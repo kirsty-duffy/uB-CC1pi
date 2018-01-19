@@ -1,0 +1,4 @@
+#This is just a guess (I'm not 100% sure it will compile until we test it)
+add_subdirectory(Modules)
+add_subdirectory(Algorithms)
+add_subdirectory(PlottingTools)
