@@ -183,12 +183,8 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
    //backtracker replacement boilerplate
    std::unique_ptr<truth::IMCTruthMatching> fMCTruthMatching;
-   if (truthParams.get<std::string>("tool_type") == "AssociationsTruth") {
-      fMCTruthMatching = std::unique_ptr<truth::IMCTruthMatching>(new truth::AssociationsTruth(truthParams));
-   }
-   else {
-      fMCTruthMatching = std::unique_ptr<truth::IMCTruthMatching>(new truth::BackTrackerTruth(truthParams));
-   }
+   const fhicl::ParameterSet& truthParams = pset.get<fhicl::ParameterSet>("MCTruthMatching"); //need to add access to pset
+   fMCTruthMatching = std::unique_ptr<truth::IMCTruthMatching>(new truth::AssociationsTruth(truthParams));
    fMCTruthMatching->Rebuild(evt);
 
    //Loop over MCParticles...
