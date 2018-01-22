@@ -245,41 +245,41 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    // Note: it's very important that we use the syntax &(vars->evtnum) to make sure
    // we get the value from reference, otherwise it won't work!
 
-   t -> Branch("run_num", &run_num);
-   t -> Branch("subrun_num", &subrun_num);
-   t -> Branch("event_num", &event_num);
+   t -> Branch("run_num", &(vars->run_num));
+   t -> Branch("subrun_num", &(vars->subrun_num));
+   t -> Branch("event_num", &(vars->event_num));
 
-   t -> Branch("cutflow", &cutflow);
-   t -> Branch("isSelected", &isSelected);
-   t -> Branch("track_length", &track_length);
-   t -> Branch("shower_length", &shower_length);
-   t -> Branch("NPFPs", &NPFPs);
-   t -> Branch("NTracks", &NTracks);
-   t -> Branch("NShowers", &NShowers);
-   t -> Branch("Sel_PFP_isTrack", &Sel_PFP_isTrack);
-   t -> Branch("Sel_PFP_isShower", &Sel_PFP_isShower);
-   t -> Branch("Sel_PFP_ID", &Sel_PFP_ID);
-   t -> Branch("Sel_MCP_ID", &Sel_MCP_ID);
-   t -> Branch("Sel_MCP_PDG", &Sel_MCP_PDG);
-   t -> Branch("Sel_MCP_E", &Sel_MCP_E);
-   t -> Branch("tpcobj_origin", &tpcobj_origin);
-   t -> Branch("tpcobj_origin_extra", &tpcobj_origin_extra);
+   t -> Branch("cutflow", &(vars->cutflow));
+   t -> Branch("isSelected", &(vars->isSelected));
+   t -> Branch("track_length", &(vars->track_length));
+   t -> Branch("shower_length", &(vars->shower_length));
+   t -> Branch("NPFPs", &(vars->NPFPs));
+   t -> Branch("NTracks", &(vars->NTracks));
+   t -> Branch("NShowers", &(vars->NShowers));
+   t -> Branch("Sel_PFP_isTrack", &(vars->Sel_PFP_isTrack));
+   t -> Branch("Sel_PFP_isShower", &(vars->Sel_PFP_isShower));
+   t -> Branch("Sel_PFP_ID", &(vars->Sel_PFP_ID));
+   t -> Branch("Sel_MCP_ID", &(vars->Sel_MCP_ID));
+   t -> Branch("Sel_MCP_PDG", &(vars->Sel_MCP_PDG));
+   t -> Branch("Sel_MCP_E", &(vars->Sel_MCP_E));
+   t -> Branch("tpcobj_origin", &(vars->tpcobj_origin));
+   t -> Branch("tpcobj_origin_extra", &(vars->tpcobj_origin_extra));
 
-   t -> Branch("MCP_PDG", &MCP_PDG);
-   t -> Branch("MCP_length", &MCP_length);
-   t -> Branch("MCP_process", &MCP_process);
-   t -> Branch("MCP_endprocess", &MCP_endprocess);
-   t -> Branch("MCP_numdaughters", &MCP_numdaughters);
-   t -> Branch("MCP_P", &MCP_P);
-   t -> Branch("MCP_E", &MCP_E);
+   t -> Branch("MCP_PDG", &(vars->MCP_PDG));
+   t -> Branch("MCP_length", &(vars->MCP_length));
+   t -> Branch("MCP_process", &(vars->MCP_process));
+   t -> Branch("MCP_endprocess", &(vars->MCP_endprocess));
+   t -> Branch("MCP_numdaughters", &(vars->MCP_numdaughters));
+   t -> Branch("MCP_P", &(vars->MCP_P));
+   t -> Branch("MCP_E", &(vars->MCP_E));
 
-   t -> Branch("nu_vtxx", &nu_vtxx);
-   t -> Branch("nu_vtxy", &nu_vtxy);
-   t -> Branch("nu_vtxz", &nu_vtxz);
-   t -> Branch("nu_isCC", &nu_isCC);
-   t -> Branch("nu_PDG", &nu_PDG);
-   t -> Branch("nu_E", &nu_E);
+   t -> Branch("nu_vtxx", &(vars->nu_vtxx));
+   t -> Branch("nu_vtxy", &(vars->nu_vtxy));
+   t -> Branch("nu_vtxz", &(vars->nu_vtxz));
+   t -> Branch("nu_isCC", &(vars->nu_isCC));
+   t -> Branch("nu_PDG", &(vars->nu_PDG));
+   t -> Branch("nu_E", &(vars->nu_E));
 
-   t -> Branch("MIPConsistency", &MIPConsistency);
+   t -> Branch("MIPConsistency", &(vars->MIPConsistency));
 
 }
