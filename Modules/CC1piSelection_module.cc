@@ -14,11 +14,15 @@
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
+#include "art/Framework/Services/Optional/TFileService.h"
 #include "canvas/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include <memory>
+
+// ROOT includes
+#include "TTree.h"
 
 class CC1piSelection;
 
@@ -42,6 +46,15 @@ private:
 
   // Declare member data here.
 
+  // TFile service
+  art::ServiceHandle<art::TFileService> tfs;
+  
+  // Output tree
+  TTree *_outtree;
+
+  // Variables for output tree
+  cc1pianavars *anavars = new cc1pianavars();
+
 };
 
 
@@ -54,6 +67,10 @@ CC1piSelection::CC1piSelection(fhicl::ParameterSet const & p)
   // Things we want to produce (i.e. add to the event):
   //  - Flag for whether it passes our selection
   //  - Failure reason if it doesn't
+
+  // Instantiate tree and make branches
+  _outtree = tfs->make<TTree>("outtree","");
+  MakeAnaBranches(_outtree,anavars);
 }
 
 void CC1piSelection::produce(art::Event & e)
@@ -73,6 +90,16 @@ void CC1piSelection::produce(art::Event & e)
   // Make sure the new flag and failure reasons get added to the tree too
   // Do we also want to add things like PIDA or MIP consistency for each track?
   // If so we'll have to think about how to fill those.
+
+  // Set anavars values to default
+  // (this will prevent bugs if any variables don't get set for a given event)
+  anavars->Clear();
+
+  // Set anavars values that are already in the reco2 file
+  anavars->SetReco2Vars(e);
+  
+  // This won't compile but is an example of giving it a value we calculated (not copied from artroot file)
+  anavars->MIPConsistency = MIPConsistency;
 }
 
 DEFINE_ART_MODULE(CC1piSelection)
