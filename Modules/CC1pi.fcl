@@ -1,4 +1,4 @@
-#include "services_microboone.fcl"
+1;95;0c#include "services_microboone.fcl"
 #include "mctruthmatching_uboone.fcl"
 
 process name: CC1pi
@@ -28,11 +28,18 @@ physics:
       }   
    }
 
-   runmods       : [ cc1pi_selec ]
-   trigger_paths : [ runmods ]
+   producermods  : [ cc1pi_selec ]
+   outputFiles   : [ out1 ]
+
+   trigger_paths : [ producermods ]
+   end_paths     : [ outputFiles ]
 }
 
 outputs:
 {
-   out1: { fileName: "%ifb_%tc_CC1pi_artrootout.root" }
+   out1: 
+   { 
+     module_type : RootOutput
+     fileName    : "%ifb_%tc_CC1pi_artrootout.root" 
+   }
 }
