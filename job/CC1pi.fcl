@@ -1,7 +1,7 @@
 #include "services_microboone.fcl"
 #include "mctruthmatching_uboone.fcl"
 
-process name: CC1pi
+process_name: CC1pi
 
 services:
 {
@@ -22,13 +22,13 @@ physics:
 {
    producers:
    {
-      cc1pi_selec: 
+      cc1piselec: 
       {
       	module_type : CC1piSelection
       }   
    }
 
-   runmods       : [ cc1pi_selec ]
+   runmods       : [ cc1piselec ]
    trigger_paths : [ runmods ]
 }
 
