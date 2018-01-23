@@ -1,28 +1,22 @@
+// Only define this stuff once
+#ifndef FILLTREE_CXX
+#define FILLTREE_CXX
+
+// Only need to include header file
+// All other includes should be in there
 #include "FillTree.h"
 
-#include "uboone/AnalysisTree/MCTruth/AssociationsTruth_tool.h"
-#include "uboone/AnalysisTree/MCTruth/BackTrackerTruth_tool.h"
+cc1pianavars::cc1pianavars(fhicl::ParameterSet const &p){
+  pset = p;
+}
 
-#include "TFile.h"
-#include "TTree.h"
-#include "TDirectory.h"
-
-#include "uboone/UBXSec/DataTypes/SelectionResult.h"
-#include "uboone/UBXSec/DataTypes/TPCObject.h"
-#include "uboone/UBXSec/DataTypes/MCGhost.h"
-
-#include "lardataobj/RecoBase/Track.h"
-#include "lardataobj/RecoBase/PFParticle.h"
-#include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
-#include "nusimdata/SimulationBase/MCParticle.h"
-#include "nusimdata/SimulationBase/MCTruth.h"
 
 void cc1pianavars::Clear(){
 
    // Set default values (that will be used if the event isn't filled)
 
    run_num = -9999;
-   subrun_run = -9999;
+   subrun_num = -9999;
    event_num = -9999;
 
    cutflow.clear();
@@ -107,10 +101,10 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       NTracks = tracks.size();
 
       for (auto track : tracks) {
-         track_length.emplace_back(track -> Length());
-         MIPConsistency.emplace_back(MIPConsistencyCheck_PIDA(track));
+	track_length.emplace_back(track -> Length());
+	MIPConsistency.emplace_back(IsMIP(track, evt));
       }
-
+      
       //Get showers (in TPCObject)
       art::FindManyP<recob::Shower> showers_from_tpcobject(tpcobj_h, evt, "TPCObjectMaker");
       std::vector<art::Ptr<recob::Shower>> showers = showers_from_tpcobject.at(tpcobj_candidate.key());
@@ -197,8 +191,8 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
       MCP_PDG.emplace_back(mcpar -> PdgCode());
 
-      P.emplace_back(mcpar -> P());
-      E.emplace_back(mcpar -> E());
+      MCP_P.emplace_back(mcpar -> P());
+      MCP_E.emplace_back(mcpar -> E());
 
       simb::MCTrajectory traj = mcpar -> Trajectory();
       MCP_length.emplace_back(traj.TotalLength());
@@ -217,14 +211,15 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          simb::MCNeutrino nu = mc_truth -> GetNeutrino();
          simb::MCParticle neutrino = nu.Nu();
 
-         if (nu.CCNC() == 0) isCC.emplace_back(true);
-         else if (nu.CCNC() == 1) isCC.emplace_back(false);
+         if (nu.CCNC() == 0) nu_isCC.emplace_back(true);
+         else if (nu.CCNC() == 1) nu_isCC.emplace_back(false);
 
          nu_PDG.emplace_back(neutrino.PdgCode());
 
          nu_E.emplace_back(neutrino.E());
 
-         const TLorentzVector& vertex = neutrino.Position(0); 
+         const TLorentzVector& vertex = neutrino.Position(0);
+	 double MC_vertex[4];
          vertex.GetXYZT(MC_vertex);
          nu_vtxx.emplace_back(MC_vertex[0]);
          nu_vtxy.emplace_back(MC_vertex[1]);
@@ -279,3 +274,5 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("MIPConsistency", &(vars->MIPConsistency));
 
 }
+
+#endif

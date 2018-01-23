@@ -24,6 +24,9 @@
 // ROOT includes
 #include "TTree.h"
 
+// Include CC1pi files from elsewhere
+#include "uboone/CC1pi/Algorithms/FillTree.h"
+
 class CC1piSelection;
 
 
@@ -53,7 +56,7 @@ private:
   TTree *_outtree;
 
   // Variables for output tree
-  cc1pianavars *anavars = new cc1pianavars();
+  cc1pianavars *anavars;
 
 };
 
@@ -68,6 +71,9 @@ CC1piSelection::CC1piSelection(fhicl::ParameterSet const & p)
   //  - Flag for whether it passes our selection
   //  - Failure reason if it doesn't
 
+  // Instantiate struct to hold variables (and pass fhicl parameters)
+  anavars = new cc1pianavars(p);
+  
   // Instantiate tree and make branches
   _outtree = tfs->make<TTree>("outtree","");
   MakeAnaBranches(_outtree,anavars);
@@ -99,7 +105,7 @@ void CC1piSelection::produce(art::Event & e)
   anavars->SetReco2Vars(e);
   
   // This won't compile but is an example of giving it a value we calculated (not copied from artroot file)
-  anavars->MIPConsistency = MIPConsistency;
+  //anavars->MIPConsistency = MIPConsistency;
 }
 
 DEFINE_ART_MODULE(CC1piSelection)

@@ -6,7 +6,7 @@
 // All the other necessary includes should be in there
 #include "MIPConsistencyCheck_PIDA.h"
 
-bool IsMIP(recob::track &track, art::Event & evt)
+bool IsMIP(art::Ptr<recob::Track> track, art::Event &evt)
 {
   // do stuff and return whether the particle is a MIP
   return true;
