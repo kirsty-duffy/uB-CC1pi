@@ -5,34 +5,34 @@ process name: CC1pi
 
 services:
 {
-   TFileService: { fileName: "CC1pi.root" }
-   TimeTracker: {}
-   RandomNumberGenerator: {}
+   TFileService: { fileName: "CC1pi_out.root" }
+   #TimeTracker: {}
+   #RandomNumberGenerator: {}
    message: @local::standard_info
 }
 
 source:
 { 
   module_type: RootInput 
-  maxEvents:   -1
+  maxEvents  : -1
+  fileNames  : [ "" ]
 }
 
 physics:
 {
    producers:
    {
-      //something
+      cc1pi_selec: 
+      {
+      	module_type : CC1piSelection
+      }   
    }
 
-   analyzers:
-   {
-      //something
-   }
-   
-   end_paths: [ ProducerName, AnalyzerName ]
+   runmods       : [ cc1pi_selec ]
+   trigger_paths : [ runmods ]
 }
 
 outputs:
 {
-   out1: { fileName: "%ifb_%tc_CC1pi.root" }
+   out1: { fileName: "%ifb_%tc_CC1pi_artrootout.root" }
 }
