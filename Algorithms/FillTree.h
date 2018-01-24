@@ -12,7 +12,7 @@
 
 // uboone includes
 #include "uboone/AnalysisTree/MCTruth/AssociationsTruth_tool.h"
-#include "uboone/AnalysisTree/MCTruth/BackTrackerTruth_tool.h"
+#include "uboone/AnalysisTree/MCTruth/IMCTruthMatching.h"
 
 // root includes
 #include "TFile.h"
@@ -25,6 +25,8 @@
 #include "uboone/UBXSec/DataTypes/MCGhost.h"
 
 // larsoft includes
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/GeometryCore.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
