@@ -8,6 +8,7 @@ services:
    #TimeTracker: {}
    #RandomNumberGenerator: {}
    message: @local::standard_info
+   @table::microboone_simulation_services
 }
 
 source:
@@ -49,3 +50,6 @@ outputs:
      fileName    : "%ifb_%tc_CC1pi_artrootout.root" 
    }
 }
+
+services.DetectorClocksService.InheritClockConfig:   false
+services.DetectorClocksService.TriggerOffsetTPC:     -400

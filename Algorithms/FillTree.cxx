@@ -60,7 +60,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
    // Set all the values that are in the reco2 file
    // This just cleans the module up - move all these lines to here instead of in the module
 
-   std::cout << "START!!!" << std::endl;
+
    run_num = evt.run();
    subrun_num = evt.subRun();
    event_num = evt.event();
@@ -166,7 +166,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       }
 
    }
-   std::cout << "DONE WITH SELECTION THINGS!!!" << std::endl;
+
    // Get all MCParticles
    art::Handle<std::vector<simb::MCParticle>> mcp_h;
    evt.getByLabel("largeant", mcp_h);
@@ -174,16 +174,13 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
    art::fill_ptr_vector(mcp_v, mcp_h);
 
    bool recorded = false;
-   std::cout << "DONE GETTING MCPs!!!" << std::endl;
+
    //backtracker replacement boilerplate
    std::unique_ptr<truth::IMCTruthMatching> fMCTruthMatching;
-   std::cout << "1!!!" << std::endl;
    const fhicl::ParameterSet& truthParams = pset.get<fhicl::ParameterSet>("MCTruthMatching");
-   std::cout << "2!!!" << std::endl;
    fMCTruthMatching = std::unique_ptr<truth::IMCTruthMatching>(new truth::AssociationsTruth(truthParams));
-   std::cout << "3!!!" << std::endl;
    fMCTruthMatching->Rebuild(evt);
-   std::cout << "DONE WITH BACKTRACKER STUFF!!!" << std::endl;
+
    //Loop over MCParticles...
    for (auto mcpar : mcp_v) {
 
@@ -230,7 +227,6 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
       }
    }
-   std::cout << "FINISH!!!" << std::endl;
 }
 
 
