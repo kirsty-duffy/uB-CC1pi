@@ -82,6 +82,7 @@ struct cc1pianavars{
   std::vector<float> nu_E;
   
   std::vector<bool> MIPConsistency;
+  std::vector<double> dqdx_trunc_uncalib;
 
   fhicl::ParameterSet pset;
 

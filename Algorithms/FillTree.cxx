@@ -51,6 +51,7 @@ void cc1pianavars::Clear(){
    nu_E.clear();
 
    MIPConsistency.clear();
+   dqdx_trunc_uncalib.clear();
 }
 
 
@@ -100,9 +101,26 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       std::vector<art::Ptr<recob::Track>> tracks = tracks_from_tpcobject.at(tpcobj_candidate.key());
       NTracks = tracks.size();
 
+      // Get calo objects (for dqdx)
+      // For now use uncalibrated "calo" variables
+      // Calibrated dqdx will be available in MCC 8.6, but currently has a bug
+      // Use association: pandoraNucalo, art::Assns<recob::Track,anab::Calorimetry,void>
+      // (Couldn't find another way to do this except going back to track handle -.-)
+      // also hardcode that this is for pandoraNu only
+      art::InputTag _caloTag = "pandoraNucalo";
+      art::InputTag _trackTag = "pandoraNu";
+      auto const& track_h = evt.getValidHandle<std::vector<recob::Track>>(_trackTag);
+      art::FindManyP<anab::Calorimetry> calos_from_tracks(track_h, evt, _caloTag);
+
       for (auto track : tracks) {
          track_length.emplace_back(track -> Length());
-         MIPConsistency.emplace_back(IsMIP(track, evt));
+	 
+	 unsigned int trkid = track->ID();
+	 std::vector<art::Ptr<anab::Calorimetry>> calos = calos_from_tracks.at(trkid);
+	 double dqdx_truncmean = GetDqDxTruncatedMean(calos); // this function is in MIPConsistency_Marco
+	 dqdx_trunc_uncalib.emplace_back(dqdx_truncmean);
+
+         MIPConsistency.emplace_back(IsMIP(track->Length(), dqdx_truncmean));
       }
 
       //Get showers (in TPCObject)
@@ -271,6 +289,7 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("nu_E", &(vars->nu_E));
 
    t -> Branch("MIPConsistency", &(vars->MIPConsistency));
+   t -> Branch("dqdx_trunc_uncalib", &(vars->dqdx_trunc_uncalib));
 
 }
 
