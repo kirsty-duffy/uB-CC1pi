@@ -7,7 +7,7 @@
 #include "FillTree.h"
 
 cc1pianavars::cc1pianavars(fhicl::ParameterSet const &p){
-  pset = p;
+   pset = p;
 }
 
 
@@ -101,10 +101,10 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       NTracks = tracks.size();
 
       for (auto track : tracks) {
-	track_length.emplace_back(track -> Length());
-	MIPConsistency.emplace_back(IsMIP(track, evt));
+         track_length.emplace_back(track -> Length());
+         MIPConsistency.emplace_back(IsMIP(track, evt));
       }
-      
+
       //Get showers (in TPCObject)
       art::FindManyP<recob::Shower> showers_from_tpcobject(tpcobj_h, evt, "TPCObjectMaker");
       std::vector<art::Ptr<recob::Shower>> showers = showers_from_tpcobject.at(tpcobj_candidate.key());
@@ -177,7 +177,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
    //backtracker replacement boilerplate
    std::unique_ptr<truth::IMCTruthMatching> fMCTruthMatching;
-   const fhicl::ParameterSet& truthParams = pset.get<fhicl::ParameterSet>("MCTruthMatching"); //need to add access to pset
+   const fhicl::ParameterSet& truthParams = pset.get<fhicl::ParameterSet>("MCTruthMatching");
    fMCTruthMatching = std::unique_ptr<truth::IMCTruthMatching>(new truth::AssociationsTruth(truthParams));
    fMCTruthMatching->Rebuild(evt);
 
@@ -219,7 +219,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          nu_E.emplace_back(neutrino.E());
 
          const TLorentzVector& vertex = neutrino.Position(0);
-	 double MC_vertex[4];
+         double MC_vertex[4];
          vertex.GetXYZT(MC_vertex);
          nu_vtxx.emplace_back(MC_vertex[0]);
          nu_vtxy.emplace_back(MC_vertex[1]);
@@ -227,7 +227,6 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
       }
    }
-
 }
 
 

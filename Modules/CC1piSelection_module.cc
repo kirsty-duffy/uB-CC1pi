@@ -103,6 +103,8 @@ void CC1piSelection::produce(art::Event & e)
 
   // Set anavars values that are already in the reco2 file
   anavars->SetReco2Vars(e);
+
+  _outtree -> Fill();
   
   // This won't compile but is an example of giving it a value we calculated (not copied from artroot file)
   //anavars->MIPConsistency = MIPConsistency;
