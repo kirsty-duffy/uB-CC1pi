@@ -13,6 +13,6 @@
 
 
 // Now declare the function
-bool IsMIP(art::Ptr<recob::Track> track, art::Event &evt);
+bool IsMIP_PIDA(art::Ptr<recob::Track> track, art::Event &evt);
 
 #endif
