@@ -45,7 +45,16 @@ bool IsMIP(art::Ptr<recob::Track> track, art::Event &evt)
   dqdx_truncmean = GetDqDxTruncatedMean(calos);
   
   // Now evaluate whether it passes the cut!
+  return IsMIP(length, dqdx_truncmean);
 
+  
+}
+
+// ------------------------------------------------------------------------------- //
+// An alternative method based on just the track length and dqdx (if you have those already)
+
+bool IsMIP(double length, double dqdx_truncmean)
+{
   // First: all long tracks are MIPs
   if (length > 1000)
     return true;
@@ -69,7 +78,6 @@ bool IsMIP(art::Ptr<recob::Track> track, art::Event &evt)
   }
   
   return false;
-  
 }
 
 // ------------------------------------------------------------------------------- //

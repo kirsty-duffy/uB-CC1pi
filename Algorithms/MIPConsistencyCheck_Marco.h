@@ -33,6 +33,7 @@ const std::vector<double> _dqdx_cutvals = {92200, 91700, 91200, 90700, 90250, 89
 
 // Now declare the function
 bool IsMIP(art::Ptr<recob::Track> track, art::Event &evt);
+bool IsMIP(double length, double dqdx_truncmean);
 
 // other functions used by IsMIP
 double GetDqDxTruncatedMean(std::vector<art::Ptr<anab::Calorimetry>> calos);
