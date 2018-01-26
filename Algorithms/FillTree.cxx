@@ -57,6 +57,9 @@ void cc1pianavars::Clear(){
 
    MIPConsistency.clear();
    dqdx_trunc_uncalib.clear();
+
+   PassesCC1piSelec = false;
+   CC1piSelecFailureReason = "";
 }
 
 void cc1pianavars::endSubRun(art::SubRun &sr) {
@@ -330,6 +333,9 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
 
    t -> Branch("MIPConsistency", &(vars->MIPConsistency));
    t -> Branch("dqdx_trunc_uncalib", &(vars->dqdx_trunc_uncalib));
+
+   t -> Branch("PassesCC1piSelec", &(vars->PassesCC1piSelec));
+   t -> Branch("CC1piSelecFailureReason", &(vars->CC1piSelecFailureReason));
 
 }
 

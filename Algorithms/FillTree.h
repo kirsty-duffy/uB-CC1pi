@@ -90,6 +90,9 @@ struct cc1pianavars{
   std::vector<bool> MIPConsistency;
   std::vector<double> dqdx_trunc_uncalib;
 
+  bool PassesCC1piSelec;
+  std::string CC1piSelecFailureReason;
+
   fhicl::ParameterSet pset;
 
   // Constructor (pass the fhicl parameters here)
