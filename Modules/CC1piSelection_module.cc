@@ -26,6 +26,7 @@
 
 // Include CC1pi files from elsewhere
 #include "uboone/CC1pi/Algorithms/FillTree.h"
+#include "uboone/CC1pi/Algorithms/TwoTrackCheck.h"
 
 class CC1piSelection;
 
@@ -87,7 +88,7 @@ CC1piSelection::CC1piSelection(fhicl::ParameterSet const & p)
   MakeAnaBranches(_outtree,anavars);
 }
 
-void CC1piSelection::produce(art::Event & e)
+void CC1piSelection::produce(art::Event & evt)
 {
   // Implementation of required member function here.
   // This is where we'll call our functions
@@ -127,7 +128,7 @@ void CC1piSelection::produce(art::Event & e)
   // ----- Finally: fill tree ------ //
 
   // Set anavars values that are already in the reco2 file
-  anavars->SetReco2Vars(e);
+  anavars->SetReco2Vars(evt);
 
   // Set anavars for PassesCC1piSelec and CC1piSelecFailureReason
   // !! These need to be made in FillTree.h and added to Clear() and MakeAnaBranches
