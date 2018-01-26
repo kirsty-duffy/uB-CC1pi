@@ -21,11 +21,11 @@ bool TwoTrackCheck(art::Event &evt, bool checkMIPs)
    std::vector<art::Ptr<recob::PFParticle>> pfps = pfps_from_tpcobject.at(tpcobj_candidate.key());
 
    //Find neutrino
-   size_t nuID = -1;
+   int nuID = -1;
    for (auto pfp : pfps) {
       if(lar_pandora::LArPandoraHelper::IsNeutrino(pfp)) {
-         nuID = pfp.Self();
-         break;
+	nuID = (int)pfp->Self();
+	break;
       }
    }
 
@@ -35,9 +35,9 @@ bool TwoTrackCheck(art::Event &evt, bool checkMIPs)
    }
 
    //Find track-like daughters of the neutrino
-   std::vector<recob::PFParticle> daughter_track_pfps;
+   std::vector<art::Ptr<recob::PFParticle>> daughter_track_pfps;
    for (auto pfp : pfps) {
-      if(lar_pandora::LArPandoraHelper::IsTrack(pfp) && pfp.Parent()==nuID) {
+     if(lar_pandora::LArPandoraHelper::IsTrack(pfp) && pfp->Parent()==(size_t)nuID) {
          daughter_track_pfps.emplace_back(pfp);
       }
    }
@@ -57,9 +57,20 @@ bool TwoTrackCheck(art::Event &evt, bool checkMIPs)
 
       art::FindManyP<recob::Track> tracks_from_pfps(pfp_h, evt, "pandoraNu");
 
+      // This is a little complicated. Every PFP could in theory have more than one track
+      // (is that true?)
+      // Anyway, right now if any track associated with a daughter PFP is MIP-like, that
+      // counts for one MIP-like track
       int MIPs = 0;
       for (auto pfp : daughter_track_pfps) {
-         if(IsMIP(tracks_from_pfps.at(pfp.key()), evt)) MIPs++;
+	std::vector<art::Ptr<recob::Track>> daughter_tracks = tracks_from_pfps.at(pfp.key());
+	for (auto track : daughter_tracks){
+	  if(IsMIP(track, evt))
+	    {
+	      MIPs++;
+	      break; // break out of the loop over tracks so the maximum one PFP can contribute is 1
+	    }
+	}
       }
 
       if(MIPs >= 2) return true;

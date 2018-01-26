@@ -1,5 +1,6 @@
 // Marco's code includes
 #include "uboone/UBXSec/DataTypes/TPCObject.h"
+#include "uboone/UBXSec/DataTypes/SelectionResult.h"
 
 // larsoft includes
 #include "lardataobj/RecoBase/Track.h"
