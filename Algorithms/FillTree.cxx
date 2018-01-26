@@ -18,6 +18,7 @@ void cc1pianavars::Clear(){
    run_num = -9999;
    subrun_num = -9999;
    event_num = -9999;
+   pot = 0;
 
    cutflow.clear();
    isSelected = false;
@@ -41,6 +42,9 @@ void cc1pianavars::Clear(){
    MCP_endprocess.clear();
    MCP_numdaughters.clear();
    MCP_P.clear();
+   MCP_Px.clear();
+   MCP_Py.clear();
+   MCP_Pz.clear();
    MCP_E.clear();
 
    nu_vtxx.clear();
@@ -65,6 +69,17 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
    run_num = evt.run();
    subrun_num = evt.subRun();
    event_num = evt.event();
+
+   //POT info
+   art::SubRun& sr = evt.getSubRun();
+   art::Handle< sumdata::POTSummary > potListHandle;
+   if(sr.getByLabel("generator", potListHandle)) {
+      pot = potListHandle -> totpot;
+   }
+   else {
+      mf::LogError(__PRETTY_FUNCTION__) << "POT info not found." << std::endl;
+      throw std::exception();
+   }
 
 
    art::Handle<std::vector<ubana::SelectionResult>> selection_h;
@@ -210,6 +225,9 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       MCP_PDG.emplace_back(mcpar -> PdgCode());
 
       MCP_P.emplace_back(mcpar -> P());
+      MCP_Px.emplace_back(mcpar -> Px());
+      MCP_Py.emplace_back(mcpar -> Py());
+      MCP_Pz.emplace_back(mcpar -> Pz());
       MCP_E.emplace_back(mcpar -> E());
 
       simb::MCTrajectory traj = mcpar -> Trajectory();
@@ -256,6 +274,7 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("run_num", &(vars->run_num));
    t -> Branch("subrun_num", &(vars->subrun_num));
    t -> Branch("event_num", &(vars->event_num));
+   t -> Branch("pot", &(vars->pot));
 
    t -> Branch("cutflow", &(vars->cutflow));
    t -> Branch("isSelected", &(vars->isSelected));
@@ -279,6 +298,9 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("MCP_endprocess", &(vars->MCP_endprocess));
    t -> Branch("MCP_numdaughters", &(vars->MCP_numdaughters));
    t -> Branch("MCP_P", &(vars->MCP_P));
+   t -> Branch("MCP_Px", &(vars->MCP_Px));
+   t -> Branch("MCP_Py", &(vars->MCP_Py));
+   t -> Branch("MCP_Pz", &(vars->MCP_Pz));
    t -> Branch("MCP_E", &(vars->MCP_E));
 
    t -> Branch("nu_vtxx", &(vars->nu_vtxx));

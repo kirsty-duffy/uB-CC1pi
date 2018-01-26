@@ -49,6 +49,7 @@ struct cc1pianavars{
   art::RunNumber_t run_num;
   art::SubRunNumber_t subrun_num;
   art::EventNumber_t event_num;
+  float pot;
   
   std::map<std::string,bool> cutflow;
   bool isSelected;
@@ -72,6 +73,9 @@ struct cc1pianavars{
   std::vector<std::string> MCP_endprocess;
   std::vector<int> MCP_numdaughters;
   std::vector<float> MCP_P;
+  std::vector<float> MCP_Px;
+  std::vector<float> MCP_Py;
+  std::vector<float> MCP_Pz;
   std::vector<float> MCP_E;
   
   std::vector<float> nu_vtxx;
