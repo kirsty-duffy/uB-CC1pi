@@ -58,6 +58,10 @@ private:
   // Variables for output tree
   cc1pianavars *anavars;
 
+  // CC1pi selection variables
+  bool PassesCC1piSelec;
+  std::string CC1piSelecFailureReason;
+
 };
 
 
@@ -101,13 +105,34 @@ void CC1piSelection::produce(art::Event & e)
   // (this will prevent bugs if any variables don't get set for a given event)
   anavars->Clear();
 
+  // ----- Cut: minimum two tracks (don't have to be MIPs) ----- //
+  bool TwoTracks = TwoTrackCheck(evt, false);
+  if (!TwoTracks){
+    PassesCC1piSelec = false;
+    CC1piSelecFailureReason="TwoTrackCut";
+  }
+
+  // ----- Cut: minimum two MIP-consistent tracks ----- //
+  bool TwoMIPTracks = TwoTrackCheck(evt, true);
+  if (!TwoMIPTracks){
+    PassesCC1piSelec = false;
+    CC1piSelecFailureReason="TwoMIPCut";
+  }
+
+
+  // ----- Finally: fill tree ------ //
+
   // Set anavars values that are already in the reco2 file
   anavars->SetReco2Vars(e);
 
+  // Set anavars for PassesCC1piSelec and CC1piSelecFailureReason
+  // !! These need to be made in FillTree.h and added to Clear() and MakeAnaBranches
+  // !! Don't need to add to SetReco2Vars
+  anavars->PassesCC1piSelec = PassesCC1piSelec;
+  anavars->CC1piSelecFailureReason = CC1piSelecFailureReason;
+
   _outtree -> Fill();
   
-  // This won't compile but is an example of giving it a value we calculated (not copied from artroot file)
-  //anavars->MIPConsistency = MIPConsistency;
 }
 
 DEFINE_ART_MODULE(CC1piSelection)
