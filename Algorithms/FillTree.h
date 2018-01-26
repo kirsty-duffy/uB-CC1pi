@@ -47,6 +47,7 @@
 
 struct cc1pianavars{
 
+  bool isData;
   art::RunNumber_t run_num;
   art::SubRunNumber_t subrun_num;
   art::EventNumber_t event_num;
@@ -95,8 +96,10 @@ struct cc1pianavars{
   cc1pianavars(fhicl::ParameterSet const &p);
   
   void Clear();
-  
-  void SetReco2Vars(art::Event &evt, art::SubRun &sr);
+
+  void endSubRun(art::SubRun &sr);
+
+  void SetReco2Vars(art::Event &evt);
 
 };
 

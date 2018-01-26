@@ -43,7 +43,7 @@ public:
   CC1piSelection & operator = (CC1piSelection &&) = delete;
 
   // Required functions.
-  void produce(art::Event & e, art::SubRun & sr) override;
+  void produce(art::Event & e) override;
 
 private:
 
@@ -79,7 +79,7 @@ CC1piSelection::CC1piSelection(fhicl::ParameterSet const & p)
   MakeAnaBranches(_outtree,anavars);
 }
 
-void CC1piSelection::produce(art::Event & e, art::SubRun & sr)
+void CC1piSelection::produce(art::Event & e)
 {
   // Implementation of required member function here.
   // This is where we'll call our functions
@@ -102,7 +102,7 @@ void CC1piSelection::produce(art::Event & e, art::SubRun & sr)
   anavars->Clear();
 
   // Set anavars values that are already in the reco2 file
-  anavars->SetReco2Vars(e, sr);
+  anavars->SetReco2Vars(e);
 
   _outtree -> Fill();
   

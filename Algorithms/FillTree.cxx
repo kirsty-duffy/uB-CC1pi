@@ -15,6 +15,7 @@ void cc1pianavars::Clear(){
 
    // Set default values (that will be used if the event isn't filled)
 
+   isData = false;
    run_num = -9999;
    subrun_num = -9999;
    event_num = -9999;
@@ -58,27 +59,42 @@ void cc1pianavars::Clear(){
    dqdx_trunc_uncalib.clear();
 }
 
+void cc1pianavars::endSubRun(art::SubRun &sr) {
 
+   art::Handle<sumdata::POTSummary> potsum_h;
 
-void cc1pianavars::SetReco2Vars(art::Event &evt, art::SubRun &sr){
+   // MC
+   if (!isData) {
+      if(sr.getByLabel("generator", potsum_h)) {
+         pot = potsum_h->totpot;
+      }
+      else {
+         pot = 0;
+         //Should this raise an error?
+      }
+   }
+
+   // Data
+   else {
+      if(sr.getByLabel("beamdata", "bnbETOR860", potsum_h)){
+         pot = potsum_h->totpot;
+      }
+      else {
+         pot = 0;
+      }
+   }
+
+}
+
+void cc1pianavars::SetReco2Vars(art::Event &evt){
 
    // Set all the values that are in the reco2 file
    // This just cleans the module up - move all these lines to here instead of in the module
 
-
+   isData = evt.isRealData();
    run_num = evt.run();
    subrun_num = evt.subRun();
    event_num = evt.event();
-
-   //POT info
-   art::Handle< sumdata::POTSummary > potListHandle;
-   if(sr.getByLabel("generator", potListHandle)) {
-      pot = potListHandle -> totpot;
-   }
-   else {
-      mf::LogError(__PRETTY_FUNCTION__) << "POT info not found." << std::endl;
-      throw std::exception();
-   }
 
 
    art::Handle<std::vector<ubana::SelectionResult>> selection_h;
@@ -128,11 +144,11 @@ void cc1pianavars::SetReco2Vars(art::Event &evt, art::SubRun &sr){
 
       for (auto track : tracks) {
          track_length.emplace_back(track -> Length());
-	 
-	 unsigned int trkid = track->ID();
-	 std::vector<art::Ptr<anab::Calorimetry>> calos = calos_from_tracks.at(trkid);
-	 double dqdx_truncmean = GetDqDxTruncatedMean(calos); // this function is in MIPConsistency_Marco
-	 dqdx_trunc_uncalib.emplace_back(dqdx_truncmean);
+
+         unsigned int trkid = track->ID();
+         std::vector<art::Ptr<anab::Calorimetry>> calos = calos_from_tracks.at(trkid);
+         double dqdx_truncmean = GetDqDxTruncatedMean(calos); // this function is in MIPConsistency_Marco
+         dqdx_trunc_uncalib.emplace_back(dqdx_truncmean);
 
          MIPConsistency.emplace_back(IsMIP(track->Length(), dqdx_truncmean));
       }
