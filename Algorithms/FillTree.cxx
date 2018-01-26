@@ -60,7 +60,7 @@ void cc1pianavars::Clear(){
 
 
 
-void cc1pianavars::SetReco2Vars(art::Event &evt){
+void cc1pianavars::SetReco2Vars(art::Event &evt, art::SubRun &sr){
 
    // Set all the values that are in the reco2 file
    // This just cleans the module up - move all these lines to here instead of in the module
@@ -71,7 +71,6 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
    event_num = evt.event();
 
    //POT info
-   art::SubRun& sr = evt.getSubRun();
    art::Handle< sumdata::POTSummary > potListHandle;
    if(sr.getByLabel("generator", potListHandle)) {
       pot = potListHandle -> totpot;

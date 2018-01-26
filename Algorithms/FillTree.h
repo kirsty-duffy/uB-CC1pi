@@ -95,7 +95,7 @@ struct cc1pianavars{
   
   void Clear();
   
-  void SetReco2Vars(art::Event &evt);
+  void SetReco2Vars(art::Event &evt, art::SubRun &sr);
 
 };
 
