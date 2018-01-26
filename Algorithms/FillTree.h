@@ -27,6 +27,7 @@
 // larsoft includes
 #include "larcore/Geometry/Geometry.h"
 #include "larcore/Geometry/GeometryCore.h"
+#include "larcoreobj/SummaryData/POTSummary.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
