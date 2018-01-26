@@ -75,6 +75,10 @@ CC1piSelection::CC1piSelection(fhicl::ParameterSet const & p)
   //  - Flag for whether it passes our selection
   //  - Failure reason if it doesn't
 
+  // Start out assuming everything passes
+  PassesCC1piSelec = true;
+  CC1piSelecFailureReason = "";
+
   // Instantiate struct to hold variables (and pass fhicl parameters)
   anavars = new cc1pianavars(p);
   
