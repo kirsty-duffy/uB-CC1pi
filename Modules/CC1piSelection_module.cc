@@ -71,10 +71,12 @@ CC1piSelection::CC1piSelection(fhicl::ParameterSet const & p)
 // Initialize member data here.
 {
   // Call appropriate produces<>() functions here.
-
   // Things we want to produce (i.e. add to the event):
   //  - Flag for whether it passes our selection
   //  - Failure reason if it doesn't
+  produces< bool >();
+  produces< std::string >();
+
 
   // Start out assuming everything passes
   PassesCC1piSelec = true;
@@ -109,34 +111,63 @@ void CC1piSelection::produce(art::Event & evt)
   // Set anavars values to default
   // (this will prevent bugs if any variables don't get set for a given event)
   anavars->Clear();
-
-  // ----- Cut: minimum two tracks (don't have to be MIPs) ----- //
-  bool TwoTracks = TwoTrackCheck(evt, false);
-  if (!TwoTracks){
+  
+  // ----- Cut: must pass Marco's selection ----- //
+  art::Handle<std::vector<ubana::SelectionResult>> selection_h;
+  evt.getByLabel("UBXSec", selection_h);
+  if(!selection_h.isValid()){
+    mf::LogError(__PRETTY_FUNCTION__) << "SelectionResult product not found." << std::endl;
+    throw std::exception();
+  }
+  std::vector<art::Ptr<ubana::SelectionResult>> selection_v;
+  art::fill_ptr_vector(selection_v, selection_h);
+  
+  bool PassesMarcosSelec = selection_v.at(0)->GetSelectionStatus();
+  if (!PassesMarcosSelec){
     PassesCC1piSelec = false;
-    CC1piSelecFailureReason="TwoTrackCut";
+    CC1piSelecFailureReason = selection_v.at(0)->GetFailureReason();;
   }
 
-  // ----- Cut: minimum two MIP-consistent tracks ----- //
-  bool TwoMIPTracks = TwoTrackCheck(evt, true);
-  if (!TwoMIPTracks){
-    PassesCC1piSelec = false;
-    CC1piSelecFailureReason="TwoMIPCut";
-  }
+  if (PassesCC1piSelec) // don't bother evaluating next cut if it's already failed
+    {
+      // ----- Cut: minimum two tracks (don't have to be MIPs) ----- //
+      bool TwoTracks = TwoTrackCheck(evt, false);
+      if (!TwoTracks){
+	PassesCC1piSelec = false;
+	CC1piSelecFailureReason="TwoTrackCut";
+      }
+    }
+  
+  if (PassesCC1piSelec) // don't bother evaluating next cut if it's already failed
+    // This means that this cut will only cut out events that have >=2 tracks but *not* MIP-like
+    // Events that have <2 tracks will already have failed
+    {
+      // ----- Cut: minimum two MIP-consistent tracks ----- //
+      bool TwoMIPTracks = TwoTrackCheck(evt, true);
+      if (!TwoMIPTracks){
+	PassesCC1piSelec = false;
+	CC1piSelecFailureReason="TwoMIPCut";
+      }
+    }
+  
 
-
-  // ----- Finally: fill tree ------ //
+  // ----- Almost at the end: fill tree ------ //
 
   // Set anavars values that are already in the reco2 file
   anavars->SetReco2Vars(evt);
 
   // Set anavars for PassesCC1piSelec and CC1piSelecFailureReason
-  // !! These need to be made in FillTree.h and added to Clear() and MakeAnaBranches
-  // !! Don't need to add to SetReco2Vars
   anavars->PassesCC1piSelec = PassesCC1piSelec;
   anavars->CC1piSelecFailureReason = CC1piSelecFailureReason;
 
   _outtree -> Fill();
+
+  
+  // ----- Finally: add things to event ------ //
+  std::unique_ptr<bool> PassesCC1piSelec_uniqueptr = std::make_unique<bool>(PassesCC1piSelec);
+  std::unique_ptr<std::string> CC1piSelecFailureReason_uniqueptr = std::make_unique<std::string>(CC1piSelecFailureReason); 
+  evt.put(std::move(PassesCC1piSelec_uniqueptr));
+  evt.put(std::move(CC1piSelecFailureReason_uniqueptr));
   
 }
 
