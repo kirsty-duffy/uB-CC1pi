@@ -19,7 +19,6 @@ void cc1pianavars::Clear(){
    run_num = -9999;
    subrun_num = -9999;
    event_num = -9999;
-//   pot = 0;
 
    cutflow.clear();
    isSelected = false;
@@ -60,35 +59,6 @@ void cc1pianavars::Clear(){
 
    PassesCC1piSelec = false;
    CC1piSelecFailureReason = "";
-}
-
-void cc1pianavars::endSubRun(art::SubRun &sr) {
-   // Note: the entire subrun's POT is recorded in the tree for every event.
-   // You must only add it once per subrun to get the correct number.
-
-   art::Handle<sumdata::POTSummary> potsum_h;
-
-   // MC
-   if (!isData) {
-      if(sr.getByLabel("generator", potsum_h)) {
-         pot = potsum_h->totpot;
-      }
-      else {
-         pot = 0;
-         //Should this raise an error?
-      }
-   }
-
-   // Data
-   else {
-      if(sr.getByLabel("beamdata", "bnbETOR860", potsum_h)){
-         pot = potsum_h->totpot;
-      }
-      else {
-         pot = 0;
-      }
-   }
-
 }
 
 void cc1pianavars::SetReco2Vars(art::Event &evt){
@@ -295,7 +265,6 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("run_num", &(vars->run_num));
    t -> Branch("subrun_num", &(vars->subrun_num));
    t -> Branch("event_num", &(vars->event_num));
-   t -> Branch("pot", &(vars->pot));
 
    t -> Branch("cutflow", &(vars->cutflow));
    t -> Branch("isSelected", &(vars->isSelected));

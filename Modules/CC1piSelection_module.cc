@@ -19,6 +19,9 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
+// Larsoft data objects includes
+#include "larcoreobj/SummaryData/POTSummary.h"
+
 #include <memory>
 
 // ROOT includes
@@ -45,6 +48,7 @@ public:
 
   // Required functions.
   void produce(art::Event & e) override;
+  void endSubRun(art::SubRun &sr) override;
 
 private:
 
@@ -53,15 +57,20 @@ private:
   // TFile service
   art::ServiceHandle<art::TFileService> tfs;
   
-  // Output tree
+  // Output trees
   TTree *_outtree;
+  TTree *_pot_tree;
 
   // Variables for output tree
   cc1pianavars *anavars;
 
   // CC1pi selection variables
-  bool PassesCC1piSelec;
-  std::string CC1piSelecFailureReason;
+  bool _PassesCC1piSelec;
+  std::string _CC1piSelecFailureReason;
+
+  // Other variables set in module
+  bool _isData;
+  double _sr_pot;
 
 };
 
@@ -79,8 +88,8 @@ CC1piSelection::CC1piSelection(fhicl::ParameterSet const & p)
 
 
   // Start out assuming everything passes
-  PassesCC1piSelec = true;
-  CC1piSelecFailureReason = "";
+  _PassesCC1piSelec = true;
+  _CC1piSelecFailureReason = "";
 
   // Instantiate struct to hold variables (and pass fhicl parameters)
   anavars = new cc1pianavars(p);
@@ -88,25 +97,16 @@ CC1piSelection::CC1piSelection(fhicl::ParameterSet const & p)
   // Instantiate tree and make branches
   _outtree = tfs->make<TTree>("outtree","");
   MakeAnaBranches(_outtree,anavars);
+
+  _pot_tree = tfs->make<TTree>("pottree","");
+  _pot_tree->Branch("pot", &_sr_pot, "pot/D");
+  _isData = false;
 }
 
 void CC1piSelection::produce(art::Event & evt)
 {
-  // Implementation of required member function here.
-  // This is where we'll call our functions
-  // MIP consistency (actually probably call this in SelectTwoMIPTracks)
-  // SelectTwoMIPTracks
-
-  // At this point we'll want to define our new data products (flag for whether
-  // this event passes our selection and failure reason. Does Marco already have a
-  // data product for failure reason that we can use/write to?)
-  // These will have to sync up with the things we have in our produces<>() functions
-  // in the constructor CC1piSelection::CC1piSelection(fhicl::ParameterSet const & p)
-  
-  // FillTree
-  // Make sure the new flag and failure reasons get added to the tree too
-  // Do we also want to add things like PIDA or MIP consistency for each track?
-  // If so we'll have to think about how to fill those.
+  // Check if we're looking at data or MC (important for POT counting in endSubRun
+  _isData = evt.isRealData();
 
   // Set anavars values to default
   // (this will prevent bugs if any variables don't get set for a given event)
@@ -124,29 +124,29 @@ void CC1piSelection::produce(art::Event & evt)
   
   bool PassesMarcosSelec = selection_v.at(0)->GetSelectionStatus();
   if (!PassesMarcosSelec){
-    PassesCC1piSelec = false;
-    CC1piSelecFailureReason = selection_v.at(0)->GetFailureReason();;
+    _PassesCC1piSelec = false;
+    _CC1piSelecFailureReason = selection_v.at(0)->GetFailureReason();;
   }
 
-  if (PassesCC1piSelec) // don't bother evaluating next cut if it's already failed
+  if (_PassesCC1piSelec) // don't bother evaluating next cut if it's already failed
     {
       // ----- Cut: minimum two tracks (don't have to be MIPs) ----- //
       bool TwoTracks = TwoTrackCheck(evt, false);
       if (!TwoTracks){
-	PassesCC1piSelec = false;
-	CC1piSelecFailureReason="TwoTrackCut";
+	_PassesCC1piSelec = false;
+	_CC1piSelecFailureReason="TwoTrackCut";
       }
     }
   
-  if (PassesCC1piSelec) // don't bother evaluating next cut if it's already failed
+  if (_PassesCC1piSelec) // don't bother evaluating next cut if it's already failed
     // This means that this cut will only cut out events that have >=2 tracks but *not* MIP-like
     // Events that have <2 tracks will already have failed
     {
       // ----- Cut: minimum two MIP-consistent tracks ----- //
       bool TwoMIPTracks = TwoTrackCheck(evt, true);
       if (!TwoMIPTracks){
-	PassesCC1piSelec = false;
-	CC1piSelecFailureReason="TwoMIPCut";
+	_PassesCC1piSelec = false;
+	_CC1piSelecFailureReason="TwoMIPCut";
       }
     }
   
@@ -156,19 +156,51 @@ void CC1piSelection::produce(art::Event & evt)
   // Set anavars values that are already in the reco2 file
   anavars->SetReco2Vars(evt);
 
-  // Set anavars for PassesCC1piSelec and CC1piSelecFailureReason
-  anavars->PassesCC1piSelec = PassesCC1piSelec;
-  anavars->CC1piSelecFailureReason = CC1piSelecFailureReason;
+  // Set anavars for _PassesCC1piSelec and _CC1piSelecFailureReason
+  anavars->PassesCC1piSelec = _PassesCC1piSelec;
+  anavars->CC1piSelecFailureReason = _CC1piSelecFailureReason;
 
   _outtree -> Fill();
 
   
   // ----- Finally: add things to event ------ //
-  std::unique_ptr<bool> PassesCC1piSelec_uniqueptr = std::make_unique<bool>(PassesCC1piSelec);
-  std::unique_ptr<std::string> CC1piSelecFailureReason_uniqueptr = std::make_unique<std::string>(CC1piSelecFailureReason); 
-  evt.put(std::move(PassesCC1piSelec_uniqueptr));
-  evt.put(std::move(CC1piSelecFailureReason_uniqueptr));
+  std::unique_ptr<bool> PassesCC1piSelec = std::make_unique<bool>(_PassesCC1piSelec);
+  std::unique_ptr<std::string> CC1piSelecFailureReason = std::make_unique<std::string>(_CC1piSelecFailureReason); 
+  evt.put(std::move(PassesCC1piSelec));
+  evt.put(std::move(CC1piSelecFailureReason));
   
+}
+
+void CC1piSelection::endSubRun(art::SubRun &sr) {
+   // Note: the entire subrun's POT is recorded in the tree for every event.
+   // You must only add it once per subrun to get the correct number.
+
+  std::cout << "Hello I'm ending a subRun and setting POT" << std::endl;
+  art::Handle<sumdata::POTSummary> potsum_h;
+
+   // MC
+   if (!_isData) {
+      if(sr.getByLabel("generator", potsum_h)) {
+         _sr_pot = potsum_h->totpot;
+      }
+      else {
+         _sr_pot = 0.;
+         //Should this raise an error?
+      }
+   }
+
+   // Data
+   else {
+      if(sr.getByLabel("beamdata", "bnbETOR860", potsum_h)){
+        _sr_pot = potsum_h->totpot;
+      }
+      else {
+        _sr_pot = 0.;
+      }
+   }
+
+   _pot_tree->Fill();
+
 }
 
 DEFINE_ART_MODULE(CC1piSelection)

@@ -27,7 +27,6 @@
 // larsoft includes
 #include "larcore/Geometry/Geometry.h"
 #include "larcore/Geometry/GeometryCore.h"
-#include "larcoreobj/SummaryData/POTSummary.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
@@ -51,7 +50,6 @@ struct cc1pianavars{
   art::RunNumber_t run_num;
   art::SubRunNumber_t subrun_num;
   art::EventNumber_t event_num;
-  float pot;
   
   std::map<std::string,bool> cutflow;
   bool isSelected;
@@ -99,8 +97,6 @@ struct cc1pianavars{
   cc1pianavars(fhicl::ParameterSet const &p);
   
   void Clear();
-
-  void endSubRun(art::SubRun &sr);
 
   void SetReco2Vars(art::Event &evt);
 
