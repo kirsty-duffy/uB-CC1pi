@@ -123,6 +123,18 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          unsigned int trkid = track->ID();
          std::vector<art::Ptr<anab::Calorimetry>> calos = calos_from_tracks.at(trkid);
          double dqdx_truncmean = GetDqDxTruncatedMean(calos); // this function is in MIPConsistency_Marco
+
+	 // Apply David's calibration: constant factor applied to trunc mean dqdx
+	 // to convert it to electrons/cm, and compare MC and data
+	 // Multiply MC by 198 and data by 243
+	 // !!! Note that this should change when real calibration is available !!!
+	 if (evt.isRealData()){ // Data: multiply by 243
+	   dqdx_truncmean *= 243.;
+	 }
+	 else{ // MC: multiply by 198
+	   dqdx_truncmean *= 198.;
+	 }
+
          dqdx_trunc_uncalib.emplace_back(dqdx_truncmean);
 
          MIPConsistency.emplace_back(IsMIP(track->Length(), dqdx_truncmean));

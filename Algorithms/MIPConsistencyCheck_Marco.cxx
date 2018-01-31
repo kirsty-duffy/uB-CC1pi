@@ -43,6 +43,17 @@ bool IsMIP(art::Ptr<recob::Track> track, art::Event &evt)
 
   // Got calorimetry object, now work out truncated mean (plane 2 only)
   dqdx_truncmean = GetDqDxTruncatedMean(calos);
+
+  // Apply David's calibration: constant factor applied to trunc mean dqdx
+  // to convert it to electrons/cm, and compare MC and data
+  // Multiply MC by 198 and data by 243
+  if (evt.isRealData()){ // Data: multiply by 243
+    dqdx_truncmean *= 243.;
+  }
+  else{ // MC: multiply by 198
+    dqdx_truncmean *= 198.;
+  }
+  
   
   // Now evaluate whether it passes the cut!
   return IsMIP(length, dqdx_truncmean);
@@ -52,6 +63,8 @@ bool IsMIP(art::Ptr<recob::Track> track, art::Event &evt)
 
 // ------------------------------------------------------------------------------- //
 // An alternative method based on just the track length and dqdx (if you have those already)
+// Note that this should have David's calibration already applied to dqdx
+// (multiply MC by 198 and data by 243)
 
 bool IsMIP(double length, double dqdx_truncmean)
 {
