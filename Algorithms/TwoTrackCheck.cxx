@@ -1,6 +1,6 @@
 #include "TwoTrackCheck.h"
 
-bool TwoTrackCheck(art::Event &evt, bool checkMIPs)
+bool TwoTrackCheck(art::Event &evt, bool checkMIPs, bool exactlyTwo)
 {
    art::Handle<std::vector<ubana::SelectionResult>> selection_h;
    evt.getByLabel("UBXSec", selection_h);
@@ -24,8 +24,8 @@ bool TwoTrackCheck(art::Event &evt, bool checkMIPs)
    int nuID = -1;
    for (auto pfp : pfps) {
       if(lar_pandora::LArPandoraHelper::IsNeutrino(pfp)) {
-	nuID = (int)pfp->Self();
-	break;
+         nuID = (int)pfp->Self();
+         break;
       }
    }
 
@@ -37,7 +37,7 @@ bool TwoTrackCheck(art::Event &evt, bool checkMIPs)
    //Find track-like daughters of the neutrino
    std::vector<art::Ptr<recob::PFParticle>> daughter_track_pfps;
    for (auto pfp : pfps) {
-     if(lar_pandora::LArPandoraHelper::IsTrack(pfp) && pfp->Parent()==(size_t)nuID) {
+      if(lar_pandora::LArPandoraHelper::IsTrack(pfp) && pfp->Parent()==(size_t)nuID) {
          daughter_track_pfps.emplace_back(pfp);
       }
    }
@@ -63,17 +63,24 @@ bool TwoTrackCheck(art::Event &evt, bool checkMIPs)
       // counts for one MIP-like track
       int MIPs = 0;
       for (auto pfp : daughter_track_pfps) {
-	std::vector<art::Ptr<recob::Track>> daughter_tracks = tracks_from_pfps.at(pfp.key());
-	for (auto track : daughter_tracks){
-	  if(IsMIP(track, evt))
-	    {
-	      MIPs++;
-	      break; // break out of the loop over tracks so the maximum one PFP can contribute is 1
-	    }
-	}
+         std::vector<art::Ptr<recob::Track>> daughter_tracks = tracks_from_pfps.at(pfp.key());
+         for (auto track : daughter_tracks){
+            if(IsMIP(track, evt))
+            {
+               MIPs++;
+               break; // break out of the loop over tracks so the maximum one PFP can contribute is 1
+            }
+         }
       }
 
-      if(MIPs >= 2) return true;
-      else return false;
+      if (!exactlyTwo) {
+         if(MIPs >= 2) return true;
+         else return false;
+      }
+
+      else {
+         if(MIPs == 2) return true;
+         else return false;
+      }
    }
 }

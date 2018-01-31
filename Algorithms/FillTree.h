@@ -53,8 +53,8 @@ struct cc1pianavars{
   
   std::map<std::string,bool> cutflow;
   bool isSelected;
-  std::vector<float> track_length;
-  std::vector<float> shower_length;
+  std::vector<double> track_length;
+  std::vector<double> shower_length;
   int NPFPs;
   int NTracks;
   int NShowers;
@@ -63,27 +63,27 @@ struct cc1pianavars{
   std::vector<int> Sel_PFP_ID;
   std::vector<int> Sel_MCP_ID;
   std::vector<int> Sel_MCP_PDG;
-  std::vector<float> Sel_MCP_E;
+  std::vector<double> Sel_MCP_E;
   int tpcobj_origin;
   int tpcobj_origin_extra;
   
   std::vector<int> MCP_PDG;
-  std::vector<float> MCP_length;
+  std::vector<double> MCP_length;
   std::vector<std::string> MCP_process;
   std::vector<std::string> MCP_endprocess;
   std::vector<int> MCP_numdaughters;
-  std::vector<float> MCP_P;
-  std::vector<float> MCP_Px;
-  std::vector<float> MCP_Py;
-  std::vector<float> MCP_Pz;
-  std::vector<float> MCP_E;
+  std::vector<double> MCP_P;
+  std::vector<double> MCP_Px;
+  std::vector<double> MCP_Py;
+  std::vector<double> MCP_Pz;
+  std::vector<double> MCP_E;
   
-  std::vector<float> nu_vtxx;
-  std::vector<float> nu_vtxy;
-  std::vector<float> nu_vtxz;
+  std::vector<double> nu_vtxx;
+  std::vector<double> nu_vtxy;
+  std::vector<double> nu_vtxz;
   std::vector<bool> nu_isCC;
   std::vector<int> nu_PDG;
-  std::vector<float> nu_E;
+  std::vector<double> nu_E;
   
   std::vector<bool> MIPConsistency;
   std::vector<double> dqdx_trunc_uncalib;

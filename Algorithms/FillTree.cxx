@@ -166,7 +166,6 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       }
 
       //Get associations
-      //Could just use "pfps" and not bother also getting all the non-selected PFPs from the event?
       art::FindManyP<ubana::MCGhost>   mcghost_from_pfp (pfp_h,   evt, "RecoTrueMatcher");
       art::FindManyP<simb::MCParticle> mcp_from_mcghost (ghost_h, evt, "RecoTrueMatcher");
 
