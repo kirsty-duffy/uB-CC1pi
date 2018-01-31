@@ -182,35 +182,35 @@ void MakePlots(std::string Cut, bool Passes, std::string SaveString, TString Fil
 
       // Replace this with a cutflow map: MakePlots should take a std::map<std::string,bool>
       // And check for each of the given cuts (strings) whether the pass/fail value matches the given bool
+      bool SelectedEvent = true;
       if(Passes) {
          if(Cut.compare("ExactlyTwoMIPCut") == 0) {
-            if(CC1piSelecFailureReason -> compare("") != 0) continue;
+            if(CC1piSelecFailureReason -> compare("") != 0) SelectedEvent = false;
          }
          else if(Cut.compare("TwoMIPCut") == 0) {
-            if((CC1piSelecFailureReason -> compare("") != 0) && (CC1piSelecFailureReason -> compare("ExactlyTwoMIPCut") != 0)) continue;
+            if((CC1piSelecFailureReason -> compare("") != 0) && (CC1piSelecFailureReason -> compare("ExactlyTwoMIPCut") != 0)) SelectedEvent = false;
          }
          else if(Cut.compare("TwoTrackCut") == 0) {
-            if((CC1piSelecFailureReason -> compare("") != 0) && (CC1piSelecFailureReason -> compare("ExactlyTwoMIPCut") != 0) && (CC1piSelecFailureReason -> compare("TwoMIPCut") != 0)) continue;
+            if((CC1piSelecFailureReason -> compare("") != 0) && (CC1piSelecFailureReason -> compare("ExactlyTwoMIPCut") != 0) && (CC1piSelecFailureReason -> compare("TwoMIPCut") != 0)) SelectedEvent = false;
          }
          else if(Cut.compare("MarcosSelec") == 0) {
-            if(!isSelected) continue;
+            if(!isSelected) SelectedEvent = false;
          }
       }
       else {
          if(Cut.compare("ExactlyTwoMIPCut") == 0) {
-            if(!(CC1piSelecFailureReason -> compare("") != 0)) continue;
+            if(!(CC1piSelecFailureReason -> compare("") != 0)) SelectedEvent = false;
          }
          else if(Cut.compare("TwoMIPCut") == 0) {
-            if(!((CC1piSelecFailureReason -> compare("") != 0) && (CC1piSelecFailureReason -> compare("ExactlyTwoMIPCut") != 0))) continue;
+            if(!((CC1piSelecFailureReason -> compare("") != 0) && (CC1piSelecFailureReason -> compare("ExactlyTwoMIPCut") != 0))) SelectedEvent = false;
          }
          else if(Cut.compare("TwoTrackCut") == 0) {
-            if(!((CC1piSelecFailureReason -> compare("") != 0) && (CC1piSelecFailureReason -> compare("ExactlyTwoMIPCut") != 0) && (CC1piSelecFailureReason -> compare("TwoMIPCut") != 0))) continue;
+            if(!((CC1piSelecFailureReason -> compare("") != 0) && (CC1piSelecFailureReason -> compare("ExactlyTwoMIPCut") != 0) && (CC1piSelecFailureReason -> compare("TwoMIPCut") != 0))) SelectedEvent = false;
          }
          else if(Cut.compare("MarcosSelec") == 0) {
-            if(isSelected) continue;
+            if(isSelected) SelectedEvent = false;
          }
       }
-
 
       bool isSignal = false;
 
@@ -220,21 +220,20 @@ void MakePlots(std::string Cut, bool Passes, std::string SaveString, TString Fil
          isSignal = true;
 
          //Efficiency...
-         eff_nuE -> Fill(isSelected, nu_E -> at(0));
+         eff_nuE -> Fill(SelectedEvent, nu_E -> at(0));
 
          for (int j = 0; j < MCP_PDG -> size(); j++) {
             if (MCP_PDG -> at(j) == 13) {
-               eff_muP -> Fill(isSelected, MCP_P -> at(j));
+               eff_muP -> Fill(SelectedEvent, MCP_P -> at(j));
                TVector3 muP(MCP_Px -> at(j), MCP_Py -> at(j), MCP_Pz -> at(j));
-               eff_muCosT -> Fill(isSelected, muP.CosTheta());
-               eff_muPhi -> Fill(isSelected, muP.Phi());
+               eff_muCosT -> Fill(SelectedEvent, muP.CosTheta());
+               eff_muPhi -> Fill(SelectedEvent, muP.Phi());
                break;
             }
          }
       }
 
-      if(isSelected) {
-
+      if(SelectedEvent) {
          //Purity...
          pur_nuE -> Fill(isSignal, nu_E -> at(0));
 
