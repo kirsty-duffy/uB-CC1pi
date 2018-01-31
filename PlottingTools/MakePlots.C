@@ -1,14 +1,4 @@
-#include "TChain.h"
-#include "TTree.h"
-#include "TFile.h"
-#include "TEfficiency.h"
-#include "TVector3.h"
-#include "TCanvas.h"
-#include "TH1.h"
-#include "TString.h"
-
-#include <vector>
-#include <iostream>
+#include "MakePlots.h"
 
 double GetPOT(TString FileName) {
 
@@ -193,30 +183,30 @@ void MakePlots(std::string Cut, bool Passes, std::string SaveString, TString Fil
       // Replace this with a cutflow map: MakePlots should take a std::map<std::string,bool>
       // And check for each of the given cuts (strings) whether the pass/fail value matches the given bool
       if(Passes) {
-         if(Cut.CompareTo("ExactlyTwoMIPCut") == 0) {
-            if(CC1piSelecFailureReason.compare("") != 0) continue;
+         if(Cut.compare("ExactlyTwoMIPCut") == 0) {
+            if(CC1piSelecFailureReason -> compare("") != 0) continue;
          }
-         else if(Cut.CompareTo("TwoMIPCut") == 0) {
-            if((CC1piSelecFailureReason.compare("") != 0) && (CC1piSelecFailureReason.compare("ExactlyTwoMIPCut") != 0)) continue;
+         else if(Cut.compare("TwoMIPCut") == 0) {
+            if((CC1piSelecFailureReason -> compare("") != 0) && (CC1piSelecFailureReason -> compare("ExactlyTwoMIPCut") != 0)) continue;
          }
-         else if(Cut.CompareTo("TwoTrackCut") == 0) {
-            if((CC1piSelecFailureReason.compare("") != 0) && (CC1piSelecFailureReason.compare("ExactlyTwoMIPCut") != 0) && (CC1piSelecFailureReason.compare("TwoMIPCut") != 0)) continue;
+         else if(Cut.compare("TwoTrackCut") == 0) {
+            if((CC1piSelecFailureReason -> compare("") != 0) && (CC1piSelecFailureReason -> compare("ExactlyTwoMIPCut") != 0) && (CC1piSelecFailureReason -> compare("TwoMIPCut") != 0)) continue;
          }
-         else if(Cut.CompareTo("MarcosSelec") == 0) {
+         else if(Cut.compare("MarcosSelec") == 0) {
             if(!isSelected) continue;
          }
       }
       else {
-         if(Cut.CompareTo("ExactlyTwoMIPCut") == 0) {
-            if(!(CC1piSelecFailureReason.compare("") != 0)) continue;
+         if(Cut.compare("ExactlyTwoMIPCut") == 0) {
+            if(!(CC1piSelecFailureReason -> compare("") != 0)) continue;
          }
-         else if(Cut.CompareTo("TwoMIPCut") == 0) {
-            if(!((CC1piSelecFailureReason.compare("") != 0) && (CC1piSelecFailureReason.compare("ExactlyTwoMIPCut") != 0))) continue;
+         else if(Cut.compare("TwoMIPCut") == 0) {
+            if(!((CC1piSelecFailureReason -> compare("") != 0) && (CC1piSelecFailureReason -> compare("ExactlyTwoMIPCut") != 0))) continue;
          }
-         else if(Cut.CompareTo("TwoTrackCut") == 0) {
-            if(!((CC1piSelecFailureReason.compare("") != 0) && (CC1piSelecFailureReason.compare("ExactlyTwoMIPCut") != 0) && (CC1piSelecFailureReason.compare("TwoMIPCut") != 0))) continue;
+         else if(Cut.compare("TwoTrackCut") == 0) {
+            if(!((CC1piSelecFailureReason -> compare("") != 0) && (CC1piSelecFailureReason -> compare("ExactlyTwoMIPCut") != 0) && (CC1piSelecFailureReason -> compare("TwoMIPCut") != 0))) continue;
          }
-         else if(Cut.CompareTo("MarcosSelec") == 0) {
+         else if(Cut.compare("MarcosSelec") == 0) {
             if(isSelected) continue;
          }
       }
@@ -339,7 +329,7 @@ void MakePlots(std::string Cut, bool Passes, std::string SaveString, TString Fil
    graph->SetMinimum(0);
    graph->SetMaximum(1);
    gPad->Update();
-   c1 -> SaveAs(TString::Format("%s_effpur_nuE.eps",SaveString));
+   c1 -> SaveAs(TString::Format("%s_effpur_nuE.eps",SaveString.c_str()));
 
    eff_muP -> Draw("AP");
    pur_muP -> Draw("P SAME");
@@ -357,7 +347,7 @@ void MakePlots(std::string Cut, bool Passes, std::string SaveString, TString Fil
    graph->SetMinimum(0);
    graph->SetMaximum(1);
    gPad->Update();
-   c1 -> SaveAs(TString::Format("%s_effpur_muP.eps",SaveString));
+   c1 -> SaveAs(TString::Format("%s_effpur_muP.eps",SaveString.c_str()));
 
    eff_muCosT -> Draw("AP");
    pur_muCosT -> Draw("P SAME");
@@ -375,7 +365,7 @@ void MakePlots(std::string Cut, bool Passes, std::string SaveString, TString Fil
    graph->SetMinimum(0);
    graph->SetMaximum(1);
    gPad->Update();
-   c1 -> SaveAs(TString::Format("%s_effpur_muCosT.eps",SaveString));
+   c1 -> SaveAs(TString::Format("%s_effpur_muCosT.eps",SaveString.c_str()));
 
    eff_muPhi -> Draw("AP");
    pur_muPhi -> Draw("P SAME");
@@ -393,7 +383,7 @@ void MakePlots(std::string Cut, bool Passes, std::string SaveString, TString Fil
    graph->SetMinimum(0);
    graph->SetMaximum(1);
    gPad->Update();
-   c1 -> SaveAs(TString::Format("%s_effpur_muPhi.eps",SaveString));
+   c1 -> SaveAs(TString::Format("%s_effpur_muPhi.eps",SaveString.c_str()));
 
    double pot_marco = 3.728e+19;
    double pot_total = GetPOT(FileName);
@@ -425,7 +415,7 @@ void MakePlots(std::string Cut, bool Passes, std::string SaveString, TString Fil
    len_legend -> AddEntry(len_mixed, "Mixed", "f");
    len_legend -> AddEntry(len_unknown, "Unknown Origin", "f");
    len_legend -> Draw("SAME");
-   c1 -> SaveAs(TString::Format("%s_THStack_len.eps",SaveString));
+   c1 -> SaveAs(TString::Format("%s_THStack_len.eps",SaveString.c_str()));
 
    std::cout << "muCC1pip: " << len_muCC1pip -> GetEntries() << std::endl;
    std::cout << "otherCC1pip: " << len_otherCC1pip -> GetEntries() << std::endl; 
@@ -459,7 +449,7 @@ void MakePlots(std::string Cut, bool Passes, std::string SaveString, TString Fil
    graph->SetMinimum(0);
    graph->SetMaximum(1);
    gPad->Update();
-   c1 -> SaveAs(TString::Format("%s_eff_track.eps",SaveString));
+   c1 -> SaveAs(TString::Format("%s_eff_track.eps",SaveString.c_str()));
 
    std::cout << "Total Efficiency: " << (1. * (eff_nuE -> GetPassedHistogram() -> GetEntries()))/(eff_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
    std::cout << "Total Purity: " << (1. * (pur_nuE -> GetPassedHistogram() -> GetEntries()))/(pur_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
