@@ -15,6 +15,7 @@ std::map<std::string,bool> TwoTrackCheck(art::Event &evt)
    art::FindManyP<ubana::TPCObject> tpcobject_from_selection(selection_h, evt, "UBXSec");
    if(tpcobject_from_selection.at(0).size() == 0) {
       //No TPCObject
+      CC1picutflow["ShowerCut"] = false;
       CC1picutflow["TwoTrackCut"] = false;
       CC1picutflow["TwoMIPCut"] = false;
       CC1picutflow["ExactlyTwoMIPCut"] = false;
@@ -48,6 +49,23 @@ std::map<std::string,bool> TwoTrackCheck(art::Event &evt)
       if(lar_pandora::LArPandoraHelper::IsTrack(pfp) && pfp->Parent()==(size_t)nuID) {
          daughter_track_pfps.emplace_back(pfp);
       }
+   }
+
+   //Find shower-like daughters of the neutrino
+   std::vector<art::Ptr<recob::PFParticle>> daughter_shower_pfps;
+   for (auto pfp : pfps) {
+      if(lar_pandora::LArPandoraHelper::IsShower(pfp) && pfp->Parent()==(size_t)nuID) {
+         daughter_shower_pfps.emplace_back(pfp);
+      }
+   }
+
+   // Independant cut that can be combined with anything else
+   // So don't fail other cuts because of this one
+   if(daughter_shower_pfps.size() > 0) {
+      CC1picutflow["ShowerCut"] = false;
+   }
+   else {
+      CC1picutflow["ShowerCut"] = true;
    }
 
    if(daughter_track_pfps.size() < 2) {

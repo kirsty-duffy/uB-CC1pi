@@ -131,33 +131,27 @@ void CC1piSelection::produce(art::Event & evt)
       _PassesCC1piSelec = false;
       _CC1piSelecFailureReason = selection_v.at(0)->GetFailureReason();;
       _CC1picutflow["MarcosSelec"] = false;
-      _CC1picutflow["TwoTrackCut"] = false;
-      _CC1picutflow["TwoMIPCut"] = false;
-      _CC1picutflow["ExactlyTwoMIPCut"] = false;
    }
-   
-   else // don't bother evaluating next cuts if it's already failed
-   {
-      _CC1picutflow["MarcosSelec"] = true;
-      std::map<std::string,bool> TwoTrackcutflow = TwoTrackCheck(evt);
-      _CC1picutflow.insert(TwoTrackcutflow.begin(), TwoTrackcutflow.end());
+   else _CC1picutflow["MarcosSelec"] = true;
 
-      if(_CC1picutflow["TwoTrackCut"] == false) {
-         _PassesCC1piSelec = false;
-         _CC1piSelecFailureReason = "TwoTrackCut";
-      }
-      else if(_CC1picutflow["TwoMIPCut"] == false) {
-         _PassesCC1piSelec = false;
-         _CC1piSelecFailureReason = "TwoMIPCut";
-      }
-      else if(_CC1picutflow["ExactlyTwoMIPCut"] == false) {
-         _PassesCC1piSelec = false;
-         _CC1piSelecFailureReason = "ExactlyTwoMIPCut";
-      }
-      else {
-         _PassesCC1piSelec = true;
-         _CC1piSelecFailureReason = "Passed";
-      }
+   std::map<std::string,bool> TwoTrackcutflow = TwoTrackCheck(evt);
+   _CC1picutflow.insert(TwoTrackcutflow.begin(), TwoTrackcutflow.end());
+
+   if(_CC1picutflow["TwoTrackCut"] == false) {
+      _PassesCC1piSelec = false;
+      _CC1piSelecFailureReason = "TwoTrackCut";
+   }
+   else if(_CC1picutflow["TwoMIPCut"] == false) {
+      _PassesCC1piSelec = false;
+      _CC1piSelecFailureReason = "TwoMIPCut";
+   }
+   else if(_CC1picutflow["ExactlyTwoMIPCut"] == false) {
+      _PassesCC1piSelec = false;
+      _CC1piSelecFailureReason = "ExactlyTwoMIPCut";
+   }
+   else {
+      _PassesCC1piSelec = true;
+      _CC1piSelecFailureReason = "Passed";
    }
 
    // ----- Almost at the end: fill tree ------ //

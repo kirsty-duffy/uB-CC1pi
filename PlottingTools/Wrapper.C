@@ -23,4 +23,7 @@ void Wrapper(TString FileName) {
    CC1picutflow["ExactlyTwoMIPCut"] = true;
    MakePlots(CC1picutflow, "PassExactlyTwoMIPCut", FileName);
 
+   CC1picutflow["ShowerCut"] = true;
+   MakePlots(CC1picutflow, "PassExactlyTwoMIPCut_PassShowerCut", FileName);
+
 }
