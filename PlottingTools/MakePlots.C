@@ -45,7 +45,7 @@ bool inFV(double x, double y, double z){
 }
 
 
-void MakePlots(std::string Cut, bool Passes, std::string SaveString, TString FileName) {
+void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveString, TString FileName) {
 
    //Setup tree...
    TChain *t = new TChain("cc1piselec/outtree");
@@ -180,35 +180,11 @@ void MakePlots(std::string Cut, bool Passes, std::string SaveString, TString Fil
 
       t -> GetEntry(i);
 
-      // Replace this with a cutflow map: MakePlots should take a std::map<std::string,bool>
-      // And check for each of the given cuts (strings) whether the pass/fail value matches the given bool
       bool SelectedEvent = true;
-      if(Passes) {
-         if(Cut.compare("ExactlyTwoMIPCut") == 0) {
-            if(CC1piSelecFailureReason -> compare("") != 0) SelectedEvent = false;
-         }
-         else if(Cut.compare("TwoMIPCut") == 0) {
-            if((CC1piSelecFailureReason -> compare("") != 0) && (CC1piSelecFailureReason -> compare("ExactlyTwoMIPCut") != 0)) SelectedEvent = false;
-         }
-         else if(Cut.compare("TwoTrackCut") == 0) {
-            if((CC1piSelecFailureReason -> compare("") != 0) && (CC1piSelecFailureReason -> compare("ExactlyTwoMIPCut") != 0) && (CC1piSelecFailureReason -> compare("TwoMIPCut") != 0)) SelectedEvent = false;
-         }
-         else if(Cut.compare("MarcosSelec") == 0) {
-            if(!isSelected) SelectedEvent = false;
-         }
-      }
-      else {
-         if(Cut.compare("ExactlyTwoMIPCut") == 0) {
-            if(!(CC1piSelecFailureReason -> compare("") != 0)) SelectedEvent = false;
-         }
-         else if(Cut.compare("TwoMIPCut") == 0) {
-            if(!((CC1piSelecFailureReason -> compare("") != 0) && (CC1piSelecFailureReason -> compare("ExactlyTwoMIPCut") != 0))) SelectedEvent = false;
-         }
-         else if(Cut.compare("TwoTrackCut") == 0) {
-            if(!((CC1piSelecFailureReason -> compare("") != 0) && (CC1piSelecFailureReason -> compare("ExactlyTwoMIPCut") != 0) && (CC1piSelecFailureReason -> compare("TwoMIPCut") != 0))) SelectedEvent = false;
-         }
-         else if(Cut.compare("MarcosSelec") == 0) {
-            if(isSelected) SelectedEvent = false;
+      for(std::map<std::string,bool>::const_iterator iter = SelectionCutflow.begin(); iter != SelectionCutflow.end(); ++iter) {
+         if(CC1picutflow -> find(iter -> first) != iter -> second) {
+            SelectedEvent = false;
+            break;
          }
       }
 

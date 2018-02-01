@@ -65,6 +65,7 @@ class CC1piSelection : public art::EDProducer {
       cc1pianavars *anavars;
 
       // CC1pi selection variables
+      std::map<std::string,bool> _CC1picutflow;
       bool _PassesCC1piSelec;
       std::string _CC1piSelecFailureReason;
 
@@ -123,45 +124,39 @@ void CC1piSelection::produce(art::Event & evt)
    art::fill_ptr_vector(selection_v, selection_h);
 
    bool PassesMarcosSelec = selection_v.at(0)->GetSelectionStatus();
+   _CC1picutflow = selection_v.at(0)->GetCutFlowStatus();
    if (!PassesMarcosSelec){
       _PassesCC1piSelec = false;
       _CC1piSelecFailureReason = selection_v.at(0)->GetFailureReason();;
+      _CC1picutflow["MarcosSelec"] = false;
+      _CC1picutflow["TwoTrackCut"] = false;
+      _CC1picutflow["TwoMIPCut"] = false;
+      _CC1picutflow["ExactlyTwoMIPCut"] = false;
    }
-
-   if (_PassesCC1piSelec) // don't bother evaluating next cut if it's already failed
+   
+   else // don't bother evaluating next cuts if it's already failed
    {
-      // ----- Cut: minimum two tracks (don't have to be MIPs) ----- //
-      bool TwoTracks = TwoTrackCheck(evt, false, false);
-      if (!TwoTracks){
+      _CC1picutflow["MarcosSelec"] = true;
+      std::map<std::string,bool> TwoTrackcutflow = TwoTrackCheck(evt);
+      _CC1picutflow.insert(TwoTrackcutflow.begin(), TwoTrackcutflow.end());
+
+      if(_CC1picutflow["TwoTrackCut"] == false) {
          _PassesCC1piSelec = false;
-         _CC1piSelecFailureReason="TwoTrackCut";
+         _CC1piSelecFailureReason = "TwoTrackCut";
+      }
+      else if(_CC1picutflow["TwoMIPCut"] == false) {
+         _PassesCC1piSelec = false;
+         _CC1piSelecFailureReason = "TwoMIPCut";
+      }
+      else if(_CC1picutflow["ExactlyTwoMIPCut"] == false) {
+         _PassesCC1piSelec = false;
+         _CC1piSelecFailureReason = "ExactlyTwoMIPCut";
+      }
+      else {
+         _PassesCC1piSelec = true;
+         _CC1piSelecFailureReason = "Passed";
       }
    }
-
-   if (_PassesCC1piSelec) // don't bother evaluating next cut if it's already failed
-      // This means that this cut will only cut out events that have >=2 tracks but *not* MIP-like
-      // Events that have <2 tracks will already have failed
-   {
-      // ----- Cut: minimum two MIP-consistent tracks ----- //
-      bool TwoMIPTracks = TwoTrackCheck(evt, true, false);
-      if (!TwoMIPTracks){
-         _PassesCC1piSelec = false;
-         _CC1piSelecFailureReason="TwoMIPCut";
-      }
-   }
-
-   if (_PassesCC1piSelec) // don't bother evaluating next cut if it's already failed
-      // This means that this cut will only cut out events that have >2 MIP-like tracks
-      // Events that have <2 tracks total or with <2 MIP-like tracks will already have failed
-   {
-      // ----- Cut: exactly two MIP-consistent tracks ----- //
-      bool TwoMIPTracks = TwoTrackCheck(evt, true, true);
-      if (!TwoMIPTracks){
-         _PassesCC1piSelec = false;
-         _CC1piSelecFailureReason="ExactlyTwoMIPCut";
-      }
-   }
-
 
    // ----- Almost at the end: fill tree ------ //
 
@@ -169,6 +164,7 @@ void CC1piSelection::produce(art::Event & evt)
    anavars->SetReco2Vars(evt);
 
    // Set anavars for _PassesCC1piSelec and _CC1piSelecFailureReason
+   anavars->CC1picutflow = _CC1picutflow;
    anavars->PassesCC1piSelec = _PassesCC1piSelec;
    anavars->CC1piSelecFailureReason = _CC1piSelecFailureReason;
 
@@ -176,8 +172,11 @@ void CC1piSelection::produce(art::Event & evt)
 
 
    // ----- Finally: add things to event ------ //
+   std::unique_ptr<std::map<std::string,bool>> CC1picutflow = std::make_unique<std::map<std::string,bool>>(_CC1picutflow);
    std::unique_ptr<bool> PassesCC1piSelec = std::make_unique<bool>(_PassesCC1piSelec);
-   std::unique_ptr<std::string> CC1piSelecFailureReason = std::make_unique<std::string>(_CC1piSelecFailureReason); 
+   std::unique_ptr<std::string> CC1piSelecFailureReason = std::make_unique<std::string>(_CC1piSelecFailureReason);
+
+   evt.put(std::move(CC1picutflow));
    evt.put(std::move(PassesCC1piSelec));
    evt.put(std::move(CC1piSelecFailureReason));
 

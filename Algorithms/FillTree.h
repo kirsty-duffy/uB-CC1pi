@@ -88,6 +88,7 @@ struct cc1pianavars{
   std::vector<bool> MIPConsistency;
   std::vector<double> dqdx_trunc_uncalib;
 
+  std::map<std::string,bool> CC1picutflow;
   bool PassesCC1piSelec;
   std::string CC1piSelecFailureReason;
 

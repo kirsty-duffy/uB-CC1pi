@@ -16,4 +16,4 @@
 // CC1pi method includes
 #include "uboone/CC1pi/Algorithms/MIPConsistencyCheck_Marco.h"
 
-bool TwoTrackCheck(art::Event &evt, bool checkMIPs, bool exactlyTwo);
+std::map<std::string,bool> TwoTrackCheck(art::Event &evt);

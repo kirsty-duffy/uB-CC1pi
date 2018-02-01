@@ -8,6 +8,7 @@
 #include "TString.h"
 
 #include <vector>
+#include <map>
 #include <iostream>
 
 
@@ -15,4 +16,4 @@ double GetPOT(TString FileName);
 
 bool inFV(double x, double y, double z);
 
-void MakePlots(std::string Cut, bool Passes, std::string SaveString, TString FileName);
+void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveString, TString FileName);

@@ -4,16 +4,23 @@
 
 void Wrapper(TString FileName) {
 
-   // MakePlots takes: the name of a cut (currently just these hardcoded four)
-   // A bool for whether you want to look at events that pass or fail that cut
+   // MakePlots takes: 
+   // A map of cut names and whether you want to look at events that passed or failed them
    // A string to append to plot save names
    // And the file name
-   // 
-   // Eventually the former two should be replaced with passing it a cutflow map
 
-   MakePlots("MarcosSelec", true, "PassMarcosSelec", FileName);
-   //MakePlots("TwoTrackCut", true, "PassTwoTrackCut", FileName);
-   //MakePlots("TwoMIPCut", true, "PassTwoMIPCut", FileName);
-   //MakePlots("ExactlyTwoMIPCut", true, "PassExactlyTwoMIPCut", FileName);
+   std::map<std::string,bool> CC1picutflow;
+
+   CC1picutflow["MarcosSelec"] = true;
+   MakePlots(CC1picutflow, "PassMarcosSelec", FileName);
+
+   CC1picutflow["TwoTrackCut"] = true;
+   MakePlots(CC1picutflow, "PassTwoTrackCut", FileName);
+
+   CC1picutflow["TwoMIPCut"] = true;
+   MakePlots(CC1picutflow, "PassTwoMIPCut", FileName);
+
+   CC1picutflow["ExactlyTwoMIPCut"] = true;
+   MakePlots(CC1picutflow, "PassExactlyTwoMIPCut", FileName);
 
 }
