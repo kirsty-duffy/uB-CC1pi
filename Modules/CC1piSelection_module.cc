@@ -82,8 +82,10 @@ CC1piSelection::CC1piSelection(fhicl::ParameterSet const & p)
 {
    // Call appropriate produces<>() functions here.
    // Things we want to produce (i.e. add to the event):
+   //  - Cutflow map of whether it passes each cut
    //  - Flag for whether it passes our selection
    //  - Failure reason if it doesn't
+   produces< std::map<std::string,bool> >();
    produces< bool >();
    produces< std::string >();
 

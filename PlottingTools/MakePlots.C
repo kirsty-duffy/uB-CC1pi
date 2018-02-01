@@ -93,6 +93,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    std::vector<bool> *MIPConsistency = NULL;
    std::vector<double> *dqdx_trunc_uncalib = NULL;
 
+   std::map<std::string,bool> *CC1picutflow = NULL;
    bool PassesCC1piSelec;
    std::string *CC1piSelecFailureReason = NULL;
 
@@ -138,6 +139,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchAddress("MIPConsistency", &MIPConsistency);
    t -> SetBranchAddress("dqdx_trunc_uncalib", &dqdx_trunc_uncalib);
 
+   t -> SetBranchAddress("CC1picutflow", &CC1picutflow);
    t -> SetBranchAddress("PassesCC1piSelec", &PassesCC1piSelec);
    t -> SetBranchAddress("CC1piSelecFailureReason", &CC1piSelecFailureReason);
 
@@ -182,7 +184,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
 
       bool SelectedEvent = true;
       for(std::map<std::string,bool>::const_iterator iter = SelectionCutflow.begin(); iter != SelectionCutflow.end(); ++iter) {
-         if(CC1picutflow -> find(iter -> first) != iter -> second) {
+         if((CC1picutflow -> find(iter -> first)) -> second != iter -> second) {
             SelectedEvent = false;
             break;
          }
@@ -428,6 +430,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
 
    std::cout << "Total Efficiency: " << (1. * (eff_nuE -> GetPassedHistogram() -> GetEntries()))/(eff_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
    std::cout << "Total Purity: " << (1. * (pur_nuE -> GetPassedHistogram() -> GetEntries()))/(pur_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
+
+   gDirectory->GetList()->Delete();
 
    return;
 }
