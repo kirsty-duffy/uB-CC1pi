@@ -1,0 +1,63 @@
+#include "services_microboone.fcl"
+
+process_name: TrueCC1piFilter
+
+services:
+{
+   TFileService: { fileName: "CC1pi_out.root" }
+   #TimeTracker: {}
+   #RandomNumberGenerator: {}
+   message: @local::standard_info
+   @table::microboone_simulation_services
+}
+
+source:
+{ 
+  module_type: RootInput 
+  maxEvents  : -1
+  fileNames  : [ "/pnfs/uboone/persistent/users/ddevitt/out/marcosel_mcc8.6_bnb+cosmic/stage1/3342176_0/prodgenie_bnb_nu_cosmic_uboone_0_20170304T225402_gen2_e5e40112-3946-433e-87b8-d9833a0e725d_20171221T035713_reco1_20171221T041802_reco2_20180124T152818_ubxsec.root" ]
+}
+
+physics:
+{
+   filters:
+   {
+      cc1pifilter:
+      {
+      	module_type : TrueCC1piFilter
+      }   
+   }
+
+   producers:
+   {
+      cc1piselec: 
+      {
+	module_type : CC1piSelection
+         MCTruthMatching:
+         {
+            tool_type:           "AssociationsTruth"
+            AssnsProducerLabels: ["gaushitTruthMatch", "crHitRemovalTruthMatch", "trajclusterTruthMatch"]
+            G4ProducerLabel:     "largeant"
+            MCTruthAssociations: { MinHitEnergyFraction: 0.1 }
+         }
+      }   
+   }
+
+   filtermods   : [ cc1pifilter, cc1piselec ]
+   outputFiles  : [ out1 ]
+
+   trigger_paths : [ filtermods ]
+   end_paths     : [ outputFiles ]
+}
+
+outputs:
+{
+   out1: 
+   { 
+     module_type : RootOutput
+     fileName    : "TrueCC1piFilter_%ifb_%tc.root" 
+   }
+}
+
+services.DetectorClocksService.InheritClockConfig:   false
+services.DetectorClocksService.TriggerOffsetTPC:     -400
