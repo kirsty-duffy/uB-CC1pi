@@ -49,7 +49,7 @@ void PlotdQdxLength(std::string infile)
     // Loop through tracks (entries in vector) and push back points in vectors
     for (unsigned int i_tr=0; i_tr < track_length->size(); i_tr++){
       double tracklength_itr = track_length->at(i_tr);
-      double dqdx_itr = dqdx_trunc_uncalib->at(i_tr)*198;
+      double dqdx_itr = dqdx_trunc_uncalib->at(i_tr);
       bool MIPConsistent_itr = MIPConsistency->at(i_tr);
 
       if (MIPConsistent_itr){
@@ -92,7 +92,7 @@ void PlotdQdxLength(std::string infile)
   leg->AddEntry(g_MIP,"Classified as MIP-like","p");
   leg->AddEntry(g_notMIP,"Classified as not MIP-like","p");
   
-  g_MIP->GetXaxis()->SetRangeUser(0,150000);
+  g_MIP->GetXaxis()->SetRangeUser(0,75e6);
   g_MIP->GetXaxis()->SetTitle("Track <dQ/dx>(trunc.)");
   g_MIP->GetYaxis()->SetTitle("Track Length (cm)");
 
