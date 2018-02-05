@@ -128,7 +128,7 @@ bool TrueCC1piFilter::filter(art::Event & evt)
   // Is true CC1pi+?
   if (primary_muons == 1 && primary_pions == 1){
     _isCC1pi = true;
-    std::cout << "Selected event mode: " << muon_MCTruth->GetNeutrino().Mode() << std::endl;
+    //std::cout << "Selected event mode: " << muon_MCTruth->GetNeutrino().Mode() << std::endl;
   }
   else{
     _isCC1pi = false;
