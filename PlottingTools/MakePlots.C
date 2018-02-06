@@ -20,10 +20,8 @@ double GetPOT(TString FileName) {
 
 }
 
-// Can swap to using Marco's FV calculator to make this cleaner
+// Can swap to using Marco's FV calculator to make this cleaner?
 // Can also just put this in the tree once we settle on a particular FV def
-// This appears to be what's in v3.0.2, but Marco's latest presentation also had a chunk of dead region
-// in z cut out, so double check (especially if we see higher event rate)
 const double xmin = 0;
 const double xmax = 256.35;
 const double ymin = -115.53;
@@ -39,6 +37,7 @@ const double FVzmax = zmax - 85;
 
 bool inFV(double x, double y, double z){
 
+//   if (x > FVxmin && x < FVxmax && y > FVymin && y < FVymax && z > FVzmin && z < FVzmax && (z < 675 || z > 775)) return true;
    if (x > FVxmin && x < FVxmax && y > FVymin && y < FVymax && z > FVzmin && z < FVzmax) return true;
    else return false;
 
@@ -65,6 +64,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    int NShowers;
    std::vector<bool> *Sel_PFP_isTrack = NULL;
    std::vector<bool> *Sel_PFP_isShower = NULL;
+   std::vector<bool> *Sel_PFP_isDaughter = NULL;
+//   std::vector<bool> *Sel_PFP_isMIP = NULL;
    std::vector<int> *Sel_PFP_ID = NULL;
    std::vector<int> *Sel_MCP_ID = NULL;
    std::vector<int> *Sel_MCP_PDG = NULL;
@@ -82,6 +83,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    std::vector<double> *MCP_Py = NULL;
    std::vector<double> *MCP_Pz = NULL;
    std::vector<double> *MCP_E = NULL;
+//   std::vector<bool> *MCP_isContained = NULL;
+   std::vector<bool> *MIPConsistency = NULL;
 
    std::vector<double> *nu_vtxx = NULL;
    std::vector<double> *nu_vtxy = NULL;
@@ -90,7 +93,6 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    std::vector<int> *nu_PDG = NULL;
    std::vector<double> *nu_E = NULL;
 
-   std::vector<bool> *MIPConsistency = NULL;
    std::vector<double> *dqdx_trunc_uncalib = NULL;
 
    std::map<std::string,bool> *CC1picutflow = NULL;
@@ -111,6 +113,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchAddress("NShowers", &NShowers);
    t -> SetBranchAddress("Sel_PFP_isTrack", &Sel_PFP_isTrack);
    t -> SetBranchAddress("Sel_PFP_isShower", &Sel_PFP_isShower);
+   t -> SetBranchAddress("Sel_PFP_isDaughter", &Sel_PFP_isDaughter);
+//   t -> SetBranchAddress("Sel_PFP_isMIP", &Sel_PFP_isMIP);
    t -> SetBranchAddress("Sel_PFP_ID", &Sel_PFP_ID);
    t -> SetBranchAddress("Sel_MCP_ID", &Sel_MCP_ID);
    t -> SetBranchAddress("Sel_MCP_PDG", &Sel_MCP_PDG);
@@ -128,6 +132,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchAddress("MCP_Py", &MCP_Py);
    t -> SetBranchAddress("MCP_Pz", &MCP_Pz);
    t -> SetBranchAddress("MCP_E", &MCP_E);
+//   t -> SetBranchAddress("MCP_isContained", &MCP_isContained);
+   t -> SetBranchAddress("MIPConsistency", &MIPConsistency);
 
    t -> SetBranchAddress("nu_vtxx", &nu_vtxx);
    t -> SetBranchAddress("nu_vtxy", &nu_vtxy);
@@ -136,7 +142,6 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchAddress("nu_PDG", &nu_PDG);
    t -> SetBranchAddress("nu_E", &nu_E);
 
-   t -> SetBranchAddress("MIPConsistency", &MIPConsistency);
    t -> SetBranchAddress("dqdx_trunc_uncalib", &dqdx_trunc_uncalib);
 
    t -> SetBranchAddress("CC1picutflow", &CC1picutflow);
@@ -153,7 +158,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    TEfficiency* pur_muCosT = new TEfficiency("pur_muCosT",";True Muon cos(#theta);",10,-1,1);
    TEfficiency* pur_muPhi = new TEfficiency("pur_muPhi",";True Muon #phi angle;",10,-3.2,3.2);
 
-   THStack* len_stack = new THStack("len_stack", ";Longest Track Length [cm];Selected Events (normalised to 3.728 #times 10^{19} POT)");
+   //TO DO: Make a seperate THStack making function
+   THStack* len_stack = new THStack("len_stack", ";Longest Track Length [cm];Selected Events (normalised to 3.782 #times 10^{19} POT)");
    TH1F* len_muCC1pip = new TH1F("len_muCC1pip", ";;", 30, 0, 700);
    TH1F* len_otherCC1pip = new TH1F("len_otherCC1pip", ";;", 30, 0, 700);
    TH1F* len_CCother = new TH1F("len_CCother", ";;", 30, 0, 700);
@@ -162,6 +168,36 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    TH1F* len_mixed = new TH1F("len_mixed", ";;", 30, 0, 700);
    TH1F* len_unknown = new TH1F("len_unknown", ";;", 30, 0, 700);
    TH1F* len_outFV = new TH1F("len_outFV", ";;", 30, 0, 700);
+
+   THStack* tracks_stack = new THStack("tracks_stack", ";Number of #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)");
+   TH1F* tracks_muCC1pip = new TH1F("tracks_muCC1pip", ";;", 10, 0, 10);
+   TH1F* tracks_otherCC1pip = new TH1F("tracks_otherCC1pip", ";;", 10, 0, 10);
+   TH1F* tracks_CCother = new TH1F("tracks_CCother", ";;", 10, 0, 10);
+   TH1F* tracks_NC = new TH1F("tracks_NC", ";;", 10, 0, 10);
+   TH1F* tracks_cosmic = new TH1F("tracks_cosmic", ";;", 10, 0, 10);
+   TH1F* tracks_mixed = new TH1F("tracks_mixed", ";;", 10, 0, 10);
+   TH1F* tracks_unknown = new TH1F("tracks_unknown", ";;", 10, 0, 10);
+   TH1F* tracks_outFV = new TH1F("tracks_outFV", ";;", 10, 0, 10);
+
+   THStack* showers_stack = new THStack("showers_stack", ";Number of #nu daughter showers in selected TCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)");
+   TH1F* showers_muCC1pip = new TH1F("showers_muCC1pip", ";;", 10, 0, 10);
+   TH1F* showers_otherCC1pip = new TH1F("showers_otherCC1pip", ";;", 10, 0, 10);
+   TH1F* showers_CCother = new TH1F("showers_CCother", ";;", 10, 0, 10);
+   TH1F* showers_NC = new TH1F("showers_NC", ";;", 10, 0, 10);
+   TH1F* showers_cosmic = new TH1F("showers_cosmic", ";;", 10, 0, 10);
+   TH1F* showers_mixed = new TH1F("showers_mixed", ";;", 10, 0, 10);
+   TH1F* showers_unknown = new TH1F("showers_unknown", ";;", 10, 0, 10);
+   TH1F* showers_outFV = new TH1F("showers_outFV", ";;", 10, 0, 10);
+
+   THStack* mips_stack = new THStack("mips_stack", ";Number of MIP-like #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)");
+   TH1F* mips_muCC1pip = new TH1F("mips_muCC1pip", ";;", 10, 0, 10);
+   TH1F* mips_otherCC1pip = new TH1F("mips_otherCC1pip", ";;", 10, 0, 10);
+   TH1F* mips_CCother = new TH1F("mips_CCother", ";;", 10, 0, 10);
+   TH1F* mips_NC = new TH1F("mips_NC", ";;", 10, 0, 10);
+   TH1F* mips_cosmic = new TH1F("mips_cosmic", ";;", 10, 0, 10);
+   TH1F* mips_mixed = new TH1F("mips_mixed", ";;", 10, 0, 10);
+   TH1F* mips_unknown = new TH1F("mips_unknown", ";;", 10, 0, 10);
+   TH1F* mips_outFV = new TH1F("mips_outFV", ";;", 10, 0, 10);
 
    len_muCC1pip -> SetFillColor(kRed);
    len_otherCC1pip -> SetFillColor(kOrange);
@@ -172,16 +208,85 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    len_unknown -> SetFillColor(kBlack);
    len_outFV -> SetFillColor(kGreen);
 
-   TEfficiency* eff_track_muon = new TEfficiency("eff_track_muon",";True Energy [GeV];",10,0,2);
-   TEfficiency* eff_track_pion = new TEfficiency("eff_track_pion",";True Energy [GeV];",10,0,2);
-   TEfficiency* eff_track_proton = new TEfficiency("eff_track_proton",";True Energy [GeV];",10,0,2);
+   tracks_muCC1pip -> SetFillColor(kRed);
+   tracks_otherCC1pip -> SetFillColor(kOrange);
+   tracks_CCother -> SetFillColor(kMagenta);
+   tracks_NC -> SetFillColor(kGray);
+   tracks_cosmic -> SetFillColor(kBlue);
+   tracks_mixed -> SetFillColor(kCyan);
+   tracks_unknown -> SetFillColor(kBlack);
+   tracks_outFV -> SetFillColor(kGreen);
+
+   showers_muCC1pip -> SetFillColor(kRed);
+   showers_otherCC1pip -> SetFillColor(kOrange);
+   showers_CCother -> SetFillColor(kMagenta);
+   showers_NC -> SetFillColor(kGray);
+   showers_cosmic -> SetFillColor(kBlue);
+   showers_mixed -> SetFillColor(kCyan);
+   showers_unknown -> SetFillColor(kBlack);
+   showers_outFV -> SetFillColor(kGreen);
+
+   mips_muCC1pip -> SetFillColor(kRed);
+   mips_otherCC1pip -> SetFillColor(kOrange);
+   mips_CCother -> SetFillColor(kMagenta);
+   mips_NC -> SetFillColor(kGray);
+   mips_cosmic -> SetFillColor(kBlue);
+   mips_mixed -> SetFillColor(kCyan);
+   mips_unknown -> SetFillColor(kBlack);
+   mips_outFV -> SetFillColor(kGreen);
+
+   TEfficiency* eff_track_muon = new TEfficiency("eff_track_muon",";True Kinetic Energy [GeV];",10,0,2);
+   TEfficiency* eff_track_pion = new TEfficiency("eff_track_pion",";True Kinetic Energy [GeV];",10,0,2);
+   TEfficiency* eff_track_proton = new TEfficiency("eff_track_proton",";True Kinetic Energy [GeV];",10,0,2);
+/*
+   TH2F* mu_pi_length = new TH2F("mu_pi_length",";Muon length [cm];Pion length [cm]", 15, 0, 350, 15, 0, 100);
+   TH2F* mu_mom_length = new TH2F("mu_mom_length", "Momentum [GeV/c];Length [cm]", 20, 0, 1, 20, 0, 350);
+   TH2F* pi_mom_length = new TH2F("pi_mom_length", "Momentum [GeV/c];Length [cm]", 20, 0, 1, 20, 0, 100);
+*/
 
    const int nentries = t -> GetEntries();
+
+   int nsignal = 0;
+   int nsignal_contained = 0;
+   int longermuon = 0;
 
    for (int i = 0; i < nentries; i++) {
 
       t -> GetEntry(i);
-
+/*
+      if(nu_isCC -> at(0) && nu_PDG -> at(0) == 14 && inFV(nu_vtxx -> at(0), nu_vtxy -> at(0), nu_vtxz -> at(0)) && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 13) == 1 && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 211) == 1 && MCP_PDG -> size() == 2 + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2112) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2212) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2000000101)) {
+         nsignal++;
+         double muon_mom = 0;
+         double muon_len = 0;
+         double pion_mom = 0;
+         double pion_len = 0;
+         for(int j = 0; j < MCP_PDG -> size(); j++) {
+            if (MCP_PDG -> at(j) == 13) {
+               if(MCP_isContained -> at(j)) {
+                  muom_mom = MCP_P -> at(j);
+                  muon_len = MCP_length -> at(j);
+               }
+            }
+            else if(MCP_PDG -> at(j) == 211) {
+               if(MCP_isContained -> at(j)) {
+                  pion_mom = MCP_P -> at(j);
+                  pion_len = MCP_length -> at(j);
+               }
+            }
+         }
+         if(muon_mom != 0) {
+            mu_mom_length -> Fill(muon_mom, muon_len);
+         }
+         if(pion_mom != 0) {
+            pi_mom_length -> Fill(pion_mom, pion_len);
+         }
+         if(muon_mom != 0 && pion_mom != 0) {
+            mu_pi_length -> Fill(muon_len, pion_len);
+            nsignal_contained++;
+            if(muon_len > pion_len) longermuon++;
+         }
+      }
+*/
       bool SelectedEvent = true;
       for(std::map<std::string,bool>::const_iterator iter = SelectionCutflow.begin(); iter != SelectionCutflow.end(); ++iter) {
          if((CC1picutflow -> find(iter -> first)) -> second != iter -> second) {
@@ -225,71 +330,121 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
             }
          }
 
-         //THStack...
+         //THStacks...
          double maxlen = *std::max_element(track_length -> begin(), track_length -> end());
+
+         int shower_daughters = 0;
+         int track_daughters = 0;
+         int mip_daughters = 0;
+         int track_counter = 0;
+
+         for(int j = 0; j < NPFPs; j++) {
+            if(Sel_PFP_isShower -> at(j) && Sel_PFP_isDaughter -> at(j)) shower_daughters++;
+            if(Sel_PFP_isTrack -> at(j)) {
+               if (Sel_PFP_isDaughter -> at(j)) {
+                  track_daughters++;
+                  if(MIPConsistency -> at(track_counter)) mip_daughters++;
+               }
+               track_counter++;
+            }
+         }
 
          if(tpcobj_origin==1) {
             len_cosmic -> Fill(maxlen);
+            tracks_cosmic -> Fill(track_daughters);
+            showers_cosmic -> Fill(shower_daughters);
+            mips_cosmic -> Fill(mip_daughters);
          }
          else if(tpcobj_origin==2) {
             len_mixed -> Fill(maxlen);
+            tracks_mixed -> Fill(track_daughters);
+            showers_mixed -> Fill(shower_daughters);
+            mips_mixed -> Fill(mip_daughters);
          }
          else if(tpcobj_origin!=0) {
             len_unknown -> Fill(maxlen);
+            tracks_unknown -> Fill(track_daughters);
+            showers_unknown -> Fill(shower_daughters);
+            mips_unknown -> Fill(mip_daughters);
          }
          else if(!inFV(nu_vtxx -> at(0), nu_vtxy -> at(0), nu_vtxz -> at(0))) {
             len_outFV -> Fill(maxlen);
+            tracks_outFV -> Fill(track_daughters);
+            showers_outFV -> Fill(shower_daughters);
+            mips_outFV -> Fill(mip_daughters);
          }
          else if(tpcobj_origin==0) {
             if(nu_isCC -> at(0) == 0) {
                len_NC -> Fill(maxlen);
+               tracks_NC -> Fill(track_daughters);
+               showers_NC -> Fill(shower_daughters);
+               mips_NC -> Fill(mip_daughters);
             }
             else if(std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 13) == 1 && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 211) == 1 && MCP_PDG -> size() == 2 + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2112) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2212) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2000000101)) {
                if(nu_PDG -> at(0) == 14) {
                   len_muCC1pip -> Fill(maxlen);
+                  tracks_muCC1pip -> Fill(track_daughters);
+                  showers_muCC1pip -> Fill(shower_daughters);
+                  mips_muCC1pip -> Fill(mip_daughters);
                }
                else {
                   len_otherCC1pip -> Fill(maxlen);
+                  tracks_otherCC1pip -> Fill(track_daughters);
+                  showers_otherCC1pip -> Fill(shower_daughters);
+                  mips_otherCC1pip -> Fill(mip_daughters);
                }
             }
             else {
                len_CCother -> Fill(maxlen);
+               tracks_CCother -> Fill(track_daughters);
+               showers_CCother -> Fill(shower_daughters);
+               mips_CCother -> Fill(mip_daughters);
             }
          }
 
-         //Track/shower classification...
+         // Track/shower classification...
+         // Subtracting particle masses in order to plot kinetic energy
          for(int j = 0; j < Sel_MCP_PDG -> size(); j++) {
             if (Sel_MCP_PDG -> at(j) == 13) {
                if(Sel_PFP_isTrack -> at(j)) {
-                  eff_track_muon -> Fill(true, Sel_MCP_E -> at(j));
+                  eff_track_muon -> Fill(true, Sel_MCP_E -> at(j) - 0.105658);
                }
                else if(Sel_PFP_isShower -> at(j)) {
-                  eff_track_muon -> Fill(false, Sel_MCP_E -> at(j));
+                  eff_track_muon -> Fill(false, Sel_MCP_E -> at(j) - 0.105658);
                }
             }
             else if(Sel_MCP_PDG -> at(j) == 211) {
                if(Sel_PFP_isTrack -> at(j)) {
-                  eff_track_pion -> Fill(true, Sel_MCP_E -> at(j));
+                  eff_track_pion -> Fill(true, Sel_MCP_E -> at(j) - 0.139570);
                }
                else if(Sel_PFP_isShower -> at(j)) {
-                  eff_track_pion -> Fill(false, Sel_MCP_E -> at(j));
+                  eff_track_pion -> Fill(false, Sel_MCP_E -> at(j) - 0.139570);
                }
             }
             else if(Sel_MCP_PDG -> at(j) == 2212) {
                if(Sel_PFP_isTrack -> at(j)) {
-                  eff_track_proton -> Fill(true, Sel_MCP_E -> at(j));
+                  eff_track_proton -> Fill(true, Sel_MCP_E -> at(j) - 0.938272);
                }
                else if(Sel_PFP_isShower -> at(j)) {
-                  eff_track_proton -> Fill(false, Sel_MCP_E -> at(j));
+                  eff_track_proton -> Fill(false, Sel_MCP_E -> at(j) - 0.938272);
                }
             }
          }
       }
    }
 
-
    TCanvas *c1 = new TCanvas("c1", "c1");
-
+/*
+   mu_pi_length -> Draw("COLZ");
+   c1 -> SaveAs("mu_pi_length.eps");
+   mu_mom_length -> Draw("COLZ");
+   c1 -> SaveAs("mu_mom_length.eps");
+   pi_mom_length -> Draw("COLZ");
+   c1 -> SaveAs("pi_mom_length.eps");
+   std::cout << "Signal events: " << nsignal << std::endl;
+   std::cout << "Contained signal: " << nsignal_contained << std::endl;
+   std::cout << "Muon longer: " << (1. * longermuon)/(mu_pi_length->GetEntries()) << std::endl;
+*/
    eff_nuE -> Draw("AP");
    pur_nuE -> Draw("P SAME");
    gPad->Update();
@@ -362,9 +517,10 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    gPad->Update();
    c1 -> SaveAs(TString::Format("%s_effpur_muPhi.eps",SaveString.c_str()));
 
-   double pot_marco = 3.728e+19;
+   double pot_marco = 3.782e+19;
    double pot_total = GetPOT(FileName);
    double norm = pot_marco/pot_total;
+
    len_unknown -> Scale(norm);
    len_mixed -> Scale(norm);
    len_cosmic -> Scale(norm);
@@ -373,35 +529,113 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    len_CCother -> Scale(norm);
    len_otherCC1pip -> Scale(norm);
    len_muCC1pip -> Scale(norm);
-   len_stack -> Add(len_unknown);
+//   len_stack -> Add(len_unknown);
    len_stack -> Add(len_mixed);
    len_stack -> Add(len_cosmic);
    len_stack -> Add(len_outFV);
    len_stack -> Add(len_NC);
    len_stack -> Add(len_CCother);
-   len_stack -> Add(len_otherCC1pip);
+//   len_stack -> Add(len_otherCC1pip);
    len_stack -> Add(len_muCC1pip);
    len_stack -> Draw();
    auto len_legend = new TLegend(0.6,0.6,0.9,0.9);
    len_legend -> AddEntry(len_muCC1pip, "#nu_{#mu} CC1#pi^{+}", "f");
-   len_legend -> AddEntry(len_otherCC1pip, "#bar{#nu}_{#mu}, #nu_{e}, #bar{#nu}_{e} CC1#pi^{+}", "f");
+//   len_legend -> AddEntry(len_otherCC1pip, "#bar{#nu}_{#mu}, #nu_{e}, #bar{#nu}_{e} CC1#pi^{+}", "f");
    len_legend -> AddEntry(len_CCother, "CC-Other", "f");
    len_legend -> AddEntry(len_NC, "NC", "f");
    len_legend -> AddEntry(len_outFV, "Out of FV", "f");
    len_legend -> AddEntry(len_cosmic, "Cosmic", "f");
    len_legend -> AddEntry(len_mixed, "Mixed", "f");
-   len_legend -> AddEntry(len_unknown, "Unknown Origin", "f");
+//   len_legend -> AddEntry(len_unknown, "Unknown Origin", "f");
    len_legend -> Draw("SAME");
    c1 -> SaveAs(TString::Format("%s_THStack_len.eps",SaveString.c_str()));
 
-   std::cout << "muCC1pip: " << len_muCC1pip -> GetEntries() << std::endl;
-   std::cout << "otherCC1pip: " << len_otherCC1pip -> GetEntries() << std::endl; 
-   std::cout << "CCother: " << len_CCother -> GetEntries() << std::endl;
-   std::cout << "NC: " << len_NC -> GetEntries() << std::endl;
-   std::cout << "outFV: " << len_outFV -> GetEntries() << std::endl;
-   std::cout << "cosmic: " << len_cosmic -> GetEntries() << std::endl;
-   std::cout << "mixed: " << len_mixed -> GetEntries() << std::endl;
-   std::cout << "unknown: " << len_unknown -> GetEntries() << std::endl;
+   tracks_unknown -> Scale(norm);
+   tracks_mixed -> Scale(norm);
+   tracks_cosmic -> Scale(norm);
+   tracks_outFV -> Scale(norm);
+   tracks_NC -> Scale(norm);
+   tracks_CCother -> Scale(norm);
+   tracks_otherCC1pip -> Scale(norm);
+   tracks_muCC1pip -> Scale(norm);
+//   tracks_stack -> Add(tracks_unknown);
+   tracks_stack -> Add(tracks_mixed);
+   tracks_stack -> Add(tracks_cosmic);
+   tracks_stack -> Add(tracks_outFV);
+   tracks_stack -> Add(tracks_NC);
+   tracks_stack -> Add(tracks_CCother);
+//   tracks_stack -> Add(tracks_otherCC1pip);
+   tracks_stack -> Add(tracks_muCC1pip);
+   tracks_stack -> Draw();
+   auto tracks_legend = new TLegend(0.6,0.6,0.9,0.9);
+   tracks_legend -> AddEntry(tracks_muCC1pip, "#nu_{#mu} CC1#pi^{+}", "f");
+//   tracks_legend -> AddEntry(tracks_otherCC1pip, "#bar{#nu}_{#mu}, #nu_{e}, #bar{#nu}_{e} CC1#pi^{+}", "f");
+   tracks_legend -> AddEntry(tracks_CCother, "CC-Other", "f");
+   tracks_legend -> AddEntry(tracks_NC, "NC", "f");
+   tracks_legend -> AddEntry(tracks_outFV, "Out of FV", "f");
+   tracks_legend -> AddEntry(tracks_cosmic, "Cosmic", "f");
+   tracks_legend -> AddEntry(tracks_mixed, "Mixed", "f");
+//   tracks_legend -> AddEntry(tracks_unknown, "Unknown Origin", "f");
+   tracks_legend -> Draw("SAME");
+   c1 -> SaveAs(TString::Format("%s_THStack_tracks.eps",SaveString.c_str()));
+
+   showers_unknown -> Scale(norm);
+   showers_mixed -> Scale(norm);
+   showers_cosmic -> Scale(norm);
+   showers_outFV -> Scale(norm);
+   showers_NC -> Scale(norm);
+   showers_CCother -> Scale(norm);
+   showers_otherCC1pip -> Scale(norm);
+   showers_muCC1pip -> Scale(norm);
+//   showers_stack -> Add(showers_unknown);
+   showers_stack -> Add(showers_mixed);
+   showers_stack -> Add(showers_cosmic);
+   showers_stack -> Add(showers_outFV);
+   showers_stack -> Add(showers_NC);
+   showers_stack -> Add(showers_CCother);
+//   showers_stack -> Add(showers_otherCC1pip);
+   showers_stack -> Add(showers_muCC1pip);
+   showers_stack -> Draw();
+   auto showers_legend = new TLegend(0.6,0.6,0.9,0.9);
+   showers_legend -> AddEntry(showers_muCC1pip, "#nu_{#mu} CC1#pi^{+}", "f");
+//   showers_legend -> AddEntry(showers_otherCC1pip, "#bar{#nu}_{#mu}, #nu_{e}, #bar{#nu}_{e} CC1#pi^{+}", "f");
+   showers_legend -> AddEntry(showers_CCother, "CC-Other", "f");
+   showers_legend -> AddEntry(showers_NC, "NC", "f");
+   showers_legend -> AddEntry(showers_outFV, "Out of FV", "f");
+   showers_legend -> AddEntry(showers_cosmic, "Cosmic", "f");
+   showers_legend -> AddEntry(showers_mixed, "Mixed", "f");
+//   showers_legend -> AddEntry(showers_unknown, "Unknown Origin", "f");
+   showers_legend -> Draw("SAME");
+   c1 -> SaveAs(TString::Format("%s_THStack_showers.eps",SaveString.c_str()));
+
+   mips_unknown -> Scale(norm);
+   mips_mixed -> Scale(norm);
+   mips_cosmic -> Scale(norm);
+   mips_outFV -> Scale(norm);
+   mips_NC -> Scale(norm);
+   mips_CCother -> Scale(norm);
+   mips_otherCC1pip -> Scale(norm);
+   mips_muCC1pip -> Scale(norm);
+//   mips_stack -> Add(mips_unknown);
+   mips_stack -> Add(mips_mixed);
+   mips_stack -> Add(mips_cosmic);
+   mips_stack -> Add(mips_outFV);
+   mips_stack -> Add(mips_NC);
+   mips_stack -> Add(mips_CCother);
+//   mips_stack -> Add(mips_otherCC1pip);
+   mips_stack -> Add(mips_muCC1pip);
+   mips_stack -> Draw();
+   auto mips_legend = new TLegend(0.6,0.6,0.9,0.9);
+   mips_legend -> AddEntry(mips_muCC1pip, "#nu_{#mu} CC1#pi^{+}", "f");
+//   mips_legend -> AddEntry(mips_otherCC1pip, "#bar{#nu}_{#mu}, #nu_{e}, #bar{#nu}_{e} CC1#pi^{+}", "f");
+   mips_legend -> AddEntry(mips_CCother, "CC-Other", "f");
+   mips_legend -> AddEntry(mips_NC, "NC", "f");
+   mips_legend -> AddEntry(mips_outFV, "Out of FV", "f");
+   mips_legend -> AddEntry(mips_cosmic, "Cosmic", "f");
+   mips_legend -> AddEntry(mips_mixed, "Mixed", "f");
+//   mips_legend -> AddEntry(mips_unknown, "Unknown Origin", "f");
+   mips_legend -> Draw("SAME");
+   c1 -> SaveAs(TString::Format("%s_THStack_mips.eps",SaveString.c_str()));
 
    eff_track_muon -> Draw("AP");
    eff_track_pion -> Draw("P SAME");
@@ -428,8 +662,22 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    gPad->Update();
    c1 -> SaveAs(TString::Format("%s_eff_track.eps",SaveString.c_str()));
 
+   double TotalEntries = 1. * (((TH1*)(len_stack -> GetStack() -> Last())) -> GetEntries());
+   std::cout << "muCC1pip: " << len_muCC1pip -> GetEntries() / TotalEntries << std::endl;
+//   std::cout << "otherCC1pip: " << len_otherCC1pip -> GetEntries() / TotalEntries << std::endl; 
+   std::cout << "CCother: " << len_CCother -> GetEntries() / TotalEntries << std::endl;
+   std::cout << "NC: " << len_NC -> GetEntries() / TotalEntries << std::endl;
+   std::cout << "outFV: " << len_outFV -> GetEntries() / TotalEntries << std::endl;
+   std::cout << "cosmic: " << len_cosmic -> GetEntries() / TotalEntries << std::endl;
+   std::cout << "mixed: " << len_mixed -> GetEntries() / TotalEntries << std::endl;
+//   std::cout << "unknown: " << len_unknown -> GetEntries() / TotalEntries << std::endl;
+
    std::cout << "Total Efficiency: " << (1. * (eff_nuE -> GetPassedHistogram() -> GetEntries()))/(eff_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
    std::cout << "Total Purity: " << (1. * (pur_nuE -> GetPassedHistogram() -> GetEntries()))/(pur_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
+
+   std::cout << "Muon Track Efficiency: " << (1. * (eff_track_muon -> GetPassedHistogram() -> GetEntries()))/(eff_track_muon -> GetTotalHistogram() -> GetEntries()) << std::endl;
+   std::cout << "Pion Track Efficiency: " << (1. * (eff_track_pion -> GetPassedHistogram() -> GetEntries()))/(eff_track_pion -> GetTotalHistogram() -> GetEntries()) << std::endl;
+   std::cout << "Proton Track Efficiency: " << (1. * (eff_track_proton -> GetPassedHistogram() -> GetEntries()))/(eff_track_proton -> GetTotalHistogram() -> GetEntries()) << std::endl;
 
    gDirectory->GetList()->Delete();
 

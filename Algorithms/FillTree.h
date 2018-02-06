@@ -60,6 +60,8 @@ struct cc1pianavars{
   int NShowers;
   std::vector<bool> Sel_PFP_isTrack;
   std::vector<bool> Sel_PFP_isShower;
+  std::vector<bool> Sel_PFP_isDaughter;
+  std::vector<bool> Sel_PFP_isMIP;
   std::vector<int> Sel_PFP_ID;
   std::vector<int> Sel_MCP_ID;
   std::vector<int> Sel_MCP_PDG;
@@ -77,7 +79,8 @@ struct cc1pianavars{
   std::vector<double> MCP_Py;
   std::vector<double> MCP_Pz;
   std::vector<double> MCP_E;
-  
+  std::vector<bool> MCP_isContained;
+
   std::vector<double> nu_vtxx;
   std::vector<double> nu_vtxy;
   std::vector<double> nu_vtxz;
@@ -85,7 +88,6 @@ struct cc1pianavars{
   std::vector<int> nu_PDG;
   std::vector<double> nu_E;
   
-  std::vector<bool> MIPConsistency;
   std::vector<double> dqdx_trunc_uncalib;
 
   std::map<std::string,bool> CC1picutflow;
@@ -102,6 +104,8 @@ struct cc1pianavars{
   void SetReco2Vars(art::Event &evt);
 
 };
+
+bool inFV(double x, double y, double z);
 
 void MakeAnaBranches(TTree *t, cc1pianavars *vars);
 

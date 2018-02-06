@@ -29,6 +29,7 @@ void cc1pianavars::Clear(){
    NShowers = -9999;
    Sel_PFP_isTrack.clear();
    Sel_PFP_isShower.clear();
+   Sel_PFP_isDaughter.clear();
    Sel_PFP_ID.clear();
    Sel_MCP_ID.clear();
    Sel_MCP_PDG.clear();
@@ -46,6 +47,7 @@ void cc1pianavars::Clear(){
    MCP_Py.clear();
    MCP_Pz.clear();
    MCP_E.clear();
+   MCP_isContained.clear();
 
    nu_vtxx.clear();
    nu_vtxy.clear();
@@ -54,7 +56,7 @@ void cc1pianavars::Clear(){
    nu_PDG.clear();
    nu_E.clear();
 
-   MIPConsistency.clear();
+   Sel_PFP_isMIP.clear();
    dqdx_trunc_uncalib.clear();
 
    CC1picutflow.clear();
@@ -118,37 +120,10 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       auto const& track_h = evt.getValidHandle<std::vector<recob::Track>>(_trackTag);
       art::FindManyP<anab::Calorimetry> calos_from_tracks(track_h, evt, _caloTag);
 
-      for (auto track : tracks) {
-         track_length.emplace_back(track -> Length());
-
-         unsigned int trkid = track->ID();
-         std::vector<art::Ptr<anab::Calorimetry>> calos = calos_from_tracks.at(trkid);
-         double dqdx_truncmean = GetDqDxTruncatedMean(calos); // this function is in MIPConsistency_Marco
-
-	 // Apply David's calibration: constant factor applied to trunc mean dqdx
-	 // to convert it to electrons/cm, and compare MC and data
-	 // Multiply MC by 198 and data by 243
-	 // !!! Note that this should change when real calibration is available !!!
-	 if (evt.isRealData()){ // Data: multiply by 243
-	   dqdx_truncmean *= 243.;
-	 }
-	 else{ // MC: multiply by 198
-	   dqdx_truncmean *= 198.;
-	 }
-
-         dqdx_trunc_uncalib.emplace_back(dqdx_truncmean);
-
-         MIPConsistency.emplace_back(IsMIP(track->Length(), dqdx_truncmean));
-      }
-
       //Get showers (in TPCObject)
       art::FindManyP<recob::Shower> showers_from_tpcobject(tpcobj_h, evt, "TPCObjectMaker");
       std::vector<art::Ptr<recob::Shower>> showers = showers_from_tpcobject.at(tpcobj_candidate.key());
       NShowers = showers.size();
-
-      for (auto shower : showers) {
-         shower_length.emplace_back(shower -> Length());
-      }
 
       //Get MCGhosts (in event)
       art::Handle<std::vector<ubana::MCGhost> > ghost_h;
@@ -170,11 +145,72 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       art::FindManyP<ubana::MCGhost>   mcghost_from_pfp (pfp_h,   evt, "RecoTrueMatcher");
       art::FindManyP<simb::MCParticle> mcp_from_mcghost (ghost_h, evt, "RecoTrueMatcher");
 
+      //Find neutrino
+      int nuID = -1;
+      for (auto pfp : pfps) {
+         if(lar_pandora::LArPandoraHelper::IsNeutrino(pfp)) {
+            nuID = (int)pfp->Self();
+            break;
+         }
+      }
+
+      art::FindManyP<recob::Track> tracks_from_pfps(pfp_h, evt, "pandoraNu");
+      art::FindManyP<recob::Shower> showers_from_pfps(pfp_h, evt, "pandoraNu");
+
       for (auto pfp : pfps) {
 
          Sel_PFP_isTrack.emplace_back(lar_pandora::LArPandoraHelper::IsTrack(pfp));
          Sel_PFP_isShower.emplace_back(lar_pandora::LArPandoraHelper::IsShower(pfp));
+         Sel_PFP_isDaughter.emplace_back(pfp->Parent()==(size_t)nuID);
          Sel_PFP_ID.emplace_back(pfp -> Self());
+
+         if(lar_pandora::LArPandoraHelper::IsTrack(pfp)) {
+            std::vector<art::Ptr<recob::Track>> tracks_pfp = tracks_from_pfps.at(pfp.key());
+            if(tracks_pfp.size() > 1) {
+               mf::LogError(__PRETTY_FUNCTION__) << "PFP associated to more than one track." << std::endl;
+               throw std::exception();
+            }
+            for (auto track : tracks_pfp){
+               track_length.emplace_back(track -> Length());
+
+               unsigned int trkid = track->ID();
+               std::vector<art::Ptr<anab::Calorimetry>> calos = calos_from_tracks.at(trkid);
+               double dqdx_truncmean = GetDqDxTruncatedMean(calos); // this function is in MIPConsistency_Marco
+
+               // Apply David's calibration: constant factor applied to trunc mean dqdx
+               // to convert it to electrons/cm, and compare MC and data
+               // Multiply MC by 198 and data by 243
+               // !!! Note that this should change when real calibration is available !!!
+               if (evt.isRealData()){ // Data: multiply by 243
+                  dqdx_truncmean *= 243.;
+               }
+               else{ // MC: multiply by 198
+                  dqdx_truncmean *= 198.;
+               }
+
+               dqdx_trunc_uncalib.emplace_back(dqdx_truncmean);
+
+               Sel_PFP_isMIP.emplace_back(IsMIP(track->Length(), dqdx_truncmean));
+            }
+         }
+
+         else if(lar_pandora::LArPandoraHelper::IsShower(pfp)) {
+            std::vector<art::Ptr<recob::Shower>> showers_pfp = showers_from_pfps.at(pfp.key());
+            if(showers_pfp.size() > 1) {
+               mf::LogError(__PRETTY_FUNCTION__) << "PFP associated to more than one showers." << std::endl;
+               throw std::exception();
+            }
+            for (auto shower : showers_pfp) {
+               shower_length.emplace_back(shower -> Length());
+               dqdx_trunc_uncalib.emplace_back(-9999);
+               Sel_PFP_isMIP.emplace_back(false);
+            }
+         }
+
+         else {
+               dqdx_trunc_uncalib.emplace_back(-9999);
+               Sel_PFP_isMIP.emplace_back(false);
+         }
 
          auto mcghosts = mcghost_from_pfp.at(pfp.key());
          if (mcghosts.size() != 1) {
@@ -234,6 +270,8 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
       simb::MCTrajectory traj = mcpar -> Trajectory();
       MCP_length.emplace_back(traj.TotalLength());
+      if(inFV(traj.X(0),traj.Y(0),traj.Z(0)) && inFV(traj.X(traj.size()-1),traj.Y(traj.size()-1),traj.Z(traj.size()-1))) MCP_isContained.emplace_back(true);
+      else MCP_isContained.emplace_back(false);
 
       MCP_process.emplace_back(mcpar -> Process());
       MCP_endprocess.emplace_back(mcpar -> EndProcess());
@@ -287,6 +325,8 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("NShowers", &(vars->NShowers));
    t -> Branch("Sel_PFP_isTrack", &(vars->Sel_PFP_isTrack));
    t -> Branch("Sel_PFP_isShower", &(vars->Sel_PFP_isShower));
+   t -> Branch("Sel_PFP_isDaughter", &(vars->Sel_PFP_isDaughter));
+   t -> Branch("Sel_PFP_isMIP", &(vars->Sel_PFP_isMIP));
    t -> Branch("Sel_PFP_ID", &(vars->Sel_PFP_ID));
    t -> Branch("Sel_MCP_ID", &(vars->Sel_MCP_ID));
    t -> Branch("Sel_MCP_PDG", &(vars->Sel_MCP_PDG));
@@ -304,6 +344,7 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("MCP_Py", &(vars->MCP_Py));
    t -> Branch("MCP_Pz", &(vars->MCP_Pz));
    t -> Branch("MCP_E", &(vars->MCP_E));
+   t -> Branch("MCP_isContained", &(vars->MCP_isContained));
 
    t -> Branch("nu_vtxx", &(vars->nu_vtxx));
    t -> Branch("nu_vtxy", &(vars->nu_vtxy));
@@ -312,13 +353,25 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("nu_PDG", &(vars->nu_PDG));
    t -> Branch("nu_E", &(vars->nu_E));
 
-   t -> Branch("MIPConsistency", &(vars->MIPConsistency));
    t -> Branch("dqdx_trunc_uncalib", &(vars->dqdx_trunc_uncalib));
 
    t -> Branch("CC1picutflow", &(vars->CC1picutflow));
    t -> Branch("PassesCC1piSelec", &(vars->PassesCC1piSelec));
    t -> Branch("CC1piSelecFailureReason", &(vars->CC1piSelecFailureReason));
 
+}
+
+//TPC boundary + FV cut
+const double FVxmin = 0 + 12;
+const double FVxmax = 256.35 - 12;
+const double FVymin = -115.53 + 35;
+const double FVymax = 117.47 - 35;
+const double FVzmin = 0.1 + 25;
+const double FVzmax = 1036.9 - 85;
+
+bool inFV(double x, double y, double z){
+   if (x > FVxmin && x < FVxmax && y > FVymin && y < FVymax && z > FVzmin && z < FVzmax && (z < 675 || z > 775)) return true;
+   else return false;
 }
 
 #endif
