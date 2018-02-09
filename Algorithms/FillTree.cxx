@@ -24,10 +24,11 @@ void cc1pianavars::Clear(){
 
    cutflow.clear();
    isSelected = false;
-   track_length.clear();
-   track_start.clear();
-   track_end.clear();
-   shower_length.clear();
+   Sel_PFP_track_length.clear();
+   Sel_PFP_track_start.clear();
+   Sel_PFP_track_end.clear();
+   Sel_PFP_shower_length.clear();
+   Sel_PFP_shower_start.clear();
    NPFPs = -9999;
    NTracks = -9999;
    NShowers = -9999;
@@ -40,6 +41,7 @@ void cc1pianavars::Clear(){
    Sel_MCP_E.clear();
    tpcobj_origin = -9999;
    tpcobj_origin_extra = -9999;
+   tpcobj_reco_vtx.clear();
 
    MCP_PDG.clear();
    MCP_length.clear();
@@ -122,9 +124,9 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       // Get calo objects (for dqdx)
       // For now use uncalibrated "calo" variables
       // Calibrated dqdx will be available in MCC 8.6, but currently has a bug
+      // also hardcode that this is for pandoraNu only
       // Use association: pandoraNucalo, art::Assns<recob::Track,anab::Calorimetry,void>
       // (Couldn't find another way to do this except going back to track handle -.-)
-      // also hardcode that this is for pandoraNu only
       art::InputTag _caloTag = "pandoraNucalo";
       art::InputTag _trackTag = "pandoraNu";
       auto const& track_h = evt.getValidHandle<std::vector<recob::Track>>(_trackTag);
@@ -181,13 +183,13 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
                throw std::exception();
             }
             for (auto track : tracks_pfp){
-               track_length.emplace_back(track -> Length());
+               Sel_PFP_track_length.emplace_back(track -> Length());
                auto start = track -> Start();
                std::vector<double> startvect= {start.X(),start.Y(),start.Z()};
-               track_start.emplace_back(startvect);
+               Sel_PFP_track_start.emplace_back(startvect);
                auto end = track -> End();
                std::vector<double> endvect = {end.X(),end.Y(),end.Z()};
-               track_end.emplace_back(endvect);
+               Sel_PFP_track_end.emplace_back(endvect);
 
                unsigned int trkid = track->ID();
                std::vector<art::Ptr<anab::Calorimetry>> calos = calos_from_tracks.at(trkid);
@@ -217,7 +219,10 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
                throw std::exception();
             }
             for (auto shower : showers_pfp) {
-               shower_length.emplace_back(shower -> Length());
+               Sel_PFP_shower_length.emplace_back(shower -> Length());
+	       auto start = shower -> ShowerStart();
+	       std::vector<double> startvect = {start.X(),start.Y(),start.Z()};
+	       Sel_PFP_shower_start.emplace_back(startvect);
                dqdx_trunc_uncalib.emplace_back(-9999);
                Sel_PFP_isMIP.emplace_back(false);
             }
@@ -252,6 +257,16 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
       }
 
+
+
+      // Get neutrino candidate vertex from TPCObject
+      recob::Vertex tpcobj_nu_vtx = tpcobj_candidate->GetVertex();
+      double reco_nu_vtx[3];
+      tpcobj_nu_vtx.XYZ(reco_nu_vtx);
+      tpcobj_reco_vtx = {reco_nu_vtx[0], reco_nu_vtx[1], reco_nu_vtx[2]};
+      // Do we need to correct for X position (time offset) and space charge? Marco seems to
+      // -- Follow up!
+      
    }
 
    // Get all MCParticles
@@ -336,10 +351,11 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
 
    t -> Branch("cutflow", &(vars->cutflow));
    t -> Branch("isSelected", &(vars->isSelected));
-   t -> Branch("track_length", &(vars->track_length));
-   t -> Branch("track_start", &(vars->track_start));
-   t -> Branch("track_end", &(vars->track_end));
-   t -> Branch("shower_length", &(vars->shower_length));
+   t -> Branch("Sel_PFP_track_length", &(vars->Sel_PFP_track_length));
+   t -> Branch("Sel_PFP_track_start", &(vars->Sel_PFP_track_start));
+   t -> Branch("Sel_PFP_track_end", &(vars->Sel_PFP_track_end));
+   t -> Branch("Sel_PFP_shower_length", &(vars->Sel_PFP_shower_length));
+   t -> Branch("Sel_PFP_shower_start", &(vars->Sel_PFP_shower_start));
    t -> Branch("NPFPs", &(vars->NPFPs));
    t -> Branch("NTracks", &(vars->NTracks));
    t -> Branch("NShowers", &(vars->NShowers));
@@ -353,6 +369,7 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("Sel_MCP_E", &(vars->Sel_MCP_E));
    t -> Branch("tpcobj_origin", &(vars->tpcobj_origin));
    t -> Branch("tpcobj_origin_extra", &(vars->tpcobj_origin_extra));
+   t -> Branch("tpcobj_reco_vtx", &(vars->tpcobj_reco_vtx));
 
    t -> Branch("MCP_PDG", &(vars->MCP_PDG));
    t -> Branch("MCP_length", &(vars->MCP_length));

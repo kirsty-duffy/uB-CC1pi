@@ -57,10 +57,11 @@ struct cc1pianavars{
   
   std::map<std::string,bool> cutflow;
   bool isSelected;
-  std::vector<double> track_length;
-  std::vector<std::vector<double>> track_start;
-  std::vector<std::vector<double>> track_end;
-  std::vector<double> shower_length;
+  std::vector<double> Sel_PFP_track_length;
+  std::vector<std::vector<double>> Sel_PFP_track_start;
+  std::vector<std::vector<double>> Sel_PFP_track_end;
+  std::vector<double> Sel_PFP_shower_length;
+  std::vector<std::vector<double>> Sel_PFP_shower_start;
   int NPFPs;
   int NTracks;
   int NShowers;
@@ -74,6 +75,7 @@ struct cc1pianavars{
   std::vector<double> Sel_MCP_E;
   int tpcobj_origin;
   int tpcobj_origin_extra;
+  std::vector<double> tpcobj_reco_vtx;
 
   std::vector<int> MCP_PDG;
   std::vector<double> MCP_length;
