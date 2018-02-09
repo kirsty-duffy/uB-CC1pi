@@ -199,6 +199,53 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    TH1F* mips_unknown = new TH1F("mips_unknown", ";;", 10, 0, 10);
    TH1F* mips_outFV = new TH1F("mips_outFV", ";;", 10, 0, 10);
 
+   THStack* vtxtrack_stack = new THStack("vtxtrack_stack", ";Distance between vertex and start of #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)");
+   TH1F* vtxtrack_muCC1pip = new TH1F("vtxtrack_muCC1pip", ";;", 50, 0, 50);
+   TH1F* vtxtrack_otherCC1pip = new TH1F("vtxtrack_otherCC1pip", ";;", 50, 0, 50);
+   TH1F* vtxtrack_CCother = new TH1F("vtxtrack_CCother", ";;", 50, 0, 50);
+   TH1F* vtxtrack_NC = new TH1F("vtxtrack_NC", ";;", 50, 0, 50);
+   TH1F* vtxtrack_cosmic = new TH1F("vtxtrack_cosmic", ";;", 50, 0, 50);
+   TH1F* vtxtrack_mixed = new TH1F("vtxtrack_mixed", ";;", 50, 0, 50);
+   TH1F* vtxtrack_unknown = new TH1F("vtxtrack_unknown", ";;", 50, 0, 50);
+   TH1F* vtxtrack_outFV = new TH1F("vtxtrack_outFV", ";;", 50, 0, 50);
+
+   THStack* vtxshwr_stack = new THStack("vtxshwr_stack", ";Distance between vertex and start of #nu daughter showers in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)");
+   TH1F* vtxshwr_muCC1pip = new TH1F("vtxshwr_muCC1pip", ";;", 50, 0, 50);
+   TH1F* vtxshwr_otherCC1pip = new TH1F("vtxshwr_otherCC1pip", ";;", 50, 0, 50);
+   TH1F* vtxshwr_CCother = new TH1F("vtxshwr_CCother", ";;", 50, 0, 50);
+   TH1F* vtxshwr_NC = new TH1F("vtxshwr_NC", ";;", 50, 0, 50);
+   TH1F* vtxshwr_cosmic = new TH1F("vtxshwr_cosmic", ";;", 50, 0, 50);
+   TH1F* vtxshwr_mixed = new TH1F("vtxshwr_mixed", ";;", 50, 0, 50);
+   TH1F* vtxshwr_unknown = new TH1F("vtxshwr_unknown", ";;", 50, 0, 50);
+   TH1F* vtxshwr_outFV = new TH1F("vtxshwr_outFV", ";;", 50, 0, 50);
+
+   THStack* shwrtrue_stack = new THStack("shwrtrue_stack", ";True CC1pi: Number of shower #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)");
+   TH1F *shwrtrue_muplus = new TH1F("shwrtrue_muplus","",10,0,10);
+   TH1F *shwrtrue_muminus = new TH1F("shwrtrue_muminus","",10,0,10);
+   TH1F *shwrtrue_piplus = new TH1F("shwrtrue_piplus","",10,0,10);
+   TH1F *shwrtrue_piminus = new TH1F("shwrtrue_piminus","",10,0,10);
+   TH1F *shwrtrue_pizero = new TH1F("shwrtrue_pizero","",10,0,10);
+   TH1F *shwrtrue_proton = new TH1F("shwrtrue_proton","",10,0,10);
+   TH1F *shwrtrue_electron = new TH1F("shwrtrue_electron","",10,0,10);
+   TH1F *shwrtrue_positron = new TH1F("shwrtrue_positron","",10,0,10);
+   TH1F *shwrtrue_neutron = new TH1F("shwrtrue_neutron","",10,0,10);
+   TH1F *shwrtrue_photon = new TH1F("shwrtrue_photon","",10,0,10);
+   TH1F *shwrtrue_other = new TH1F("shwrtrue_other","",10,0,10);
+
+   THStack* shwrtrue_bg_stack = new THStack("shwrtrue_bg_stack", ";Background: Number of shower #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)");
+   TH1F *shwrtrue_bg_muplus = new TH1F("shwrtrue_bg_muplus","",10,0,10);
+   TH1F *shwrtrue_bg_muminus = new TH1F("shwrtrue_bg_muminus","",10,0,10);
+   TH1F *shwrtrue_bg_piplus = new TH1F("shwrtrue_bg_piplus","",10,0,10);
+   TH1F *shwrtrue_bg_piminus = new TH1F("shwrtrue_bg_piminus","",10,0,10);
+   TH1F *shwrtrue_bg_pizero = new TH1F("shwrtrue_bg_pizero","",10,0,10);
+   TH1F *shwrtrue_bg_proton = new TH1F("shwrtrue_bg_proton","",10,0,10);
+   TH1F *shwrtrue_bg_electron = new TH1F("shwrtrue_bg_electron","",10,0,10);
+   TH1F *shwrtrue_bg_positron = new TH1F("shwrtrue_bg_positron","",10,0,10);
+   TH1F *shwrtrue_bg_neutron = new TH1F("shwrtrue_bg_neutron","",10,0,10);
+   TH1F *shwrtrue_bg_photon = new TH1F("shwrtrue_bg_photon","",10,0,10);
+   TH1F *shwrtrue_bg_other = new TH1F("shwrtrue_bg_other","",10,0,10);
+   
+
    len_muCC1pip -> SetFillColor(kRed);
    len_otherCC1pip -> SetFillColor(kOrange);
    len_CCother -> SetFillColor(kMagenta);
@@ -234,6 +281,48 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    mips_mixed -> SetFillColor(kCyan);
    mips_unknown -> SetFillColor(kBlack);
    mips_outFV -> SetFillColor(kGreen);
+
+   vtxtrack_muCC1pip -> SetFillColor(kRed);
+   vtxtrack_otherCC1pip -> SetFillColor(kOrange);
+   vtxtrack_CCother -> SetFillColor(kMagenta);
+   vtxtrack_NC -> SetFillColor(kGray);
+   vtxtrack_cosmic -> SetFillColor(kBlue);
+   vtxtrack_mixed -> SetFillColor(kCyan);
+   vtxtrack_unknown -> SetFillColor(kBlack);
+   vtxtrack_outFV -> SetFillColor(kGreen);
+
+   vtxshwr_muCC1pip -> SetFillColor(kRed);
+   vtxshwr_otherCC1pip -> SetFillColor(kOrange);
+   vtxshwr_CCother -> SetFillColor(kMagenta);
+   vtxshwr_NC -> SetFillColor(kGray);
+   vtxshwr_cosmic -> SetFillColor(kBlue);
+   vtxshwr_mixed -> SetFillColor(kCyan);
+   vtxshwr_unknown -> SetFillColor(kBlack);
+   vtxshwr_outFV -> SetFillColor(kGreen);
+
+   shwrtrue_muminus -> SetFillColor(kRed);
+   shwrtrue_muplus -> SetFillColor(kOrange);
+   shwrtrue_piplus -> SetFillColor(kMagenta);
+   shwrtrue_piminus -> SetFillColor(kGray);
+   shwrtrue_pizero -> SetFillColor(kBlue);
+   shwrtrue_proton -> SetFillColor(kCyan);
+   shwrtrue_electron -> SetFillColor(kBlack);
+   shwrtrue_positron -> SetFillColor(kOrange+1);
+   shwrtrue_neutron -> SetFillColor(kViolet);
+   shwrtrue_photon -> SetFillColor(kGreen+3);
+   shwrtrue_other -> SetFillColor(kGreen);
+
+   shwrtrue_bg_muminus -> SetFillColor(kRed);
+   shwrtrue_bg_muplus -> SetFillColor(kOrange);
+   shwrtrue_bg_piplus -> SetFillColor(kMagenta);
+   shwrtrue_bg_piminus -> SetFillColor(kGray);
+   shwrtrue_bg_pizero -> SetFillColor(kBlue);
+   shwrtrue_bg_proton -> SetFillColor(kCyan);
+   shwrtrue_bg_electron -> SetFillColor(kBlack);
+   shwrtrue_bg_positron -> SetFillColor(kOrange+1);
+   shwrtrue_bg_neutron -> SetFillColor(kViolet);
+   shwrtrue_bg_photon -> SetFillColor(kGreen+3);
+   shwrtrue_bg_other -> SetFillColor(kGreen);
 
    TEfficiency* eff_track_muon = new TEfficiency("eff_track_muon",";True Kinetic Energy [GeV];",10,0,2);
    TEfficiency* eff_track_pion = new TEfficiency("eff_track_pion",";True Kinetic Energy [GeV];",10,0,2);
@@ -337,13 +426,19 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          int track_daughters = 0;
          int mip_daughters = 0;
          int track_counter = 0;
+	 std::vector<double> vtxtrack_daughters = {0.};
+	 std::vector<double> vtxshwr_daughters = {0.}; 
 
          for(int j = 0; j < NPFPs; j++) {
-            if(Sel_PFP_isShower -> at(j) && Sel_PFP_isDaughter -> at(j)) shower_daughters++;
+	   if(Sel_PFP_isShower -> at(j) && Sel_PFP_isDaughter -> at(j)){
+	     shower_daughters++;
+	     vtxshwr_daughters.push_back(0); // Add things in the tree!
+	   }
             if(Sel_PFP_isTrack -> at(j)) {
                if (Sel_PFP_isDaughter -> at(j)) {
                   track_daughters++;
                   if(MIPConsistency -> at(track_counter)) mip_daughters++;
+		  vtxtrack_daughters.push_back(0); // Add things in the tree!
                }
                track_counter++;
             }
@@ -354,44 +449,86 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
             tracks_cosmic -> Fill(track_daughters);
             showers_cosmic -> Fill(shower_daughters);
             mips_cosmic -> Fill(mip_daughters);
+	    for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
+	      vtxtrack_cosmic -> Fill(vtxtrack_daughters.at(i_tr));
+	    }
+	    for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
+	      vtxshwr_cosmic -> Fill(vtxshwr_daughters.at(i_sh));
+	    }
          }
          else if(tpcobj_origin==2) {
             len_mixed -> Fill(maxlen);
             tracks_mixed -> Fill(track_daughters);
             showers_mixed -> Fill(shower_daughters);
             mips_mixed -> Fill(mip_daughters);
+	    for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
+	      vtxtrack_mixed -> Fill(vtxtrack_daughters.at(i_tr));
+	    }
+	    for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
+	      vtxshwr_mixed -> Fill(vtxshwr_daughters.at(i_sh));
+	    }
          }
          else if(tpcobj_origin!=0) {
             len_unknown -> Fill(maxlen);
             tracks_unknown -> Fill(track_daughters);
             showers_unknown -> Fill(shower_daughters);
             mips_unknown -> Fill(mip_daughters);
+	    for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
+	      vtxtrack_unknown -> Fill(vtxtrack_daughters.at(i_tr));
+	    }
+	    for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
+	      vtxshwr_unknown -> Fill(vtxshwr_daughters.at(i_sh));
+	    }
          }
          else if(!inFV(nu_vtxx -> at(0), nu_vtxy -> at(0), nu_vtxz -> at(0))) {
             len_outFV -> Fill(maxlen);
             tracks_outFV -> Fill(track_daughters);
             showers_outFV -> Fill(shower_daughters);
             mips_outFV -> Fill(mip_daughters);
+	    for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
+	      vtxtrack_outFV -> Fill(vtxtrack_daughters.at(i_tr));
+	    }
+	    for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
+	      vtxshwr_outFV -> Fill(vtxshwr_daughters.at(i_sh));
+	    }
          }
          else if(tpcobj_origin==0) {
-            if(nu_isCC -> at(0) == 0) {
-               len_NC -> Fill(maxlen);
-               tracks_NC -> Fill(track_daughters);
-               showers_NC -> Fill(shower_daughters);
-               mips_NC -> Fill(mip_daughters);
-            }
-            else if(std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 13) == 1 && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 211) == 1 && MCP_PDG -> size() == 2 + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2112) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2212) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2000000101)) {
+	   if(nu_isCC -> at(0) == 0) {
+	     len_NC -> Fill(maxlen);
+	     tracks_NC -> Fill(track_daughters);
+	     showers_NC -> Fill(shower_daughters);
+	     mips_NC -> Fill(mip_daughters);
+	     for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
+	       vtxtrack_NC -> Fill(vtxtrack_daughters.at(i_tr));
+	     }
+	     for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
+	       vtxshwr_NC -> Fill(vtxshwr_daughters.at(i_sh));
+	     }
+	   }
+	   else if(std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 13) == 1 && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 211) == 1 && MCP_PDG -> size() == 2 + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2112) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2212) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2000000101)) {
                if(nu_PDG -> at(0) == 14) {
                   len_muCC1pip -> Fill(maxlen);
                   tracks_muCC1pip -> Fill(track_daughters);
                   showers_muCC1pip -> Fill(shower_daughters);
                   mips_muCC1pip -> Fill(mip_daughters);
+		  for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
+		    vtxtrack_muCC1pip -> Fill(vtxtrack_daughters.at(i_tr));
+		  }
+		  for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
+		    vtxshwr_muCC1pip -> Fill(vtxshwr_daughters.at(i_sh));
+		  }
                }
                else {
                   len_otherCC1pip -> Fill(maxlen);
                   tracks_otherCC1pip -> Fill(track_daughters);
                   showers_otherCC1pip -> Fill(shower_daughters);
                   mips_otherCC1pip -> Fill(mip_daughters);
+		  for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
+		    vtxtrack_otherCC1pip -> Fill(vtxtrack_daughters.at(i_tr));
+		  }
+		  for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
+		    vtxshwr_otherCC1pip -> Fill(vtxshwr_daughters.at(i_sh));
+		  }
                }
             }
             else {
@@ -399,6 +536,12 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
                tracks_CCother -> Fill(track_daughters);
                showers_CCother -> Fill(shower_daughters);
                mips_CCother -> Fill(mip_daughters);
+	       for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
+		 vtxtrack_CCother -> Fill(vtxtrack_daughters.at(i_tr));
+	       }
+	       for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
+		 vtxshwr_CCother -> Fill(vtxshwr_daughters.at(i_sh));
+	       }
             }
          }
 
@@ -429,7 +572,84 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
                   eff_track_proton -> Fill(false, Sel_MCP_E -> at(j) - 0.938272);
                }
             }
-         }
+
+	    // Look at what particles are being associated with showers
+	    if (Sel_PFP_isShower -> at(j)){
+	      // If true CC1pip
+	      if(isSignal) {
+		if (Sel_MCP_PDG -> at(j) == 13){ // muminus
+		  shwrtrue_muminus -> Fill(shower_daughters,1.0/shower_daughters);
+		}
+		else if (Sel_MCP_PDG -> at(j) == -13){ // muplus
+		  shwrtrue_muplus -> Fill(shower_daughters,1.0/shower_daughters);
+		}
+		else if (Sel_MCP_PDG -> at(j) == 211){ // piplus
+		  shwrtrue_piplus -> Fill(shower_daughters,1.0/shower_daughters);
+		}
+		else if (Sel_MCP_PDG -> at(j) == -211){ // piminus
+		  shwrtrue_piminus -> Fill(shower_daughters,1.0/shower_daughters);
+		}
+		else if (Sel_MCP_PDG -> at(j) == 111){ // pizero
+		  shwrtrue_pizero -> Fill(shower_daughters,1.0/shower_daughters);
+		}
+		else if (Sel_MCP_PDG -> at(j) == 2212){ // proton
+		  shwrtrue_proton -> Fill(shower_daughters,1.0/shower_daughters);
+		}
+		else if (Sel_MCP_PDG -> at(j) == 11){ // electron
+		  shwrtrue_electron -> Fill(shower_daughters,1.0/shower_daughters);
+		}
+		else if (Sel_MCP_PDG -> at(j) == -11){ // positron
+		shwrtrue_positron -> Fill(shower_daughters,1.0/shower_daughters);
+		}
+		else if (Sel_MCP_PDG -> at(j) == 22){ // photon
+		  shwrtrue_photon -> Fill(shower_daughters,1.0/shower_daughters);
+		}
+		else if (Sel_MCP_PDG -> at(j) == 2112){ // neutron
+		  shwrtrue_neutron -> Fill(shower_daughters,1.0/shower_daughters);
+		}
+		else if (!(Sel_MCP_PDG -> at (j) == -9999)){ // other
+		  shwrtrue_other -> Fill(shower_daughters);
+		  std::cout << Sel_MCP_PDG -> at (j) << std::endl;
+		}	
+	      }
+	      else{
+		if (Sel_MCP_PDG -> at(j) == 13){ // muminus
+		  shwrtrue_bg_muminus -> Fill(shower_daughters,1.0/shower_daughters);
+		}
+		else if (Sel_MCP_PDG -> at(j) == -13){ // muplus
+		  shwrtrue_bg_muplus -> Fill(shower_daughters,1.0/shower_daughters);
+		}
+		else if (Sel_MCP_PDG -> at(j) == 211){ // piplus
+		  shwrtrue_bg_piplus -> Fill(shower_daughters,1.0/shower_daughters);
+		}
+		else if (Sel_MCP_PDG -> at(j) == -211){ // piminus
+		  shwrtrue_bg_piminus -> Fill(shower_daughters,1.0/shower_daughters);
+		}
+		else if (Sel_MCP_PDG -> at(j) == 111){ // pizero
+		  shwrtrue_bg_pizero -> Fill(shower_daughters,1.0/shower_daughters);
+		}
+		else if (Sel_MCP_PDG -> at(j) == 2212){ // proton
+		  shwrtrue_bg_proton -> Fill(shower_daughters,1.0/shower_daughters);
+		}
+		else if (Sel_MCP_PDG -> at(j) == 11){ // electron
+		  shwrtrue_bg_electron -> Fill(shower_daughters,1.0/shower_daughters);
+		}
+		else if (Sel_MCP_PDG -> at(j) == -11){ // positron
+		  shwrtrue_bg_positron -> Fill(shower_daughters,1.0/shower_daughters);
+		}
+		else if (Sel_MCP_PDG -> at(j) == 22){ // photon
+		  shwrtrue_bg_photon -> Fill(shower_daughters,1.0/shower_daughters);
+		}
+		else if (Sel_MCP_PDG -> at(j) == 2112){ // neutron
+		  shwrtrue_bg_neutron -> Fill(shower_daughters,1.0/shower_daughters);
+		}
+		else if (!(Sel_MCP_PDG -> at (j) == -9999)){ // other
+		  shwrtrue_bg_other -> Fill(shower_daughters);
+		  std::cout << Sel_MCP_PDG -> at (j) << std::endl;
+		}
+	      }
+	    } // end if (Sel_PFP_isShower -> at(j))  
+	 } // end loop over Sel_MCP_PDG (j)
       }
    }
 
@@ -636,6 +856,140 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
 //   mips_legend -> AddEntry(mips_unknown, "Unknown Origin", "f");
    mips_legend -> Draw("SAME");
    c1 -> SaveAs(TString::Format("%s_THStack_mips.eps",SaveString.c_str()));
+
+   vtxtrack_unknown -> Scale(norm);
+   vtxtrack_mixed -> Scale(norm);
+   vtxtrack_cosmic -> Scale(norm);
+   vtxtrack_outFV -> Scale(norm);
+   vtxtrack_NC -> Scale(norm);
+   vtxtrack_CCother -> Scale(norm);
+   vtxtrack_otherCC1pip -> Scale(norm);
+   vtxtrack_muCC1pip -> Scale(norm);
+//   vtxtrack_stack -> Add(vtxtrack_unknown);
+   vtxtrack_stack -> Add(vtxtrack_mixed);
+   vtxtrack_stack -> Add(vtxtrack_cosmic);
+   vtxtrack_stack -> Add(vtxtrack_outFV);
+   vtxtrack_stack -> Add(vtxtrack_NC);
+   vtxtrack_stack -> Add(vtxtrack_CCother);
+//   vtxtrack_stack -> Add(vtxtrack_otherCC1pip);
+   vtxtrack_stack -> Add(vtxtrack_muCC1pip);
+   vtxtrack_stack -> Draw();
+   auto vtxtrack_legend = new TLegend(0.6,0.6,0.9,0.9);
+   vtxtrack_legend -> AddEntry(vtxtrack_muCC1pip, "#nu_{#mu} CC1#pi^{+}", "f");
+//   vtxtrack_legend -> AddEntry(vtxtrack_otherCC1pip, "#bar{#nu}_{#mu}, #nu_{e}, #bar{#nu}_{e} CC1#pi^{+}", "f");
+   vtxtrack_legend -> AddEntry(vtxtrack_CCother, "CC-Other", "f");
+   vtxtrack_legend -> AddEntry(vtxtrack_NC, "NC", "f");
+   vtxtrack_legend -> AddEntry(vtxtrack_outFV, "Out of FV", "f");
+   vtxtrack_legend -> AddEntry(vtxtrack_cosmic, "Cosmic", "f");
+   vtxtrack_legend -> AddEntry(vtxtrack_mixed, "Mixed", "f");
+//   vtxtrack_legend -> AddEntry(vtxtrack_unknown, "Unknown Origin", "f");
+   vtxtrack_legend -> Draw("SAME");
+   c1 -> SaveAs(TString::Format("%s_THStack_vtxtrack.eps",SaveString.c_str()));
+
+   vtxshwr_unknown -> Scale(norm);
+   vtxshwr_mixed -> Scale(norm);
+   vtxshwr_cosmic -> Scale(norm);
+   vtxshwr_outFV -> Scale(norm);
+   vtxshwr_NC -> Scale(norm);
+   vtxshwr_CCother -> Scale(norm);
+   vtxshwr_otherCC1pip -> Scale(norm);
+   vtxshwr_muCC1pip -> Scale(norm);
+//   vtxshwr_stack -> Add(vtxshwr_unknown);
+   vtxshwr_stack -> Add(vtxshwr_mixed);
+   vtxshwr_stack -> Add(vtxshwr_cosmic);
+   vtxshwr_stack -> Add(vtxshwr_outFV);
+   vtxshwr_stack -> Add(vtxshwr_NC);
+   vtxshwr_stack -> Add(vtxshwr_CCother);
+//   vtxshwr_stack -> Add(vtxshwr_otherCC1pip);
+   vtxshwr_stack -> Add(vtxshwr_muCC1pip);
+   vtxshwr_stack -> Draw();
+   auto vtxshwr_legend = new TLegend(0.6,0.6,0.9,0.9);
+   vtxshwr_legend -> AddEntry(vtxshwr_muCC1pip, "#nu_{#mu} CC1#pi^{+}", "f");
+//   vtxshwr_legend -> AddEntry(vtxshwr_otherCC1pip, "#bar{#nu}_{#mu}, #nu_{e}, #bar{#nu}_{e} CC1#pi^{+}", "f");
+   vtxshwr_legend -> AddEntry(vtxshwr_CCother, "CC-Other", "f");
+   vtxshwr_legend -> AddEntry(vtxshwr_NC, "NC", "f");
+   vtxshwr_legend -> AddEntry(vtxshwr_outFV, "Out of FV", "f");
+   vtxshwr_legend -> AddEntry(vtxshwr_cosmic, "Cosmic", "f");
+   vtxshwr_legend -> AddEntry(vtxshwr_mixed, "Mixed", "f");
+//   vtxshwr_legend -> AddEntry(vtxshwr_unknown, "Unknown Origin", "f");
+   vtxshwr_legend -> Draw("SAME");
+   c1 -> SaveAs(TString::Format("%s_THStack_vtxshwr.eps",SaveString.c_str()));
+   
+   shwrtrue_muplus -> Scale(norm);
+   shwrtrue_muminus -> Scale(norm);
+   shwrtrue_piplus -> Scale(norm);
+   shwrtrue_piminus -> Scale(norm);
+   shwrtrue_pizero -> Scale(norm);
+   shwrtrue_proton -> Scale(norm);
+   shwrtrue_electron -> Scale(norm);
+   shwrtrue_positron -> Scale(norm);
+   shwrtrue_neutron -> Scale(norm);
+   shwrtrue_photon -> Scale(norm);
+   shwrtrue_other -> Scale(norm);
+   shwrtrue_stack -> Add(shwrtrue_muplus);
+   shwrtrue_stack -> Add(shwrtrue_muminus);
+   shwrtrue_stack -> Add(shwrtrue_piplus);
+   shwrtrue_stack -> Add(shwrtrue_piminus);
+   shwrtrue_stack -> Add(shwrtrue_pizero);
+   shwrtrue_stack -> Add(shwrtrue_proton);
+   shwrtrue_stack -> Add(shwrtrue_electron);
+   shwrtrue_stack -> Add(shwrtrue_positron);
+   shwrtrue_stack -> Add(shwrtrue_neutron);
+   shwrtrue_stack -> Add(shwrtrue_photon);
+   shwrtrue_stack -> Add(shwrtrue_other);
+   shwrtrue_stack -> Draw("hist");
+   auto shwrtrue_legend = new TLegend(0.6,0.6,0.9,0.9);
+   shwrtrue_legend -> AddEntry(shwrtrue_muminus, "#mu^{-}", "f");
+   shwrtrue_legend -> AddEntry(shwrtrue_muplus, "#mu^{+}", "f");
+   shwrtrue_legend -> AddEntry(shwrtrue_piplus, "#pi^{+}", "f");
+   shwrtrue_legend -> AddEntry(shwrtrue_piminus, "#pi^{-}", "f");
+   shwrtrue_legend -> AddEntry(shwrtrue_pizero, "#pi^{0}", "f");
+   shwrtrue_legend -> AddEntry(shwrtrue_proton, "p", "f");
+   shwrtrue_legend -> AddEntry(shwrtrue_electron, "e^{-}", "f");
+   shwrtrue_legend -> AddEntry(shwrtrue_positron, "e^{+}", "f");
+   shwrtrue_legend -> AddEntry(shwrtrue_neutron, "n", "f");
+   shwrtrue_legend -> AddEntry(shwrtrue_photon, "#gamma", "f");
+   shwrtrue_legend -> AddEntry(shwrtrue_other, "other", "f");
+   shwrtrue_legend -> Draw("SAME");
+   c1 -> SaveAs(TString::Format("%s_THStack_signal_shwrtrue.eps",SaveString.c_str()));
+   
+   shwrtrue_bg_muplus -> Scale(norm);
+   shwrtrue_bg_muminus -> Scale(norm);
+   shwrtrue_bg_piplus -> Scale(norm);
+   shwrtrue_bg_piminus -> Scale(norm);
+   shwrtrue_bg_pizero -> Scale(norm);
+   shwrtrue_bg_proton -> Scale(norm);
+   shwrtrue_bg_electron -> Scale(norm);
+   shwrtrue_bg_positron -> Scale(norm);
+   shwrtrue_bg_neutron -> Scale(norm);
+   shwrtrue_bg_photon -> Scale(norm);
+   shwrtrue_bg_other -> Scale(norm);
+   shwrtrue_bg_stack -> Add(shwrtrue_bg_muplus);
+   shwrtrue_bg_stack -> Add(shwrtrue_bg_muminus);
+   shwrtrue_bg_stack -> Add(shwrtrue_bg_piplus);
+   shwrtrue_bg_stack -> Add(shwrtrue_bg_piminus);
+   shwrtrue_bg_stack -> Add(shwrtrue_bg_pizero);
+   shwrtrue_bg_stack -> Add(shwrtrue_bg_proton);
+   shwrtrue_bg_stack -> Add(shwrtrue_bg_electron);
+   shwrtrue_bg_stack -> Add(shwrtrue_bg_positron);
+   shwrtrue_bg_stack -> Add(shwrtrue_bg_neutron);
+   shwrtrue_bg_stack -> Add(shwrtrue_bg_photon);
+   shwrtrue_bg_stack -> Add(shwrtrue_bg_other);
+   shwrtrue_bg_stack -> Draw("hist");
+   auto shwrtrue_bg_legend = new TLegend(0.6,0.6,0.9,0.9);
+   shwrtrue_bg_legend -> AddEntry(shwrtrue_bg_muminus, "#mu^{-}", "f");
+   shwrtrue_bg_legend -> AddEntry(shwrtrue_bg_muplus, "#mu^{+}", "f");
+   shwrtrue_bg_legend -> AddEntry(shwrtrue_bg_piplus, "#pi^{+}", "f");
+   shwrtrue_bg_legend -> AddEntry(shwrtrue_bg_piminus, "#pi^{-}", "f");
+   shwrtrue_bg_legend -> AddEntry(shwrtrue_bg_pizero, "#pi^{0}", "f");
+   shwrtrue_bg_legend -> AddEntry(shwrtrue_bg_proton, "p", "f");
+   shwrtrue_bg_legend -> AddEntry(shwrtrue_bg_electron, "e^{-}", "f");
+   shwrtrue_bg_legend -> AddEntry(shwrtrue_bg_positron, "e^{+}", "f");
+   shwrtrue_bg_legend -> AddEntry(shwrtrue_bg_neutron, "n", "f");
+   shwrtrue_bg_legend -> AddEntry(shwrtrue_bg_photon, "#gamma", "f");
+   shwrtrue_bg_legend -> AddEntry(shwrtrue_bg_other, "other", "f");
+   shwrtrue_bg_legend -> Draw("SAME");
+   c1 -> SaveAs(TString::Format("%s_THStack_bg_shwrtrue.eps",SaveString.c_str()));
 
    eff_track_muon -> Draw("AP");
    eff_track_pion -> Draw("P SAME");
