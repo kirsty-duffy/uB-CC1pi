@@ -1,0 +1,37 @@
+<!-- Project details -->
+<!DOCTYPE project [
+<!ENTITY name "truecc1pifilter_v1">
+<!ENTITY user "kduffy">
+]>
+
+<project name="&name;">
+
+  <!-- Group -->
+  <group>uboone</group>
+
+  <!-- Project size (numevents is an upper limit) -->
+  <numevents>200000</numevents> <!-- 200000 -->
+  <numjobs>4000</numjobs> <!-- 4000 -->
+  <maxfilesperjob>1</maxfilesperjob>
+
+  <!-- Where to look for fcl files (in addition to $FHICL_FILE_PATH) -->
+  <fcldir>/pnfs/uboone/persistent/users/kduffy/TrueCC1piFilter/fcl/</fcldir>
+
+  <!-- Batch OS -->
+  <os>SL6</os>
+
+  <!-- Larsoft information -->
+  <larsoft>
+    <local>/pnfs/uboone/persistent/users/kduffy/TrueCC1piFilter/local.tar</local>
+  </larsoft>
+
+  <!-- Stages -->
+  <stage name = "filter">
+     <maxfilesperjob>1</maxfilesperjob>
+     <inputdef>prodgenie_bnb_nu_uboone_mcc8.6_reco2_dev</inputdef>
+     <fcl>/pnfs/uboone/persistent/users/kduffy/TrueCC1piFilter/fcl/TrueCC1piFilter.fcl</fcl>
+     <outdir>/pnfs/uboone/persistent/users/kduffy/TrueCC1piFilter/&name;/out/</outdir>
+     <logdir>/pnfs/uboone/persistent/users/kduffy/TrueCC1piFilter/&name;/log/</logdir>
+     <workdir>/pnfs/uboone/persistent/users/kduffy/TrueCC1piFilter/&name;/work/</workdir>
+  </stage>
+</project>
