@@ -23,6 +23,8 @@ void cc1pianavars::Clear(){
    cutflow.clear();
    isSelected = false;
    track_length.clear();
+   track_start.clear();
+   track_end.clear();
    shower_length.clear();
    NPFPs = -9999;
    NTracks = -9999;
@@ -172,6 +174,12 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
             }
             for (auto track : tracks_pfp){
                track_length.emplace_back(track -> Length());
+               auto start = track -> Start();
+               std::vector<double> startvect= {start.X(),start.Y(),start.Z()};
+               track_start.emplace_back(startvect);
+               auto end = track -> End();
+               std::vector<double> endvect = {end.X(),end.Y(),end.Z()};
+               track_end.emplace_back(endvect);
 
                unsigned int trkid = track->ID();
                std::vector<art::Ptr<anab::Calorimetry>> calos = calos_from_tracks.at(trkid);
@@ -319,6 +327,8 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("cutflow", &(vars->cutflow));
    t -> Branch("isSelected", &(vars->isSelected));
    t -> Branch("track_length", &(vars->track_length));
+   t -> Branch("track_start", &(vars->track_start));
+   t -> Branch("track_end", &(vars->track_end));
    t -> Branch("shower_length", &(vars->shower_length));
    t -> Branch("NPFPs", &(vars->NPFPs));
    t -> Branch("NTracks", &(vars->NTracks));
