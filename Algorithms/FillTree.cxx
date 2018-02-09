@@ -20,6 +20,8 @@ void cc1pianavars::Clear(){
    subrun_num = -9999;
    event_num = -9999;
 
+   topology = kUnknown;
+
    cutflow.clear();
    isSelected = false;
    track_length.clear();
@@ -90,6 +92,12 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
       isSelected = true;
 
+      // Get topology from MC truth (MC only)
+      if (!isData){
+	auto const mctruth_h = evt.getValidHandle<std::vector<simb::MCTruth>>("generator"); // Get only GENIE MCtruth
+	topology = GetTopology(mctruth_h);
+      }
+	
       //Get TPCObject
       art::FindManyP<ubana::TPCObject> tpcobject_from_selection(selection_h, evt, "UBXSec");
       art::Ptr<ubana::TPCObject> tpcobj_candidate = tpcobject_from_selection.at(0).at(0);
@@ -315,6 +323,8 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("run_num", &(vars->run_num));
    t -> Branch("subrun_num", &(vars->subrun_num));
    t -> Branch("event_num", &(vars->event_num));
+
+   t -> Branch("topology", &(vars->topology), "topology/I");
 
    t -> Branch("cutflow", &(vars->cutflow));
    t -> Branch("isSelected", &(vars->isSelected));

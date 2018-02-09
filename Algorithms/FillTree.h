@@ -43,6 +43,8 @@
 
 // CC1pi method includes
 #include "uboone/CC1pi/Algorithms/MIPConsistencyCheck_Marco.h"
+#include "uboone/CC1pi/Algorithms/GetTopology.h"
+#include "uboone/CC1pi/Algorithms/TopologyEnums.h"
 
 struct cc1pianavars{
 
@@ -50,6 +52,8 @@ struct cc1pianavars{
   art::RunNumber_t run_num;
   art::SubRunNumber_t subrun_num;
   art::EventNumber_t event_num;
+  
+  NuIntTopology topology;
   
   std::map<std::string,bool> cutflow;
   bool isSelected;
