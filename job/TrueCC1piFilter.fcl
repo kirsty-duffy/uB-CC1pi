@@ -41,6 +41,7 @@ outputs:
    { 
      module_type : RootOutput
      fileName    : "TrueCC1piFilter_%ifb_%tc.root" 
+     dataTier    : "reconstructed"
    }
 }
 
