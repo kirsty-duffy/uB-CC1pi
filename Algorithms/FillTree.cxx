@@ -67,7 +67,6 @@ void cc1pianavars::Clear(){
 
    CC1picutflow.clear();
    PassesCC1piSelec = false;
-   CC1piSelecFailureReason = "";
 }
 
 void cc1pianavars::SetReco2Vars(art::Event &evt){
@@ -98,10 +97,10 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
       // Get topology from MC truth (MC only)
       if (!isData){
-	auto const mctruth_h = evt.getValidHandle<std::vector<simb::MCTruth>>("generator"); // Get only GENIE MCtruth
-	topology = GetTopology(mctruth_h);
+         auto const mctruth_h = evt.getValidHandle<std::vector<simb::MCTruth>>("generator"); // Get only GENIE MCtruth
+         topology = GetTopology(mctruth_h);
       }
-	
+
       //Get TPCObject
       art::FindManyP<ubana::TPCObject> tpcobject_from_selection(selection_h, evt, "UBXSec");
       art::Ptr<ubana::TPCObject> tpcobj_candidate = tpcobject_from_selection.at(0).at(0);
@@ -210,6 +209,10 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
                Sel_PFP_isMIP.emplace_back(IsMIP(track->Length(), dqdx_truncmean));
             }
+
+            // Fill non-track variables with nonsense values to keep indices lined up
+            Sel_PFP_shower_length.emplace_back(-9999);
+            Sel_PFP_shower_start.emplace_back(-9999);
          }
 
          else if(lar_pandora::LArPandoraHelper::IsShower(pfp)) {
@@ -220,17 +223,28 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
             }
             for (auto shower : showers_pfp) {
                Sel_PFP_shower_length.emplace_back(shower -> Length());
-	       auto start = shower -> ShowerStart();
-	       std::vector<double> startvect = {start.X(),start.Y(),start.Z()};
-	       Sel_PFP_shower_start.emplace_back(startvect);
-               dqdx_trunc_uncalib.emplace_back(-9999);
-               Sel_PFP_isMIP.emplace_back(false);
+               auto start = shower -> ShowerStart();
+               std::vector<double> startvect = {start.X(),start.Y(),start.Z()};
+               Sel_PFP_shower_start.emplace_back(startvect);
             }
+
+            // Fill non-shower variables with nonsense values to keep indices lined up
+            Sel_PFP_track_length.emplace_back(-9999);
+            Sel_PFP_track_start.emplace_back(-9999);
+            Sel_PFP_track_end.emplace_back(-9999);
+            dqdx_trunc_uncalib.emplace_back(-9999);
+            Sel_PFP_isMIP.emplace_back(false);
          }
 
-         else {
-               dqdx_trunc_uncalib.emplace_back(-9999);
-               Sel_PFP_isMIP.emplace_back(false);
+         else if(lar_pandora::LArPandoraHelper::IsNeutrino(pfp)) {
+            // Fill non-neutrino variables with nonsense values to keep indices lined up
+            Sel_PFP_track_length.emplace_back(-9999);
+            Sel_PFP_track_start.emplace_back(-9999);
+            Sel_PFP_track_end.emplace_back(-9999);
+            dqdx_trunc_uncalib.emplace_back(-9999);
+            Sel_PFP_isMIP.emplace_back(false);
+            Sel_PFP_shower_length.emplace_back(-9999);
+            Sel_PFP_shower_start.emplace_back(-9999);
          }
 
          auto mcghosts = mcghost_from_pfp.at(pfp.key());
@@ -266,7 +280,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       tpcobj_reco_vtx = {reco_nu_vtx[0], reco_nu_vtx[1], reco_nu_vtx[2]};
       // Do we need to correct for X position (time offset) and space charge? Marco seems to
       // -- Follow up!
-      
+
    }
 
    // Get all MCParticles
@@ -309,6 +323,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       MCP_numdaughters.emplace_back(mcpar -> NumberDaughters());
 
       //Record neutrino info (once)
+      //Note: Potential issues for events with multiple neutrinos
       if(!recorded) {
 
          if (!(mc_truth -> NeutrinoSet())) continue;
@@ -394,21 +409,7 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
 
    t -> Branch("CC1picutflow", &(vars->CC1picutflow));
    t -> Branch("PassesCC1piSelec", &(vars->PassesCC1piSelec));
-   t -> Branch("CC1piSelecFailureReason", &(vars->CC1piSelecFailureReason));
 
-}
-
-//TPC boundary + FV cut
-const double FVxmin = 0 + 12;
-const double FVxmax = 256.35 - 12;
-const double FVymin = -115.53 + 35;
-const double FVymax = 117.47 - 35;
-const double FVzmin = 0.1 + 25;
-const double FVzmax = 1036.9 - 85;
-
-bool inFV(double x, double y, double z){
-   if (x > FVxmin && x < FVxmax && y > FVymin && y < FVymax && z > FVzmin && z < FVzmax && (z < 675 || z > 775)) return true;
-   else return false;
 }
 
 #endif

@@ -30,6 +30,7 @@
 // Include CC1pi files from elsewhere
 #include "uboone/CC1pi/Algorithms/FillTree.h"
 #include "uboone/CC1pi/Algorithms/TwoTrackCheck.h"
+#include "uboone/CC1pi/Algorithms/FVCheck.h"
 
 class CC1piSelection;
 
@@ -67,7 +68,6 @@ class CC1piSelection : public art::EDProducer {
       // CC1pi selection variables
       std::map<std::string,bool> _CC1picutflow;
       bool _PassesCC1piSelec;
-      std::string _CC1piSelecFailureReason;
 
       // Other variables set in module
       bool _isData;
@@ -84,7 +84,6 @@ CC1piSelection::CC1piSelection(fhicl::ParameterSet const & p)
    // Things we want to produce (i.e. add to the event):
    //  - Cutflow map of whether it passes each cut
    //  - Flag for whether it passes our selection
-   //  - Failure reason if it doesn't
    produces< std::map<std::string,bool> >();
    produces< bool >();
    produces< std::string >();
@@ -92,7 +91,6 @@ CC1piSelection::CC1piSelection(fhicl::ParameterSet const & p)
 
    // Start out assuming everything passes
    _PassesCC1piSelec = true;
-   _CC1piSelecFailureReason = "";
 
    // Instantiate struct to hold variables (and pass fhicl parameters)
    anavars = new cc1pianavars(p);
@@ -131,31 +129,23 @@ void CC1piSelection::produce(art::Event & evt)
    std::map<std::string,bool> TwoTrackcutflow = TwoTrackCheck(evt);
    _CC1picutflow.insert(TwoTrackcutflow.begin(), TwoTrackcutflow.end());
 
-   if (!PassesMarcosSelec){
-      _PassesCC1piSelec = false;
-      _CC1piSelecFailureReason = selection_v.at(0)->GetFailureReason();;
-      _CC1picutflow["MarcosSelec"] = false;
+   // Check if "passing" events still pass the full FV cut
+   if (PassesMarcosSelec) {
+      if(!FVCheck(evt)) {
+         PassesMarcosSelec = false;
+         _CC1picutflow["fiducial_volume"] = false;
+      }
    }
 
+   if (!PassesMarcosSelec){
+      _PassesCC1piSelec = false;
+      _CC1picutflow["MarcosSelec"] = false;
+   }
    else {
       _CC1picutflow["MarcosSelec"] = true;
 
-      if(_CC1picutflow["TwoTrackCut"] == false) {
-         _PassesCC1piSelec = false;
-         _CC1piSelecFailureReason = "TwoTrackCut";
-      }
-      else if(_CC1picutflow["TwoMIPCut"] == false) {
-         _PassesCC1piSelec = false;
-         _CC1piSelecFailureReason = "TwoMIPCut";
-      }
-      else if(_CC1picutflow["ExactlyTwoMIPCut"] == false) {
-         _PassesCC1piSelec = false;
-         _CC1piSelecFailureReason = "ExactlyTwoMIPCut";
-      }
-      else {
-         _PassesCC1piSelec = true;
-         _CC1piSelecFailureReason = "Passed";
-      }
+      if(_CC1picutflow["TwoTrackCut"] == false || _CC1picutflow["TwoMIPCut"] == false || _CC1picutflow["ExactlyTwoMIPCut"] == false) _PassesCC1piSelec = false;
+      else _PassesCC1piSelec = true;
    }
 
    // ----- Almost at the end: fill tree ------ //
@@ -163,10 +153,9 @@ void CC1piSelection::produce(art::Event & evt)
    // Set anavars values that are already in the reco2 file
    anavars->SetReco2Vars(evt);
 
-   // Set anavars for _PassesCC1piSelec and _CC1piSelecFailureReason
+   // Set anavars for _CC1picutflow and _PassesCC1piSelec
    anavars->CC1picutflow = _CC1picutflow;
    anavars->PassesCC1piSelec = _PassesCC1piSelec;
-   anavars->CC1piSelecFailureReason = _CC1piSelecFailureReason;
 
    _outtree -> Fill();
 
@@ -174,11 +163,9 @@ void CC1piSelection::produce(art::Event & evt)
    // ----- Finally: add things to event ------ //
    std::unique_ptr<std::map<std::string,bool>> CC1picutflow = std::make_unique<std::map<std::string,bool>>(_CC1picutflow);
    std::unique_ptr<bool> PassesCC1piSelec = std::make_unique<bool>(_PassesCC1piSelec);
-   std::unique_ptr<std::string> CC1piSelecFailureReason = std::make_unique<std::string>(_CC1piSelecFailureReason);
 
    evt.put(std::move(CC1picutflow));
    evt.put(std::move(PassesCC1piSelec));
-   evt.put(std::move(CC1piSelecFailureReason));
 
 }
 
