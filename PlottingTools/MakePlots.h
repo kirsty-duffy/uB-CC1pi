@@ -11,6 +11,10 @@
 #include <map>
 #include <iostream>
 
+#include "../Algorithms/TopologyEnums.h"
+#include "../Algorithms/PDGEnums.h"
+#include "StackedHistsPDGCode.h"
+
 
 double GetPOT(TString FileName);
 
