@@ -45,6 +45,7 @@
 #include "uboone/CC1pi/Algorithms/MIPConsistencyCheck_Marco.h"
 #include "uboone/CC1pi/Algorithms/GetTopology.h"
 #include "uboone/CC1pi/Algorithms/TopologyEnums.h"
+#include "uboone/CC1pi/Algorithms/FiducialVolume.h"
 
 struct cc1pianavars{
 
@@ -112,8 +113,6 @@ struct cc1pianavars{
   void SetReco2Vars(art::Event &evt);
 
 };
-
-bool inFV(double x, double y, double z);
 
 void MakeAnaBranches(TTree *t, cc1pianavars *vars);
 
