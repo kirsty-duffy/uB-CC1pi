@@ -1,7 +1,7 @@
-#ifndef STACKEDHISTS_PDGCODE
-#define STACKEDHISTS_PDGCODE
+#ifndef STACKEDHIST_TOPOLOGY
+#define STACKEDHIST_TOPOLOGY
 
-#include "uboone/CC1pi/Algorithms/PDGEnums.h"
+#include "uboone/CC1pi/Algorithms/TopologyEnums.h"
 
 #include "TH1F.h"
 #include "THStack.h"
@@ -9,53 +9,52 @@
 #include <vector>
 #include <string>
 
-class StackedHistPDGCode{
+class StackedHistTopology{
 
  public:
-  StackedHistPDGCode(std::string histname, std::string title, int nbins, double lowlimit, double highlimit);// Constructor
-  void Fill(PDGCode particle_pdg, double value);
-  void Fill(PDGCode particle_pdg, double value, double weight);
+  StackedHistTopology(std::string histname, std::string title, int nbins, double lowlimit, double highlimit);// Constructor
+  void Fill(NuIntTopology topology, double value);
+  void Fill(NuIntTopology topology, double value, double weight);
   void DrawStack(double norm, TCanvas *c1);
 
  protected:
   int nHists;
-  std::vector<PDGCode> hist_order; // For keeping track of which hist goes with which PDG code
+  std::vector<NuIntTopology> hist_order; // For keeping track of which hist goes with which topology
   
   THStack *stack;
   TH1F *hists[25];
 
   void StyleHists();
-  unsigned int GetHistN(PDGCode particle_pdg);
-  PDGCode GetPDGFromHistN(unsigned int hist_n);
+  unsigned int GetHistN(NuIntTopology topology);
+  NuIntTopology GetTopologyFromHistN(unsigned int hist_n);
 };
 
 // Define functions here instead of a .C file so we don't need too many includes
 
 // -------------------------- Constructor -------------------------- //
 // Intended to be very general so you can make histograms of whatever you like
-StackedHistPDGCode::StackedHistPDGCode(std::string histname, std::string title, int nbins, double lowlimit, double highlimit)
+StackedHistTopology::StackedHistTopology(std::string histname, std::string title, int nbins, double lowlimit, double highlimit)
 {
-  // PDG categories for the histograms
-  hist_order.push_back(kNuMu);
-  hist_order.push_back(kNuMuBar);
-  hist_order.push_back(kNuE);
-  hist_order.push_back(kNuEBar);
-  hist_order.push_back(kNuTau);
-  hist_order.push_back(kNuTauBar);
-  hist_order.push_back(kMuMinus);
-  hist_order.push_back(kMuPlus);
-  hist_order.push_back(kPiMinus);
-  hist_order.push_back(kPiPlus);
-  hist_order.push_back(kPiZero);
-  hist_order.push_back(kElectron);
-  hist_order.push_back(kPositron);
-  hist_order.push_back(kTauMinus);
-  hist_order.push_back(kTauPlus);
-  hist_order.push_back(kPhoton);
-  hist_order.push_back(kProton);
-  hist_order.push_back(kNeutron);
-  hist_order.push_back(kPDGUnknown);
-  
+  // Topology categories for the histograms
+  hist_order.push_back(kCC0pi0p);
+  hist_order.push_back(kCC0pi1p);
+  hist_order.push_back(kCC0piNp);
+  hist_order.push_back(kCC1piplus0p);
+  hist_order.push_back(kCC1piplus1p);
+  hist_order.push_back(kCC1piplusNp);
+  hist_order.push_back(kCC1piminus0p);
+  hist_order.push_back(kCC1piminus1p);
+  hist_order.push_back(kCC1piminusNp);
+  hist_order.push_back(kCC1pizero0p);
+  hist_order.push_back(kCC1pizero1p);
+  hist_order.push_back(kCC1pizeroNp);
+  hist_order.push_back(kCCmultipi0p);
+  hist_order.push_back(kCCmultipi1p);
+  hist_order.push_back(kCCmultipiNp);
+  hist_order.push_back(kCCother);
+  hist_order.push_back(kNC);
+  hist_order.push_back(kUnknown);
+
   nHists = hist_order.size();
   
   stack = new THStack(histname.c_str(),title.c_str());
@@ -66,25 +65,25 @@ StackedHistPDGCode::StackedHistPDGCode(std::string histname, std::string title, 
 }
 
 // -------------------------- Function to fill the correct histogram -------------------------- //
-void StackedHistPDGCode::Fill(PDGCode particle_pdg, double value)
+void StackedHistTopology::Fill(NuIntTopology topology, double value)
 {
-  unsigned int n_hist = StackedHistPDGCode::GetHistN(particle_pdg);
+  unsigned int n_hist = StackedHistTopology::GetHistN(topology);
   hists[n_hist]->Fill(value);
 }
 
 // -------------------------- Function to fill the correct histogram -------------------------- //
 // Overloaded to allow for weights
-void StackedHistPDGCode::Fill(PDGCode particle_pdg, double value, double weight)
+void StackedHistTopology::Fill(NuIntTopology topology, double value, double weight)
 {
-  unsigned int n_hist = StackedHistPDGCode::GetHistN(particle_pdg);
+  unsigned int n_hist = StackedHistTopology::GetHistN(topology);
   hists[n_hist]->Fill(value, weight);
 }
 
 // -------------------------- Function to draw the histograms -------------------------- //
-void StackedHistPDGCode::DrawStack(double norm, TCanvas *c1)
+void StackedHistTopology::DrawStack(double norm, TCanvas *c1)
 {
   // First: style the histograms
-  StackedHistPDGCode::StyleHists();
+  StackedHistTopology::StyleHists();
 
   // Next: add histogramst to the stack and make TLegend
   // Only do this for histograms that have entries
@@ -95,8 +94,8 @@ void StackedHistPDGCode::DrawStack(double norm, TCanvas *c1)
     
     hists[i_hist]->Scale(norm);
     stack->Add(hists[i_hist]);
-    PDGCode pdg_for_legend = StackedHistPDGCode::GetPDGFromHistN((unsigned int)i_hist);
-    leg->AddEntry(hists[i_hist],PDGenum2str(pdg_for_legend).c_str(),"f");
+    NuIntTopology topology_for_legend = StackedHistTopology::GetTopologyFromHistN((unsigned int)i_hist);
+    leg->AddEntry(hists[i_hist],topologyenum2str(topology_for_legend).c_str(),"f");
     
   }
 
@@ -107,7 +106,7 @@ void StackedHistPDGCode::DrawStack(double norm, TCanvas *c1)
 
 // -------------------------- Function to style the histograms -------------------------- //
 // Private: only called by DrawStack function in this file
-void StackedHistPDGCode::StyleHists()
+void StackedHistTopology::StyleHists()
 {
   // Set fill color for all histograms
   hists[0] ->SetFillColor(kOrange);
@@ -132,15 +131,15 @@ void StackedHistPDGCode::StyleHists()
 }
 
 
-// ---------------------- Function to get histogram number for given PDG code ---------------------- //
+// ---------------------- Function to get histogram number for given topology ---------------------- //
 // Private: only called by functions in this class
-unsigned int StackedHistPDGCode::GetHistN(PDGCode particle_pdg)
+unsigned int StackedHistTopology::GetHistN(NuIntTopology topology)
 {
   unsigned int HistN;
   bool found_hist=false;
 
   for (unsigned int i=0; i<nHists; i++){
-    if (hist_order.at(i) == particle_pdg){
+    if (hist_order.at(i) == topology){
       HistN = i;
       found_hist = true;
       break;
@@ -148,7 +147,7 @@ unsigned int StackedHistPDGCode::GetHistN(PDGCode particle_pdg)
   }
 
   if (!found_hist){
-    std::cout << "[ERROR: StackedHistsPDGCode.h] Could not find histogram for PDG code " << particle_pdg << std::endl;
+    std::cout << "[ERROR: StackedHistTopology.h] Could not find histogram for topology " << topology << std::endl;
     HistN = 9999;
   }
 
@@ -156,9 +155,9 @@ unsigned int StackedHistPDGCode::GetHistN(PDGCode particle_pdg)
 }
 
 
-// ---------------------- Function to get PDG code for given histogram number ---------------------- //
+// ---------------------- Function to get topology code for given histogram number ---------------------- //
 // Private: only called by functions in this class
-PDGCode StackedHistPDGCode::GetPDGFromHistN(unsigned int hist_n)
+NuIntTopology StackedHistTopology::GetTopologyFromHistN(unsigned int hist_n)
 {
   return hist_order.at(hist_n);
 }

@@ -13,7 +13,8 @@
 
 #include "../Algorithms/TopologyEnums.h"
 #include "../Algorithms/PDGEnums.h"
-#include "StackedHistsPDGCode.h"
+#include "StackedHistPDGCode.h"
+#include "StackedHistTopology.h"
 
 
 double GetPOT(TString FileName);
