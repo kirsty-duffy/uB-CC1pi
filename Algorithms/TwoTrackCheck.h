@@ -1,3 +1,6 @@
+#ifndef TWOTRACKCHECK_H
+#define TWOTRACKCHECK_H
+
 // Marco's code includes
 #include "uboone/UBXSec/DataTypes/TPCObject.h"
 #include "uboone/UBXSec/DataTypes/SelectionResult.h"
@@ -17,3 +20,5 @@
 #include "uboone/CC1pi/Algorithms/MIPConsistencyCheck_Marco.h"
 
 std::map<std::string,bool> TwoTrackCheck(art::Event &evt);
+
+#endif

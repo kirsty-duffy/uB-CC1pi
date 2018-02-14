@@ -1,3 +1,6 @@
+#ifndef FVCHECK_CXX
+#define FVCHECK_CXX
+
 #include "FVCheck.h"
 
 //TPC boundary + FV cut
@@ -39,3 +42,5 @@ bool FVCheck(art::Event &evt)
 
    return inFV(reco_nu_vtx[0], reco_nu_vtx[1], reco_nu_vtx[2]);
 }
+
+#endif

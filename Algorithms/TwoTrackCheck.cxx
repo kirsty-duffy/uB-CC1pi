@@ -1,3 +1,6 @@
+#ifndef TWOTRACKCHECK_CXX
+#define TWOTRACKCHECK_CXX
+
 #include "TwoTrackCheck.h"
 
 std::map<std::string,bool> TwoTrackCheck(art::Event &evt)
@@ -116,3 +119,5 @@ std::map<std::string,bool> TwoTrackCheck(art::Event &evt)
 
    return CC1picutflow;
 }
+
+#endif

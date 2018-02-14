@@ -1,3 +1,6 @@
+#ifndef FVCHECK_H
+#define FVCHECK_H
+
 // Marco's code includes
 #include "uboone/UBXSec/DataTypes/TPCObject.h"
 #include "uboone/UBXSec/DataTypes/SelectionResult.h"
@@ -14,3 +17,5 @@
 bool FVCheck(art::Event &evt);
 
 bool inFV(double x, double y, double z);
+
+#endif
