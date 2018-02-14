@@ -124,10 +124,9 @@ void StackedHistTopology::StyleHists()
   hists[12]->SetFillColor(kCyan+2);
   hists[13]->SetFillColor(kCyan);
   hists[14]->SetFillColor(kGreen+1);
-  hists[15]->SetFillColor(kGreen+3);
-  hists[16]->SetFillColor(kGray);
-  hists[17]->SetFillColor(kGray+2);
-  hists[18]->SetFillColor(kBlack);
+  hists[15]->SetFillColor(kGray);
+  hists[16]->SetFillColor(kGray+2);
+  hists[17]->SetFillColor(kBlack);
 }
 
 
