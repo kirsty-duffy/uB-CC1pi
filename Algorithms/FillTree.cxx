@@ -276,8 +276,8 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       double reco_nu_vtx[3];
       TPCObj_nu_vtx.XYZ(reco_nu_vtx);
       TPCObj_reco_vtx = {reco_nu_vtx[0], reco_nu_vtx[1], reco_nu_vtx[2]};
-      // Do we need to correct for X position (time offset) and space charge? Marco seems to
-      // -- Follow up!
+      // We eventually need to correct for X position (time offset) and space charge
+      // See issues #8 and #10 on github
 
    } // if selected
 
