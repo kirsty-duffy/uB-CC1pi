@@ -54,29 +54,32 @@ struct cc1pianavars{
   art::SubRunNumber_t subrun_num;
   art::EventNumber_t event_num;
   
-  NuIntTopology topology;
   
-  std::map<std::string,bool> cutflow;
-  bool isSelected;
-  std::vector<double> Sel_PFP_track_length;
-  std::vector<std::vector<double>> Sel_PFP_track_start;
-  std::vector<std::vector<double>> Sel_PFP_track_end;
-  std::vector<double> Sel_PFP_shower_length;
-  std::vector<std::vector<double>> Sel_PFP_shower_start;
-  int NPFPs;
-  int NTracks;
-  int NShowers;
-  std::vector<bool> Sel_PFP_isTrack;
-  std::vector<bool> Sel_PFP_isShower;
-  std::vector<bool> Sel_PFP_isDaughter;
-  std::vector<bool> Sel_PFP_isMIP;
-  std::vector<int> Sel_PFP_ID;
-  std::vector<int> Sel_MCP_ID;
-  std::vector<int> Sel_MCP_PDG;
-  std::vector<double> Sel_MCP_E;
-  int tpcobj_origin;
-  int tpcobj_origin_extra;
-  std::vector<double> tpcobj_reco_vtx;
+  std::map<std::string,bool> Marco_cutflow;
+  bool Marco_selected;
+
+  NuIntTopology TPCObj_beamnu_topology;
+  std::vector<double> TPCObj_PFP_track_length;
+  std::vector<std::vector<double>> TPCObj_PFP_track_start;
+  std::vector<std::vector<double>> TPCObj_PFP_track_end;
+  std::vector<double> TPCObj_PFP_track_dqdx_truncmean;
+  std::vector<bool> TPCObj_PFP_isMIP;
+  std::vector<double> TPCObj_PFP_shower_length;
+  std::vector<std::vector<double>> TPCObj_PFP_shower_start;
+  int TPCObj_NPFPs;
+  int TPCObj_NTracks;
+  int TPCObj_NShowers;
+  std::vector<bool> TPCObj_PFP_isTrack;
+  std::vector<bool> TPCObj_PFP_isShower;
+  std::vector<bool> TPCObj_PFP_isDaughter;
+  std::vector<int> TPCObj_PFP_id;
+  std::vector<int> TPCObj_PFP_MCPid;
+  std::vector<int> TPCObj_PFP_truePDG;
+  std::vector<double> TPCObj_PFP_trueE;
+  std::vector<double> TPCObj_PFP_trueKE;
+  int TPCObj_origin;
+  int TPCObj_origin_extra;
+  std::vector<double> TPCObj_reco_vtx;
 
   std::vector<int> MCP_PDG;
   std::vector<double> MCP_length;
@@ -88,6 +91,7 @@ struct cc1pianavars{
   std::vector<double> MCP_Py;
   std::vector<double> MCP_Pz;
   std::vector<double> MCP_E;
+  std::vector<double> MCP_KE;
   std::vector<bool> MCP_isContained;
 
   std::vector<double> nu_vtxx;
@@ -96,11 +100,8 @@ struct cc1pianavars{
   std::vector<bool> nu_isCC;
   std::vector<int> nu_PDG;
   std::vector<double> nu_E;
-  
-  std::vector<double> dqdx_trunc_uncalib;
 
   std::map<std::string,bool> CC1picutflow;
-  bool PassesCC1piSelec;
 
   fhicl::ParameterSet pset;
 

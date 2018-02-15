@@ -67,7 +67,6 @@ class CC1piSelection : public art::EDProducer {
 
       // CC1pi selection variables
       std::map<std::string,bool> _CC1picutflow;
-      bool _PassesCC1piSelec;
 
       // Other variables set in module
       bool _isData;
@@ -82,15 +81,8 @@ CC1piSelection::CC1piSelection(fhicl::ParameterSet const & p)
 {
    // Call appropriate produces<>() functions here.
    // Things we want to produce (i.e. add to the event):
-   //  - Cutflow map of whether it passes each cut
-   //  - Flag for whether it passes our selection
+   //  - Cutflow map of whether it passes each cut (possibly also pseudo-cuts such as "passes the whole selection")
    produces< std::map<std::string,bool> >();
-   produces< bool >();
-   produces< std::string >();
-
-
-   // Start out assuming everything passes
-   _PassesCC1piSelec = true;
 
    // Instantiate struct to hold variables (and pass fhicl parameters)
    anavars = new cc1pianavars(p);
@@ -137,35 +129,27 @@ void CC1piSelection::produce(art::Event & evt)
       }
    }
 
-   if (!PassesMarcosSelec){
-      _PassesCC1piSelec = false;
-      _CC1picutflow["MarcosSelec"] = false;
-   }
-   else {
-      _CC1picutflow["MarcosSelec"] = true;
+   if (PassesMarcosSelec) _CC1picutflow["MarcosSelec"] = true;
+   else _CC1picutflow["MarcosSelec"] = false;
 
-      if(_CC1picutflow["TwoTrackCut"] == false || _CC1picutflow["TwoMIPCut"] == false || _CC1picutflow["ExactlyTwoMIPCut"] == false) _PassesCC1piSelec = false;
-      else _PassesCC1piSelec = true;
-   }
+   if(_CC1picutflow["MarcosSelec"] == true && _CC1picutflow["ExactlyTwoMIPCut"] == true) _CC1picutflow["CC1piSelec"] = true;
+   else _CC1picutflow["CC1piSelec"] = false;
 
    // ----- Almost at the end: fill tree ------ //
 
    // Set anavars values that are already in the reco2 file
    anavars->SetReco2Vars(evt);
 
-   // Set anavars for _CC1picutflow and _PassesCC1piSelec
+   // Set anavars for _CC1picutflow
    anavars->CC1picutflow = _CC1picutflow;
-   anavars->PassesCC1piSelec = _PassesCC1piSelec;
 
    _outtree -> Fill();
 
 
    // ----- Finally: add things to event ------ //
    std::unique_ptr<std::map<std::string,bool>> CC1picutflow = std::make_unique<std::map<std::string,bool>>(_CC1picutflow);
-   std::unique_ptr<bool> PassesCC1piSelec = std::make_unique<bool>(_PassesCC1piSelec);
 
    evt.put(std::move(CC1picutflow));
-   evt.put(std::move(PassesCC1piSelec));
 
 }
 

@@ -20,28 +20,31 @@ void cc1pianavars::Clear(){
    subrun_num = -9999;
    event_num = -9999;
 
-   topology = kUnknown;
+   Marco_cutflow.clear();
+   Marco_selected = false;
 
-   cutflow.clear();
-   isSelected = false;
-   Sel_PFP_track_length.clear();
-   Sel_PFP_track_start.clear();
-   Sel_PFP_track_end.clear();
-   Sel_PFP_shower_length.clear();
-   Sel_PFP_shower_start.clear();
-   NPFPs = -9999;
-   NTracks = -9999;
-   NShowers = -9999;
-   Sel_PFP_isTrack.clear();
-   Sel_PFP_isShower.clear();
-   Sel_PFP_isDaughter.clear();
-   Sel_PFP_ID.clear();
-   Sel_MCP_ID.clear();
-   Sel_MCP_PDG.clear();
-   Sel_MCP_E.clear();
-   tpcobj_origin = -9999;
-   tpcobj_origin_extra = -9999;
-   tpcobj_reco_vtx.clear();
+   TPCObj_beamnu_topology = kUnknown;
+   TPCObj_PFP_track_length.clear();
+   TPCObj_PFP_track_start.clear();
+   TPCObj_PFP_track_end.clear();
+   TPCObj_PFP_track_dqdx_truncmean.clear();
+   TPCObj_PFP_isMIP.clear();
+   TPCObj_PFP_shower_length.clear();
+   TPCObj_PFP_shower_start.clear();
+   TPCObj_NPFPs = -9999;
+   TPCObj_NTracks = -9999;
+   TPCObj_NShowers = -9999;
+   TPCObj_PFP_isTrack.clear();
+   TPCObj_PFP_isShower.clear();
+   TPCObj_PFP_isDaughter.clear();
+   TPCObj_PFP_id.clear();
+   TPCObj_PFP_MCPid.clear();
+   TPCObj_PFP_truePDG.clear();
+   TPCObj_PFP_trueE.clear();
+   TPCObj_PFP_trueKE.clear();
+   TPCObj_origin = -9999;
+   TPCObj_origin_extra = -9999;
+   TPCObj_reco_vtx.clear();
 
    MCP_PDG.clear();
    MCP_length.clear();
@@ -53,6 +56,7 @@ void cc1pianavars::Clear(){
    MCP_Py.clear();
    MCP_Pz.clear();
    MCP_E.clear();
+   MCP_KE.clear();
    MCP_isContained.clear();
 
    nu_vtxx.clear();
@@ -62,11 +66,7 @@ void cc1pianavars::Clear(){
    nu_PDG.clear();
    nu_E.clear();
 
-   Sel_PFP_isMIP.clear();
-   dqdx_trunc_uncalib.clear();
-
    CC1picutflow.clear();
-   PassesCC1piSelec = false;
 }
 
 void cc1pianavars::SetReco2Vars(art::Event &evt){
@@ -89,36 +89,36 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
    std::vector<art::Ptr<ubana::SelectionResult>> selection_v;
    art::fill_ptr_vector(selection_v, selection_h);
 
-   cutflow = selection_v.at(0)->GetCutFlowStatus();
+   Marco_cutflow = selection_v.at(0)->GetCutFlowStatus();
 
    if (selection_v.at(0)->GetSelectionStatus()) {
 
-      isSelected = true;
+      Marco_selected = true;
 
       // Get topology from MC truth (MC only)
       if (!isData){
          auto const mctruth_h = evt.getValidHandle<std::vector<simb::MCTruth>>("generator"); // Get only GENIE MCtruth
-         topology = GetTopology(mctruth_h);
+         TPCObj_beamnu_topology = GetTopology(mctruth_h);
       }
 
       //Get TPCObject
-      art::FindManyP<ubana::TPCObject> tpcobject_from_selection(selection_h, evt, "UBXSec");
-      art::Ptr<ubana::TPCObject> tpcobj_candidate = tpcobject_from_selection.at(0).at(0);
-      art::Handle<std::vector<ubana::TPCObject>> tpcobj_h;
-      evt.getByLabel("TPCObjectMaker", tpcobj_h);
+      art::FindManyP<ubana::TPCObject> TPCObject_from_selection(selection_h, evt, "UBXSec");
+      art::Ptr<ubana::TPCObject> TPCObj_candidate = TPCObject_from_selection.at(0).at(0);
+      art::Handle<std::vector<ubana::TPCObject>> TPCObj_h;
+      evt.getByLabel("TPCObjectMaker", TPCObj_h);
 
-      tpcobj_origin = tpcobj_candidate -> GetOrigin();
-      tpcobj_origin_extra = tpcobj_candidate -> GetOriginExtra();
+      TPCObj_origin = TPCObj_candidate -> GetOrigin();
+      TPCObj_origin_extra = TPCObj_candidate -> GetOriginExtra();
 
       //Get PFPs (in TPCObject)
-      art::FindManyP<recob::PFParticle> pfps_from_tpcobject(tpcobj_h, evt, "TPCObjectMaker");
-      std::vector<art::Ptr<recob::PFParticle>> pfps = pfps_from_tpcobject.at(tpcobj_candidate.key());
-      NPFPs = pfps.size();
+      art::FindManyP<recob::PFParticle> pfps_from_TPCObject(TPCObj_h, evt, "TPCObjectMaker");
+      std::vector<art::Ptr<recob::PFParticle>> pfps = pfps_from_TPCObject.at(TPCObj_candidate.key());
+      TPCObj_NPFPs = pfps.size();
 
       //Get tracks (in TPCObject)
-      art::FindManyP<recob::Track> tracks_from_tpcobject(tpcobj_h, evt, "TPCObjectMaker");
-      std::vector<art::Ptr<recob::Track>> tracks = tracks_from_tpcobject.at(tpcobj_candidate.key());
-      NTracks = tracks.size();
+      art::FindManyP<recob::Track> tracks_from_TPCObject(TPCObj_h, evt, "TPCObjectMaker");
+      std::vector<art::Ptr<recob::Track>> tracks = tracks_from_TPCObject.at(TPCObj_candidate.key());
+      TPCObj_NTracks = tracks.size();
 
       // Get calo objects (for dqdx)
       // For now use uncalibrated "calo" variables
@@ -132,9 +132,9 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       art::FindManyP<anab::Calorimetry> calos_from_tracks(track_h, evt, _caloTag);
 
       //Get showers (in TPCObject)
-      art::FindManyP<recob::Shower> showers_from_tpcobject(tpcobj_h, evt, "TPCObjectMaker");
-      std::vector<art::Ptr<recob::Shower>> showers = showers_from_tpcobject.at(tpcobj_candidate.key());
-      NShowers = showers.size();
+      art::FindManyP<recob::Shower> showers_from_TPCObject(TPCObj_h, evt, "TPCObjectMaker");
+      std::vector<art::Ptr<recob::Shower>> showers = showers_from_TPCObject.at(TPCObj_candidate.key());
+      TPCObj_NShowers = showers.size();
 
       //Get MCGhosts (in event)
       art::Handle<std::vector<ubana::MCGhost> > ghost_h;
@@ -170,10 +170,19 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
       for (auto pfp : pfps) {
 
-         Sel_PFP_isTrack.emplace_back(lar_pandora::LArPandoraHelper::IsTrack(pfp));
-         Sel_PFP_isShower.emplace_back(lar_pandora::LArPandoraHelper::IsShower(pfp));
-         Sel_PFP_isDaughter.emplace_back(pfp->Parent()==(size_t)nuID);
-         Sel_PFP_ID.emplace_back(pfp -> Self());
+         TPCObj_PFP_isTrack.emplace_back(lar_pandora::LArPandoraHelper::IsTrack(pfp));
+         TPCObj_PFP_isShower.emplace_back(lar_pandora::LArPandoraHelper::IsShower(pfp));
+         TPCObj_PFP_isDaughter.emplace_back(pfp->Parent()==(size_t)nuID);
+         TPCObj_PFP_id.emplace_back(pfp -> Self());
+
+         //Set default values for track/shower specific variables
+         double track_length = -9999;
+         std::vector<double> track_start = {-9999, -9999, -9999};
+         std::vector<double> track_end = {-9999, -9999, -9999};
+         double track_dqdx_truncmean = -9999;
+         bool isMIP = false;
+         double shower_length = -9999;
+         std::vector<double> shower_start = {-9999, -9999, -9999};
 
          if(lar_pandora::LArPandoraHelper::IsTrack(pfp)) {
             std::vector<art::Ptr<recob::Track>> tracks_pfp = tracks_from_pfps.at(pfp.key());
@@ -182,38 +191,31 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
                throw std::exception();
             }
             for (auto track : tracks_pfp){
-               Sel_PFP_track_length.emplace_back(track -> Length());
+               track_length = track -> Length();
                auto start = track -> Start();
-               std::vector<double> startvect= {start.X(),start.Y(),start.Z()};
-               Sel_PFP_track_start.emplace_back(startvect);
+               track_start = {start.X(),start.Y(),start.Z()};
                auto end = track -> End();
-               std::vector<double> endvect = {end.X(),end.Y(),end.Z()};
-               Sel_PFP_track_end.emplace_back(endvect);
+               track_end = {end.X(),end.Y(),end.Z()};
 
                unsigned int trkid = track->ID();
                std::vector<art::Ptr<anab::Calorimetry>> calos = calos_from_tracks.at(trkid);
-               double dqdx_truncmean = GetDqDxTruncatedMean(calos); // this function is in MIPConsistency_Marco
+               track_dqdx_truncmean = GetDqDxTruncatedMean(calos); // this function is in MIPConsistency_Marco
 
                // Apply David's calibration: constant factor applied to trunc mean dqdx
                // to convert it to electrons/cm, and compare MC and data
                // Multiply MC by 198 and data by 243
                // !!! Note that this should change when real calibration is available !!!
                if (evt.isRealData()){ // Data: multiply by 243
-                  dqdx_truncmean *= 243.;
+                  track_dqdx_truncmean *= 243.;
                }
                else{ // MC: multiply by 198
-                  dqdx_truncmean *= 198.;
+                  track_dqdx_truncmean *= 198.;
                }
 
-               dqdx_trunc_uncalib.emplace_back(dqdx_truncmean);
-
-               Sel_PFP_isMIP.emplace_back(IsMIP(track->Length(), dqdx_truncmean));
+               isMIP = IsMIP(track_length, track_dqdx_truncmean);
             }
 
-            // Fill non-track variables with nonsense values to keep indices lined up
-            Sel_PFP_shower_length.emplace_back(-9999);
-            Sel_PFP_shower_start.emplace_back(-9999);
-         }
+         } // IsTrack
 
          else if(lar_pandora::LArPandoraHelper::IsShower(pfp)) {
             std::vector<art::Ptr<recob::Shower>> showers_pfp = showers_from_pfps.at(pfp.key());
@@ -222,66 +224,62 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
                throw std::exception();
             }
             for (auto shower : showers_pfp) {
-               Sel_PFP_shower_length.emplace_back(shower -> Length());
+               shower_length = shower -> Length();
                auto start = shower -> ShowerStart();
-               std::vector<double> startvect = {start.X(),start.Y(),start.Z()};
-               Sel_PFP_shower_start.emplace_back(startvect);
+               shower_start = {start.X(),start.Y(),start.Z()};
             }
 
-            // Fill non-shower variables with nonsense values to keep indices lined up
-            Sel_PFP_track_length.emplace_back(-9999);
-            Sel_PFP_track_start.emplace_back(-9999);
-            Sel_PFP_track_end.emplace_back(-9999);
-            dqdx_trunc_uncalib.emplace_back(-9999);
-            Sel_PFP_isMIP.emplace_back(false);
-         }
+         } // IsShower
 
-         else if(lar_pandora::LArPandoraHelper::IsNeutrino(pfp)) {
-            // Fill non-neutrino variables with nonsense values to keep indices lined up
-            Sel_PFP_track_length.emplace_back(-9999);
-            Sel_PFP_track_start.emplace_back(-9999);
-            Sel_PFP_track_end.emplace_back(-9999);
-            dqdx_trunc_uncalib.emplace_back(-9999);
-            Sel_PFP_isMIP.emplace_back(false);
-            Sel_PFP_shower_length.emplace_back(-9999);
-            Sel_PFP_shower_start.emplace_back(-9999);
-         }
+         // Fill track/shower specific variables
+         TPCObj_PFP_track_length.emplace_back(track_length);
+         TPCObj_PFP_track_start.emplace_back(track_start);
+         TPCObj_PFP_track_end.emplace_back(track_end);
+         TPCObj_PFP_track_dqdx_truncmean.emplace_back(track_dqdx_truncmean);
+         TPCObj_PFP_isMIP.emplace_back(isMIP);
+         TPCObj_PFP_shower_length.emplace_back(shower_length);
+         TPCObj_PFP_shower_start.emplace_back(shower_start);
+
+
+         // Do reco-truth matching...
 
          auto mcghosts = mcghost_from_pfp.at(pfp.key());
          if (mcghosts.size() != 1) {
-            Sel_MCP_ID.emplace_back(-9999);
-            Sel_MCP_PDG.emplace_back(-9999);
-            Sel_MCP_E.emplace_back(-9999);
+            TPCObj_PFP_MCPid.emplace_back(-9999);
+            TPCObj_PFP_truePDG.emplace_back(-9999);
+            TPCObj_PFP_trueE.emplace_back(-9999);
+            TPCObj_PFP_trueKE.emplace_back(-9999);
             continue;
          }
          auto mcghost = mcghosts[0];
 
          auto mcps = mcp_from_mcghost.at(mcghost.key());
          if(mcps.size() != 1) {
-            Sel_MCP_ID.emplace_back(-9999);
-            Sel_MCP_PDG.emplace_back(-9999);
-            Sel_MCP_E.emplace_back(-9999);
+            TPCObj_PFP_MCPid.emplace_back(-9999);
+            TPCObj_PFP_truePDG.emplace_back(-9999);
+            TPCObj_PFP_trueE.emplace_back(-9999);
+            TPCObj_PFP_trueKE.emplace_back(-9999);
             continue;
          }
          auto mcp = mcps[0];
 
-         Sel_MCP_ID.emplace_back(mcp -> TrackId());
-         Sel_MCP_PDG.emplace_back(mcp -> PdgCode());
-         Sel_MCP_E.emplace_back(mcp -> E());
+         TPCObj_PFP_MCPid.emplace_back(mcp -> TrackId());
+         TPCObj_PFP_truePDG.emplace_back(mcp -> PdgCode());
+         TPCObj_PFP_trueE.emplace_back(mcp -> E());
+         TPCObj_PFP_trueE.emplace_back(mcp -> E() - mcp -> Mass());
 
-      }
-
+      } // loop over pfps
 
 
       // Get neutrino candidate vertex from TPCObject
-      recob::Vertex tpcobj_nu_vtx = tpcobj_candidate->GetVertex();
+      recob::Vertex TPCObj_nu_vtx = TPCObj_candidate->GetVertex();
       double reco_nu_vtx[3];
-      tpcobj_nu_vtx.XYZ(reco_nu_vtx);
-      tpcobj_reco_vtx = {reco_nu_vtx[0], reco_nu_vtx[1], reco_nu_vtx[2]};
+      TPCObj_nu_vtx.XYZ(reco_nu_vtx);
+      TPCObj_reco_vtx = {reco_nu_vtx[0], reco_nu_vtx[1], reco_nu_vtx[2]};
       // Do we need to correct for X position (time offset) and space charge? Marco seems to
       // -- Follow up!
 
-   }
+   } // if selected
 
    // Get all MCParticles
    art::Handle<std::vector<simb::MCParticle>> mcp_h;
@@ -289,15 +287,16 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
    std::vector<art::Ptr<simb::MCParticle>> mcp_v;
    art::fill_ptr_vector(mcp_v, mcp_h);
 
-   bool recorded = false;
+   bool nu_recorded = false;
 
-   //backtracker replacement boilerplate
+   // backtracker replacement boilerplate
    std::unique_ptr<truth::IMCTruthMatching> fMCTruthMatching;
    const fhicl::ParameterSet& truthParams = pset.get<fhicl::ParameterSet>("MCTruthMatching");
    fMCTruthMatching = std::unique_ptr<truth::IMCTruthMatching>(new truth::AssociationsTruth(truthParams));
    fMCTruthMatching->Rebuild(evt);
 
-   //Loop over MCParticles...
+   // Loop over all MCParticles in the event...
+   // Note: Only filled for particles from true beam neutrinos!
    for (auto mcpar : mcp_v) {
 
       art::Ptr<simb::MCTruth> mc_truth = fMCTruthMatching -> TrackIDToMCTruth(mcpar -> TrackId());
@@ -312,6 +311,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       MCP_Py.emplace_back(mcpar -> Py());
       MCP_Pz.emplace_back(mcpar -> Pz());
       MCP_E.emplace_back(mcpar -> E());
+      MCP_KE.emplace_back(mcpar -> E() - mcpar -> Mass());
 
       simb::MCTrajectory traj = mcpar -> Trajectory();
       MCP_length.emplace_back(traj.TotalLength());
@@ -324,11 +324,11 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
       //Record neutrino info (once)
       //Note: Potential issues for events with multiple neutrinos
-      if(!recorded) {
+      if(!nu_recorded) {
 
          if (!(mc_truth -> NeutrinoSet())) continue;
 
-         recorded = true;
+         nu_recorded = true;
 
          simb::MCNeutrino nu = mc_truth -> GetNeutrino();
          simb::MCParticle neutrino = nu.Nu();
@@ -362,29 +362,31 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("subrun_num", &(vars->subrun_num));
    t -> Branch("event_num", &(vars->event_num));
 
-   t -> Branch("topology", &(vars->topology), "topology/I");
+   t -> Branch("Marco_cutflow", &(vars->Marco_cutflow));
+   t -> Branch("Marco_selected", &(vars->Marco_selected));
 
-   t -> Branch("cutflow", &(vars->cutflow));
-   t -> Branch("isSelected", &(vars->isSelected));
-   t -> Branch("Sel_PFP_track_length", &(vars->Sel_PFP_track_length));
-   t -> Branch("Sel_PFP_track_start", &(vars->Sel_PFP_track_start));
-   t -> Branch("Sel_PFP_track_end", &(vars->Sel_PFP_track_end));
-   t -> Branch("Sel_PFP_shower_length", &(vars->Sel_PFP_shower_length));
-   t -> Branch("Sel_PFP_shower_start", &(vars->Sel_PFP_shower_start));
-   t -> Branch("NPFPs", &(vars->NPFPs));
-   t -> Branch("NTracks", &(vars->NTracks));
-   t -> Branch("NShowers", &(vars->NShowers));
-   t -> Branch("Sel_PFP_isTrack", &(vars->Sel_PFP_isTrack));
-   t -> Branch("Sel_PFP_isShower", &(vars->Sel_PFP_isShower));
-   t -> Branch("Sel_PFP_isDaughter", &(vars->Sel_PFP_isDaughter));
-   t -> Branch("Sel_PFP_isMIP", &(vars->Sel_PFP_isMIP));
-   t -> Branch("Sel_PFP_ID", &(vars->Sel_PFP_ID));
-   t -> Branch("Sel_MCP_ID", &(vars->Sel_MCP_ID));
-   t -> Branch("Sel_MCP_PDG", &(vars->Sel_MCP_PDG));
-   t -> Branch("Sel_MCP_E", &(vars->Sel_MCP_E));
-   t -> Branch("tpcobj_origin", &(vars->tpcobj_origin));
-   t -> Branch("tpcobj_origin_extra", &(vars->tpcobj_origin_extra));
-   t -> Branch("tpcobj_reco_vtx", &(vars->tpcobj_reco_vtx));
+   t -> Branch("TPCObj_beamnu_topology", &(vars->TPCObj_beamnu_topology), "TPCObj_beamnu_topology/I");
+   t -> Branch("TPCObj_PFP_track_length", &(vars->TPCObj_PFP_track_length));
+   t -> Branch("TPCObj_PFP_track_start", &(vars->TPCObj_PFP_track_start));
+   t -> Branch("TPCObj_PFP_track_end", &(vars->TPCObj_PFP_track_end));
+   t -> Branch("TPCObj_PFP_track_dqdx_truncmean", &(vars->TPCObj_PFP_track_dqdx_truncmean));
+   t -> Branch("TPCObj_PFP_isMIP", &(vars->TPCObj_PFP_isMIP));
+   t -> Branch("TPCObj_PFP_shower_length", &(vars->TPCObj_PFP_shower_length));
+   t -> Branch("TPCObj_PFP_shower_start", &(vars->TPCObj_PFP_shower_start));
+   t -> Branch("TPCObj_NPFPs", &(vars->TPCObj_NPFPs));
+   t -> Branch("TPCObj_NTracks", &(vars->TPCObj_NTracks));
+   t -> Branch("TPCObj_NShowers", &(vars->TPCObj_NShowers));
+   t -> Branch("TPCObj_PFP_isTrack", &(vars->TPCObj_PFP_isTrack));
+   t -> Branch("TPCObj_PFP_isShower", &(vars->TPCObj_PFP_isShower));
+   t -> Branch("TPCObj_PFP_isDaughter", &(vars->TPCObj_PFP_isDaughter));
+   t -> Branch("TPCObj_PFP_id", &(vars->TPCObj_PFP_id));
+   t -> Branch("TPCObj_PFP_MCPid", &(vars->TPCObj_PFP_MCPid));
+   t -> Branch("TPCObj_PFP_truePDG", &(vars->TPCObj_PFP_truePDG));
+   t -> Branch("TPCObj_PFP_trueE", &(vars->TPCObj_PFP_trueE));
+   t -> Branch("TPCObj_PFP_trueKE", &(vars->TPCObj_PFP_trueKE));
+   t -> Branch("TPCObj_origin", &(vars->TPCObj_origin));
+   t -> Branch("TPCObj_origin_extra", &(vars->TPCObj_origin_extra));
+   t -> Branch("TPCObj_reco_vtx", &(vars->TPCObj_reco_vtx));
 
    t -> Branch("MCP_PDG", &(vars->MCP_PDG));
    t -> Branch("MCP_length", &(vars->MCP_length));
@@ -396,6 +398,7 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("MCP_Py", &(vars->MCP_Py));
    t -> Branch("MCP_Pz", &(vars->MCP_Pz));
    t -> Branch("MCP_E", &(vars->MCP_E));
+   t -> Branch("MCP_KE", &(vars->MCP_KE));
    t -> Branch("MCP_isContained", &(vars->MCP_isContained));
 
    t -> Branch("nu_vtxx", &(vars->nu_vtxx));
@@ -405,10 +408,7 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("nu_PDG", &(vars->nu_PDG));
    t -> Branch("nu_E", &(vars->nu_E));
 
-   t -> Branch("dqdx_trunc_uncalib", &(vars->dqdx_trunc_uncalib));
-
    t -> Branch("CC1picutflow", &(vars->CC1picutflow));
-   t -> Branch("PassesCC1piSelec", &(vars->PassesCC1piSelec));
 
 }
 
