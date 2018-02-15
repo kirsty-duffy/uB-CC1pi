@@ -266,7 +266,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          TPCObj_PFP_MCPid.emplace_back(mcp -> TrackId());
          TPCObj_PFP_truePDG.emplace_back(mcp -> PdgCode());
          TPCObj_PFP_trueE.emplace_back(mcp -> E());
-         TPCObj_PFP_trueE.emplace_back(mcp -> E() - mcp -> Mass());
+         TPCObj_PFP_trueKE.emplace_back(mcp -> E() - mcp -> Mass());
 
       } // loop over pfps
 
