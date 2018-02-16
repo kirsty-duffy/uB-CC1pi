@@ -20,30 +20,6 @@ double GetPOT(TString FileName) {
 
 }
 
-// Can swap to using Marco's FV calculator to make this cleaner?
-// Can also just put this in the tree once we settle on a particular FV def
-const double xmin = 0;
-const double xmax = 256.35;
-const double ymin = -115.53;
-const double ymax = 117.47;
-const double zmin = 0.1;
-const double zmax = 1036.9;
-const double FVxmin = xmin + 12;
-const double FVxmax = xmax - 12;
-const double FVymin = ymin + 35;
-const double FVymax = ymax - 35;
-const double FVzmin = zmin + 25;
-const double FVzmax = zmax - 85;
-
-bool inFV(double x, double y, double z){
-
-//   if (x > FVxmin && x < FVxmax && y > FVymin && y < FVymax && z > FVzmin && z < FVzmax && (z < 675 || z > 775)) return true;
-   if (x > FVxmin && x < FVxmax && y > FVymin && y < FVymax && z > FVzmin && z < FVzmax) return true;
-   else return false;
-
-}
-
-
 void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveString, TString FileName) {
 
    //Setup tree...
@@ -55,25 +31,31 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    unsigned int subrun_num;
    unsigned int event_num;
 
-   NuIntTopology topology;
+   std::map<std::string,bool> *Marco_cutflow = NULL;
+   bool Marco_selected;
 
-   std::map<std::string,bool> *cutflow = NULL;
-   bool isSelected;
-   std::vector<double> *track_length = NULL;
-   std::vector<double> *shower_length = NULL;
-   int NPFPs;
-   int NTracks;
-   int NShowers;
-   std::vector<bool> *Sel_PFP_isTrack = NULL;
-   std::vector<bool> *Sel_PFP_isShower = NULL;
-   std::vector<bool> *Sel_PFP_isDaughter = NULL;
-//   std::vector<bool> *Sel_PFP_isMIP = NULL;
-   std::vector<int> *Sel_PFP_ID = NULL;
-   std::vector<int> *Sel_MCP_ID = NULL;
-   std::vector<int> *Sel_MCP_PDG = NULL;
-   std::vector<double> *Sel_MCP_E = NULL;
-   int tpcobj_origin;
-   int tpcobj_origin_extra;
+   NuIntTopology TPCObj_beamnu_topology;
+   std::vector<double> *TPCObj_PFP_track_length = NULL;
+   std::vector<std::vector<double>> *TPCObj_PFP_track_start = NULL;
+   std::vector<std::vector<double>> *TPCObj_PFP_track_end = NULL;
+   std::vector<double> *TPCObj_PFP_track_dqdx_truncmean = NULL;
+   std::vector<bool> *TPCObj_PFP_isMIP = NULL;
+   std::vector<double> *TPCObj_PFP_shower_length = NULL;
+   std::vector<std::vector<double>> *TPCObj_PFP_shower_start = NULL;
+   int TPCObj_NPFPs;
+   int TPCObj_NTracks;
+   int TPCObj_NShowers;
+   std::vector<bool> *TPCObj_PFP_isTrack = NULL;
+   std::vector<bool> *TPCObj_PFP_isShower = NULL;
+   std::vector<bool> *TPCObj_PFP_isDaughter = NULL;
+   std::vector<int> *TPCObj_PFP_id = NULL;
+   std::vector<int> *TPCObj_PFP_MCPid = NULL;
+   std::vector<int> *TPCObj_PFP_truePDG = NULL;
+   std::vector<double> *TPCObj_PFP_trueE = NULL;
+   std::vector<double> *TPCObj_PFP_trueKE = NULL;
+   int TPCObj_origin;
+   int TPCObj_origin_extra;
+   std::vector<double> *TPCObj_reco_vtx = NULL;
 
    std::vector<int> *MCP_PDG = NULL;
    std::vector<double> *MCP_length = NULL;
@@ -85,8 +67,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    std::vector<double> *MCP_Py = NULL;
    std::vector<double> *MCP_Pz = NULL;
    std::vector<double> *MCP_E = NULL;
-//   std::vector<bool> *MCP_isContained = NULL;
-   std::vector<bool> *MIPConsistency = NULL;
+   std::vector<double> *MCP_KE = NULL;
+   std::vector<bool> *MCP_isContained = NULL;
 
    std::vector<double> *nu_vtxx = NULL;
    std::vector<double> *nu_vtxy = NULL;
@@ -95,36 +77,38 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    std::vector<int> *nu_PDG = NULL;
    std::vector<double> *nu_E = NULL;
 
-   std::vector<double> *dqdx_trunc_uncalib = NULL;
-
    std::map<std::string,bool> *CC1picutflow = NULL;
-   bool PassesCC1piSelec;
-   std::string *CC1piSelecFailureReason = NULL;
 
    t -> SetBranchAddress("isData", &isData);
    t -> SetBranchAddress("run_num", &run_num);
    t -> SetBranchAddress("subrun_num", &subrun_num);
    t -> SetBranchAddress("event_num", &event_num);
 
-   t -> SetBranchAddress("topology", &topology);
+   t -> SetBranchAddress("Marco_cutflow", &Marco_cutflow);
+   t -> SetBranchAddress("Marco_selected", &Marco_selected);
 
-   t -> SetBranchAddress("cutflow", &cutflow);
-   t -> SetBranchAddress("isSelected", &isSelected);
-   t -> SetBranchAddress("track_length", &track_length);
-   t -> SetBranchAddress("shower_length", &shower_length);
-   t -> SetBranchAddress("NPFPs", &NPFPs);
-   t -> SetBranchAddress("NTracks", &NTracks);
-   t -> SetBranchAddress("NShowers", &NShowers);
-   t -> SetBranchAddress("Sel_PFP_isTrack", &Sel_PFP_isTrack);
-   t -> SetBranchAddress("Sel_PFP_isShower", &Sel_PFP_isShower);
-   t -> SetBranchAddress("Sel_PFP_isDaughter", &Sel_PFP_isDaughter);
-//   t -> SetBranchAddress("Sel_PFP_isMIP", &Sel_PFP_isMIP);
-   t -> SetBranchAddress("Sel_PFP_ID", &Sel_PFP_ID);
-   t -> SetBranchAddress("Sel_MCP_ID", &Sel_MCP_ID);
-   t -> SetBranchAddress("Sel_MCP_PDG", &Sel_MCP_PDG);
-   t -> SetBranchAddress("Sel_MCP_E", &Sel_MCP_E);
-   t -> SetBranchAddress("tpcobj_origin", &tpcobj_origin);
-   t -> SetBranchAddress("tpcobj_origin_extra", &tpcobj_origin_extra);
+   t -> SetBranchAddress("TPCObj_beamnu_topology", &TPCObj_beamnu_topology);
+   t -> SetBranchAddress("TPCObj_PFP_track_length", &TPCObj_PFP_track_length);
+   t -> SetBranchAddress("TPCObj_PFP_track_start", &TPCObj_PFP_track_start);
+   t -> SetBranchAddress("TPCObj_PFP_track_end", &TPCObj_PFP_track_end);
+   t -> SetBranchAddress("TPCObj_PFP_track_dqdx_truncmean", &TPCObj_PFP_track_dqdx_truncmean);
+   t -> SetBranchAddress("TPCObj_PFP_isMIP", &TPCObj_PFP_isMIP);
+   t -> SetBranchAddress("TPCObj_PFP_shower_length", &TPCObj_PFP_shower_length);
+   t -> SetBranchAddress("TPCObj_PFP_shower_start", &TPCObj_PFP_shower_start);
+   t -> SetBranchAddress("TPCObj_NPFPs", &TPCObj_NPFPs);
+   t -> SetBranchAddress("TPCObj_NTracks", &TPCObj_NTracks);
+   t -> SetBranchAddress("TPCObj_NShowers", &TPCObj_NShowers);
+   t -> SetBranchAddress("TPCObj_PFP_isTrack", &TPCObj_PFP_isTrack);
+   t -> SetBranchAddress("TPCObj_PFP_isShower", &TPCObj_PFP_isShower);
+   t -> SetBranchAddress("TPCObj_PFP_isDaughter", &TPCObj_PFP_isDaughter);
+   t -> SetBranchAddress("TPCObj_PFP_id", &TPCObj_PFP_id);
+   t -> SetBranchAddress("TPCObj_PFP_MCPid", &TPCObj_PFP_MCPid);
+   t -> SetBranchAddress("TPCObj_PFP_truePDG", &TPCObj_PFP_truePDG);
+   t -> SetBranchAddress("TPCObj_PFP_trueE", &TPCObj_PFP_trueE);
+   t -> SetBranchAddress("TPCObj_PFP_trueKE", &TPCObj_PFP_trueKE);
+   t -> SetBranchAddress("TPCObj_origin", &TPCObj_origin);
+   t -> SetBranchAddress("TPCObj_origin_extra", &TPCObj_origin_extra);
+   t -> SetBranchAddress("TPCObj_reco_vtx", &TPCObj_reco_vtx);
 
    t -> SetBranchAddress("MCP_PDG", &MCP_PDG);
    t -> SetBranchAddress("MCP_length", &MCP_length);
@@ -136,8 +120,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchAddress("MCP_Py", &MCP_Py);
    t -> SetBranchAddress("MCP_Pz", &MCP_Pz);
    t -> SetBranchAddress("MCP_E", &MCP_E);
-//   t -> SetBranchAddress("MCP_isContained", &MCP_isContained);
-   t -> SetBranchAddress("MIPConsistency", &MIPConsistency);
+   t -> SetBranchAddress("MCP_KE", &MCP_KE);
+   t -> SetBranchAddress("MCP_isContained", &MCP_isContained);
 
    t -> SetBranchAddress("nu_vtxx", &nu_vtxx);
    t -> SetBranchAddress("nu_vtxy", &nu_vtxy);
@@ -146,11 +130,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchAddress("nu_PDG", &nu_PDG);
    t -> SetBranchAddress("nu_E", &nu_E);
 
-   t -> SetBranchAddress("dqdx_trunc_uncalib", &dqdx_trunc_uncalib);
-
    t -> SetBranchAddress("CC1picutflow", &CC1picutflow);
-   t -> SetBranchAddress("PassesCC1piSelec", &PassesCC1piSelec);
-   t -> SetBranchAddress("CC1piSelecFailureReason", &CC1piSelecFailureReason);
+
 
    TEfficiency* eff_nuE = new TEfficiency("eff_nuE",";True Neutrino Energy [GeV];",15,0,3);
    TEfficiency* eff_muP = new TEfficiency("eff_muP",";True Muon Momentum [GeV];",15,0,2);
@@ -228,7 +209,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    StackedHistPDGCode *shwrtrue_bg_stack = new StackedHistPDGCode("shwrtrue_bg_stack", ";Background: Number of shower #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)",10,0,10);
 
    StackedHistPDGCode *len_stack_byPDG = new StackedHistPDGCode("len_stack_byPDG", ";Longest Track Length [cm];Selected Events (normalised to 3.782 #times 10^{19} POT)", 30, 0, 700);
-   
+
 
    len_muCC1pip -> SetFillColor(kRed);
    len_otherCC1pip -> SetFillColor(kOrange);
@@ -287,11 +268,11 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    TEfficiency* eff_track_muon = new TEfficiency("eff_track_muon",";True Kinetic Energy [GeV];",10,0,2);
    TEfficiency* eff_track_pion = new TEfficiency("eff_track_pion",";True Kinetic Energy [GeV];",10,0,2);
    TEfficiency* eff_track_proton = new TEfficiency("eff_track_proton",";True Kinetic Energy [GeV];",10,0,2);
-/*
-   TH2F* mu_pi_length = new TH2F("mu_pi_length",";Muon length [cm];Pion length [cm]", 15, 0, 350, 15, 0, 100);
-   TH2F* mu_mom_length = new TH2F("mu_mom_length", "Momentum [GeV/c];Length [cm]", 20, 0, 1, 20, 0, 350);
-   TH2F* pi_mom_length = new TH2F("pi_mom_length", "Momentum [GeV/c];Length [cm]", 20, 0, 1, 20, 0, 100);
-*/
+   /*
+      TH2F* mu_pi_length = new TH2F("mu_pi_length",";Muon length [cm];Pion length [cm]", 15, 0, 350, 15, 0, 100);
+      TH2F* mu_mom_length = new TH2F("mu_mom_length", "Momentum [GeV/c];Length [cm]", 20, 0, 1, 20, 0, 350);
+      TH2F* pi_mom_length = new TH2F("pi_mom_length", "Momentum [GeV/c];Length [cm]", 20, 0, 1, 20, 0, 100);
+      */
 
    const int nentries = t -> GetEntries();
 
@@ -302,40 +283,40 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    for (int i = 0; i < nentries; i++) {
 
       t -> GetEntry(i);
-/*
-      if(nu_isCC -> at(0) && nu_PDG -> at(0) == 14 && inFV(nu_vtxx -> at(0), nu_vtxy -> at(0), nu_vtxz -> at(0)) && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 13) == 1 && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 211) == 1 && MCP_PDG -> size() == 2 + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2112) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2212) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2000000101)) {
+      /*
+         if(nu_isCC -> at(0) && nu_PDG -> at(0) == 14 && inFV(nu_vtxx -> at(0), nu_vtxy -> at(0), nu_vtxz -> at(0)) && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 13) == 1 && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 211) == 1 && MCP_PDG -> size() == 2 + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2112) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2212) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2000000101)) {
          nsignal++;
          double muon_mom = 0;
          double muon_len = 0;
          double pion_mom = 0;
          double pion_len = 0;
          for(int j = 0; j < MCP_PDG -> size(); j++) {
-            if (MCP_PDG -> at(j) == 13) {
-               if(MCP_isContained -> at(j)) {
-                  muom_mom = MCP_P -> at(j);
-                  muon_len = MCP_length -> at(j);
-               }
-            }
-            else if(MCP_PDG -> at(j) == 211) {
-               if(MCP_isContained -> at(j)) {
-                  pion_mom = MCP_P -> at(j);
-                  pion_len = MCP_length -> at(j);
-               }
-            }
+         if (MCP_PDG -> at(j) == 13) {
+         if(MCP_isContained -> at(j)) {
+         muom_mom = MCP_P -> at(j);
+         muon_len = MCP_length -> at(j);
+         }
+         }
+         else if(MCP_PDG -> at(j) == 211) {
+         if(MCP_isContained -> at(j)) {
+         pion_mom = MCP_P -> at(j);
+         pion_len = MCP_length -> at(j);
+         }
+         }
          }
          if(muon_mom != 0) {
-            mu_mom_length -> Fill(muon_mom, muon_len);
+         mu_mom_length -> Fill(muon_mom, muon_len);
          }
          if(pion_mom != 0) {
-            pi_mom_length -> Fill(pion_mom, pion_len);
+         pi_mom_length -> Fill(pion_mom, pion_len);
          }
          if(muon_mom != 0 && pion_mom != 0) {
-            mu_pi_length -> Fill(muon_len, pion_len);
-            nsignal_contained++;
-            if(muon_len > pion_len) longermuon++;
+         mu_pi_length -> Fill(muon_len, pion_len);
+         nsignal_contained++;
+         if(muon_len > pion_len) longermuon++;
          }
-      }
-*/
+         }
+         */
       bool SelectedEvent = true;
       for(std::map<std::string,bool>::const_iterator iter = SelectionCutflow.begin(); iter != SelectionCutflow.end(); ++iter) {
          if((CC1picutflow -> find(iter -> first)) -> second != iter -> second) {
@@ -386,118 +367,118 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          int track_daughters = 0;
          int mip_daughters = 0;
          int track_counter = 0;
-	 std::vector<double> vtxtrack_daughters = {0.};
-	 std::vector<double> vtxshwr_daughters = {0.};
+         std::vector<double> vtxtrack_daughters = {0.};
+         std::vector<double> vtxshwr_daughters = {0.};
 
          for(int j = 0; j < NPFPs; j++) {
-	   if(Sel_PFP_isShower -> at(j) && Sel_PFP_isDaughter -> at(j)){
-	     shower_daughters++;
-	     vtxshwr_daughters.push_back(0); // Add things in the tree!
-	   }
+            if(Sel_PFP_isShower -> at(j) && Sel_PFP_isDaughter -> at(j)){
+               shower_daughters++;
+               vtxshwr_daughters.push_back(0); // Add things in the tree!
+            }
             if(Sel_PFP_isTrack -> at(j)) {
                if (Sel_PFP_isDaughter -> at(j)) {
                   track_daughters++;
                   if(MIPConsistency -> at(track_counter)) mip_daughters++;
-		  vtxtrack_daughters.push_back(0); // Add things in the tree!
+                  vtxtrack_daughters.push_back(0); // Add things in the tree!
                }
                track_counter++;
-	       
-	       // Make plot of track length by true particle type
-	       // Should this be for reco daughters only or all tracks (as currently)?
-	       
-	       // Commented out because indices don't line up between track_length and Sel_MCP_PDG
-	       //std::cout << j << std::endl;
-	       //std::cout << "mcp " << Sel_MCP_PDG->at(j) << std::endl;
-	       //std::cout << "track length " << track_length->at(j) << std::endl;
-		 //len_stack_byPDG->Fill((PDGCode)Sel_MCP_PDG->at(j), track_length->at(j));
-	    }
-	 }
+
+               // Make plot of track length by true particle type
+               // Should this be for reco daughters only or all tracks (as currently)?
+
+               // Commented out because indices don't line up between track_length and Sel_MCP_PDG
+               //std::cout << j << std::endl;
+               //std::cout << "mcp " << Sel_MCP_PDG->at(j) << std::endl;
+               //std::cout << "track length " << track_length->at(j) << std::endl;
+               //len_stack_byPDG->Fill((PDGCode)Sel_MCP_PDG->at(j), track_length->at(j));
+            }
+         }
 
          if(tpcobj_origin==1) {
             len_cosmic -> Fill(maxlen);
             tracks_cosmic -> Fill(track_daughters);
             showers_cosmic -> Fill(shower_daughters);
             mips_cosmic -> Fill(mip_daughters);
-	    for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
-	      vtxtrack_cosmic -> Fill(vtxtrack_daughters.at(i_tr));
-	    }
-	    for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
-	      vtxshwr_cosmic -> Fill(vtxshwr_daughters.at(i_sh));
-	    }
+            for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
+               vtxtrack_cosmic -> Fill(vtxtrack_daughters.at(i_tr));
+            }
+            for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
+               vtxshwr_cosmic -> Fill(vtxshwr_daughters.at(i_sh));
+            }
          }
          else if(tpcobj_origin==2) {
             len_mixed -> Fill(maxlen);
             tracks_mixed -> Fill(track_daughters);
             showers_mixed -> Fill(shower_daughters);
             mips_mixed -> Fill(mip_daughters);
-	    for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
-	      vtxtrack_mixed -> Fill(vtxtrack_daughters.at(i_tr));
-	    }
-	    for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
-	      vtxshwr_mixed -> Fill(vtxshwr_daughters.at(i_sh));
-	    }
+            for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
+               vtxtrack_mixed -> Fill(vtxtrack_daughters.at(i_tr));
+            }
+            for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
+               vtxshwr_mixed -> Fill(vtxshwr_daughters.at(i_sh));
+            }
          }
          else if(tpcobj_origin!=0) {
             len_unknown -> Fill(maxlen);
             tracks_unknown -> Fill(track_daughters);
             showers_unknown -> Fill(shower_daughters);
             mips_unknown -> Fill(mip_daughters);
-	    for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
-	      vtxtrack_unknown -> Fill(vtxtrack_daughters.at(i_tr));
-	    }
-	    for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
-	      vtxshwr_unknown -> Fill(vtxshwr_daughters.at(i_sh));
-	    }
+            for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
+               vtxtrack_unknown -> Fill(vtxtrack_daughters.at(i_tr));
+            }
+            for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
+               vtxshwr_unknown -> Fill(vtxshwr_daughters.at(i_sh));
+            }
          }
          else if(!inFV(nu_vtxx -> at(0), nu_vtxy -> at(0), nu_vtxz -> at(0))) {
             len_outFV -> Fill(maxlen);
             tracks_outFV -> Fill(track_daughters);
             showers_outFV -> Fill(shower_daughters);
             mips_outFV -> Fill(mip_daughters);
-	    for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
-	      vtxtrack_outFV -> Fill(vtxtrack_daughters.at(i_tr));
-	    }
-	    for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
-	      vtxshwr_outFV -> Fill(vtxshwr_daughters.at(i_sh));
-	    }
+            for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
+               vtxtrack_outFV -> Fill(vtxtrack_daughters.at(i_tr));
+            }
+            for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
+               vtxshwr_outFV -> Fill(vtxshwr_daughters.at(i_sh));
+            }
          }
          else if(tpcobj_origin==0) {
-	   if(nu_isCC -> at(0) == 0) {
-	     len_NC -> Fill(maxlen);
-	     tracks_NC -> Fill(track_daughters);
-	     showers_NC -> Fill(shower_daughters);
-	     mips_NC -> Fill(mip_daughters);
-	     for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
-	       vtxtrack_NC -> Fill(vtxtrack_daughters.at(i_tr));
-	     }
-	     for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
-	       vtxshwr_NC -> Fill(vtxshwr_daughters.at(i_sh));
-	     }
-	   }
-	   else if(std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 13) == 1 && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 211) == 1 && MCP_PDG -> size() == 2 + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2112) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2212) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2000000101)) {
+            if(nu_isCC -> at(0) == 0) {
+               len_NC -> Fill(maxlen);
+               tracks_NC -> Fill(track_daughters);
+               showers_NC -> Fill(shower_daughters);
+               mips_NC -> Fill(mip_daughters);
+               for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
+                  vtxtrack_NC -> Fill(vtxtrack_daughters.at(i_tr));
+               }
+               for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
+                  vtxshwr_NC -> Fill(vtxshwr_daughters.at(i_sh));
+               }
+            }
+            else if(std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 13) == 1 && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 211) == 1 && MCP_PDG -> size() == 2 + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2112) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2212) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2000000101)) {
                if(nu_PDG -> at(0) == 14) {
                   len_muCC1pip -> Fill(maxlen);
                   tracks_muCC1pip -> Fill(track_daughters);
                   showers_muCC1pip -> Fill(shower_daughters);
                   mips_muCC1pip -> Fill(mip_daughters);
-		  for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
-		    vtxtrack_muCC1pip -> Fill(vtxtrack_daughters.at(i_tr));
-		  }
-		  for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
-		    vtxshwr_muCC1pip -> Fill(vtxshwr_daughters.at(i_sh));
-		  }
+                  for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
+                     vtxtrack_muCC1pip -> Fill(vtxtrack_daughters.at(i_tr));
+                  }
+                  for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
+                     vtxshwr_muCC1pip -> Fill(vtxshwr_daughters.at(i_sh));
+                  }
                }
                else {
                   len_otherCC1pip -> Fill(maxlen);
                   tracks_otherCC1pip -> Fill(track_daughters);
                   showers_otherCC1pip -> Fill(shower_daughters);
                   mips_otherCC1pip -> Fill(mip_daughters);
-		  for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
-		    vtxtrack_otherCC1pip -> Fill(vtxtrack_daughters.at(i_tr));
-		  }
-		  for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
-		    vtxshwr_otherCC1pip -> Fill(vtxshwr_daughters.at(i_sh));
-		  }
+                  for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
+                     vtxtrack_otherCC1pip -> Fill(vtxtrack_daughters.at(i_tr));
+                  }
+                  for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
+                     vtxshwr_otherCC1pip -> Fill(vtxshwr_daughters.at(i_sh));
+                  }
                }
             }
             else {
@@ -505,12 +486,12 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
                tracks_CCother -> Fill(track_daughters);
                showers_CCother -> Fill(shower_daughters);
                mips_CCother -> Fill(mip_daughters);
-	       for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
-		 vtxtrack_CCother -> Fill(vtxtrack_daughters.at(i_tr));
-	       }
-	       for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
-		 vtxshwr_CCother -> Fill(vtxshwr_daughters.at(i_sh));
-	       }
+               for (int i_tr=0; i_tr < vtxtrack_daughters.size(); i_tr++){
+                  vtxtrack_CCother -> Fill(vtxtrack_daughters.at(i_tr));
+               }
+               for (int i_sh=0; i_sh < vtxshwr_daughters.size(); i_sh++){
+                  vtxshwr_CCother -> Fill(vtxshwr_daughters.at(i_sh));
+               }
             }
          }
 
@@ -542,33 +523,33 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
                }
             }
 
-	    // Look at what particles are being associated with showers
-	    if (Sel_PFP_isShower -> at(j)){
-	      PDGCode mcp_pdgcode = (PDGCode)Sel_MCP_PDG->at(j);
-	      if(isSignal) { // !!!Change this to use topology!!! If true CC1pip
-	        shwrtrue_stack->Fill(mcp_pdgcode, shower_daughters, 1.0/shower_daughters);
-	      }
-	      else{
-		shwrtrue_bg_stack->Fill(mcp_pdgcode, shower_daughters, 1.0/shower_daughters);
-	      }
-	    } // end if (Sel_PFP_isShower -> at(j))  
-	    
-	 } // end loop over Sel_MCP_PDG (j)
+            // Look at what particles are being associated with showers
+            if (Sel_PFP_isShower -> at(j)){
+               PDGCode mcp_pdgcode = (PDGCode)Sel_MCP_PDG->at(j);
+               if(isSignal) { // !!!Change this to use topology!!! If true CC1pip
+                  shwrtrue_stack->Fill(mcp_pdgcode, shower_daughters, 1.0/shower_daughters);
+               }
+               else{
+                  shwrtrue_bg_stack->Fill(mcp_pdgcode, shower_daughters, 1.0/shower_daughters);
+               }
+            } // end if (Sel_PFP_isShower -> at(j))  
+
+         } // end loop over Sel_MCP_PDG (j)
       }
    }
 
    TCanvas *c1 = new TCanvas("c1", "c1");
-/*
-   mu_pi_length -> Draw("COLZ");
-   c1 -> SaveAs("mu_pi_length.eps");
-   mu_mom_length -> Draw("COLZ");
-   c1 -> SaveAs("mu_mom_length.eps");
-   pi_mom_length -> Draw("COLZ");
-   c1 -> SaveAs("pi_mom_length.eps");
-   std::cout << "Signal events: " << nsignal << std::endl;
-   std::cout << "Contained signal: " << nsignal_contained << std::endl;
-   std::cout << "Muon longer: " << (1. * longermuon)/(mu_pi_length->GetEntries()) << std::endl;
-*/
+   /*
+      mu_pi_length -> Draw("COLZ");
+      c1 -> SaveAs("mu_pi_length.eps");
+      mu_mom_length -> Draw("COLZ");
+      c1 -> SaveAs("mu_mom_length.eps");
+      pi_mom_length -> Draw("COLZ");
+      c1 -> SaveAs("pi_mom_length.eps");
+      std::cout << "Signal events: " << nsignal << std::endl;
+      std::cout << "Contained signal: " << nsignal_contained << std::endl;
+      std::cout << "Muon longer: " << (1. * longermuon)/(mu_pi_length->GetEntries()) << std::endl;
+      */
    eff_nuE -> Draw("AP");
    pur_nuE -> Draw("P SAME");
    gPad->Update();
@@ -653,24 +634,24 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    len_CCother -> Scale(norm);
    len_otherCC1pip -> Scale(norm);
    len_muCC1pip -> Scale(norm);
-//   len_stack -> Add(len_unknown);
+   //   len_stack -> Add(len_unknown);
    len_stack -> Add(len_mixed);
    len_stack -> Add(len_cosmic);
    len_stack -> Add(len_outFV);
    len_stack -> Add(len_NC);
    len_stack -> Add(len_CCother);
-//   len_stack -> Add(len_otherCC1pip);
+   //   len_stack -> Add(len_otherCC1pip);
    len_stack -> Add(len_muCC1pip);
    len_stack -> Draw();
    auto len_legend = new TLegend(0.6,0.6,0.9,0.9);
    len_legend -> AddEntry(len_muCC1pip, "#nu_{#mu} CC1#pi^{+}", "f");
-//   len_legend -> AddEntry(len_otherCC1pip, "#bar{#nu}_{#mu}, #nu_{e}, #bar{#nu}_{e} CC1#pi^{+}", "f");
+   //   len_legend -> AddEntry(len_otherCC1pip, "#bar{#nu}_{#mu}, #nu_{e}, #bar{#nu}_{e} CC1#pi^{+}", "f");
    len_legend -> AddEntry(len_CCother, "CC-Other", "f");
    len_legend -> AddEntry(len_NC, "NC", "f");
    len_legend -> AddEntry(len_outFV, "Out of FV", "f");
    len_legend -> AddEntry(len_cosmic, "Cosmic", "f");
    len_legend -> AddEntry(len_mixed, "Mixed", "f");
-//   len_legend -> AddEntry(len_unknown, "Unknown Origin", "f");
+   //   len_legend -> AddEntry(len_unknown, "Unknown Origin", "f");
    len_legend -> Draw("SAME");
    c1 -> SaveAs(TString::Format("%s_THStack_len.eps",SaveString.c_str()));
 
@@ -682,24 +663,24 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    tracks_CCother -> Scale(norm);
    tracks_otherCC1pip -> Scale(norm);
    tracks_muCC1pip -> Scale(norm);
-//   tracks_stack -> Add(tracks_unknown);
+   //   tracks_stack -> Add(tracks_unknown);
    tracks_stack -> Add(tracks_mixed);
    tracks_stack -> Add(tracks_cosmic);
    tracks_stack -> Add(tracks_outFV);
    tracks_stack -> Add(tracks_NC);
    tracks_stack -> Add(tracks_CCother);
-//   tracks_stack -> Add(tracks_otherCC1pip);
+   //   tracks_stack -> Add(tracks_otherCC1pip);
    tracks_stack -> Add(tracks_muCC1pip);
    tracks_stack -> Draw();
    auto tracks_legend = new TLegend(0.6,0.6,0.9,0.9);
    tracks_legend -> AddEntry(tracks_muCC1pip, "#nu_{#mu} CC1#pi^{+}", "f");
-//   tracks_legend -> AddEntry(tracks_otherCC1pip, "#bar{#nu}_{#mu}, #nu_{e}, #bar{#nu}_{e} CC1#pi^{+}", "f");
+   //   tracks_legend -> AddEntry(tracks_otherCC1pip, "#bar{#nu}_{#mu}, #nu_{e}, #bar{#nu}_{e} CC1#pi^{+}", "f");
    tracks_legend -> AddEntry(tracks_CCother, "CC-Other", "f");
    tracks_legend -> AddEntry(tracks_NC, "NC", "f");
    tracks_legend -> AddEntry(tracks_outFV, "Out of FV", "f");
    tracks_legend -> AddEntry(tracks_cosmic, "Cosmic", "f");
    tracks_legend -> AddEntry(tracks_mixed, "Mixed", "f");
-//   tracks_legend -> AddEntry(tracks_unknown, "Unknown Origin", "f");
+   //   tracks_legend -> AddEntry(tracks_unknown, "Unknown Origin", "f");
    tracks_legend -> Draw("SAME");
    c1 -> SaveAs(TString::Format("%s_THStack_tracks.eps",SaveString.c_str()));
 
@@ -711,24 +692,24 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    showers_CCother -> Scale(norm);
    showers_otherCC1pip -> Scale(norm);
    showers_muCC1pip -> Scale(norm);
-//   showers_stack -> Add(showers_unknown);
+   //   showers_stack -> Add(showers_unknown);
    showers_stack -> Add(showers_mixed);
    showers_stack -> Add(showers_cosmic);
    showers_stack -> Add(showers_outFV);
    showers_stack -> Add(showers_NC);
    showers_stack -> Add(showers_CCother);
-//   showers_stack -> Add(showers_otherCC1pip);
+   //   showers_stack -> Add(showers_otherCC1pip);
    showers_stack -> Add(showers_muCC1pip);
    showers_stack -> Draw();
    auto showers_legend = new TLegend(0.6,0.6,0.9,0.9);
    showers_legend -> AddEntry(showers_muCC1pip, "#nu_{#mu} CC1#pi^{+}", "f");
-//   showers_legend -> AddEntry(showers_otherCC1pip, "#bar{#nu}_{#mu}, #nu_{e}, #bar{#nu}_{e} CC1#pi^{+}", "f");
+   //   showers_legend -> AddEntry(showers_otherCC1pip, "#bar{#nu}_{#mu}, #nu_{e}, #bar{#nu}_{e} CC1#pi^{+}", "f");
    showers_legend -> AddEntry(showers_CCother, "CC-Other", "f");
    showers_legend -> AddEntry(showers_NC, "NC", "f");
    showers_legend -> AddEntry(showers_outFV, "Out of FV", "f");
    showers_legend -> AddEntry(showers_cosmic, "Cosmic", "f");
    showers_legend -> AddEntry(showers_mixed, "Mixed", "f");
-//   showers_legend -> AddEntry(showers_unknown, "Unknown Origin", "f");
+   //   showers_legend -> AddEntry(showers_unknown, "Unknown Origin", "f");
    showers_legend -> Draw("SAME");
    c1 -> SaveAs(TString::Format("%s_THStack_showers.eps",SaveString.c_str()));
 
@@ -740,24 +721,24 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    mips_CCother -> Scale(norm);
    mips_otherCC1pip -> Scale(norm);
    mips_muCC1pip -> Scale(norm);
-//   mips_stack -> Add(mips_unknown);
+   //   mips_stack -> Add(mips_unknown);
    mips_stack -> Add(mips_mixed);
    mips_stack -> Add(mips_cosmic);
    mips_stack -> Add(mips_outFV);
    mips_stack -> Add(mips_NC);
    mips_stack -> Add(mips_CCother);
-//   mips_stack -> Add(mips_otherCC1pip);
+   //   mips_stack -> Add(mips_otherCC1pip);
    mips_stack -> Add(mips_muCC1pip);
    mips_stack -> Draw();
    auto mips_legend = new TLegend(0.6,0.6,0.9,0.9);
    mips_legend -> AddEntry(mips_muCC1pip, "#nu_{#mu} CC1#pi^{+}", "f");
-//   mips_legend -> AddEntry(mips_otherCC1pip, "#bar{#nu}_{#mu}, #nu_{e}, #bar{#nu}_{e} CC1#pi^{+}", "f");
+   //   mips_legend -> AddEntry(mips_otherCC1pip, "#bar{#nu}_{#mu}, #nu_{e}, #bar{#nu}_{e} CC1#pi^{+}", "f");
    mips_legend -> AddEntry(mips_CCother, "CC-Other", "f");
    mips_legend -> AddEntry(mips_NC, "NC", "f");
    mips_legend -> AddEntry(mips_outFV, "Out of FV", "f");
    mips_legend -> AddEntry(mips_cosmic, "Cosmic", "f");
    mips_legend -> AddEntry(mips_mixed, "Mixed", "f");
-//   mips_legend -> AddEntry(mips_unknown, "Unknown Origin", "f");
+   //   mips_legend -> AddEntry(mips_unknown, "Unknown Origin", "f");
    mips_legend -> Draw("SAME");
    c1 -> SaveAs(TString::Format("%s_THStack_mips.eps",SaveString.c_str()));
 
@@ -769,24 +750,24 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    vtxtrack_CCother -> Scale(norm);
    vtxtrack_otherCC1pip -> Scale(norm);
    vtxtrack_muCC1pip -> Scale(norm);
-//   vtxtrack_stack -> Add(vtxtrack_unknown);
+   //   vtxtrack_stack -> Add(vtxtrack_unknown);
    vtxtrack_stack -> Add(vtxtrack_mixed);
    vtxtrack_stack -> Add(vtxtrack_cosmic);
    vtxtrack_stack -> Add(vtxtrack_outFV);
    vtxtrack_stack -> Add(vtxtrack_NC);
    vtxtrack_stack -> Add(vtxtrack_CCother);
-//   vtxtrack_stack -> Add(vtxtrack_otherCC1pip);
+   //   vtxtrack_stack -> Add(vtxtrack_otherCC1pip);
    vtxtrack_stack -> Add(vtxtrack_muCC1pip);
    vtxtrack_stack -> Draw();
    auto vtxtrack_legend = new TLegend(0.6,0.6,0.9,0.9);
    vtxtrack_legend -> AddEntry(vtxtrack_muCC1pip, "#nu_{#mu} CC1#pi^{+}", "f");
-//   vtxtrack_legend -> AddEntry(vtxtrack_otherCC1pip, "#bar{#nu}_{#mu}, #nu_{e}, #bar{#nu}_{e} CC1#pi^{+}", "f");
+   //   vtxtrack_legend -> AddEntry(vtxtrack_otherCC1pip, "#bar{#nu}_{#mu}, #nu_{e}, #bar{#nu}_{e} CC1#pi^{+}", "f");
    vtxtrack_legend -> AddEntry(vtxtrack_CCother, "CC-Other", "f");
    vtxtrack_legend -> AddEntry(vtxtrack_NC, "NC", "f");
    vtxtrack_legend -> AddEntry(vtxtrack_outFV, "Out of FV", "f");
    vtxtrack_legend -> AddEntry(vtxtrack_cosmic, "Cosmic", "f");
    vtxtrack_legend -> AddEntry(vtxtrack_mixed, "Mixed", "f");
-//   vtxtrack_legend -> AddEntry(vtxtrack_unknown, "Unknown Origin", "f");
+   //   vtxtrack_legend -> AddEntry(vtxtrack_unknown, "Unknown Origin", "f");
    vtxtrack_legend -> Draw("SAME");
    c1 -> SaveAs(TString::Format("%s_THStack_vtxtrack.eps",SaveString.c_str()));
 
@@ -798,27 +779,27 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    vtxshwr_CCother -> Scale(norm);
    vtxshwr_otherCC1pip -> Scale(norm);
    vtxshwr_muCC1pip -> Scale(norm);
-//   vtxshwr_stack -> Add(vtxshwr_unknown);
+   //   vtxshwr_stack -> Add(vtxshwr_unknown);
    vtxshwr_stack -> Add(vtxshwr_mixed);
    vtxshwr_stack -> Add(vtxshwr_cosmic);
    vtxshwr_stack -> Add(vtxshwr_outFV);
    vtxshwr_stack -> Add(vtxshwr_NC);
    vtxshwr_stack -> Add(vtxshwr_CCother);
-//   vtxshwr_stack -> Add(vtxshwr_otherCC1pip);
+   //   vtxshwr_stack -> Add(vtxshwr_otherCC1pip);
    vtxshwr_stack -> Add(vtxshwr_muCC1pip);
    vtxshwr_stack -> Draw();
    auto vtxshwr_legend = new TLegend(0.6,0.6,0.9,0.9);
    vtxshwr_legend -> AddEntry(vtxshwr_muCC1pip, "#nu_{#mu} CC1#pi^{+}", "f");
-//   vtxshwr_legend -> AddEntry(vtxshwr_otherCC1pip, "#bar{#nu}_{#mu}, #nu_{e}, #bar{#nu}_{e} CC1#pi^{+}", "f");
+   //   vtxshwr_legend -> AddEntry(vtxshwr_otherCC1pip, "#bar{#nu}_{#mu}, #nu_{e}, #bar{#nu}_{e} CC1#pi^{+}", "f");
    vtxshwr_legend -> AddEntry(vtxshwr_CCother, "CC-Other", "f");
    vtxshwr_legend -> AddEntry(vtxshwr_NC, "NC", "f");
    vtxshwr_legend -> AddEntry(vtxshwr_outFV, "Out of FV", "f");
    vtxshwr_legend -> AddEntry(vtxshwr_cosmic, "Cosmic", "f");
    vtxshwr_legend -> AddEntry(vtxshwr_mixed, "Mixed", "f");
-//   vtxshwr_legend -> AddEntry(vtxshwr_unknown, "Unknown Origin", "f");
+   //   vtxshwr_legend -> AddEntry(vtxshwr_unknown, "Unknown Origin", "f");
    vtxshwr_legend -> Draw("SAME");
    c1 -> SaveAs(TString::Format("%s_THStack_vtxshwr.eps",SaveString.c_str()));
-   
+
 
    shwrtrue_stack->DrawStack(norm, c1);
    c1 -> SaveAs(TString::Format("%s_THStack_signal_shwrtrue.eps",SaveString.c_str()));
@@ -856,13 +837,13 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
 
    double TotalEntries = 1. * (((TH1*)(len_stack -> GetStack() -> Last())) -> GetEntries());
    std::cout << "muCC1pip: " << len_muCC1pip -> GetEntries() / TotalEntries << std::endl;
-//   std::cout << "otherCC1pip: " << len_otherCC1pip -> GetEntries() / TotalEntries << std::endl; 
+   //   std::cout << "otherCC1pip: " << len_otherCC1pip -> GetEntries() / TotalEntries << std::endl; 
    std::cout << "CCother: " << len_CCother -> GetEntries() / TotalEntries << std::endl;
    std::cout << "NC: " << len_NC -> GetEntries() / TotalEntries << std::endl;
    std::cout << "outFV: " << len_outFV -> GetEntries() / TotalEntries << std::endl;
    std::cout << "cosmic: " << len_cosmic -> GetEntries() / TotalEntries << std::endl;
    std::cout << "mixed: " << len_mixed -> GetEntries() / TotalEntries << std::endl;
-//   std::cout << "unknown: " << len_unknown -> GetEntries() / TotalEntries << std::endl;
+   //   std::cout << "unknown: " << len_unknown -> GetEntries() / TotalEntries << std::endl;
 
    std::cout << "Total Efficiency: " << (1. * (eff_nuE -> GetPassedHistogram() -> GetEntries()))/(eff_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
    std::cout << "Total Purity: " << (1. * (pur_nuE -> GetPassedHistogram() -> GetEntries()))/(pur_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;

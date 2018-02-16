@@ -54,7 +54,6 @@ struct cc1pianavars{
   art::SubRunNumber_t subrun_num;
   art::EventNumber_t event_num;
   
-  
   std::map<std::string,bool> Marco_cutflow;
   bool Marco_selected;
 

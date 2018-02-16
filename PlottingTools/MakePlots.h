@@ -13,12 +13,11 @@
 
 #include "../Algorithms/TopologyEnums.h"
 #include "../Algorithms/PDGEnums.h"
+#include "../Algorithms/FVCheck.h"
 #include "StackedHistPDGCode.h"
 #include "StackedHistTopology.h"
 
 
 double GetPOT(TString FileName);
-
-bool inFV(double x, double y, double z);
 
 void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveString, TString FileName);
