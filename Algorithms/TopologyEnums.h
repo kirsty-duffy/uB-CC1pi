@@ -4,6 +4,8 @@
 #include <string>
 #include <iostream>
 
+// Note: kCosmic, kMixed, and kOutFV will never be set by GetTopology.cxx
+// They will be kUnknown and you must check for them yourself
 enum NuIntTopology{
   kCC0pi0p,
   kCC0pi1p,
@@ -22,6 +24,9 @@ enum NuIntTopology{
   kCCmultipiNp,
   kCCother,
   kNC,
+  kCosmic,
+  kMixed,
+  kOutFV,
   kUnknown
 };
 
@@ -81,6 +86,15 @@ inline std::string topologyenum2str(NuIntTopology topology)
   case kNC:
     returnString = "NC";
     break;
+  case kCosmic:
+    returnString = "Cosmic";
+    break;
+  case kMixed:
+    returnString = "Mixed";
+    break;
+  case kOutFV:
+    returnString = "Out of FV";
+    break;
   default:
     std::cout << "[ERROR: TopologyEnums.h] Could not find string conversion for " << topology << std::endl;
     returnString = "Unknown";
@@ -126,6 +140,15 @@ inline std::string topologyenum2str_coarse(NuIntTopology topology)
     break;
   case kNC:
     returnString = "NC";
+    break;
+  case kCosmic:
+    returnString = "Cosmic";
+    break;
+  case kMixed:
+    returnString = "Mixed";
+    break;
+  case kOutFV:
+    returnString = "Out of FV";
     break;
   default:
     std::cout << "[ERROR: TopologyEnums.h] Could not find string conversion for " << topology << std::endl;
