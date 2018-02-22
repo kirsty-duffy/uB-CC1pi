@@ -167,14 +167,18 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    StackedHistTopology* mips_stack = new StackedHistTopology("mips_stack", ";Number of MIP-like #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 10, 0, 10);
    StackedHistTopology* vtxtrack_stack = new StackedHistTopology("vtxtrack_stack", ";Distance between vertex and start of #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 50, 0, 50);
    StackedHistTopology* vtxshwr_stack = new StackedHistTopology("vtxshwr_stack", ";Distance between vertex and start of #nu daughter showers in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 50, 0, 50);
-   /*
-      StackedHistPDGCode* shwrtrue_stack = new StackedHistPDGCode("shwrtrue_sig",";True CC1pi: Number of shower #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)",10,0,10);
-      StackedHistPDGCode* shwrtrue_bg_stack = new StackedHistPDGCode("shwrtrue_bg_stack", ";Background: Number of shower #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)",10,0,10);
-      StackedHistPDGCode* len_stack_byPDG = new StackedHistPDGCode("len_stack_byPDG", ";Longest Track Length [cm];Selected Events (normalised to 3.782 #times 10^{19} POT)", 30, 0, 700);
-   */
+   StackedHistTopology* pfps_stack = new StackedHistTopology("pfps_stack", ";Number of #nu daughter PFPs in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 10, 0, 10);
+
+   StackedHistPDGCode* shwrtrue_stack = new StackedHistPDGCode("shwrtrue_sig",";True CC1pi: Number of shower #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)",10,0,10);
+   StackedHistPDGCode* shwrtrue_bg_stack = new StackedHistPDGCode("shwrtrue_bg_stack", ";Background: Number of shower #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)",10,0,10);
+   StackedHistPDGCode* len_stack_byPDG = new StackedHistPDGCode("len_stack_byPDG", ";Longest Track Length [cm];Selected Events (normalised to 3.782 #times 10^{19} POT)", 30, 0, 700);
+   StackedHistPDGCode* isMIP_stack = new StackedHistPDGCode("isMIP_stack", ";#nu daughter track is MIP-like?;Selected Events (normalised to 3.782 #times 10^{19} POT)",2,0,2);
+
    TEfficiency* eff_track_muon = new TEfficiency("eff_track_muon",";True Kinetic Energy [GeV];",10,0,2);
    TEfficiency* eff_track_pion = new TEfficiency("eff_track_pion",";True Kinetic Energy [GeV];",10,0,2);
    TEfficiency* eff_track_proton = new TEfficiency("eff_track_proton",";True Kinetic Energy [GeV];",10,0,2);
+
+   TH2D* longest2tracks_byPDG = new TH2D("longest2tracks_byPDG",";True PDG of longest track;True PDG of second longest track",4,0,4,4,0,4);
 
    const int nentries = t -> GetEntries();
 
@@ -199,8 +203,13 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          }
       }
 
+      bool isSignal = false;
+
       // if signal...
-      if (TPCObj_beamnu_topology == kCC1piplus0p || TPCObj_beamnu_topology == kCC1piplus1p || TPCObj_beamnu_topology == kCC1piplusNp) {
+      //      if (TPCObj_beamnu_topology == kCC1piplus0p || TPCObj_beamnu_topology == kCC1piplus1p || TPCObj_beamnu_topology == kCC1piplusNp) {
+      if(nu_isCC -> at(0) && nu_PDG -> at(0) == 14 && inFV(nu_vtxx -> at(0), nu_vtxy -> at(0), nu_vtxz -> at(0)) && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 13) == 1 && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 211) == 1 && MCP_PDG -> size() == 2 + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2112) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2212) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2000000101) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 1000180400)) {
+
+         isSignal = true;
 
          // Check neutrino flavour (just in case)
          if (nu_PDG -> at(0) != 14) std::cout << "WARNING: Signal event has neutrino with PDG code " << nu_PDG -> at(0) << " (should be 14)" << std::endl;
@@ -222,20 +231,36 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
       if(SelectedEvent) {
 
          // Purity...
-         pur_nuE -> Fill(TPCObj_beamnu_topology == kCC1piplus0p || TPCObj_beamnu_topology == kCC1piplus1p || TPCObj_beamnu_topology == kCC1piplusNp, nu_E -> at(0));
+         pur_nuE -> Fill(isSignal, nu_E -> at(0));
 
          for (int j = 0; j < MCP_PDG -> size(); j++) {
             if (MCP_PDG -> at(j) == 13) {
-               pur_muP -> Fill(TPCObj_beamnu_topology == kCC1piplus0p || TPCObj_beamnu_topology == kCC1piplus1p || TPCObj_beamnu_topology == kCC1piplusNp, MCP_P -> at(j));
+               pur_muP -> Fill(isSignal, MCP_P -> at(j));
                TVector3 muP(MCP_Px -> at(j), MCP_Py -> at(j), MCP_Pz -> at(j));
-               pur_muCosT -> Fill(TPCObj_beamnu_topology == kCC1piplus0p || TPCObj_beamnu_topology == kCC1piplus1p || TPCObj_beamnu_topology == kCC1piplusNp, muP.CosTheta());
-               pur_muPhi -> Fill(TPCObj_beamnu_topology == kCC1piplus0p || TPCObj_beamnu_topology == kCC1piplus1p || TPCObj_beamnu_topology == kCC1piplusNp, muP.Phi());
+               pur_muCosT -> Fill(isSignal, muP.CosTheta());
+               pur_muPhi -> Fill(isSignal, muP.Phi());
                break;
             }
          }
 
          // THStacks...
-         double maxlen = *std::max_element(TPCObj_PFP_track_length -> begin(), TPCObj_PFP_track_length -> end());
+
+         //Find longest and second longest tracks
+         double maxlen = 0, maxlen2 = 0;
+         PDGCode maxPDG, maxPDG2;
+         for(int j = 0; j < TPCObj_NPFPs; j++) {
+            if (TPCObj_PFP_track_length -> at(j) > maxlen) {
+               maxlen2 = maxlen;
+               maxlen = TPCObj_PFP_track_length -> at(j);
+               maxPDG2 = maxPDG;
+               maxPDG = (PDGCode)TPCObj_PFP_truePDG -> at(j);
+            }
+            else if (TPCObj_PFP_track_length -> at(j) > maxlen2) {
+               maxlen2 = TPCObj_PFP_track_length -> at(j);
+               maxPDG2 = (PDGCode)TPCObj_PFP_truePDG -> at(j);
+            }
+         }
+
          int shower_daughters = 0;
          int track_daughters = 0;
          int mip_daughters = 0;
@@ -260,13 +285,45 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          tracks_stack -> Fill(TPCObj_beamnu_topology, track_daughters);
          showers_stack -> Fill(TPCObj_beamnu_topology, shower_daughters);
          mips_stack -> Fill(TPCObj_beamnu_topology, mip_daughters);
+         pfps_stack -> Fill(TPCObj_beamnu_topology, track_daughters+shower_daughters);
          for (int j = 0; j < track_daughters; j++) {
             vtxtrack_stack -> Fill(TPCObj_beamnu_topology, vtxtrack_daughters.at(j));
          }
          for (int j = 0; j < shower_daughters; j++) {
             vtxshwr_stack -> Fill(TPCObj_beamnu_topology, vtxshwr_daughters.at(j));
          }
+         len_stack_byPDG -> Fill(maxPDG, maxlen);
+         for(int j = 0; j < TPCObj_NPFPs; j++) {
+            if(TPCObj_PFP_isDaughter -> at(j) && TPCObj_PFP_isTrack -> at(j)) isMIP_stack -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j),TPCObj_PFP_isMIP->at(j));
+         }
 
+         //Longest 2 tracks by PDG...
+         if(TPCObj_NTracks >= 2) {
+            if(maxPDG == kMuMinus) {
+               if(maxPDG2 == kMuMinus) longest2tracks_byPDG -> Fill(0., 0);
+               else if(maxPDG2 == kPiPlus) longest2tracks_byPDG -> Fill(0.,1);
+               else if(maxPDG2 == kProton) longest2tracks_byPDG -> Fill(0.,2);
+               else longest2tracks_byPDG -> Fill(0.,3);
+            }
+            else if(maxPDG == kPiPlus) {
+               if(maxPDG2 == kMuMinus) longest2tracks_byPDG -> Fill(1,0);
+               else if(maxPDG2 == kPiPlus) longest2tracks_byPDG -> Fill(1,1);
+               else if(maxPDG2 == kProton) longest2tracks_byPDG -> Fill(1,2);
+               else longest2tracks_byPDG -> Fill(1,3);
+            }
+            else if(maxPDG == kProton) {
+               if(maxPDG2 == kMuMinus) longest2tracks_byPDG -> Fill(2,0);
+               else if(maxPDG2 == kPiPlus) longest2tracks_byPDG -> Fill(2,1);
+               else if(maxPDG2 == kProton) longest2tracks_byPDG -> Fill(2,2);
+               else longest2tracks_byPDG -> Fill(2,3);
+            }
+            else {
+               if(maxPDG2 == kMuMinus) longest2tracks_byPDG -> Fill(3,0);
+               else if(maxPDG2 == kPiPlus) longest2tracks_byPDG -> Fill(3,1);
+               else if(maxPDG2 == kProton) longest2tracks_byPDG -> Fill(3,2);
+               else longest2tracks_byPDG -> Fill(3,3);
+            }
+         }
 
          // Track/shower classification...
          for(int j = 0; j < TPCObj_NPFPs; j++) {
@@ -294,21 +351,22 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
                   eff_track_proton -> Fill(false, TPCObj_PFP_trueKE -> at(j));
                }
             }
-            /*
+
             // Look at what particles are being associated with showers
-            if (TPCObj_PFP_isShower -> at(j)){
-            PDGCode mcp_pdgcode = (PDGCode)TPCObj_PFP_truePDG->at(j);
-            if(isSignal) { // !!!Change this to use topology!!! If true CC1pip
-            shwrtrue_stack->Fill(mcp_pdgcode, shower_daughters, 1.0/shower_daughters);
-            }
-            else{
-            shwrtrue_bg_stack->Fill(mcp_pdgcode, shower_daughters, 1.0/shower_daughters);
-            }
+            if (TPCObj_PFP_isShower -> at(j) && TPCObj_PFP_isDaughter -> at(j)){
+               PDGCode mcp_pdgcode = (PDGCode)TPCObj_PFP_truePDG->at(j);
+               if(isSignal) { // !!!Change this to use topology!!! If true CC1pip
+                  shwrtrue_stack->Fill(mcp_pdgcode, shower_daughters, 1.0/shower_daughters);
+               }
+               else{
+                  shwrtrue_bg_stack->Fill(mcp_pdgcode, shower_daughters, 1.0/shower_daughters);
+               }
             } // end if (TPCObj_PFP_isShower -> at(j))  
-            */
-         } // end loop over TPCObj_PFP_truePDG (j)
+         } // end loop over PFPs
       }
    }
+
+   gStyle->SetOptStat(0);
 
    TCanvas *c1 = new TCanvas("c1", "c1");
 
@@ -400,22 +458,26 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    mips_stack -> DrawStack(norm, c1);
    c1 -> SaveAs(TString::Format("%s_THStack_mips.eps",SaveString.c_str()));
 
+   pfps_stack -> DrawStack(norm, c1);
+   c1 -> SaveAs(TString::Format("%s_THStack_pfps.eps",SaveString.c_str()));
+
    vtxtrack_stack -> DrawStack(norm, c1);
    c1 -> SaveAs(TString::Format("%s_THStack_vtxtrack.eps",SaveString.c_str()));
 
    vtxshwr_stack -> DrawStack(norm, c1);
    c1 -> SaveAs(TString::Format("%s_THStack_vtxshwr.eps",SaveString.c_str()));
 
-   /*
-      shwrtrue_stack -> DrawStack(norm, c1);
-      c1 -> SaveAs(TString::Format("%s_THStack_signal_shwrtrue.eps",SaveString.c_str()));
+   shwrtrue_stack -> DrawStack(norm, c1);
+   c1 -> SaveAs(TString::Format("%s_THStack_signal_shwrtrue.eps",SaveString.c_str()));
 
-      shwrtrue_bg_stack -> DrawStack(norm, c1);
-      c1 -> SaveAs(TString::Format("%s_THStack_bg_shwrtrue.eps",SaveString.c_str()));
+   shwrtrue_bg_stack -> DrawStack(norm, c1);
+   c1 -> SaveAs(TString::Format("%s_THStack_bg_shwrtrue.eps",SaveString.c_str()));
 
-      len_stack_byPDG -> DrawStack(norm, c1);
-      c1 -> SaveAs(TString::Format("%s_THStack_trklen_byPDG.eps",SaveString.c_str()));
-   */
+   len_stack_byPDG -> DrawStack(norm, c1);
+   c1 -> SaveAs(TString::Format("%s_THStack_trklen_byPDG.eps",SaveString.c_str()));
+
+   isMIP_stack -> DrawStack(norm, c1);
+   c1 -> SaveAs(TString::Format("%s_THSTack_isMIP.eps",SaveString.c_str()));
 
    eff_track_muon -> Draw("AP");
    eff_track_pion -> Draw("P SAME");
@@ -442,6 +504,17 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    gPad->Update();
    c1 -> SaveAs(TString::Format("%s_eff_track.eps",SaveString.c_str()));
 
+   longest2tracks_byPDG->GetXaxis()->SetBinLabel(1,PDGenum2str(kMuMinus).c_str());
+   longest2tracks_byPDG->GetXaxis()->SetBinLabel(2,PDGenum2str(kPiPlus).c_str());
+   longest2tracks_byPDG->GetXaxis()->SetBinLabel(3,PDGenum2str(kProton).c_str());
+   longest2tracks_byPDG->GetXaxis()->SetBinLabel(4,"Other");
+   longest2tracks_byPDG->GetYaxis()->SetBinLabel(1,PDGenum2str(kMuMinus).c_str());
+   longest2tracks_byPDG->GetYaxis()->SetBinLabel(2,PDGenum2str(kPiPlus).c_str());
+   longest2tracks_byPDG->GetYaxis()->SetBinLabel(3,PDGenum2str(kProton).c_str());
+   longest2tracks_byPDG->GetYaxis()->SetBinLabel(4,"Other");
+   longest2tracks_byPDG->Draw("COLZ TEXT");
+   c1 -> SaveAs(TString::Format("%s_longest2tracks_byPDG.eps",SaveString.c_str()));
+
    std::cout << "Total Efficiency: " << (1. * (eff_nuE -> GetPassedHistogram() -> GetEntries()))/(eff_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
    std::cout << "Total Purity: " << (1. * (pur_nuE -> GetPassedHistogram() -> GetEntries()))/(pur_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
 
@@ -452,4 +525,4 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    gDirectory->GetList()->Delete();
 
    return;
-}
+   }
