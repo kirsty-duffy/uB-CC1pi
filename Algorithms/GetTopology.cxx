@@ -51,8 +51,8 @@ NuIntTopology GetTopology(art::ValidHandle<std::vector<simb::MCTruth>> mc_truths
   NuIntTopology inttype = kUnknown;
   
   simb::MCNeutrino neutrino = mctruth.GetNeutrino();
-  if (neutrino.CCNC() == simb::kCC){
-    if (npiplus+npiminus+npizero==0){ // CC0pi
+  if (neutrino.CCNC() == simb::kCC && abs(neutrino.Nu().PdgCode())==14){ // If numu CC
+    if (npiplus+npiminus+npizero==0){ // numu CC0pi
       switch (nprotons){
       case 0:
 	inttype = kCC0pi0p;
@@ -64,8 +64,8 @@ NuIntTopology GetTopology(art::ValidHandle<std::vector<simb::MCTruth>> mc_truths
 	inttype = kCC0piNp;
       }
     }
-    else if (npiplus+npiminus+npizero==1){ // CC1pi
-      if (npiplus == 1){ // CCpiplus
+    else if (npiplus+npiminus+npizero==1){ // numu CC1pi
+      if (npiplus == 1){ // numu CCpiplus
 	switch (nprotons){
 	case 0:
 	  inttype = kCC1piplus0p;
@@ -77,7 +77,7 @@ NuIntTopology GetTopology(art::ValidHandle<std::vector<simb::MCTruth>> mc_truths
 	  inttype = kCC1piplusNp;
 	}
       }
-      else if (npiminus == 1){ // CCpiminus
+      else if (npiminus == 1){ // numu CCpiminus
 	switch (nprotons){
 	case 0:
 	  inttype = kCC1piminus0p;
@@ -117,7 +117,10 @@ NuIntTopology GetTopology(art::ValidHandle<std::vector<simb::MCTruth>> mc_truths
     else{
       inttype = kCCother;
     }
-  } // end if CC
+  } // end if numu CC
+  else if (neutrino.CCNC() == simb::kCC && abs(neutrino.Nu().PdgCode())==12){ // if nue CC
+    inttype = kCCNue;
+  } // end if nue CC
   else if (neutrino.CCNC() == simb::kNC){
     inttype = kNC;
   } // end if NC
@@ -126,9 +129,9 @@ NuIntTopology GetTopology(art::ValidHandle<std::vector<simb::MCTruth>> mc_truths
   }
 
   // Check it's doing sensible things
-  if (neutrino.CCNC() == simb::kCC){std::cout << "CC interaction. ";}
+  /*if (neutrino.CCNC() == simb::kCC){std::cout << "CC interaction. ";}
   if (neutrino.CCNC() == simb::kNC){std::cout << "NC interaction. ";}
-  std::cout << "Mode is " << neutrino.Mode() << ", topology is " << topologyenum2str(inttype) << std::endl;
+  std::cout << "Mode is " << neutrino.Mode() << ", topology is " << topologyenum2str(inttype) << std::endl;*/
   
   return inttype;
 }

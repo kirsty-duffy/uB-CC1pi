@@ -23,7 +23,8 @@ void cc1pianavars::Clear(){
    Marco_cutflow.clear();
    Marco_selected = false;
 
-   TPCObj_beamnu_topology = kUnknown;
+   Truth_topology = kUnknown;
+   
    TPCObj_PFP_track_length.clear();
    TPCObj_PFP_track_start.clear();
    TPCObj_PFP_track_end.clear();
@@ -91,15 +92,41 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
    Marco_cutflow = selection_v.at(0)->GetCutFlowStatus();
 
+   // Get topology from MC truth (MC only)
+   // Do this for all events (not just ones selected by Marco)
+   if (!isData){
+
+     auto const mctruth_h = evt.getValidHandle<std::vector<simb::MCTruth>>("generator"); // Get only GENIE MCtruth
+     simb::MCTruth top_mctruth = mctruth_h->at(0);
+     simb::MCNeutrino top_nu = top_mctruth.GetNeutrino();
+     simb::MCParticle top_neutrino = top_nu.Nu();
+
+     const TLorentzVector& top_vertex = top_neutrino.Position(0);
+     double top_vertexXYZT[4];
+     top_vertex.GetXYZT(top_vertexXYZT);
+     
+     // If selected event, check TPC object origin for cosmic/mixed
+     if (selection_v.at(0)->GetSelectionStatus() && TPCObj_origin == 1){
+       Truth_topology = kCosmic;
+     }
+     else if (selection_v.at(0)->GetSelectionStatus() && TPCObj_origin == 2){
+       Truth_topology = kMixed;
+     }
+     else { // If not selected, or selected and not cosmic/mixed origin
+	if(inFV(top_vertexXYZT[0], top_vertexXYZT[1], top_vertexXYZT[2])){ // If true vertex is in the fiducial volume
+	 Truth_topology = GetTopology(mctruth_h);
+       }
+       else{ // outFV topology
+	 Truth_topology = kOutFV; 
+       }
+     }
+   } // if !isData
+
+
+   // Now fill most variables only if the event is selected by Marco
    if (selection_v.at(0)->GetSelectionStatus()) {
 
       Marco_selected = true;
-
-      // Get topology from MC truth (MC only)
-      if (!isData){
-         auto const mctruth_h = evt.getValidHandle<std::vector<simb::MCTruth>>("generator"); // Get only GENIE MCtruth
-         TPCObj_beamnu_topology = GetTopology(mctruth_h);
-      }
 
       //Get TPCObject
       art::FindManyP<ubana::TPCObject> TPCObject_from_selection(selection_h, evt, "UBXSec");
@@ -365,7 +392,8 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("Marco_cutflow", &(vars->Marco_cutflow));
    t -> Branch("Marco_selected", &(vars->Marco_selected));
 
-   t -> Branch("TPCObj_beamnu_topology", &(vars->TPCObj_beamnu_topology), "TPCObj_beamnu_topology/I");
+   t -> Branch("Truth_topology", &(vars->Truth_topology), "Truth_topology/I");
+   
    t -> Branch("TPCObj_PFP_track_length", &(vars->TPCObj_PFP_track_length));
    t -> Branch("TPCObj_PFP_track_start", &(vars->TPCObj_PFP_track_start));
    t -> Branch("TPCObj_PFP_track_end", &(vars->TPCObj_PFP_track_end));

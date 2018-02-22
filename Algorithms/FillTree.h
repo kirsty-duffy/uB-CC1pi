@@ -57,7 +57,8 @@ struct cc1pianavars{
   std::map<std::string,bool> Marco_cutflow;
   bool Marco_selected;
 
-  NuIntTopology TPCObj_beamnu_topology;
+  NuIntTopology Truth_topology;
+  
   std::vector<double> TPCObj_PFP_track_length;
   std::vector<std::vector<double>> TPCObj_PFP_track_start;
   std::vector<std::vector<double>> TPCObj_PFP_track_end;
