@@ -52,6 +52,7 @@ StackedHistTopology::StackedHistTopology(std::string histname, std::string title
   hist_order.push_back(kCCmultipi1p);
   hist_order.push_back(kCCmultipiNp);
   hist_order.push_back(kCCother);
+  hist_order.push_back(kCCNue);
   hist_order.push_back(kNC);
   hist_order.push_back(kOutFV);
   hist_order.push_back(kCosmic);
@@ -112,27 +113,28 @@ void StackedHistTopology::DrawStack(double norm, TCanvas *c1)
 void StackedHistTopology::StyleHists()
 {
   // Set fill color for all histograms
-  hists[0] ->SetFillColor(kOrange);
-  hists[1] ->SetFillColor(kOrange-3);
-  hists[2] ->SetFillColor(kOrange+2);
-  hists[3] ->SetFillColor(kRed);
-  hists[4] ->SetFillColor(kRed+2);
-  hists[5] ->SetFillColor(kPink-7);
-  hists[6] ->SetFillColor(kPink+10);
-  hists[7] ->SetFillColor(kMagenta+1);
-  hists[8] ->SetFillColor(kViolet+1);
-  hists[9] ->SetFillColor(kBlue+2);
-  hists[10]->SetFillColor(kBlue);
-  hists[11]->SetFillColor(kAzure+1);
-  hists[12]->SetFillColor(kCyan+2);
-  hists[13]->SetFillColor(kCyan);
-  hists[14]->SetFillColor(kGreen+1);
-  hists[15]->SetFillColor(kGray);
-  hists[16]->SetFillColor(kGray+2);
-  hists[17]->SetFillColor(kGreen+3);
-  hists[18]->SetFillColor(kYellow+1);
-  hists[19]->SetFillColor(kYellow+2);
-  hists[20]->SetFillColor(kBlack);
+  hists[0] ->SetFillColor(kOrange); // CC0pi0p
+  hists[1] ->SetFillColor(kOrange-3); // CC0pi1p
+  hists[2] ->SetFillColor(kOrange+2); // CC0piNp
+  hists[3] ->SetFillColor(kRed); // CC1piplus0p
+  hists[4] ->SetFillColor(kRed+2); // CC1piplus1p
+  hists[5] ->SetFillColor(kPink-7); // CC1piplusNp
+  hists[6] ->SetFillColor(kPink+10); // CC1piminus0p
+  hists[7] ->SetFillColor(kMagenta+1); // CC1piminus1p
+  hists[8] ->SetFillColor(kViolet+1); // CC1piminusNp
+  hists[9] ->SetFillColor(kBlue+2); // CC1pizero0p
+  hists[10]->SetFillColor(kBlue); // CC1pizero1p
+  hists[11]->SetFillColor(kAzure+1); // CC1pizeroNp
+  hists[12]->SetFillColor(kCyan+2); // CCmultipi0p
+  hists[13]->SetFillColor(kCyan); // CCmultipi1p
+  hists[14]->SetFillColor(kGreen+1); // CCmultipiNp
+  hists[15]->SetFillColor(kGreen+3); // CCother
+  hists[16]->SetFillColor(kYellow+1); // CCnue
+  hists[17]->SetFillColor(kBlue-10); // NC
+  hists[18]->SetFillColor(kBlue-5); // outFV
+  hists[19]->SetFillColor(kGray); // Cosmic
+  hists[20]->SetFillColor(kGray+2); // Mixed
+  hists[21]->SetFillColor(kBlack); // Unknown
 }
 
 

@@ -183,9 +183,11 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
       t -> GetEntry(i);
 
       // Set topology (check for cosmic, mixed, OFV)
+      // Move this to module! 
       if (TPCObj_origin == 1) TPCObj_beamnu_topology = kCosmic;
       else if (TPCObj_origin == 2) TPCObj_beamnu_topology = kMixed;
       else if (TPCObj_origin == 0 && !inFV(nu_vtxx -> at(0), nu_vtxy -> at(0), nu_vtxz -> at(0))) TPCObj_beamnu_topology = kOutFV;
+      else if (TPCObj_origin == 0 && PDGCode(abs(nu_PDG -> at(0))) == kNuE && TPCObj_beamnu_topology != kNC) TPCObj_beamnu_topology = kCCNue;
 
 
       // Check whether the event passes the requested cutflow map
