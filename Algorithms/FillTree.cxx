@@ -93,38 +93,30 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
    Marco_cutflow = selection_v.at(0)->GetCutFlowStatus();
 
    // Get topology from MC truth (MC only)
-   // Do this for all events (not just ones selected by Marco)
+   // Do this for all events (not just those selected by Marco)
+   // For events not selected by Marco we don't have TPCObj_origin information so we
+   // can only set neutrino interaction topology (including kUnknown) or outFV
+   // Events that are selected and cosmic/mixed/unknown origin will be overwritten later
    if (!isData){
-
+     
      auto const mctruth_h = evt.getValidHandle<std::vector<simb::MCTruth>>("generator"); // Get only GENIE MCtruth
      simb::MCTruth top_mctruth = mctruth_h->at(0);
      simb::MCNeutrino top_nu = top_mctruth.GetNeutrino();
      simb::MCParticle top_neutrino = top_nu.Nu();
-
+     
      const TLorentzVector& top_vertex = top_neutrino.Position(0);
      double top_vertexXYZT[4];
      top_vertex.GetXYZT(top_vertexXYZT);
      
-     // If selected event, check TPC object origin for cosmic/mixed
-     if (selection_v.at(0)->GetSelectionStatus() && TPCObj_origin == 1){
-       Truth_topology = kCosmic;
-     }
-     else if (selection_v.at(0)->GetSelectionStatus() && TPCObj_origin == 2){
-       Truth_topology = kMixed;
-     }
-     else if (selection_v.at(0)->GetSelectionStatus() && TPCObj_origin != 0){ // if selected object has some other non-neutrino origin, set it to unknown
-       Truth_topology = kUnknown;
-     }
-     else { // If not selected, or selected and neutrino origin
-	if(inFV(top_vertexXYZT[0], top_vertexXYZT[1], top_vertexXYZT[2])){ // If true vertex is in the fiducial volume
-	 Truth_topology = GetTopology(mctruth_h);
-       }
-       else{ // outFV topology
-	 Truth_topology = kOutFV; 
-       }
+     
+     if(inFV(top_vertexXYZT[0], top_vertexXYZT[1], top_vertexXYZT[2])){ // If true vertex is in the fiducial volume
+       Truth_topology = GetTopology(mctruth_h);
+	}
+     else{ // outFV topology
+       Truth_topology = kOutFV; 
      }
    } // if !isData
-
+   
 
    // Now fill most variables only if the event is selected by Marco
    if (selection_v.at(0)->GetSelectionStatus()) {
@@ -139,6 +131,25 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
       TPCObj_origin = TPCObj_candidate -> GetOrigin();
       TPCObj_origin_extra = TPCObj_candidate -> GetOriginExtra();
+
+      // Get topology from MC truth (MC only)
+      // Overwrite what was done above for selected cosmic/mixed/unknown origin events only
+      if (!isData){
+	
+	// For selected event, check TPC object origin for cosmic/mixed/unknown
+	// Only overwrite events that don't have TPC_origin == 0
+	// For TPC_origin == 0 events we want to keep the Truth_topology assigned above
+	if (TPCObj_origin == 1){
+	  Truth_topology = kCosmic;
+	}
+	else if (TPCObj_origin == 2){
+	  Truth_topology = kMixed;
+	}
+	else if (TPCObj_origin != 0){ // if selected object has some other non-neutrino origin, set it to unknown
+	  Truth_topology = kUnknown;
+	}
+      } // if !isData
+      
 
       //Get PFPs (in TPCObject)
       art::FindManyP<recob::PFParticle> pfps_from_TPCObject(TPCObj_h, evt, "TPCObjectMaker");
