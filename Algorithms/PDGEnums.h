@@ -20,6 +20,9 @@ enum PDGCode{
     kPhoton      = 22,
     kProton      = 2212,
     kNeutron     = 2112,
+    kKaPlus      = 321,
+    kKaMinus     = -321,
+    kSigmaPlus   = 3222,
     kArgon       = 1000180400,
     kBindino     = 2000000101,
     kPDGUnknown  = -9999
@@ -83,6 +86,15 @@ inline std::string PDGenum2str(PDGCode type)
       break;
     case kNeutron:
       returnString = "n";
+      break;
+    case kKaPlus:
+      returnString = "K^{+}";
+      break;
+    case kKaMinus:
+      returnString = "K^{-}";
+      break;
+    case kSigmaPlus:
+      returnString = "#Sigma^{+}";
       break;
     case kArgon:
       returnString = "Ar-40";
