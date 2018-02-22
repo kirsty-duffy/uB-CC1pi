@@ -84,7 +84,7 @@ inline std::string topologyenum2str(NuIntTopology topology)
   case kCCother:
     returnString = "#nu_{#mu} CC other";
     break;
-  case kNueCC:
+  case kCCNue:
     returnString = "#nu_{e} CC";
     break;
   case kNC:
@@ -142,7 +142,7 @@ inline std::string topologyenum2str_coarse(NuIntTopology topology)
   case kCCother:
     returnString = "#nu_{#mu} CC other";
     break;
-  case kNueCC:
+  case kCCNue:
     returnString = "#nu_{e} CC";
     break;
   case kNC:

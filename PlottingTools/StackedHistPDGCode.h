@@ -1,7 +1,8 @@
 #ifndef STACKEDHIST_PDGCODE
 #define STACKEDHIST_PDGCODE
 
-#include "uboone/CC1pi/Algorithms/PDGEnums.h"
+//#include "uboone/CC1pi/Algorithms/PDGEnums.h"
+#include "../Algorithms/PDGEnums.h"
 
 #include "TH1F.h"
 #include "THStack.h"

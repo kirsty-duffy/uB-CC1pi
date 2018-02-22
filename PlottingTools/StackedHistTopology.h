@@ -1,7 +1,8 @@
 #ifndef STACKEDHIST_TOPOLOGY
 #define STACKEDHIST_TOPOLOGY
 
-#include "uboone/CC1pi/Algorithms/TopologyEnums.h"
+//#include "uboone/CC1pi/Algorithms/TopologyEnums.h"
+#include "../Algorithms/TopologyEnums.h"
 
 #include "TH1F.h"
 #include "THStack.h"
