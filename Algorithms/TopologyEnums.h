@@ -21,6 +21,7 @@ enum NuIntTopology{
   kCCmultipi1p,
   kCCmultipiNp,
   kCCother,
+  kCCNue,
   kNC,
   kUnknown
 };
@@ -31,52 +32,55 @@ inline std::string topologyenum2str(NuIntTopology topology)
   
   switch(topology){
   case kCC0pi0p:
-    returnString = "CC 0#pi 0p";
+    returnString = "#nu_{#mu} CC 0#pi 0p";
     break;
   case kCC0pi1p:
-    returnString = "CC 0#pi 1p";
+    returnString = "#nu_{#mu} CC 0#pi 1p";
     break;
   case kCC0piNp:
-    returnString = "CC 0#pi Np (N>1)";
+    returnString = "#nu_{#mu} CC 0#pi Np (N>1)";
     break;
   case kCC1piplus0p:
-    returnString = "CC 1#pi^{+} 0p";
+    returnString = "#nu_{#mu} CC 1#pi^{+} 0p";
     break;
   case kCC1piplus1p:
-    returnString = "CC 1#pi^{+} 1p";
+    returnString = "#nu_{#mu} CC 1#pi^{+} 1p";
     break;
   case kCC1piplusNp:
-    returnString = "CC 1#pi^{+} Np (N>1)";
+    returnString = "#nu_{#mu} CC 1#pi^{+} Np (N>1)";
     break;
   case kCC1piminus0p:
-    returnString = "CC 1#pi^{-} 0p";
+    returnString = "#nu_{#mu} CC 1#pi^{-} 0p";
     break;
   case kCC1piminus1p:
-    returnString = "CC 1#pi^{-} 1p";
+    returnString = "#nu_{#mu} CC 1#pi^{-} 1p";
     break;
   case kCC1piminusNp:
-    returnString = "CC 1#pi^{-} Np (N>1)";
+    returnString = "#nu_{#mu} CC 1#pi^{-} Np (N>1)";
     break;
   case kCC1pizero0p:
-    returnString = "CC 1pi^{0} 0p";
+    returnString = "#nu_{#mu} CC 1pi^{0} 0p";
     break;
   case kCC1pizero1p:
-    returnString = "CC 1pi^{0} 1p";
+    returnString = "#nu_{#mu} CC 1pi^{0} 1p";
     break;
   case kCC1pizeroNp:
-    returnString = "CC 1pi^{0} Np (N>1)";
+    returnString = "#nu_{#mu} CC 1pi^{0} Np (N>1)";
     break;
   case kCCmultipi0p:
-    returnString = "CC multi#pi 0p";
+    returnString = "#nu_{#mu} CC multi#pi 0p";
     break;
   case kCCmultipi1p:
-    returnString = "CC multi#pi 1p";
+    returnString = "#nu_{#mu} CC multi#pi 1p";
     break;
   case kCCmultipiNp:
-    returnString = "CC multi#pi Np (N>1)";
+    returnString = "#nu_{#mu} CC multi#pi Np (N>1)";
     break;
   case kCCother:
-    returnString = "CC other";
+    returnString = "#nu_{#mu} CC other";
+    break;
+  case kNueCC:
+    returnString = "#nu_{e} CC";
     break;
   case kNC:
     returnString = "NC";
@@ -99,30 +103,33 @@ inline std::string topologyenum2str_coarse(NuIntTopology topology)
   case kCC0pi0p:
   case kCC0pi1p:
   case kCC0piNp:
-    returnString = "CC 0#pi";
+    returnString = "#nu_{#mu} CC 0#pi";
     break;
   case kCC1piplus0p:
   case kCC1piplus1p:
   case kCC1piplusNp:
-    returnString = "CC 1#pi^{+}";
+    returnString = "#nu_{#mu} CC 1#pi^{+}";
     break;
   case kCC1piminus0p:
   case kCC1piminus1p:
   case kCC1piminusNp:
-    returnString = "CC 1#pi^{-}";
+    returnString = "#nu_{#mu} CC 1#pi^{-}";
     break;
   case kCC1pizero0p:
   case kCC1pizero1p:
   case kCC1pizeroNp:
-    returnString = "CC 1pi^{0}";
+    returnString = "#nu_{#mu} CC 1pi^{0}";
     break;
   case kCCmultipi0p:
   case kCCmultipi1p:
   case kCCmultipiNp:
-    returnString = "CC multi#pi";
+    returnString = "#nu_{#mu} CC multi#pi";
     break;
   case kCCother:
-    returnString = "CC other";
+    returnString = "#nu_{#mu} CC other";
+    break;
+  case kNueCC:
+    returnString = "#nu_{e} CC";
     break;
   case kNC:
     returnString = "NC";
