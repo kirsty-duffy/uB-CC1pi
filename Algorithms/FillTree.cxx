@@ -112,7 +112,10 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
      else if (selection_v.at(0)->GetSelectionStatus() && TPCObj_origin == 2){
        Truth_topology = kMixed;
      }
-     else { // If not selected, or selected and not cosmic/mixed origin
+     else if (selection_v.at(0)->GetSelectionStatus() && TPCObj_origin != 0){ // if selected object has some other non-neutrino origin, set it to unknown
+       Truth_topology = kUnknown;
+     }
+     else { // If not selected, or selected and neutrino origin
 	if(inFV(top_vertexXYZT[0], top_vertexXYZT[1], top_vertexXYZT[2])){ // If true vertex is in the fiducial volume
 	 Truth_topology = GetTopology(mctruth_h);
        }
