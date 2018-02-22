@@ -5,6 +5,7 @@
 #include "TVector3.h"
 #include "TCanvas.h"
 #include "TH1.h"
+#include "TH2.h"
 #include "TString.h"
 
 #include <vector>

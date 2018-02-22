@@ -156,7 +156,7 @@ unsigned int StackedHistTopology::GetHistN(NuIntTopology topology)
 
   if (!found_hist){
     std::cout << "[ERROR: StackedHistTopology.h] Could not find histogram for topology " << topology << std::endl;
-    HistN = 9999;
+    HistN = nHists-1;
   }
 
   return HistN;
