@@ -1,0 +1,41 @@
+<!-- Project details -->
+<!DOCTYPE project [
+<!ENTITY name "mintwotrackfilter_mcc85_BNBdata_v1">
+<!ENTITY user "kduffy">
+]>
+
+<project name="&name;">
+
+  <!-- Group -->
+  <group>uboone</group>
+
+  <!-- Project size (numevents is an upper limit) -->
+  <numevents>50</numevents>
+  <numjobs>1000</numjobs>
+  <maxfilesperjob>1</maxfilesperjob>
+
+  <!-- Where to look for fcl files (in addition to $FHICL_FILE_PATH) -->
+  <fcldir>/pnfs/uboone/persistent/users/kduffy/fcl/</fcldir>
+
+  <!-- Batch OS -->
+  <os>SL6</os>
+
+  <!-- Larsoft information -->
+  <larsoft>
+    <local>/pnfs/uboone/resilient/users/kduffy/tars/twotrfilter_marcoselv3.1.1.tar</local>
+  </larsoft>
+
+  <!-- requested memory, in MB -->
+  <memory>4000</memory>
+
+  <!-- Stages -->
+  <stage name = "TwoTrFilter">
+     <maxfilesperjob>1</maxfilesperjob>
+     <inputdef>prod_reco_optfilter_bnb_v11_unblind_mcc8</inputdef>
+     <fcl>run_ubxsec_data_bnbon_twotrfilter.fcl</fcl>
+     <outdir>/pnfs/uboone/scratch/users/kduffy/&name;/v06_26_01_11_v3.1.1/filter/</outdir>
+     <logdir>/pnfs/uboone/scratch/users/kduffy/&name;/v06_26_01_11_v3.1.1/filter/</logdir>
+     <workdir>/pnfs/uboone/resilient/users/kduffy/&name;/v06_26_01_11_v3.1.1/filter/</workdir>
+     <schema>root</schema>
+  </stage>
+</project>
