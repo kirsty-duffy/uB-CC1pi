@@ -1,6 +1,6 @@
 <!-- Project details -->
 <!DOCTYPE project [
-<!ENTITY name "mintwotrackfilter_mcc87MC_v0">
+<!ENTITY name "mintwotrackfilter_mcc87MC_v1">
 <!ENTITY user "kduffy">
 ]>
 
@@ -10,8 +10,8 @@
   <group>uboone</group>
 
   <!-- Project size (numevents is an upper limit) -->
-  <numevents>500</numevents>
-  <numjobs>10</numjobs>
+  <numevents>50000</numevents>
+  <numjobs>1000</numjobs>
 
   <!-- Where to look for fcl files (in addition to $FHICL_FILE_PATH) -->
   <fcldir>/pnfs/uboone/persistent/users/kduffy/fcl/</fcldir>
