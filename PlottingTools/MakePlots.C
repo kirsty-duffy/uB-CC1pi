@@ -169,8 +169,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    StackedHistTopology* vtxshwr_stack = new StackedHistTopology("vtxshwr_stack", ";Distance between vertex and start of #nu daughter showers in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 50, 0, 50);
    StackedHistTopology* pfps_stack = new StackedHistTopology("pfps_stack", ";Number of #nu daughter PFPs in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 10, 0, 10);
 
-   StackedHistPDGCode* shwrtrue_stack = new StackedHistPDGCode("shwrtrue_sig",";True CC1pi: Number of shower #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)",10,0,10);
-   StackedHistPDGCode* shwrtrue_bg_stack = new StackedHistPDGCode("shwrtrue_bg_stack", ";Background: Number of shower #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)",10,0,10);
+   StackedHistPDGCode* shwrtrue_stack = new StackedHistPDGCode("shwrtrue_sig",";True CC1pi: Number of shower #nu daughters in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)",10,0,10);
+   StackedHistPDGCode* shwrtrue_bg_stack = new StackedHistPDGCode("shwrtrue_bg_stack", ";Background: Number of shower #nu daughters in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)",10,0,10);
    StackedHistPDGCode* len_stack_byPDG = new StackedHistPDGCode("len_stack_byPDG", ";Longest Track Length [cm];Selected Events (normalised to 3.782 #times 10^{19} POT)", 30, 0, 700);
    StackedHistPDGCode* isMIP_stack = new StackedHistPDGCode("isMIP_stack", ";#nu daughter track is MIP-like?;Selected Events (normalised to 3.782 #times 10^{19} POT)",2,0,2);
 
@@ -178,7 +178,10 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    TEfficiency* eff_track_pion = new TEfficiency("eff_track_pion",";True Kinetic Energy [GeV];",10,0,2);
    TEfficiency* eff_track_proton = new TEfficiency("eff_track_proton",";True Kinetic Energy [GeV];",10,0,2);
 
-   TH2D* longest2tracks_byPDG = new TH2D("longest2tracks_byPDG",";True PDG of longest track;True PDG of second longest track",4,0,4,4,0,4);
+   TH2D* longest2tracks_byPDG_signal = new TH2D("longest2tracks_byPDG_signal",";True PDG of longest track;True PDG of second longest track",4,0,4,4,0,4);
+   TH2D* longest2tracks_byPDG_bg = new TH2D("longest2tracks_byPDG_bg",";True PDG of longest track;True PDG of second longest track",4,0,4,4,0,4);
+
+   TH1D* vtx_truereco_dist = new TH1D("vtx_truereco_dist",";Distance between true and reco vertices;Selected Events (normalised to 3.782 #times 10^{19} POT)",50,0,50);
 
    const int nentries = t -> GetEntries();
 
@@ -300,31 +303,59 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
             if(TPCObj_PFP_isDaughter -> at(j) && TPCObj_PFP_isTrack -> at(j)) isMIP_stack -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j),TPCObj_PFP_isMIP->at(j));
          }
 
-         //Longest 2 tracks by PDG...
-         if(TPCObj_NTracks >= 2) {
-            if(maxPDG == kMuMinus) {
-               if(maxPDG2 == kMuMinus) longest2tracks_byPDG -> Fill(0., 0);
-               else if(maxPDG2 == kPiPlus) longest2tracks_byPDG -> Fill(0.,1);
-               else if(maxPDG2 == kProton) longest2tracks_byPDG -> Fill(0.,2);
-               else longest2tracks_byPDG -> Fill(0.,3);
-            }
-            else if(maxPDG == kPiPlus) {
-               if(maxPDG2 == kMuMinus) longest2tracks_byPDG -> Fill(1,0);
-               else if(maxPDG2 == kPiPlus) longest2tracks_byPDG -> Fill(1,1);
-               else if(maxPDG2 == kProton) longest2tracks_byPDG -> Fill(1,2);
-               else longest2tracks_byPDG -> Fill(1,3);
-            }
-            else if(maxPDG == kProton) {
-               if(maxPDG2 == kMuMinus) longest2tracks_byPDG -> Fill(2,0);
-               else if(maxPDG2 == kPiPlus) longest2tracks_byPDG -> Fill(2,1);
-               else if(maxPDG2 == kProton) longest2tracks_byPDG -> Fill(2,2);
-               else longest2tracks_byPDG -> Fill(2,3);
+         //Longest 2 daughter tracks by PDG...
+         if(track_daughters >= 2) {
+            if(isSignal) {
+               if(maxPDG == kMuMinus) {
+                  if(maxPDG2 == kMuMinus) longest2tracks_byPDG_signal -> Fill(0., 0);
+                  else if(maxPDG2 == kPiPlus) longest2tracks_byPDG_signal -> Fill(0.,1);
+                  else if(maxPDG2 == kProton) longest2tracks_byPDG_signal -> Fill(0.,2);
+                  else longest2tracks_byPDG_signal -> Fill(0.,3);
+               }
+               else if(maxPDG == kPiPlus) {
+                  if(maxPDG2 == kMuMinus) longest2tracks_byPDG_signal -> Fill(1,0);
+                  else if(maxPDG2 == kPiPlus) longest2tracks_byPDG_signal -> Fill(1,1);
+                  else if(maxPDG2 == kProton) longest2tracks_byPDG_signal -> Fill(1,2);
+                  else longest2tracks_byPDG_signal -> Fill(1,3);
+               }
+               else if(maxPDG == kProton) {
+                  if(maxPDG2 == kMuMinus) longest2tracks_byPDG_signal -> Fill(2,0);
+                  else if(maxPDG2 == kPiPlus) longest2tracks_byPDG_signal -> Fill(2,1);
+                  else if(maxPDG2 == kProton) longest2tracks_byPDG_signal -> Fill(2,2);
+                  else longest2tracks_byPDG_signal -> Fill(2,3);
+               }
+               else {
+                  if(maxPDG2 == kMuMinus) longest2tracks_byPDG_signal -> Fill(3,0);
+                  else if(maxPDG2 == kPiPlus) longest2tracks_byPDG_signal -> Fill(3,1);
+                  else if(maxPDG2 == kProton) longest2tracks_byPDG_signal -> Fill(3,2);
+                  else longest2tracks_byPDG_signal -> Fill(3,3);
+               }
             }
             else {
-               if(maxPDG2 == kMuMinus) longest2tracks_byPDG -> Fill(3,0);
-               else if(maxPDG2 == kPiPlus) longest2tracks_byPDG -> Fill(3,1);
-               else if(maxPDG2 == kProton) longest2tracks_byPDG -> Fill(3,2);
-               else longest2tracks_byPDG -> Fill(3,3);
+               if(maxPDG == kMuMinus) {
+                  if(maxPDG2 == kMuMinus) longest2tracks_byPDG_bg -> Fill(0., 0);
+                  else if(maxPDG2 == kPiPlus) longest2tracks_byPDG_bg -> Fill(0.,1);
+                  else if(maxPDG2 == kProton) longest2tracks_byPDG_bg -> Fill(0.,2);
+                  else longest2tracks_byPDG_bg -> Fill(0.,3);
+               }
+               else if(maxPDG == kPiPlus) {
+                  if(maxPDG2 == kMuMinus) longest2tracks_byPDG_bg -> Fill(1,0);
+                  else if(maxPDG2 == kPiPlus) longest2tracks_byPDG_bg -> Fill(1,1);
+                  else if(maxPDG2 == kProton) longest2tracks_byPDG_bg -> Fill(1,2);
+                  else longest2tracks_byPDG_bg -> Fill(1,3);
+               }
+               else if(maxPDG == kProton) {
+                  if(maxPDG2 == kMuMinus) longest2tracks_byPDG_bg -> Fill(2,0);
+                  else if(maxPDG2 == kPiPlus) longest2tracks_byPDG_bg -> Fill(2,1);
+                  else if(maxPDG2 == kProton) longest2tracks_byPDG_bg -> Fill(2,2);
+                  else longest2tracks_byPDG_bg -> Fill(2,3);
+               }
+               else {
+                  if(maxPDG2 == kMuMinus) longest2tracks_byPDG_bg -> Fill(3,0);
+                  else if(maxPDG2 == kPiPlus) longest2tracks_byPDG_bg -> Fill(3,1);
+                  else if(maxPDG2 == kProton) longest2tracks_byPDG_bg -> Fill(3,2);
+                  else longest2tracks_byPDG_bg -> Fill(3,3);
+               }
             }
          }
 
@@ -366,10 +397,15 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
                }
             } // end if (TPCObj_PFP_isShower -> at(j))  
          } // end loop over PFPs
-      }
-   }
 
-   gStyle->SetOptStat(0);
+      vtx_truereco_dist -> Fill(std::hypot(std::hypot(TPCObj_reco_vtx->at(0) - nu_vtxx->at(0), TPCObj_reco_vtx->at(1) - nu_vtxy->at(0)), TPCObj_reco_vtx->at(2) - nu_vtxz->at(0)));
+
+
+      } // end if(SelectedEvent)
+   } //end loop over entries
+
+   gStyle->SetOptStat(0); //No stats box
+//   gStyle -> SetOptStat(111111); //Full stats box, including under/overflow
 
    TCanvas *c1 = new TCanvas("c1", "c1");
 
@@ -507,16 +543,30 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    gPad->Update();
    c1 -> SaveAs(TString::Format("%s_eff_track.eps",SaveString.c_str()));
 
-   longest2tracks_byPDG->GetXaxis()->SetBinLabel(1,PDGenum2str(kMuMinus).c_str());
-   longest2tracks_byPDG->GetXaxis()->SetBinLabel(2,PDGenum2str(kPiPlus).c_str());
-   longest2tracks_byPDG->GetXaxis()->SetBinLabel(3,PDGenum2str(kProton).c_str());
-   longest2tracks_byPDG->GetXaxis()->SetBinLabel(4,"Other");
-   longest2tracks_byPDG->GetYaxis()->SetBinLabel(1,PDGenum2str(kMuMinus).c_str());
-   longest2tracks_byPDG->GetYaxis()->SetBinLabel(2,PDGenum2str(kPiPlus).c_str());
-   longest2tracks_byPDG->GetYaxis()->SetBinLabel(3,PDGenum2str(kProton).c_str());
-   longest2tracks_byPDG->GetYaxis()->SetBinLabel(4,"Other");
-   longest2tracks_byPDG->Draw("COLZ TEXT");
-   c1 -> SaveAs(TString::Format("%s_longest2tracks_byPDG.eps",SaveString.c_str()));
+   longest2tracks_byPDG_signal->GetXaxis()->SetBinLabel(1,PDGenum2str(kMuMinus).c_str());
+   longest2tracks_byPDG_signal->GetXaxis()->SetBinLabel(2,PDGenum2str(kPiPlus).c_str());
+   longest2tracks_byPDG_signal->GetXaxis()->SetBinLabel(3,PDGenum2str(kProton).c_str());
+   longest2tracks_byPDG_signal->GetXaxis()->SetBinLabel(4,"Other");
+   longest2tracks_byPDG_signal->GetYaxis()->SetBinLabel(1,PDGenum2str(kMuMinus).c_str());
+   longest2tracks_byPDG_signal->GetYaxis()->SetBinLabel(2,PDGenum2str(kPiPlus).c_str());
+   longest2tracks_byPDG_signal->GetYaxis()->SetBinLabel(3,PDGenum2str(kProton).c_str());
+   longest2tracks_byPDG_signal->GetYaxis()->SetBinLabel(4,"Other");
+   longest2tracks_byPDG_signal->Draw("COLZ TEXT");
+   c1 -> SaveAs(TString::Format("%s_longest2tracks_byPDG_signal.eps",SaveString.c_str()));
+
+   longest2tracks_byPDG_bg->GetXaxis()->SetBinLabel(1,PDGenum2str(kMuMinus).c_str());
+   longest2tracks_byPDG_bg->GetXaxis()->SetBinLabel(2,PDGenum2str(kPiPlus).c_str());
+   longest2tracks_byPDG_bg->GetXaxis()->SetBinLabel(3,PDGenum2str(kProton).c_str());
+   longest2tracks_byPDG_bg->GetXaxis()->SetBinLabel(4,"Other");
+   longest2tracks_byPDG_bg->GetYaxis()->SetBinLabel(1,PDGenum2str(kMuMinus).c_str());
+   longest2tracks_byPDG_bg->GetYaxis()->SetBinLabel(2,PDGenum2str(kPiPlus).c_str());
+   longest2tracks_byPDG_bg->GetYaxis()->SetBinLabel(3,PDGenum2str(kProton).c_str());
+   longest2tracks_byPDG_bg->GetYaxis()->SetBinLabel(4,"Other");
+   longest2tracks_byPDG_bg->Draw("COLZ TEXT");
+   c1 -> SaveAs(TString::Format("%s_longest2tracks_byPDG_bg.eps",SaveString.c_str()));
+
+   vtx_truereco_dist -> Draw();
+   c1 -> SaveAs(TString::Format("%s_vtx_truereco_dist.eps",SaveString.c_str()));
 
    std::cout << "Total Efficiency: " << (1. * (eff_nuE -> GetPassedHistogram() -> GetEntries()))/(eff_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
    std::cout << "Total Purity: " << (1. * (pur_nuE -> GetPassedHistogram() -> GetEntries()))/(pur_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
