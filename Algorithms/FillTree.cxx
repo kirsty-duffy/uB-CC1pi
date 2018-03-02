@@ -69,12 +69,11 @@ void cc1pianavars::Clear(){
    MCP_KE.clear();
    MCP_isContained.clear();
 
-   nu_vtxx.clear();
-   nu_vtxy.clear();
-   nu_vtxz.clear();
-   nu_isCC.clear();
-   nu_PDG.clear();
-   nu_E.clear();
+   nu_vtx.clear();
+   nu_vtx_spacecharge.clear();
+   nu_isCC = false;
+   nu_PDG = -9999;
+   nu_E = -9999;
 
    CC1picutflow.clear();
 }
@@ -461,19 +460,25 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          simb::MCNeutrino nu = mc_truth -> GetNeutrino();
          simb::MCParticle neutrino = nu.Nu();
 
-         if (nu.CCNC() == 0) nu_isCC.emplace_back(true);
-         else if (nu.CCNC() == 1) nu_isCC.emplace_back(false);
+         if (nu.CCNC() == 0) nu_isCC = true;
+         else if (nu.CCNC() == 1) nu_isCC = false;
 
-         nu_PDG.emplace_back(neutrino.PdgCode());
+         nu_PDG = neutrino.PdgCode();
 
-         nu_E.emplace_back(neutrino.E());
+         nu_E = neutrino.E();
 
          const TLorentzVector& vertex = neutrino.Position(0);
          double MC_vertex[4];
          vertex.GetXYZT(MC_vertex);
-         nu_vtxx.emplace_back(MC_vertex[0]);
-         nu_vtxy.emplace_back(MC_vertex[1]);
-         nu_vtxz.emplace_back(MC_vertex[2]);
+         nu_vtx = {MC_vertex[0], MC_vertex[1], MC_vertex[2]};
+
+         // Space Charge correction
+         auto const* SCE = lar::providerFrom<spacecharge::SpaceChargeService>();
+         std::vector<double> sce_corr = SCE->GetPosOffsets(nu_vtx[0], nu_vtx[1], nu_vtx[2]);
+         std::cout << "SCE correction in x, y, z = " << sce_corr.at(0)
+            << ", " << sce_corr.at(1) 
+            << ", " << sce_corr.at(2) << std::endl;
+         nu_vtx_spacecharge = {nu_vtx[0] - sce_corr.at(0), nu_vtx[1] + sce_corr.at(1), nu_vtx[2] + sce_corr.at(2)};
 
       }
    }
@@ -539,9 +544,8 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("MCP_KE", &(vars->MCP_KE));
    t -> Branch("MCP_isContained", &(vars->MCP_isContained));
 
-   t -> Branch("nu_vtxx", &(vars->nu_vtxx));
-   t -> Branch("nu_vtxy", &(vars->nu_vtxy));
-   t -> Branch("nu_vtxz", &(vars->nu_vtxz));
+   t -> Branch("nu_vtx", &(vars->nu_vtx));
+   t -> Branch("nu_vtx_spacecharge", &(vars->nu_vtx_spacecharge));
    t -> Branch("nu_isCC", &(vars->nu_isCC));
    t -> Branch("nu_PDG", &(vars->nu_PDG));
    t -> Branch("nu_E", &(vars->nu_E));

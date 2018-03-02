@@ -166,6 +166,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
 
    StackedHistPDGCode* len_stack_byPDG = new StackedHistPDGCode("len_stack_byPDG", ";Longest Track Length [cm];Selected Events (normalised to 3.782 #times 10^{19} POT)", 30, 0, 700);
    StackedHistPDGCode* isMIP_stack_byPDG = new StackedHistPDGCode("isMIP_stack_byPDG", ";#nu daughter track is MIP-like?;Selected Events (normalised to 3.782 #times 10^{19} POT)", 2, 0, 2);
+   StackedHistPDGCode* mips_stack_byPDG = new StackedHistPDGCode("mips_stack_byPDG", ";Number of MIP-like #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 10, 0, 10);
    StackedHistPDGCode* pfps_stack_byPDG = new StackedHistPDGCode("pfps_stack_byPDG", ";Number of #nu daughter PFPs in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 10, 0, 10);
 
    TH2D* longest2tracks_byPDG_signal = new TH2D("longest2tracks_byPDG_signal",";True PDG of longest track;True PDG of second longest track",4,0,4,4,0,4);
@@ -279,6 +280,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
             if(TPCObj_PFP_isDaughter -> at(j)) {
                isMIP_stack_byPDG -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j), TPCObj_PFP_isMIP->at(j));
                pfps_stack_byPDG -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j), track_daughters, 1./track_daughters);
+               if(mip_daughters>0) mips_stack_byPDG -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j), mip_daughters, 1./mip_daughters);
             }
          }
 
@@ -444,6 +446,9 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
 
    isMIP_stack_byPDG -> DrawStack(norm, c1);
    c1 -> SaveAs(TString::Format("%s_THSTack_isMIP_byPDG.eps",SaveString.c_str()));
+
+   mips_stack_byPDG -> DrawStack(norm, c1);
+   c1 -> SaveAs(TString::Format("%s_THSTack_mips_byPDG.eps",SaveString.c_str()));
 
    pfps_stack_byPDG -> DrawStack(norm, c1);
    c1 -> SaveAs(TString::Format("%s_THSTack_pfps_byPDG.eps",SaveString.c_str()));

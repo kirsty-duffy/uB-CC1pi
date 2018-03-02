@@ -18,9 +18,6 @@ services:
    TPCEnergyCalib: @local::microboone_tpcenergycalib_service
 }
 
-services.DetectorClocksService.InheritClockConfig:   false
-services.DetectorClocksService.TriggerOffsetTPC:     -400
-
 services.SpaceCharge.EnableCorrSCE:       true
 services.SpaceCharge.EnableSimEfieldSCE:  true
 services.SpaceCharge.EnableSimSpatialSCE: true
