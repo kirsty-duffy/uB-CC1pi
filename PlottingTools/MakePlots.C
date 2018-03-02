@@ -88,12 +88,11 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    std::vector<double> *MCP_KE = NULL;
    std::vector<bool> *MCP_isContained = NULL;
 
-   std::vector<double> *nu_vtxx = NULL;
-   std::vector<double> *nu_vtxy = NULL;
-   std::vector<double> *nu_vtxz = NULL;
-   std::vector<bool> *nu_isCC = NULL;
-   std::vector<int> *nu_PDG = NULL;
-   std::vector<double> *nu_E = NULL;
+   std::vector<double> *nu_vtx = NULL;
+   std::vector<double> *nu_vtx_spacecharge = NULL;
+   bool nu_isCC;
+   int nu_PDG;
+   double nu_E;
 
    std::map<std::string,bool> *CC1picutflow = NULL;
 
@@ -141,9 +140,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchAddress("MCP_KE", &MCP_KE);
    t -> SetBranchAddress("MCP_isContained", &MCP_isContained);
 
-   t -> SetBranchAddress("nu_vtxx", &nu_vtxx);
-   t -> SetBranchAddress("nu_vtxy", &nu_vtxy);
-   t -> SetBranchAddress("nu_vtxz", &nu_vtxz);
+   t -> SetBranchAddress("nu_vtx", &nu_vtx);
+   t -> SetBranchAddress("nu_vtx_spacecharge", &nu_vtx_spacecharge);
    t -> SetBranchAddress("nu_isCC", &nu_isCC);
    t -> SetBranchAddress("nu_PDG", &nu_PDG);
    t -> SetBranchAddress("nu_E", &nu_E);
@@ -182,6 +180,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    TH2D* longest2tracks_byPDG_bg = new TH2D("longest2tracks_byPDG_bg",";True PDG of longest track;True PDG of second longest track",4,0,4,4,0,4);
 
    TH1D* vtx_truereco_dist = new TH1D("vtx_truereco_dist",";Distance between true and reco vertices;Selected Events (normalised to 3.782 #times 10^{19} POT)",50,0,50);
+   TH1D* vtx_truereco_spacecharge_dist = new TH1D("vtx_truereco_spacecharge_dist",";Distance between true and reco vertices (including spacecharge);Selected Events (normalised to 3.782 #times 10^{19} POT)",50,0,50);
 
    const int nentries = t -> GetEntries();
 
@@ -193,7 +192,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
       // Move this to module! 
       if (TPCObj_origin == 1) TPCObj_beamnu_topology = kCosmic;
       else if (TPCObj_origin == 2) TPCObj_beamnu_topology = kMixed;
-      else if (TPCObj_origin == 0 && !inFV(nu_vtxx -> at(0), nu_vtxy -> at(0), nu_vtxz -> at(0))) TPCObj_beamnu_topology = kOutFV;
+      else if (TPCObj_origin == 0 && !inFV(nu_vtx -> at(0), nu_vtx -> at(1), nu_vtx -> at(2))) TPCObj_beamnu_topology = kOutFV;
       else if (TPCObj_origin == 0 && PDGCode(abs(nu_PDG -> at(0))) == kNuE && TPCObj_beamnu_topology != kNC) TPCObj_beamnu_topology = kCCNue;
 
 
@@ -213,7 +212,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
 
       // if signal...
       //      if (TPCObj_beamnu_topology == kCC1piplus0p || TPCObj_beamnu_topology == kCC1piplus1p || TPCObj_beamnu_topology == kCC1piplusNp) {
-      if(nu_isCC -> at(0) && nu_PDG -> at(0) == 14 && inFV(nu_vtxx -> at(0), nu_vtxy -> at(0), nu_vtxz -> at(0)) && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 13) == 1 && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 211) == 1 && MCP_PDG -> size() == 2 + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2112) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2212) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2000000101) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 1000180400)) {
+      if(nu_isCC -> at(0) && nu_PDG -> at(0) == 14 && inFV(nu_vtx -> at(0), nu_vtx -> at(1), nu_vtx -> at(2)) && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 13) == 1 && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 211) == 1 && MCP_PDG -> size() == 2 + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2112) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2212) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2000000101) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 1000180400)) {
 
          isSignal = true;
 
@@ -398,7 +397,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
             } // end if (TPCObj_PFP_isShower -> at(j))  
          } // end loop over PFPs
 
-      vtx_truereco_dist -> Fill(std::hypot(std::hypot(TPCObj_reco_vtx->at(0) - nu_vtxx->at(0), TPCObj_reco_vtx->at(1) - nu_vtxy->at(0)), TPCObj_reco_vtx->at(2) - nu_vtxz->at(0)));
+      vtx_truereco_dist -> Fill(std::hypot(std::hypot(TPCObj_reco_vtx->at(0) - nu_vtx->at(0), TPCObj_reco_vtx->at(1) - nu_vtx->at(1)), TPCObj_reco_vtx->at(2) - nu_vtx->at(2)));
+      vtx_truereco_spacecharge_dist -> Fill(std::hypot(std::hypot(TPCObj_reco_vtx->at(0) - nu_vtx_spacecharge->at(0), TPCObj_reco_vtx->at(1) - nu_vtx_spacecharge->at(1)), TPCObj_reco_vtx->at(2) - nu_vtx_spacecharge->at(2)));
 
 
       } // end if(SelectedEvent)
@@ -567,6 +567,9 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
 
    vtx_truereco_dist -> Draw();
    c1 -> SaveAs(TString::Format("%s_vtx_truereco_dist.eps",SaveString.c_str()));
+
+   vtx_truereco_spacecharge_dist -> Draw();
+   c1 -> SaveAs(TString::Format("%s_vtx_truereco_spacecharge_dist.eps",SaveString.c_str()));
 
    std::cout << "Total Efficiency: " << (1. * (eff_nuE -> GetPassedHistogram() -> GetEntries()))/(eff_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
    std::cout << "Total Purity: " << (1. * (pur_nuE -> GetPassedHistogram() -> GetEntries()))/(pur_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;

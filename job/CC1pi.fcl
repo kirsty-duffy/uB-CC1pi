@@ -13,7 +13,12 @@ services:
       InheritClockConfig:   false
       TriggerOffsetTPC:     -400
    }
+   SpaceCharge: @local::microboone_spacecharge
 }
+
+services.SpaceCharge.EnableCorrSCE:       true
+services.SpaceCharge.EnableSimEfieldSCE:  true
+services.SpaceCharge.EnableSimSpatialSCE: true
 
 source:
 { 

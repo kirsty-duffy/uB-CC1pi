@@ -29,6 +29,7 @@
 #include "larcore/Geometry/GeometryCore.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/PFParticle.h"
+#include "larevt/SpaceChargeServices/SpaceChargeService.h"
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 #include "nusimdata/SimulationBase/MCParticle.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
@@ -94,12 +95,11 @@ struct cc1pianavars{
   std::vector<double> MCP_KE;
   std::vector<bool> MCP_isContained;
 
-  std::vector<double> nu_vtxx;
-  std::vector<double> nu_vtxy;
-  std::vector<double> nu_vtxz;
-  std::vector<bool> nu_isCC;
-  std::vector<int> nu_PDG;
-  std::vector<double> nu_E;
+  std::vector<double> nu_vtx;
+  std::vector<double> nu_vtx_spacecharge;
+  bool nu_isCC;
+  int nu_PDG;
+  double nu_E;
 
   std::map<std::string,bool> CC1picutflow;
 
