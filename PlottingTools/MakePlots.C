@@ -206,7 +206,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          }
       }
 
-      // Test 2 duaghter PFP cut
+      // Test 2 daughter PFP cut
       //if (std::count(TPCObj_PFP_isDaughter -> begin(), TPCObj_PFP_isDaughter -> end(), true) < 2) SelectedEvent = false;
 
       bool isSignal = false;

@@ -9,13 +9,18 @@ services:
    #RandomNumberGenerator: {}
    message: @local::standard_info
    @table::microboone_simulation_services
+   DetectorClocksService: {
+      InheritClockConfig:   false
+      TriggerOffsetTPC:     -400
+   }
 }
 
 source:
 { 
-  module_type: RootInput 
-  maxEvents  : -1
-  fileNames  : [ "/pnfs/uboone/persistent/users/ddevitt/out/marcosel_mcc8.6_bnb+cosmic/stage1/3342176_0/prodgenie_bnb_nu_cosmic_uboone_0_20170304T225402_gen2_e5e40112-3946-433e-87b8-d9833a0e725d_20171221T035713_reco1_20171221T041802_reco2_20180124T152818_ubxsec.root" ]
+  module_type   : RootInput 
+  maxEvents     : -1
+  fileNames     : [ "/pnfs/uboone/persistent/users/ddevitt/out/marcosel_mcc8.6_bnb+cosmic/stage1/3342176_0/prodgenie_bnb_nu_cosmic_uboone_0_20170304T225402_gen2_e5e40112-3946-433e-87b8-d9833a0e725d_20171221T035713_reco1_20171221T041802_reco2_20180124T152818_ubxsec.root" ]
+  inputCommands : [ "keep *", "drop sumdata::RunData_*_*_*" ] #Workaround for LArSoft bug 18943
 }
 
 physics:
@@ -50,6 +55,3 @@ outputs:
      fileName    : "%ifb_%tc_CC1pi_artrootout.root" 
    }
 }
-
-services.DetectorClocksService.InheritClockConfig:   false
-services.DetectorClocksService.TriggerOffsetTPC:     -400
