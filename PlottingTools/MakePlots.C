@@ -52,7 +52,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    std::map<std::string,bool> *Marco_cutflow = NULL;
    bool Marco_selected;
 
-   NuIntTopology TPCObj_beamnu_topology;
+   NuIntTopology Truth_topology;
    std::vector<double> *TPCObj_PFP_track_length = NULL;
    std::vector<std::vector<double>> *TPCObj_PFP_track_start = NULL;
    std::vector<std::vector<double>> *TPCObj_PFP_track_end = NULL;
@@ -104,7 +104,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchAddress("Marco_cutflow", &Marco_cutflow);
    t -> SetBranchAddress("Marco_selected", &Marco_selected);
 
-   t -> SetBranchAddress("TPCObj_beamnu_topology", &TPCObj_beamnu_topology);
+   t -> SetBranchAddress("Truth_topology", &Truth_topology);
    t -> SetBranchAddress("TPCObj_PFP_track_length", &TPCObj_PFP_track_length);
    t -> SetBranchAddress("TPCObj_PFP_track_start", &TPCObj_PFP_track_start);
    t -> SetBranchAddress("TPCObj_PFP_track_end", &TPCObj_PFP_track_end);
@@ -190,10 +190,10 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
 
       // Set topology (check for cosmic, mixed, OFV)
       // Move this to module! 
-      if (TPCObj_origin == 1) TPCObj_beamnu_topology = kCosmic;
-      else if (TPCObj_origin == 2) TPCObj_beamnu_topology = kMixed;
-      else if (TPCObj_origin == 0 && !inFV(nu_vtx -> at(0), nu_vtx -> at(1), nu_vtx -> at(2))) TPCObj_beamnu_topology = kOutFV;
-      else if (TPCObj_origin == 0 && PDGCode(abs(nu_PDG)) == kNuE && TPCObj_beamnu_topology != kNC) TPCObj_beamnu_topology = kCCNue;
+      if (TPCObj_origin == 1) Truth_topology = kCosmic;
+      else if (TPCObj_origin == 2) Truth_topology = kMixed;
+      else if (TPCObj_origin == 0 && !inFV(nu_vtx -> at(0), nu_vtx -> at(1), nu_vtx -> at(2))) Truth_topology = kOutFV;
+      else if (TPCObj_origin == 0 && PDGCode(abs(nu_PDG)) == kNuE && Truth_topology != kNC) Truth_topology = kCCNue;
 
 
       // Check whether the event passes the requested cutflow map
@@ -211,7 +211,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
       bool isSignal = false;
 
       // if signal...
-      //      if (TPCObj_beamnu_topology == kCC1piplus0p || TPCObj_beamnu_topology == kCC1piplus1p || TPCObj_beamnu_topology == kCC1piplusNp) {
+      //      if (Truth_topology == kCC1piplus0p || Truth_topology == kCC1piplus1p || Truth_topology == kCC1piplusNp) {
       if(nu_isCC && nu_PDG == 14 && inFV(nu_vtx -> at(0), nu_vtx -> at(1), nu_vtx -> at(2)) && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 13) == 1 && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 211) == 1 && MCP_PDG -> size() == 2 + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2112) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2212) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2000000101) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 1000180400)) {
 
          isSignal = true;
@@ -286,16 +286,16 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
             }
          }
 
-         len_stack -> Fill(TPCObj_beamnu_topology, maxlen);
-         tracks_stack -> Fill(TPCObj_beamnu_topology, track_daughters);
-         showers_stack -> Fill(TPCObj_beamnu_topology, shower_daughters);
-         mips_stack -> Fill(TPCObj_beamnu_topology, mip_daughters);
-         pfps_stack -> Fill(TPCObj_beamnu_topology, track_daughters+shower_daughters);
+         len_stack -> Fill(Truth_topology, maxlen);
+         tracks_stack -> Fill(Truth_topology, track_daughters);
+         showers_stack -> Fill(Truth_topology, shower_daughters);
+         mips_stack -> Fill(Truth_topology, mip_daughters);
+         pfps_stack -> Fill(Truth_topology, track_daughters+shower_daughters);
          for (int j = 0; j < track_daughters; j++) {
-            vtxtrack_stack -> Fill(TPCObj_beamnu_topology, vtxtrack_daughters.at(j));
+            vtxtrack_stack -> Fill(Truth_topology, vtxtrack_daughters.at(j));
          }
          for (int j = 0; j < shower_daughters; j++) {
-            vtxshwr_stack -> Fill(TPCObj_beamnu_topology, vtxshwr_daughters.at(j));
+            vtxshwr_stack -> Fill(Truth_topology, vtxshwr_daughters.at(j));
          }
          len_stack_byPDG -> Fill(maxPDG, maxlen);
          for(int j = 0; j < TPCObj_NPFPs; j++) {
