@@ -193,7 +193,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
       if (TPCObj_origin == 1) TPCObj_beamnu_topology = kCosmic;
       else if (TPCObj_origin == 2) TPCObj_beamnu_topology = kMixed;
       else if (TPCObj_origin == 0 && !inFV(nu_vtx -> at(0), nu_vtx -> at(1), nu_vtx -> at(2))) TPCObj_beamnu_topology = kOutFV;
-      else if (TPCObj_origin == 0 && PDGCode(abs(nu_PDG -> at(0))) == kNuE && TPCObj_beamnu_topology != kNC) TPCObj_beamnu_topology = kCCNue;
+      else if (TPCObj_origin == 0 && PDGCode(abs(nu_PDG)) == kNuE && TPCObj_beamnu_topology != kNC) TPCObj_beamnu_topology = kCCNue;
 
 
       // Check whether the event passes the requested cutflow map
@@ -212,15 +212,15 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
 
       // if signal...
       //      if (TPCObj_beamnu_topology == kCC1piplus0p || TPCObj_beamnu_topology == kCC1piplus1p || TPCObj_beamnu_topology == kCC1piplusNp) {
-      if(nu_isCC -> at(0) && nu_PDG -> at(0) == 14 && inFV(nu_vtx -> at(0), nu_vtx -> at(1), nu_vtx -> at(2)) && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 13) == 1 && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 211) == 1 && MCP_PDG -> size() == 2 + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2112) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2212) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2000000101) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 1000180400)) {
+      if(nu_isCC && nu_PDG == 14 && inFV(nu_vtx -> at(0), nu_vtx -> at(1), nu_vtx -> at(2)) && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 13) == 1 && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 211) == 1 && MCP_PDG -> size() == 2 + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2112) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2212) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2000000101) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 1000180400)) {
 
          isSignal = true;
 
          // Check neutrino flavour (just in case)
-         if (nu_PDG -> at(0) != 14) std::cout << "WARNING: Signal event has neutrino with PDG code " << nu_PDG -> at(0) << " (should be 14)" << std::endl;
+         if (nu_PDG != 14) std::cout << "WARNING: Signal event has neutrino with PDG code " << nu_PDG << " (should be 14)" << std::endl;
 
          // Efficiency...
-         eff_nuE -> Fill(SelectedEvent, nu_E -> at(0));
+         eff_nuE -> Fill(SelectedEvent, nu_E);
 
          for (int j = 0; j < MCP_PDG -> size(); j++) {
             if (MCP_PDG -> at(j) == 13) {
@@ -236,7 +236,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
       if(SelectedEvent) {
 
          // Purity...
-         pur_nuE -> Fill(isSignal, nu_E -> at(0));
+         pur_nuE -> Fill(isSignal, nu_E);
 
          for (int j = 0; j < MCP_PDG -> size(); j++) {
             if (MCP_PDG -> at(j) == 13) {
