@@ -9,12 +9,11 @@ services:
    #RandomNumberGenerator: {}
    message: @local::standard_info
    @table::microboone_simulation_services
-   DetectorClocksService: {
-      InheritClockConfig:   false
-      TriggerOffsetTPC:     -400
-   }
    SpaceCharge: @local::microboone_spacecharge
 }
+
+services.DetectorClocksService.InheritClockConfig:   false
+services.DetectorClocksService.TriggerOffsetTPC:     -400
 
 services.SpaceCharge.EnableCorrSCE:       true
 services.SpaceCharge.EnableSimEfieldSCE:  true
