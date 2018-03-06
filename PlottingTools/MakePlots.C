@@ -291,13 +291,14 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          showers_stack -> Fill(Truth_topology, shower_daughters);
          mips_stack -> Fill(Truth_topology, mip_daughters);
          pfps_stack -> Fill(Truth_topology, track_daughters+shower_daughters);
+         len_stack_byPDG -> Fill(maxPDG, maxlen);
+
          for (int j = 0; j < track_daughters; j++) {
             vtxtrack_stack -> Fill(Truth_topology, vtxtrack_daughters.at(j));
          }
          for (int j = 0; j < shower_daughters; j++) {
             vtxshwr_stack -> Fill(Truth_topology, vtxshwr_daughters.at(j));
          }
-         len_stack_byPDG -> Fill(maxPDG, maxlen);
          for(int j = 0; j < TPCObj_NPFPs; j++) {
             if(TPCObj_PFP_isDaughter -> at(j) && TPCObj_PFP_isTrack -> at(j)) isMIP_stack -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j),TPCObj_PFP_isMIP->at(j));
          }
@@ -565,9 +566,11 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    longest2tracks_byPDG_bg->Draw("COLZ TEXT");
    c1 -> SaveAs(TString::Format("%s_longest2tracks_byPDG_bg.eps",SaveString.c_str()));
 
+   vtx_truereco_dist -> Scale(norm);
    vtx_truereco_dist -> Draw();
    c1 -> SaveAs(TString::Format("%s_vtx_truereco_dist.eps",SaveString.c_str()));
 
+   vtx_truereco_spacecharge_dist -> Scale(norm);
    vtx_truereco_spacecharge_dist -> Draw();
    c1 -> SaveAs(TString::Format("%s_vtx_truereco_spacecharge_dist.eps",SaveString.c_str()));
 

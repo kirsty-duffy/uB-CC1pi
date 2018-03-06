@@ -319,7 +319,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       // We eventually need to correct for X position (time offset) and space charge
       // See issues #8 and #10 on github
 
-   } // if selected
+   } // if selected by Marco
 
    // Get all MCParticles
    art::Handle<std::vector<simb::MCParticle>> mcp_h;
