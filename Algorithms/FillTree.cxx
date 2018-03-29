@@ -205,8 +205,8 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          }
       }
 
-      art::FindManyP<recob::Track> tracks_from_pfps(pfp_h, evt, "pandoraNu");
-      art::FindManyP<recob::Shower> showers_from_pfps(pfp_h, evt, "pandoraNu");
+      art::FindManyP<recob::Track> tracks_from_pfps(pfp_h, evt, "pandoraNu::UBXSec");
+      art::FindManyP<recob::Shower> showers_from_pfps(pfp_h, evt, "pandoraNu::UBXSec");
 
       for (auto pfp : pfps) {
 
@@ -224,7 +224,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          double shower_length = -9999;
          std::vector<double> shower_start = {-9999, -9999, -9999};
 
-         if(lar_pandora::LArPandoraHelper::IsTrack(pfp)) {
+//         if(lar_pandora::LArPandoraHelper::IsTrack(pfp)) {
             std::vector<art::Ptr<recob::Track>> tracks_pfp = tracks_from_pfps.at(pfp.key());
             if(tracks_pfp.size() > 1) {
                mf::LogError(__PRETTY_FUNCTION__) << "PFP associated to more than one track." << std::endl;
@@ -255,9 +255,9 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
                isMIP = IsMIP(track_length, track_dqdx_truncmean);
             }
 
-         } // IsTrack
+//         } // IsTrack
 
-         else if(lar_pandora::LArPandoraHelper::IsShower(pfp)) {
+//         else if(lar_pandora::LArPandoraHelper::IsShower(pfp)) {
             std::vector<art::Ptr<recob::Shower>> showers_pfp = showers_from_pfps.at(pfp.key());
             if(showers_pfp.size() > 1) {
                mf::LogError(__PRETTY_FUNCTION__) << "PFP associated to more than one showers." << std::endl;
@@ -269,7 +269,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
                shower_start = {start.X(),start.Y(),start.Z()};
             }
 
-         } // IsShower
+//         } // IsShower
 
          // Fill track/shower specific variables
          TPCObj_PFP_track_length.emplace_back(track_length);
