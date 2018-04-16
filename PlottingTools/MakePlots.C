@@ -160,27 +160,24 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    TEfficiency* pur_muPhi = new TEfficiency("pur_muPhi",";True Muon #phi angle;",10,-3.2,3.2);
 
    StackedHistTopology* len_stack = new StackedHistTopology("len_stack", ";Longest Track Length [cm];Selected Eevents(normalised to 3.782 #times 10^{19} POT)", 30, 0, 700);
-   StackedHistTopology* tracks_stack = new StackedHistTopology("tracks_stack", ";Number of #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 10, 0, 10);
-   StackedHistTopology* showers_stack = new StackedHistTopology("showers_stack", ";Number of #nu daughter showers in selected TCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 10, 0, 10);
    StackedHistTopology* mips_stack = new StackedHistTopology("mips_stack", ";Number of MIP-like #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 10, 0, 10);
-   StackedHistTopology* vtxtrack_stack = new StackedHistTopology("vtxtrack_stack", ";Distance between vertex and start of #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 50, 0, 50);
-   StackedHistTopology* vtxshwr_stack = new StackedHistTopology("vtxshwr_stack", ";Distance between vertex and start of #nu daughter showers in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 50, 0, 50);
+   StackedHistTopology* vtxtrack_stack = new StackedHistTopology("vtxtrack_stack", ";Distance between vertex and start of #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 20, 0, 20);
    StackedHistTopology* pfps_stack = new StackedHistTopology("pfps_stack", ";Number of #nu daughter PFPs in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 10, 0, 10);
 
-   StackedHistPDGCode* shwrtrue_stack = new StackedHistPDGCode("shwrtrue_sig",";True CC1pi: Number of shower #nu daughters in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)",10,0,10);
-   StackedHistPDGCode* shwrtrue_bg_stack = new StackedHistPDGCode("shwrtrue_bg_stack", ";Background: Number of shower #nu daughters in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)",10,0,10);
+//   StackedHistPDGCode* shwrtrue_stack = new StackedHistPDGCode("shwrtrue_sig",";True CC1pi: Number of shower #nu daughters in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)",10,0,10);
+//   StackedHistPDGCode* shwrtrue_bg_stack = new StackedHistPDGCode("shwrtrue_bg_stack", ";Background: Number of shower #nu daughters in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)",10,0,10);
    StackedHistPDGCode* len_stack_byPDG = new StackedHistPDGCode("len_stack_byPDG", ";Longest Track Length [cm];Selected Events (normalised to 3.782 #times 10^{19} POT)", 30, 0, 700);
    StackedHistPDGCode* isMIP_stack = new StackedHistPDGCode("isMIP_stack", ";#nu daughter track is MIP-like?;Selected Events (normalised to 3.782 #times 10^{19} POT)",2,0,2);
-
+/*
    TEfficiency* eff_track_muon = new TEfficiency("eff_track_muon",";True Kinetic Energy [GeV];",10,0,2);
    TEfficiency* eff_track_pion = new TEfficiency("eff_track_pion",";True Kinetic Energy [GeV];",10,0,2);
    TEfficiency* eff_track_proton = new TEfficiency("eff_track_proton",";True Kinetic Energy [GeV];",10,0,2);
-
+*/
    TH2D* longest2tracks_byPDG_signal = new TH2D("longest2tracks_byPDG_signal",";True PDG of longest track;True PDG of second longest track",4,0,4,4,0,4);
    TH2D* longest2tracks_byPDG_bg = new TH2D("longest2tracks_byPDG_bg",";True PDG of longest track;True PDG of second longest track",4,0,4,4,0,4);
 
-   TH1D* vtx_truereco_dist = new TH1D("vtx_truereco_dist",";Distance between true and reco vertices;Selected Events (normalised to 3.782 #times 10^{19} POT)",50,0,50);
-   TH1D* vtx_truereco_spacecharge_dist = new TH1D("vtx_truereco_spacecharge_dist",";Distance between true and reco vertices (including spacecharge);Selected Events (normalised to 3.782 #times 10^{19} POT)",50,0,50);
+//   TH1D* vtx_truereco_dist = new TH1D("vtx_truereco_dist",";Distance between true and reco vertices;Selected Events (normalised to 3.782 #times 10^{19} POT)",50,0,50);
+//   TH1D* vtx_truereco_spacecharge_dist = new TH1D("vtx_truereco_spacecharge_dist",";Distance between true and reco vertices (including spacecharge);Selected Events (normalised to 3.782 #times 10^{19} POT)",50,0,50);
 
    const int nentries = t -> GetEntries();
 
@@ -266,18 +263,13 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
             }
          }
 
-         int shower_daughters = 0;
          int track_daughters = 0;
          int mip_daughters = 0;
          std::vector<double> vtxtrack_daughters;
-         std::vector<double> vtxshwr_daughters;
 
          for(int j = 0; j < TPCObj_NPFPs; j++) {
-            if(TPCObj_PFP_isShower -> at(j) && TPCObj_PFP_isDaughter -> at(j)){
-               shower_daughters++;
-               vtxshwr_daughters.emplace_back(std::hypot(std::hypot(TPCObj_reco_vtx->at(0) - TPCObj_PFP_shower_start->at(j).at(0), TPCObj_reco_vtx->at(1) - TPCObj_PFP_shower_start->at(j).at(1)), TPCObj_reco_vtx->at(2) - TPCObj_PFP_shower_start->at(j).at(2)));
-            }
-            if(TPCObj_PFP_isTrack -> at(j) && TPCObj_PFP_isDaughter -> at(j)){
+            if(TPCObj_PFP_isDaughter -> at(j)){
+               if(TPCObj_PFP_track_length -> at(j) < 0) std::cout << "Daughter PFP has no track." << std::endl;
                track_daughters++;
                vtxtrack_daughters.emplace_back(std::hypot(std::hypot(TPCObj_reco_vtx->at(0) - TPCObj_PFP_track_start->at(j).at(0), TPCObj_reco_vtx->at(1) - TPCObj_PFP_track_start->at(j).at(1)), TPCObj_reco_vtx->at(2) - TPCObj_PFP_track_start->at(j).at(2)));
             }
@@ -287,20 +279,15 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          }
 
          len_stack -> Fill(Truth_topology, maxlen);
-         tracks_stack -> Fill(Truth_topology, track_daughters);
-         showers_stack -> Fill(Truth_topology, shower_daughters);
          mips_stack -> Fill(Truth_topology, mip_daughters);
-         pfps_stack -> Fill(Truth_topology, track_daughters+shower_daughters);
+         pfps_stack -> Fill(Truth_topology, track_daughters);
          len_stack_byPDG -> Fill(maxPDG, maxlen);
 
          for (int j = 0; j < track_daughters; j++) {
             vtxtrack_stack -> Fill(Truth_topology, vtxtrack_daughters.at(j));
          }
-         for (int j = 0; j < shower_daughters; j++) {
-            vtxshwr_stack -> Fill(Truth_topology, vtxshwr_daughters.at(j));
-         }
          for(int j = 0; j < TPCObj_NPFPs; j++) {
-            if(TPCObj_PFP_isDaughter -> at(j) && TPCObj_PFP_isTrack -> at(j)) isMIP_stack -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j),TPCObj_PFP_isMIP->at(j));
+            if(TPCObj_PFP_isDaughter -> at(j)) isMIP_stack -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j),TPCObj_PFP_isMIP->at(j));
          }
 
          //Longest 2 daughter tracks by PDG...
@@ -358,7 +345,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
                }
             }
          }
-
+/*
          // Track/shower classification...
          for(int j = 0; j < TPCObj_NPFPs; j++) {
             if (TPCObj_PFP_truePDG -> at(j) == 13) {
@@ -397,9 +384,9 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
                }
             } // end if (TPCObj_PFP_isShower -> at(j))  
          } // end loop over PFPs
-
-      vtx_truereco_dist -> Fill(std::hypot(std::hypot(TPCObj_reco_vtx->at(0) - nu_vtx->at(0), TPCObj_reco_vtx->at(1) - nu_vtx->at(1)), TPCObj_reco_vtx->at(2) - nu_vtx->at(2)));
-      vtx_truereco_spacecharge_dist -> Fill(std::hypot(std::hypot(TPCObj_reco_vtx->at(0) - nu_vtx_spacecharge->at(0), TPCObj_reco_vtx->at(1) - nu_vtx_spacecharge->at(1)), TPCObj_reco_vtx->at(2) - nu_vtx_spacecharge->at(2)));
+*/
+//      vtx_truereco_dist -> Fill(std::hypot(std::hypot(TPCObj_reco_vtx->at(0) - nu_vtx->at(0), TPCObj_reco_vtx->at(1) - nu_vtx->at(1)), TPCObj_reco_vtx->at(2) - nu_vtx->at(2)));
+//      vtx_truereco_spacecharge_dist -> Fill(std::hypot(std::hypot(TPCObj_reco_vtx->at(0) - nu_vtx_spacecharge->at(0), TPCObj_reco_vtx->at(1) - nu_vtx_spacecharge->at(1)), TPCObj_reco_vtx->at(2) - nu_vtx_spacecharge->at(2)));
 
 
       } // end if(SelectedEvent)
@@ -489,12 +476,6 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    len_stack -> DrawStack(norm, c1);
    c1 -> SaveAs(TString::Format("%s_THStack_len.eps",SaveString.c_str()));
 
-   tracks_stack -> DrawStack(norm, c1);
-   c1 -> SaveAs(TString::Format("%s_THStack_tracks.eps",SaveString.c_str()));
-
-   showers_stack -> DrawStack(norm, c1);
-   c1 -> SaveAs(TString::Format("%s_THStack_showers.eps",SaveString.c_str()));
-
    mips_stack -> DrawStack(norm, c1);
    c1 -> SaveAs(TString::Format("%s_THStack_mips.eps",SaveString.c_str()));
 
@@ -503,22 +484,19 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
 
    vtxtrack_stack -> DrawStack(norm, c1);
    c1 -> SaveAs(TString::Format("%s_THStack_vtxtrack.eps",SaveString.c_str()));
-
-   vtxshwr_stack -> DrawStack(norm, c1);
-   c1 -> SaveAs(TString::Format("%s_THStack_vtxshwr.eps",SaveString.c_str()));
-
+/*
    shwrtrue_stack -> DrawStack(norm, c1);
    c1 -> SaveAs(TString::Format("%s_THStack_signal_shwrtrue.eps",SaveString.c_str()));
 
    shwrtrue_bg_stack -> DrawStack(norm, c1);
    c1 -> SaveAs(TString::Format("%s_THStack_bg_shwrtrue.eps",SaveString.c_str()));
-
+*/
    len_stack_byPDG -> DrawStack(norm, c1);
    c1 -> SaveAs(TString::Format("%s_THStack_trklen_byPDG.eps",SaveString.c_str()));
 
    isMIP_stack -> DrawStack(norm, c1);
    c1 -> SaveAs(TString::Format("%s_THSTack_isMIP.eps",SaveString.c_str()));
-
+/*
    eff_track_muon -> Draw("AP");
    eff_track_pion -> Draw("P SAME");
    eff_track_proton -> Draw("P SAME");
@@ -543,7 +521,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    graph->SetMaximum(1);
    gPad->Update();
    c1 -> SaveAs(TString::Format("%s_eff_track.eps",SaveString.c_str()));
-
+*/
    longest2tracks_byPDG_signal->GetXaxis()->SetBinLabel(1,PDGenum2str(kMuMinus).c_str());
    longest2tracks_byPDG_signal->GetXaxis()->SetBinLabel(2,PDGenum2str(kPiPlus).c_str());
    longest2tracks_byPDG_signal->GetXaxis()->SetBinLabel(3,PDGenum2str(kProton).c_str());
@@ -565,7 +543,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    longest2tracks_byPDG_bg->GetYaxis()->SetBinLabel(4,"Other");
    longest2tracks_byPDG_bg->Draw("COLZ TEXT");
    c1 -> SaveAs(TString::Format("%s_longest2tracks_byPDG_bg.eps",SaveString.c_str()));
-
+/*
    vtx_truereco_dist -> Scale(norm);
    vtx_truereco_dist -> Draw();
    c1 -> SaveAs(TString::Format("%s_vtx_truereco_dist.eps",SaveString.c_str()));
@@ -573,14 +551,14 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    vtx_truereco_spacecharge_dist -> Scale(norm);
    vtx_truereco_spacecharge_dist -> Draw();
    c1 -> SaveAs(TString::Format("%s_vtx_truereco_spacecharge_dist.eps",SaveString.c_str()));
-
+*/
    std::cout << "Total Efficiency: " << (1. * (eff_nuE -> GetPassedHistogram() -> GetEntries()))/(eff_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
    std::cout << "Total Purity: " << (1. * (pur_nuE -> GetPassedHistogram() -> GetEntries()))/(pur_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
-
+/*
    std::cout << "Muon Track Efficiency: " << (1. * (eff_track_muon -> GetPassedHistogram() -> GetEntries()))/(eff_track_muon -> GetTotalHistogram() -> GetEntries()) << std::endl;
    std::cout << "Pion Track Efficiency: " << (1. * (eff_track_pion -> GetPassedHistogram() -> GetEntries()))/(eff_track_pion -> GetTotalHistogram() -> GetEntries()) << std::endl;
    std::cout << "Proton Track Efficiency: " << (1. * (eff_track_proton -> GetPassedHistogram() -> GetEntries()))/(eff_track_proton -> GetTotalHistogram() -> GetEntries()) << std::endl;
-
+*/
    gDirectory->GetList()->Delete();
 
    return;

@@ -1,0 +1,87 @@
+#include "cluster_microboone.fcl"
+#include "kalmanfilterfinaltrackfitter.fcl"
+#include "cosmicremovalmodules.fcl"
+#include "calorimetry_microboone.fcl"
+#include "particleid_microboone.fcl"
+#include "mctrutht0matching.fcl"
+#include "calibration_microboone.fcl"
+
+#include "run_ubxsec_mc_bnbcosmic.fcl"
+
+
+services:
+{
+   OpDigiProperties:          @local::microboone_opdigiproperties
+   @table::microboone_services_reco
+   @table::ubxsec_mc_services
+}
+
+
+# Tell pandora to produce tracks even for PFPs it thinks are showers
+physics.producers.pandoraNu.BuildShowersAsTracks: true
+
+
+# Main settings for pandoraNuKalmanTrack
+physics.producers.pandoraNuKalmanTrack:           @local::kalmantrackfit
+physics.producers.pandoraNuKalmanTracktag:        @local::microboone_cosmictracktagger
+physics.producers.pandoraNuKalmanTrackcalo:       @local::microboone_calomc
+physics.producers.pandoraNuKalmanTrackpid:        @local::microboone_chi2pid
+physics.producers.pandoraNuKalmanTrackcali:       @local::microboone_calibrationdedx
+physics.producers.pandoraNuKalmanTrackcalipid:    @local::microboone_chi2pid
+physics.producers.pandoraNuKalmanTrackFlashMatch: @local::microboone_beamflashtrackmatchtagger
+#physics.producers.pandoraNuKalmanTrackTruthMatch: @local::standard_mctrutht0matching
+
+
+# Overrides for the above settings
+physics.producers.pandoraNuKalmanTrack.inputs.inputPFParticleLabel:   "pandoraNu::UBXSec"
+physics.producers.pandoraNuKalmanTrack.inputs.inputShowersLabel:      ""
+physics.producers.pandoraNuKalmanTrack.inputs.inputTracksLabel:       ""
+physics.producers.pandoraNuKalmanTrack.inputs.inputCaloLabel:         ""
+physics.producers.pandoraNuKalmanTrack.inputs.inputPidLabel:          ""
+physics.producers.pandoraNuKalmanTrack.options.trackFromPF:           true
+physics.producers.pandoraNuKalmanTrack.options.showerFromPF:          false
+
+physics.producers.pandoraNuKalmanTracktag.TrackModuleLabel:           "pandoraNuKalmanTrack"
+
+physics.producers.pandoraNuKalmanTrackcalo.TrackModuleLabel:          "pandoraNuKalmanTrack"
+physics.producers.pandoraNuKalmanTrackcalo.SpacePointModuleLabel:     "pandoraNuKalmanTrack"
+
+physics.producers.pandoraNuKalmanTrackpid.CalorimetryModuleLabel:     "pandoraNuKalmanTrackcalo"
+physics.producers.pandoraNuKalmanTrackpid.TrackModuleLabel:           "pandoraNuKalmanTrack"
+
+physics.producers.pandoraNuKalmanTrackcali.TrackModuleLabel:          "pandoraNuKalmanTrack"
+physics.producers.pandoraNuKalmanTrackcali.CalorimetryModuleLabel:    "pandoraNuKalmanTrackcalo"
+
+physics.producers.pandoraNuKalmanTrackcalipid.TrackModuleLabel:       "pandoraNuKalmanTrack"
+physics.producers.pandoraNuKalmanTrackcalipid.CalorimetryModuleLabel: "pandoraNuKalmanTrackcali"
+physics.producers.pandoraNuKalmanTrackcalipid.Chi2PIDAlg.UseMedian:   true
+
+physics.producers.pandoraNuKalmanTrackFlashMatch.TrackModuleLabel:    "pandoraNuKalmanTrack"
+physics.producers.pandoraNuKalmanTrackFlashMatch.FlashModuleLabel:    "simpleFlashBeam"
+physics.producers.pandoraNuKalmanTrackFlashMatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
+
+#physics.producers.pandoraNuKalmanTrackTruthMatch.TrackModuleLabel:    "pandoraNuKalmanTrack"
+#physics.producers.pandoraNuKalmanTrackTruthMatch.ShowerModuleLabel:   "pandoraNuKalmanTrack"
+#physics.producers.pandoraNuKalmanTrackTruthMatch.makeT0Assns:         false
+#physics.producers.pandoraNuKalmanTrackTruthMatch.makePFParticleAssns: false
+
+
+#Trigger paths for the above producers
+physics.pandoraNuKalmanTrackreco: [ pandoraNuKalmanTrack,
+                                    pandoraNuKalmanTracktag,
+                                    pandoraNuKalmanTrackcalo,
+                                    pandoraNuKalmanTrackpid,
+                                    pandoraNuKalmanTrackcali,
+                                    pandoraNuKalmanTrackcalipid,
+                                    pandoraNuKalmanTrackFlashMatch
+#                                    pandoraNuKalmanTrackTruthMatch
+                                  ]
+
+physics.combinedreco: [ @sequence::physics.reco, @sequence::physics.pandoraNuKalmanTrackreco ]
+
+physics.trigger_paths: [ reco, combinedreco ]
+
+
+# Make Marco's module stop filtering (will pass all events)
+# See https://cdcvs.fnal.gov/redmine/projects/art/wiki/Filtering_events for details
+# outputs.out1.SelectEvents: [ ]
