@@ -1,8 +1,9 @@
 <!-- Project details -->
 <!DOCTYPE project [
-<!ENTITY release "v06_26_01_10">
+<!ENTITY release "v06_26_01_13">
 <!ENTITY name "marco_sel">
 <!ENTITY user "ddevitt">
+<!ENTITY version "v06_26_01_13_v2">
 ]>
 
 <project name="&name;">
@@ -11,8 +12,8 @@
   <group>uboone</group>
 
   <!-- Project size (numevents is an upper limit) -->
-  <numevents>49800</numevents>
-  <numjobs>498</numjobs>
+  <numevents>25000</numevents>
+  <numjobs>500</numjobs>
 
   <!-- Where to look for fcl files (in addition to $FHICL_FILE_PATH) -->
   <!-- fcldir>/pnfs/uboone/persistent/users/ddevitt/fcl/</fcldir -->
@@ -22,33 +23,33 @@
 
   <!-- Larsoft information -->
   <larsoft>
-    <tag>&release;</tag>
-    <qual>e10:prof</qual>
-    <local>/pnfs/uboone/resilient/users/ddevitt/tars/marco_sel_v06_26_01_10_v3.1.1_v1.tar</local>
+    <!-- tag>&release;</tag -->
+    <!-- qual>e10:prof</qual -->
+    <local>/pnfs/uboone/resilient/users/ddevitt/tars/&version;.tar</local>
   </larsoft>
 
   <!-- requested memory, in MB -->
-  <memory>4000</memory>
+  <memory>2000</memory>
 
   <!-- Stages -->
   <stage name = "Marco_selection">
      <maxfilesperjob>1</maxfilesperjob>
-     <inputlist>/pnfs/uboone/persistent/users/ddevitt/filelist/filepaths_prodgenie_bnb_nu_cosmic_uboone_mcc8.6_reco2_dev_first50000.txt</inputlist>
-     <fcl>run_ubxsec_mc_bnbcosmic.fcl</fcl>
-     <outdir>/pnfs/uboone/persistent/users/ddevitt/out/marco_sel_v06_26_01_10_v3.1.1_v1/stage1/</outdir>
-     <logdir>/pnfs/uboone/persistent/users/ddevitt/out/marco_sel_v06_26_01_10_v3.1.1_v1/stage1/</logdir>
-     <workdir>/pnfs/uboone/resilient/users/ddevitt/work/marco_sel_v06_26_01_10_v3.1.1_v1/stage1/</workdir>
-     <bookdir>/uboone/data/users/ddevitt/book/marco_sel_v06_26_01_10_v3.1.1_v1/stage1/</bookdir>
+     <inputlist>/pnfs/uboone/persistent/users/ddevitt/filelist/filepaths_prodgenie_bnb_nu_cosmic_uboone_mcc8.7_reco2_dev_first25000.txt</inputlist>
+     <fcl>run_ubxsec_mc_bnbcosmic_BuildShowersAsTracks.fcl</fcl>
+     <outdir>/pnfs/uboone/persistent/users/ddevitt/out/&version;/stage1/</outdir>
+     <logdir>/pnfs/uboone/persistent/users/ddevitt/out/&version;/stage1/</logdir>
+     <workdir>/pnfs/uboone/resilient/users/ddevitt/work/&version;/stage1/</workdir>
+     <bookdir>/uboone/data/users/ddevitt/book/&version;/stage1/</bookdir>
      <schema>root</schema>
   </stage>
   <stage name = "CC1pi_selection">
-     <maxfilesperjob>2</maxfilesperjob>
+     <maxfilesperjob>1</maxfilesperjob>
      <!-- inputlist>/pnfs/uboone/persistent/users/ddevitt/filelist/stage1_out_files.txt</inputlist -->
      <fcl>CC1pi.fcl</fcl>
-     <outdir>/pnfs/uboone/persistent/users/ddevitt/out/marco_sel_v06_26_01_10_v3.1.1_v1/stage2/</outdir>
-     <logdir>/pnfs/uboone/persistent/users/ddevitt/out/marco_sel_v06_26_01_10_v3.1.1_v1/stage2/</logdir>
-     <workdir>/pnfs/uboone/resilient/users/ddevitt/work/marco_sel_v06_26_01_10_v3.1.1_v1/stage2/</workdir>
-     <bookdir>/uboone/data/users/ddevitt/book/marco_sel_v06_26_01_10_v3.1.1_v1/stage2/</bookdir>
+     <outdir>/pnfs/uboone/persistent/users/ddevitt/out/&version;/stage2/</outdir>
+     <logdir>/pnfs/uboone/persistent/users/ddevitt/out/&version;/stage2/</logdir>
+     <workdir>/pnfs/uboone/resilient/users/ddevitt/work/&version;/stage2/</workdir>
+     <bookdir>/uboone/data/users/ddevitt/book/&version;/stage2/</bookdir>
      <schema>root</schema>
   </stage>
 </project>

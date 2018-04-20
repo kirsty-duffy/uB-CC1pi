@@ -92,7 +92,9 @@ void StackedHistTopology::DrawStack(double norm, TCanvas *c1)
 
   // Next: add histogramst to the stack and make TLegend
   // Only do this for histograms that have entries
-  TLegend *leg = new TLegend(0.6,0.7,0.95,0.95);
+  TLegend *leg = new TLegend(0.55,0.7,0.95,0.95);
+  
+  leg -> SetNColumns(2);
   
   for (int i_hist=0; i_hist < nHists; i_hist++){
     if (hists[i_hist]->GetEntries() == 0) continue;
