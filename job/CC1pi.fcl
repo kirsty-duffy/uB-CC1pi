@@ -1,4 +1,9 @@
 #include "services_microboone.fcl"
+#include "config_particle_identification.fcl"
+#include "calibration_microboone.fcl"
+#include "caldata_microboone.fcl"
+#include "config_particle_identification_fiducialvolume.fcl"
+#include "config_particle_identification_braggalgo.fcl"
 
 process_name: CC1pi
 
@@ -10,6 +15,7 @@ services:
    message: @local::standard_info
    @table::microboone_simulation_services
    SpaceCharge: @local::microboone_spacecharge
+   TPCEnergyCalib: @local::microboone_tpcenergycalib_service
 }
 
 services.DetectorClocksService.InheritClockConfig:   false
@@ -20,8 +26,8 @@ services.SpaceCharge.EnableSimEfieldSCE:  true
 services.SpaceCharge.EnableSimSpatialSCE: true
 
 source:
-{ 
-  module_type   : RootInput 
+{
+  module_type   : RootInput
   maxEvents     : -1
   fileNames     : [ "/pnfs/uboone/persistent/users/ddevitt/out/marcosel_mcc8.6_bnb+cosmic/stage1/3342176_0/prodgenie_bnb_nu_cosmic_uboone_0_20170304T225402_gen2_e5e40112-3946-433e-87b8-d9833a0e725d_20171221T035713_reco1_20171221T041802_reco2_20180124T152818_ubxsec.root" ]
   inputCommands : [ "keep *", "drop sumdata::RunData_*_*_*" ] #Workaround for LArSoft bug 18943
@@ -31,7 +37,9 @@ physics:
 {
    producers:
    {
-      cc1piselec: 
+      UBXSecpandoraNucali: @local::microboone_calibrationdedx
+      pid: @local::particleidconfig
+      cc1piselec:
       {
       	module_type : CC1piSelection
          MCTruthMatching:
@@ -41,10 +49,10 @@ physics:
             G4ProducerLabel:     "largeant"
             MCTruthAssociations: { MinHitEnergyFraction: 0.1 }
          }
-      }   
+      }
    }
 
-   producermods  : [ cc1piselec ]
+   producermods  : [ UBXSecpandoraNucali, pid, cc1piselec ]
    outputFiles   : [ out1 ]
 
    trigger_paths : [ producermods ]
@@ -53,9 +61,22 @@ physics:
 
 outputs:
 {
-   out1: 
-   { 
+   out1:
+   {
      module_type : RootOutput
-     fileName    : "%ifb_%tc_CC1pi_artrootout.root" 
+     fileName    : "%ifb_%tc_CC1pi_artrootout.root"
    }
 }
+
+
+physics.producers.UBXSecpandoraNucali.TrackModuleLabel:       "pandoraNu::UBXSec"
+physics.producers.UBXSecpandoraNucali.CalorimetryModuleLabel: "pandoraNucalo::UBXSec"
+physics.producers.pid.ProducerLabels:
+{
+
+# producer label names
+  TrackLabel        : "pandoraNu::UBXSec"
+  CalorimetryLabel  : "UBXSecpandoraNucali::CC1pi"
+
+}
+physics.producers.pid.BraggAlgo: @local::braggalgo_mcc8

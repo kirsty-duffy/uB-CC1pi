@@ -18,6 +18,7 @@ std::map<std::string,bool> TwoTrackCheck(art::Event &evt)
    art::FindManyP<ubana::TPCObject> tpcobject_from_selection(selection_h, evt, "UBXSec");
    if(tpcobject_from_selection.at(0).size() == 0) {
       //No TPCObject
+      CC1picutflow["ShowerCut"] = false;
       CC1picutflow["TwoTrackCut"] = false;
       CC1picutflow["TwoMIPCut"] = false;
       CC1picutflow["ExactlyTwoMIPCut"] = false;
@@ -48,9 +49,26 @@ std::map<std::string,bool> TwoTrackCheck(art::Event &evt)
    //Find track-like daughters of the neutrino
    std::vector<art::Ptr<recob::PFParticle>> daughter_track_pfps;
    for (auto pfp : pfps) {
-      if(pfp->Parent()==(size_t)nuID) {
+      if(lar_pandora::LArPandoraHelper::IsTrack(pfp) && pfp->Parent()==(size_t)nuID) {
          daughter_track_pfps.emplace_back(pfp);
       }
+   }
+
+   //Find shower-like daughters of the neutrino
+   std::vector<art::Ptr<recob::PFParticle>> daughter_shower_pfps;
+   for (auto pfp : pfps) {
+      if(lar_pandora::LArPandoraHelper::IsShower(pfp) && pfp->Parent()==(size_t)nuID) {
+         daughter_shower_pfps.emplace_back(pfp);
+      }
+   }
+
+   // Independant cut that can be combined with anything else
+   // So don't fail other cuts because of this one
+   if(daughter_shower_pfps.size() > 0) {
+      CC1picutflow["ShowerCut"] = false;
+   }
+   else {
+      CC1picutflow["ShowerCut"] = true;
    }
 
    if(daughter_track_pfps.size() < 2) {
@@ -69,7 +87,11 @@ std::map<std::string,bool> TwoTrackCheck(art::Event &evt)
       throw std::exception();
    }
 
-   art::FindManyP<recob::Track> tracks_from_pfps(pfp_h, evt, "pandoraNu::UBXSec");
+   art::FindManyP<recob::Track> tracks_from_pfps(pfp_h, evt, "pandoraNu");
+
+   // Also get track-PID association objects
+   auto const& track_h = evt.getValidHandle<std::vector<recob::Track>>("pandoraNu");
+   art::FindManyP<anab::ParticleID> trackPIDAssn(track_h, evt, "pid");
 
    // Every PFP could in theory have more than one track
    // At least for pandoraNu, however, it "should" always be one-to-one
@@ -82,7 +104,7 @@ std::map<std::string,bool> TwoTrackCheck(art::Event &evt)
          throw std::exception();
       }
       for (auto track : daughter_tracks){
-         if(IsMIP(track, evt)) MIPs++;
+         if(IsMIP(trackPIDAssn,track->ID())) MIPs++;
       }
    }
 

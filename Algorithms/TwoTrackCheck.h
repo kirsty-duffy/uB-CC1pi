@@ -17,7 +17,7 @@
 #include "canvas/Persistency/Common/FindManyP.h"
 
 // CC1pi method includes
-#include "uboone/CC1pi/Algorithms/MIPConsistencyCheck_Marco.h"
+#include "uboone/CC1pi/Algorithms/MIPConsistencyCheck_n2LLH.h"
 
 std::map<std::string,bool> TwoTrackCheck(art::Event &evt);
 

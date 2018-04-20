@@ -29,7 +29,7 @@
 #include "larcore/Geometry/GeometryCore.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/PFParticle.h"
-#include "larevt/SpaceChargeServices/SpaceChargeService.h"
+#include "lardataobj/AnalysisBase/ParticleID.h"
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 #include "nusimdata/SimulationBase/MCParticle.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
@@ -43,7 +43,7 @@
 #include "canvas/Persistency/Common/FindManyP.h"
 
 // CC1pi method includes
-#include "uboone/CC1pi/Algorithms/MIPConsistencyCheck_Marco.h"
+#include "uboone/CC1pi/Algorithms/MIPConsistencyCheck_n2LLH.h"
 #include "uboone/CC1pi/Algorithms/GetTopology.h"
 #include "uboone/CC1pi/Algorithms/TopologyEnums.h"
 #include "uboone/CC1pi/Algorithms/FVCheck.h"
@@ -54,16 +54,19 @@ struct cc1pianavars{
   art::RunNumber_t run_num;
   art::SubRunNumber_t subrun_num;
   art::EventNumber_t event_num;
-  
+
   std::map<std::string,bool> Marco_cutflow;
   bool Marco_selected;
 
   NuIntTopology Truth_topology;
-  
+
   std::vector<double> TPCObj_PFP_track_length;
   std::vector<std::vector<double>> TPCObj_PFP_track_start;
   std::vector<std::vector<double>> TPCObj_PFP_track_end;
   std::vector<double> TPCObj_PFP_track_dqdx_truncmean;
+  std::vector<double> TPCObj_PFP_track_dedx_truncmean;
+  std::vector<std::vector<double>> TPCObj_PFP_track_dedx_perhit;
+  std::vector<std::vector<double>> TPCObj_PFP_track_resrange_perhit;
   std::vector<bool> TPCObj_PFP_isMIP;
   std::vector<double> TPCObj_PFP_shower_length;
   std::vector<std::vector<double>> TPCObj_PFP_shower_start;
@@ -78,6 +81,12 @@ struct cc1pianavars{
   std::vector<int> TPCObj_PFP_truePDG;
   std::vector<double> TPCObj_PFP_trueE;
   std::vector<double> TPCObj_PFP_trueKE;
+  std::vector<double> TPCObj_PFP_n2LLH_fwd_mu;
+  std::vector<double> TPCObj_PFP_n2LLH_fwd_p;
+  std::vector<double> TPCObj_PFP_n2LLH_bwd_mu;
+  std::vector<double> TPCObj_PFP_n2LLH_bwd_p;
+  std::vector<double> TPCObj_PFP_n2LLH_MIP;
+  std::vector<double> TPCObj_PFP_PIDA;
   int TPCObj_origin;
   int TPCObj_origin_extra;
   std::vector<double> TPCObj_reco_vtx;
@@ -95,11 +104,12 @@ struct cc1pianavars{
   std::vector<double> MCP_KE;
   std::vector<bool> MCP_isContained;
 
-  std::vector<double> nu_vtx;
-  std::vector<double> nu_vtx_spacecharge;
-  bool nu_isCC;
-  int nu_PDG;
-  double nu_E;
+  std::vector<double> nu_vtxx;
+  std::vector<double> nu_vtxy;
+  std::vector<double> nu_vtxz;
+  std::vector<bool> nu_isCC;
+  std::vector<int> nu_PDG;
+  std::vector<double> nu_E;
 
   std::map<std::string,bool> CC1picutflow;
 
@@ -107,7 +117,7 @@ struct cc1pianavars{
 
   // Constructor (pass the fhicl parameters here)
   cc1pianavars(fhicl::ParameterSet const &p);
-  
+
   void Clear();
 
   void SetReco2Vars(art::Event &evt);
