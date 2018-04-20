@@ -63,7 +63,6 @@ struct cc1pianavars{
   std::vector<double> TPCObj_PFP_track_length;
   std::vector<std::vector<double>> TPCObj_PFP_track_start;
   std::vector<std::vector<double>> TPCObj_PFP_track_end;
-  std::vector<double> TPCObj_PFP_track_dqdx_truncmean;
   std::vector<double> TPCObj_PFP_track_dedx_truncmean;
   std::vector<std::vector<double>> TPCObj_PFP_track_dedx_perhit;
   std::vector<std::vector<double>> TPCObj_PFP_track_resrange_perhit;

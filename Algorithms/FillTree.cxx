@@ -28,7 +28,6 @@ void cc1pianavars::Clear(){
    TPCObj_PFP_track_length.clear();
    TPCObj_PFP_track_start.clear();
    TPCObj_PFP_track_end.clear();
-   TPCObj_PFP_track_dqdx_truncmean.clear();
    TPCObj_PFP_track_dedx_truncmean.clear();
    TPCObj_PFP_track_dedx_perhit.clear();
    TPCObj_PFP_track_resrange_perhit.clear();
@@ -169,10 +168,8 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       std::vector<art::Ptr<recob::Track>> tracks = tracks_from_TPCObject.at(TPCObj_candidate.key());
       TPCObj_NTracks = tracks.size();
 
-      // Get calo objects (for dqdx)
-      // For now use uncalibrated "calo" variables
-      // Calibrated dqdx will be available in MCC 8.6, but currently has a bug
-      // also hardcode that this is for pandoraNu only
+      // Get calo objects (for dedx)
+      // hardcoded InputTags - change this!!
       // Use association: pandoraNucalo, art::Assns<recob::Track,anab::Calorimetry,void>
       // (Couldn't find another way to do this except going back to track handle -.-)
       art::InputTag _caloTag = "UBXSecpandoraNucali::CC1pi";//"pandoraNucali";
@@ -233,7 +230,6 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          double track_length = -9999;
          std::vector<double> track_start = {-9999, -9999, -9999};
          std::vector<double> track_end = {-9999, -9999, -9999};
-         double track_dqdx_truncmean = -9999;
          double track_dedx_truncmean = -9999;
          std::vector<double> track_dedx_perhit = {-9999};
          std::vector<double> track_resrange_perhit = {-9999};
@@ -318,7 +314,6 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
 
                       if (AlgScore.fAlgName == "TruncatedMean"){
-                        if (anab::kVariableType(AlgScore.fVariableType) == anab::kdQdxtruncmean) track_dqdx_truncmean = AlgScore.fValue;
                         if (anab::kVariableType(AlgScore.fVariableType) == anab::kdEdxtruncmean) track_dedx_truncmean = AlgScore.fValue;
                       }// if AlgName = TruncatedMean
 
@@ -354,7 +349,6 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          TPCObj_PFP_track_length.emplace_back(track_length);
          TPCObj_PFP_track_start.emplace_back(track_start);
          TPCObj_PFP_track_end.emplace_back(track_end);
-         TPCObj_PFP_track_dqdx_truncmean.emplace_back(track_dqdx_truncmean);
          TPCObj_PFP_track_dedx_truncmean.emplace_back(track_dedx_truncmean);
          TPCObj_PFP_track_dedx_perhit.emplace_back(track_dedx_perhit);
          TPCObj_PFP_track_resrange_perhit.emplace_back(track_resrange_perhit);
@@ -498,7 +492,6 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("TPCObj_PFP_track_length", &(vars->TPCObj_PFP_track_length));
    t -> Branch("TPCObj_PFP_track_start", &(vars->TPCObj_PFP_track_start));
    t -> Branch("TPCObj_PFP_track_end", &(vars->TPCObj_PFP_track_end));
-   t -> Branch("TPCObj_PFP_track_dqdx_truncmean", &(vars->TPCObj_PFP_track_dqdx_truncmean));
    t -> Branch("TPCObj_PFP_track_dedx_truncmean", &(vars->TPCObj_PFP_track_dedx_truncmean));
    t -> Branch("TPCObj_PFP_track_dedx_perhit",&(vars->TPCObj_PFP_track_dedx_perhit));
    t -> Branch("TPCObj_PFP_track_resrange_perhit",&(vars->TPCObj_PFP_track_resrange_perhit));
