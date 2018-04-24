@@ -54,7 +54,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    std::map<std::string,bool> *Marco_cutflow = nullptr;
    bool Marco_selected = 0;
 
-   NuIntTopology Truth_topology;
+   NuIntTopology Truth_topology = kUnknown;
    std::vector<double> *TPCObj_PFP_track_length = nullptr;
    std::vector<std::vector<double>> *TPCObj_PFP_track_start = nullptr;
    std::vector<std::vector<double>> *TPCObj_PFP_track_end = nullptr;
@@ -99,100 +99,100 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    std::map<std::string,bool> *CC1picutflow = nullptr;
 
    t -> SetBranchStatus("*",0);
-   // t -> SetBranchStatus("isData",1);
-   // t -> SetBranchAddress("isData", &isData);
-   // t -> SetBranchStatus("run_num",1);
-   // t -> SetBranchAddress("run_num", &run_num);
-   // t -> SetBranchStatus("subrun_num",1);
-   // t -> SetBranchAddress("subrun_num", &subrun_num);
-   // t -> SetBranchStatus("event_num",1);
-   // t -> SetBranchAddress("event_num", &event_num);
-   //
-   // t -> SetBranchStatus("Marco_cutflow",1);
-   // t -> SetBranchAddress("Marco_cutflow", &Marco_cutflow);
-   // t -> SetBranchStatus("Marco_selected",1);
-   // t -> SetBranchAddress("Marco_selected", &Marco_selected);
-   //
-   // t -> SetBranchStatus("Truth_topology",1);
-   // t -> SetBranchAddress("Truth_topology", &Truth_topology);
-   // t -> SetBranchStatus("TPCObj_PFP_track_length",1);
-   // t -> SetBranchAddress("TPCObj_PFP_track_length", &TPCObj_PFP_track_length);
-   // t -> SetBranchStatus("TPCObj_PFP_track_start",1);
-   // t -> SetBranchAddress("TPCObj_PFP_track_start", &TPCObj_PFP_track_start);
-   // t -> SetBranchStatus("TPCObj_PFP_track_end",1);
-   // t -> SetBranchAddress("TPCObj_PFP_track_end", &TPCObj_PFP_track_end);
-   // t -> SetBranchStatus("TPCObj_PFP_track_dqdx_truncmean",1);
-   // t -> SetBranchAddress("TPCObj_PFP_track_dqdx_truncmean", &TPCObj_PFP_track_dqdx_truncmean);
-   // t -> SetBranchStatus("TPCObj_PFP_isMIP",1);
-   // t -> SetBranchAddress("TPCObj_PFP_isMIP", &TPCObj_PFP_isMIP);
-   // t -> SetBranchStatus("TPCObj_PFP_shower_length",1);
-   // t -> SetBranchAddress("TPCObj_PFP_shower_length", &TPCObj_PFP_shower_length);
-   // t -> SetBranchStatus("TPCObj_PFP_shower_start",1);
-   // t -> SetBranchAddress("TPCObj_PFP_shower_start", &TPCObj_PFP_shower_start);
-   // t -> SetBranchStatus("TPCObj_NPFPs",1);
-   // t -> SetBranchAddress("TPCObj_NPFPs", &TPCObj_NPFPs);
-   // t -> SetBranchStatus("TPCObj_NTracks",1);
-   // t -> SetBranchAddress("TPCObj_NTracks", &TPCObj_NTracks);
-   // t -> SetBranchStatus("TPCObj_NShowers",1);
-   // t -> SetBranchAddress("TPCObj_NShowers", &TPCObj_NShowers);
-   // t -> SetBranchStatus("TPCObj_PFP_isTrack",1);
-   // t -> SetBranchAddress("TPCObj_PFP_isTrack", &TPCObj_PFP_isTrack);
-   // t -> SetBranchStatus("TPCObj_PFP_isShower",1);
-   // t -> SetBranchAddress("TPCObj_PFP_isShower", &TPCObj_PFP_isShower);
-   // t -> SetBranchStatus("TPCObj_PFP_isDaughter",1);
-   // t -> SetBranchAddress("TPCObj_PFP_isDaughter", &TPCObj_PFP_isDaughter);
-   // t -> SetBranchStatus("TPCObj_PFP_id",1);
-   // t -> SetBranchAddress("TPCObj_PFP_id", &TPCObj_PFP_id);
-   // t -> SetBranchStatus("TPCObj_PFP_MCPid",1);
-   // t -> SetBranchAddress("TPCObj_PFP_MCPid", &TPCObj_PFP_MCPid);
-   // t -> SetBranchStatus("TPCObj_PFP_truePDG",1);
-   // t -> SetBranchAddress("TPCObj_PFP_truePDG", &TPCObj_PFP_truePDG);
-   // t -> SetBranchStatus("TPCObj_PFP_trueE",1);
-   // t -> SetBranchAddress("TPCObj_PFP_trueE", &TPCObj_PFP_trueE);
-   // t -> SetBranchStatus("TPCObj_PFP_trueKE",1);
-   // t -> SetBranchAddress("TPCObj_PFP_trueKE", &TPCObj_PFP_trueKE);
-   // t -> SetBranchStatus("TPCObj_origin",1);
-   // t -> SetBranchAddress("TPCObj_origin", &TPCObj_origin);
-   // t -> SetBranchStatus("TPCObj_origin_extra",1);
-   // t -> SetBranchAddress("TPCObj_origin_extra", &TPCObj_origin_extra);
-   // t -> SetBranchStatus("TPCObj_reco_vtx",1);
-   // t -> SetBranchAddress("TPCObj_reco_vtx", &TPCObj_reco_vtx);
-   //
-   // t -> SetBranchStatus("MCP_PDG",1);
-   // t -> SetBranchAddress("MCP_PDG", &MCP_PDG);
-   // t -> SetBranchStatus("MCP_length",1);
-   // t -> SetBranchAddress("MCP_length", &MCP_length);
-   // t -> SetBranchStatus("MCP_process",1);
-   // t -> SetBranchAddress("MCP_process", &MCP_process);
-   // t -> SetBranchStatus("MCP_endprocess",1);
-   // t -> SetBranchAddress("MCP_endprocess", &MCP_endprocess);
-   // t -> SetBranchStatus("MCP_numdaughters",1);
-   // t -> SetBranchAddress("MCP_numdaughters", &MCP_numdaughters);
-   // t -> SetBranchStatus("MCP_P",1);
-   // t -> SetBranchAddress("MCP_P", &MCP_P);
-   // t -> SetBranchStatus("MCP_Px",1);
-   // t -> SetBranchAddress("MCP_Px", &MCP_Px);
-   // t -> SetBranchStatus("MCP_Py",1);
-   // t -> SetBranchAddress("MCP_Py", &MCP_Py);
-   // t -> SetBranchStatus("MCP_Pz",1);
-   // t -> SetBranchAddress("MCP_Pz", &MCP_Pz);
-   // t -> SetBranchStatus("MCP_E",1);
-   // t -> SetBranchAddress("MCP_E", &MCP_E);
-   // t -> SetBranchStatus("MCP_KE",1);
-   // t -> SetBranchAddress("MCP_KE", &MCP_KE);
-   // t -> SetBranchStatus("MCP_isContained",1);
-   // t -> SetBranchAddress("MCP_isContained", &MCP_isContained);
-   //
-   // t -> SetBranchStatus("nu_vtx",1);
-   // t -> SetBranchAddress("nu_vtx", &nu_vtx);
-   // t -> SetBranchStatus("nu_vtx_spacecharge",1);
-   // t -> SetBranchAddress("nu_vtx_spacecharge", &nu_vtx_spacecharge);
-   // t -> SetBranchStatus("nu_isCC",1);
-   // t -> SetBranchAddress("nu_isCC", &nu_isCC);
-   // t -> SetBranchStatus("nu_PDG",1);
-   // t -> SetBranchAddress("nu_PDG", &nu_PDG);
-   // t -> SetBranchStatus("nu_E",1);
-   // t -> SetBranchAddress("nu_E", &nu_E);
+   t -> SetBranchStatus("isData",1);
+   t -> SetBranchAddress("isData", &isData);
+   t -> SetBranchStatus("run_num",1);
+   t -> SetBranchAddress("run_num", &run_num);
+   t -> SetBranchStatus("subrun_num",1);
+   t -> SetBranchAddress("subrun_num", &subrun_num);
+   t -> SetBranchStatus("event_num",1);
+   t -> SetBranchAddress("event_num", &event_num);
+
+   t -> SetBranchStatus("Marco_cutflow",1);
+   t -> SetBranchAddress("Marco_cutflow", &Marco_cutflow);
+   t -> SetBranchStatus("Marco_selected",1);
+   t -> SetBranchAddress("Marco_selected", &Marco_selected);
+
+   t -> SetBranchStatus("Truth_topology",1);
+   t -> SetBranchAddress("Truth_topology", &Truth_topology);
+   t -> SetBranchStatus("TPCObj_PFP_track_length",1);
+   t -> SetBranchAddress("TPCObj_PFP_track_length", &TPCObj_PFP_track_length);
+   t -> SetBranchStatus("TPCObj_PFP_track_start",1);
+   t -> SetBranchAddress("TPCObj_PFP_track_start", &TPCObj_PFP_track_start);
+   t -> SetBranchStatus("TPCObj_PFP_track_end",1);
+   t -> SetBranchAddress("TPCObj_PFP_track_end", &TPCObj_PFP_track_end);
+   t -> SetBranchStatus("TPCObj_PFP_track_dqdx_truncmean",1);
+   t -> SetBranchAddress("TPCObj_PFP_track_dqdx_truncmean", &TPCObj_PFP_track_dqdx_truncmean);
+   t -> SetBranchStatus("TPCObj_PFP_isMIP",1);
+   t -> SetBranchAddress("TPCObj_PFP_isMIP", &TPCObj_PFP_isMIP);
+   t -> SetBranchStatus("TPCObj_PFP_shower_length",1);
+   t -> SetBranchAddress("TPCObj_PFP_shower_length", &TPCObj_PFP_shower_length);
+   t -> SetBranchStatus("TPCObj_PFP_shower_start",1);
+   t -> SetBranchAddress("TPCObj_PFP_shower_start", &TPCObj_PFP_shower_start);
+   t -> SetBranchStatus("TPCObj_NPFPs",1);
+   t -> SetBranchAddress("TPCObj_NPFPs", &TPCObj_NPFPs);
+   t -> SetBranchStatus("TPCObj_NTracks",1);
+   t -> SetBranchAddress("TPCObj_NTracks", &TPCObj_NTracks);
+   t -> SetBranchStatus("TPCObj_NShowers",1);
+   t -> SetBranchAddress("TPCObj_NShowers", &TPCObj_NShowers);
+   t -> SetBranchStatus("TPCObj_PFP_isTrack",1);
+   t -> SetBranchAddress("TPCObj_PFP_isTrack", &TPCObj_PFP_isTrack);
+   t -> SetBranchStatus("TPCObj_PFP_isShower",1);
+   t -> SetBranchAddress("TPCObj_PFP_isShower", &TPCObj_PFP_isShower);
+   t -> SetBranchStatus("TPCObj_PFP_isDaughter",1);
+   t -> SetBranchAddress("TPCObj_PFP_isDaughter", &TPCObj_PFP_isDaughter);
+   t -> SetBranchStatus("TPCObj_PFP_id",1);
+   t -> SetBranchAddress("TPCObj_PFP_id", &TPCObj_PFP_id);
+   t -> SetBranchStatus("TPCObj_PFP_MCPid",1);
+   t -> SetBranchAddress("TPCObj_PFP_MCPid", &TPCObj_PFP_MCPid);
+   t -> SetBranchStatus("TPCObj_PFP_truePDG",1);
+   t -> SetBranchAddress("TPCObj_PFP_truePDG", &TPCObj_PFP_truePDG);
+   t -> SetBranchStatus("TPCObj_PFP_trueE",1);
+   t -> SetBranchAddress("TPCObj_PFP_trueE", &TPCObj_PFP_trueE);
+   t -> SetBranchStatus("TPCObj_PFP_trueKE",1);
+   t -> SetBranchAddress("TPCObj_PFP_trueKE", &TPCObj_PFP_trueKE);
+   t -> SetBranchStatus("TPCObj_origin",1);
+   t -> SetBranchAddress("TPCObj_origin", &TPCObj_origin);
+   t -> SetBranchStatus("TPCObj_origin_extra",1);
+   t -> SetBranchAddress("TPCObj_origin_extra", &TPCObj_origin_extra);
+   t -> SetBranchStatus("TPCObj_reco_vtx",1);
+   t -> SetBranchAddress("TPCObj_reco_vtx", &TPCObj_reco_vtx);
+
+   t -> SetBranchStatus("MCP_PDG",1);
+   t -> SetBranchAddress("MCP_PDG", &MCP_PDG);
+   t -> SetBranchStatus("MCP_length",1);
+   t -> SetBranchAddress("MCP_length", &MCP_length);
+   t -> SetBranchStatus("MCP_process",1);
+   t -> SetBranchAddress("MCP_process", &MCP_process);
+   t -> SetBranchStatus("MCP_endprocess",1);
+   t -> SetBranchAddress("MCP_endprocess", &MCP_endprocess);
+   t -> SetBranchStatus("MCP_numdaughters",1);
+   t -> SetBranchAddress("MCP_numdaughters", &MCP_numdaughters);
+   t -> SetBranchStatus("MCP_P",1);
+   t -> SetBranchAddress("MCP_P", &MCP_P);
+   t -> SetBranchStatus("MCP_Px",1);
+   t -> SetBranchAddress("MCP_Px", &MCP_Px);
+   t -> SetBranchStatus("MCP_Py",1);
+   t -> SetBranchAddress("MCP_Py", &MCP_Py);
+   t -> SetBranchStatus("MCP_Pz",1);
+   t -> SetBranchAddress("MCP_Pz", &MCP_Pz);
+   t -> SetBranchStatus("MCP_E",1);
+   t -> SetBranchAddress("MCP_E", &MCP_E);
+   t -> SetBranchStatus("MCP_KE",1);
+   t -> SetBranchAddress("MCP_KE", &MCP_KE);
+   t -> SetBranchStatus("MCP_isContained",1);
+   t -> SetBranchAddress("MCP_isContained", &MCP_isContained);
+
+   t -> SetBranchStatus("nu_vtx",1);
+   t -> SetBranchAddress("nu_vtx", &nu_vtx);
+   t -> SetBranchStatus("nu_vtx_spacecharge",1);
+   t -> SetBranchAddress("nu_vtx_spacecharge", &nu_vtx_spacecharge);
+   t -> SetBranchStatus("nu_isCC",1);
+   t -> SetBranchAddress("nu_isCC", &nu_isCC);
+   t -> SetBranchStatus("nu_PDG",1);
+   t -> SetBranchAddress("nu_PDG", &nu_PDG);
+   t -> SetBranchStatus("nu_E",1);
+   t -> SetBranchAddress("nu_E", &nu_E);
 
    t -> SetBranchStatus("CC1picutflow",1);
    t -> SetBranchAddress("CC1picutflow", &CC1picutflow);
@@ -227,9 +227,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    const int nentries = t -> GetEntries();
 
    for (int i = 0; i < nentries; i++) {
-      std::cout << i << std::endl;
       t -> GetEntry(i);
-      std::cout << i << std::endl;
+
       // Check whether the event passes the requested cutflow map
       bool SelectedEvent = true;
       for(std::map<std::string,bool>::const_iterator iter = SelectionCutflow.begin(); iter != SelectionCutflow.end(); ++iter) {
@@ -242,8 +241,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
       bool isSignal = false;
 
       // if signal...
-      //      if (Truth_topology == kCC1piplus0p || Truth_topology == kCC1piplus1p || Truth_topology == kCC1piplusNp) {
-      if(nu_isCC && nu_PDG == 14 && inFV(nu_vtx -> at(0), nu_vtx -> at(1), nu_vtx -> at(2)) && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 13) == 1 && std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 211) == 1 && MCP_PDG -> size() == 2 + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2112) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2212) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 2000000101) + std::count(MCP_PDG -> begin(), MCP_PDG -> end(), 1000180400)) {
+      if (Truth_topology == kCC1piplus0p || Truth_topology == kCC1piplus1p || Truth_topology == kCC1piplusNp) {
 
          isSignal = true;
 
@@ -253,7 +251,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          // Efficiency...
          eff_nuE -> Fill(SelectedEvent, nu_E);
 
-         for (int j = 0; j < MCP_PDG -> size(); j++) {
+         for (size_t j = 0; j < MCP_PDG -> size(); j++) {
             if (MCP_PDG -> at(j) == 13) {
                eff_muP -> Fill(SelectedEvent, MCP_P -> at(j));
                TVector3 muP(MCP_Px -> at(j), MCP_Py -> at(j), MCP_Pz -> at(j));
@@ -271,7 +269,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          // Purity...
          pur_nuE -> Fill(isSignal, nu_E);
 
-         for (int j = 0; j < MCP_PDG -> size(); j++) {
+         for (size_t j = 0; j < MCP_PDG -> size(); j++) {
             if (MCP_PDG -> at(j) == 13) {
                pur_muP -> Fill(isSignal, MCP_P -> at(j));
                TVector3 muP(MCP_Px -> at(j), MCP_Py -> at(j), MCP_Pz -> at(j));
@@ -285,7 +283,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
 
          //Find longest and second longest tracks
          double maxlen = 0, maxlen2 = 0;
-         PDGCode maxPDG, maxPDG2;
+         PDGCode maxPDG = kPDGUnknown;
+         PDGCode maxPDG2 = kPDGUnknown;
          for(int j = 0; j < TPCObj_NPFPs; j++) {
             if (TPCObj_PFP_track_length -> at(j) > maxlen) {
                maxlen2 = maxlen;
