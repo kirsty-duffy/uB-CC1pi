@@ -1,0 +1,9 @@
+#include "run_ubxsec_data_bnbon.fcl"
+
+
+# Tell pandora to produce tracks even for PFPs it thinks are showers
+physics.producers.pandoraNu.BuildShowersAsTracks: true
+
+# Make Marco's module stop filtering (will pass all events)
+# See https://cdcvs.fnal.gov/redmine/projects/art/wiki/Filtering_events for details
+outputs.out1.SelectEvents: [ ]
