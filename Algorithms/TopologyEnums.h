@@ -34,7 +34,7 @@ enum NuIntTopology{
 inline std::string topologyenum2str(NuIntTopology topology)
 {
   std::string returnString = "";
-  
+
   switch(topology){
   case kCC0pi0p:
     returnString = "#nu_{#mu} CC 0#pi 0p";
@@ -99,6 +99,9 @@ inline std::string topologyenum2str(NuIntTopology topology)
   case kOutFV:
     returnString = "Out of FV";
     break;
+  case kUnknown:
+    returnString = "Unknown";
+    break;
   default:
     std::cout << "[ERROR: TopologyEnums.h] Could not find string conversion for " << topology << std::endl;
     returnString = "Unknown";
@@ -112,7 +115,7 @@ inline std::string topologyenum2str(NuIntTopology topology)
 inline std::string topologyenum2str_coarse(NuIntTopology topology)
 {
   std::string returnString = "";
-  
+
   switch(topology){
   case kCC0pi0p:
   case kCC0pi1p:

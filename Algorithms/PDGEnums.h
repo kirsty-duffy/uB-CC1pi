@@ -99,13 +99,16 @@ inline std::string PDGenum2str(PDGCode type)
     case kArgon:
       returnString = "Ar-40";
       break;
-  case kBindino:
+    case kBindino:
       returnString = "Bindino";
       break;
-  default:
-    std::cout << "[ERROR: PDGEnums.h] Could not find string conversion for " << type << std::endl;
-    returnString = "Unknown";
-    break;
+    case kPDGUnknown:
+      returnString = "Unknown";
+      break;
+    default:
+      std::cout << "[ERROR: PDGEnums.h] Could not find string conversion for " << type << std::endl;
+      returnString = "Unknown";
+      break;
   }
 
   return returnString;
@@ -113,5 +116,3 @@ inline std::string PDGenum2str(PDGCode type)
 
 
 #endif
-
-
