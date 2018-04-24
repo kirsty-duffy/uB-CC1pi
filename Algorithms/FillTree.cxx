@@ -88,6 +88,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
    subrun_num = evt.subRun();
    event_num = evt.event();
 
+   //std::cout << "[CC1pi::FillTree::SetReco2Vars] Using isData = " << isData << std::endl;
 
    art::Handle<std::vector<ubana::SelectionResult>> selection_h;
    evt.getByLabel("UBXSec", selection_h);
@@ -403,74 +404,76 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
    } // if selected
 
-   // Get all MCParticles
-   art::Handle<std::vector<simb::MCParticle>> mcp_h;
-   evt.getByLabel("largeant", mcp_h);
-   std::vector<art::Ptr<simb::MCParticle>> mcp_v;
-   art::fill_ptr_vector(mcp_v, mcp_h);
+   // Get all MCParticles (only for MC)
+   if (!isData){
+      art::Handle<std::vector<simb::MCParticle>> mcp_h;
+      evt.getByLabel("largeant", mcp_h);
+      std::vector<art::Ptr<simb::MCParticle>> mcp_v;
+      art::fill_ptr_vector(mcp_v, mcp_h);
 
-   bool nu_recorded = false;
+      bool nu_recorded = false;
 
-   // backtracker replacement boilerplate
-   std::unique_ptr<truth::IMCTruthMatching> fMCTruthMatching;
-   const fhicl::ParameterSet& truthParams = pset.get<fhicl::ParameterSet>("MCTruthMatching");
-   fMCTruthMatching = std::unique_ptr<truth::IMCTruthMatching>(new truth::AssociationsTruth(truthParams));
-   fMCTruthMatching->Rebuild(evt);
+      // backtracker replacement boilerplate
+      std::unique_ptr<truth::IMCTruthMatching> fMCTruthMatching;
+      const fhicl::ParameterSet& truthParams = pset.get<fhicl::ParameterSet>("MCTruthMatching");
+      fMCTruthMatching = std::unique_ptr<truth::IMCTruthMatching>(new truth::AssociationsTruth(truthParams));
+      fMCTruthMatching->Rebuild(evt);
 
-   // Loop over all MCParticles in the event...
-   // Note: Only filled for particles from true beam neutrinos!
-   for (auto mcpar : mcp_v) {
+      // Loop over all MCParticles in the event...
+      // Note: Only filled for particles from true beam neutrinos!
+      for (auto mcpar : mcp_v) {
 
-      art::Ptr<simb::MCTruth> mc_truth = fMCTruthMatching -> TrackIDToMCTruth(mcpar -> TrackId());
-      if (mc_truth -> Origin() != simb::kBeamNeutrino) continue;
-      if (mcpar -> Mother() != 0) continue;
-      if (mcpar -> StatusCode() != 1) continue;
+         art::Ptr<simb::MCTruth> mc_truth = fMCTruthMatching -> TrackIDToMCTruth(mcpar -> TrackId());
+         if (mc_truth -> Origin() != simb::kBeamNeutrino) continue;
+         if (mcpar -> Mother() != 0) continue;
+         if (mcpar -> StatusCode() != 1) continue;
 
-      MCP_PDG.emplace_back(mcpar -> PdgCode());
+         MCP_PDG.emplace_back(mcpar -> PdgCode());
 
-      MCP_P.emplace_back(mcpar -> P());
-      MCP_Px.emplace_back(mcpar -> Px());
-      MCP_Py.emplace_back(mcpar -> Py());
-      MCP_Pz.emplace_back(mcpar -> Pz());
-      MCP_E.emplace_back(mcpar -> E());
-      MCP_KE.emplace_back(mcpar -> E() - mcpar -> Mass());
+         MCP_P.emplace_back(mcpar -> P());
+         MCP_Px.emplace_back(mcpar -> Px());
+         MCP_Py.emplace_back(mcpar -> Py());
+         MCP_Pz.emplace_back(mcpar -> Pz());
+         MCP_E.emplace_back(mcpar -> E());
+         MCP_KE.emplace_back(mcpar -> E() - mcpar -> Mass());
 
-      simb::MCTrajectory traj = mcpar -> Trajectory();
-      MCP_length.emplace_back(traj.TotalLength());
-      if(inFV(traj.X(0),traj.Y(0),traj.Z(0)) && inFV(traj.X(traj.size()-1),traj.Y(traj.size()-1),traj.Z(traj.size()-1))) MCP_isContained.emplace_back(true);
-      else MCP_isContained.emplace_back(false);
+         simb::MCTrajectory traj = mcpar -> Trajectory();
+         MCP_length.emplace_back(traj.TotalLength());
+         if(inFV(traj.X(0),traj.Y(0),traj.Z(0)) && inFV(traj.X(traj.size()-1),traj.Y(traj.size()-1),traj.Z(traj.size()-1))) MCP_isContained.emplace_back(true);
+         else MCP_isContained.emplace_back(false);
 
-      MCP_process.emplace_back(mcpar -> Process());
-      MCP_endprocess.emplace_back(mcpar -> EndProcess());
-      MCP_numdaughters.emplace_back(mcpar -> NumberDaughters());
+         MCP_process.emplace_back(mcpar -> Process());
+         MCP_endprocess.emplace_back(mcpar -> EndProcess());
+         MCP_numdaughters.emplace_back(mcpar -> NumberDaughters());
 
-      //Record neutrino info (once)
-      //Note: Potential issues for events with multiple neutrinos
-      if(!nu_recorded) {
+         //Record neutrino info (once)
+         //Note: Potential issues for events with multiple neutrinos
+         if(!nu_recorded) {
 
-         if (!(mc_truth -> NeutrinoSet())) continue;
+            if (!(mc_truth -> NeutrinoSet())) continue;
 
-         nu_recorded = true;
+            nu_recorded = true;
 
-         simb::MCNeutrino nu = mc_truth -> GetNeutrino();
-         simb::MCParticle neutrino = nu.Nu();
+            simb::MCNeutrino nu = mc_truth -> GetNeutrino();
+            simb::MCParticle neutrino = nu.Nu();
 
-         if (nu.CCNC() == 0) nu_isCC.emplace_back(true);
-         else if (nu.CCNC() == 1) nu_isCC.emplace_back(false);
+            if (nu.CCNC() == 0) nu_isCC.emplace_back(true);
+            else if (nu.CCNC() == 1) nu_isCC.emplace_back(false);
 
-         nu_PDG.emplace_back(neutrino.PdgCode());
+            nu_PDG.emplace_back(neutrino.PdgCode());
 
-         nu_E.emplace_back(neutrino.E());
+            nu_E.emplace_back(neutrino.E());
 
-         const TLorentzVector& vertex = neutrino.Position(0);
-         double MC_vertex[4];
-         vertex.GetXYZT(MC_vertex);
-         nu_vtxx.emplace_back(MC_vertex[0]);
-         nu_vtxy.emplace_back(MC_vertex[1]);
-         nu_vtxz.emplace_back(MC_vertex[2]);
+            const TLorentzVector& vertex = neutrino.Position(0);
+            double MC_vertex[4];
+            vertex.GetXYZT(MC_vertex);
+            nu_vtxx.emplace_back(MC_vertex[0]);
+            nu_vtxy.emplace_back(MC_vertex[1]);
+            nu_vtxz.emplace_back(MC_vertex[2]);
 
-      }
-   }
+         }
+      } // end loop over MCParticles
+   } // end if (!isData)
 }
 
 
