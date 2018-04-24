@@ -21,7 +21,7 @@ class StackedHistTopology{
  protected:
   int nHists;
   std::vector<NuIntTopology> hist_order; // For keeping track of which hist goes with which topology
-  
+
   THStack *stack;
   TH1F *hists[25];
 
@@ -61,7 +61,7 @@ StackedHistTopology::StackedHistTopology(std::string histname, std::string title
   hist_order.push_back(kUnknown);
 
   nHists = hist_order.size();
-  
+
   stack = new THStack(histname.c_str(),title.c_str());
   for (int i_hist=0; i_hist < nHists; i_hist++){
     std::string histname_i = std::string(histname)+std::string("_")+std::to_string(i_hist);
@@ -93,17 +93,17 @@ void StackedHistTopology::DrawStack(double norm, TCanvas *c1)
   // Next: add histogramst to the stack and make TLegend
   // Only do this for histograms that have entries
   TLegend *leg = new TLegend(0.55,0.7,0.95,0.95);
-  
+
   leg -> SetNColumns(2);
-  
+
   for (int i_hist=0; i_hist < nHists; i_hist++){
     if (hists[i_hist]->GetEntries() == 0) continue;
-    
+
     hists[i_hist]->Scale(norm);
     stack->Add(hists[i_hist]);
     NuIntTopology topology_for_legend = StackedHistTopology::GetTopologyFromHistN((unsigned int)i_hist);
     leg->AddEntry(hists[i_hist],topologyenum2str(topology_for_legend).c_str(),"f");
-    
+
   }
 
   c1->cd();
@@ -148,7 +148,7 @@ unsigned int StackedHistTopology::GetHistN(NuIntTopology topology)
   unsigned int HistN;
   bool found_hist=false;
 
-  for (unsigned int i=0; i<nHists; i++){
+  for (int i=0; i<nHists; i++){
     if (hist_order.at(i) == topology){
       HistN = i;
       found_hist = true;

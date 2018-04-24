@@ -19,7 +19,7 @@ class StackedHistPDGCode{
   void DrawStack(double norm, TCanvas *c1);
 
  protected:
-  unsigned int nHists;
+  int nHists;
   std::vector<PDGCode> hist_order; // For keeping track of which hist goes with which PDG code
 
   THStack *stack;
@@ -142,7 +142,7 @@ unsigned int StackedHistPDGCode::GetHistN(PDGCode particle_pdg)
   unsigned int HistN;
   bool found_hist=false;
 
-  for (unsigned int i=0; i<nHists; i++){
+  for (int i=0; i<nHists; i++){
     if (hist_order.at(i) == particle_pdg){
       HistN = i;
       found_hist = true;
