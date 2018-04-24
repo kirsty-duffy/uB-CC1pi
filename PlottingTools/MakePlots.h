@@ -7,10 +7,14 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TString.h"
+#include "TLegend.h"
+#include "TStyle.h"
+#include "TGraphAsymmErrors.h"
 
 #include <vector>
 #include <map>
 #include <iostream>
+#include <algorithm>
 
 #include "../Algorithms/TopologyEnums.h"
 #include "../Algorithms/PDGEnums.h"
