@@ -100,6 +100,7 @@ void CC1piSelection::produce(art::Event & evt)
 {
    // Check if we're looking at data or MC (important for POT counting in endSubRun
    _isData = evt.isRealData();
+   std::cout << "[CC1pi] Using isData = " << _isData << std::endl;
 
    // Set anavars values to default
    // (this will prevent bugs if any variables don't get set for a given event)
