@@ -6,6 +6,8 @@ double GetPOT(TString FileName) {
    t_pot -> Add(FileName);
 
    double pot;
+   t_pot -> SetBranchStatus("*",0);
+   t_pot -> SetBranchStatus("pot",1);
    t_pot -> SetBranchAddress("pot", &pot);
 
    double totalPOT = 0;
@@ -49,103 +51,150 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    unsigned int subrun_num;
    unsigned int event_num;
 
-   std::map<std::string,bool> *Marco_cutflow = NULL;
-   bool Marco_selected;
+   std::map<std::string,bool> *Marco_cutflow = nullptr;
+   bool Marco_selected = 0;
 
    NuIntTopology Truth_topology;
-   std::vector<double> *TPCObj_PFP_track_length = NULL;
-   std::vector<std::vector<double>> *TPCObj_PFP_track_start = NULL;
-   std::vector<std::vector<double>> *TPCObj_PFP_track_end = NULL;
-   std::vector<double> *TPCObj_PFP_track_dqdx_truncmean = NULL;
-   std::vector<bool> *TPCObj_PFP_isMIP = NULL;
-   std::vector<double> *TPCObj_PFP_shower_length = NULL;
-   std::vector<std::vector<double>> *TPCObj_PFP_shower_start = NULL;
-   int TPCObj_NPFPs;
-   int TPCObj_NTracks;
-   int TPCObj_NShowers;
-   std::vector<bool> *TPCObj_PFP_isTrack = NULL;
-   std::vector<bool> *TPCObj_PFP_isShower = NULL;
-   std::vector<bool> *TPCObj_PFP_isDaughter = NULL;
-   std::vector<int> *TPCObj_PFP_id = NULL;
-   std::vector<int> *TPCObj_PFP_MCPid = NULL;
-   std::vector<int> *TPCObj_PFP_truePDG = NULL;
-   std::vector<double> *TPCObj_PFP_trueE = NULL;
-   std::vector<double> *TPCObj_PFP_trueKE = NULL;
-   int TPCObj_origin;
-   int TPCObj_origin_extra;
-   std::vector<double> *TPCObj_reco_vtx = NULL;
+   std::vector<double> *TPCObj_PFP_track_length = nullptr;
+   std::vector<std::vector<double>> *TPCObj_PFP_track_start = nullptr;
+   std::vector<std::vector<double>> *TPCObj_PFP_track_end = nullptr;
+   std::vector<double> *TPCObj_PFP_track_dqdx_truncmean = nullptr;
+   std::vector<bool> *TPCObj_PFP_isMIP = nullptr;
+   std::vector<double> *TPCObj_PFP_shower_length = nullptr;
+   std::vector<std::vector<double>> *TPCObj_PFP_shower_start = nullptr;
+   int TPCObj_NPFPs = 0;
+   int TPCObj_NTracks = 0;
+   int TPCObj_NShowers = 0;
+   std::vector<bool> *TPCObj_PFP_isTrack = nullptr;
+   std::vector<bool> *TPCObj_PFP_isShower = nullptr;
+   std::vector<bool> *TPCObj_PFP_isDaughter = nullptr;
+   std::vector<int> *TPCObj_PFP_id = nullptr;
+   std::vector<int> *TPCObj_PFP_MCPid = nullptr;
+   std::vector<int> *TPCObj_PFP_truePDG = nullptr;
+   std::vector<double> *TPCObj_PFP_trueE = nullptr;
+   std::vector<double> *TPCObj_PFP_trueKE = nullptr;
+   int TPCObj_origin = 0;
+   int TPCObj_origin_extra = 0;
+   std::vector<double> *TPCObj_reco_vtx = nullptr;
 
-   std::vector<int> *MCP_PDG = NULL;
-   std::vector<double> *MCP_length = NULL;
-   std::vector<std::string> *MCP_process = NULL;
-   std::vector<std::string> *MCP_endprocess = NULL;
-   std::vector<int> *MCP_numdaughters = NULL;
-   std::vector<double> *MCP_P = NULL;
-   std::vector<double> *MCP_Px = NULL;
-   std::vector<double> *MCP_Py = NULL;
-   std::vector<double> *MCP_Pz = NULL;
-   std::vector<double> *MCP_E = NULL;
-   std::vector<double> *MCP_KE = NULL;
-   std::vector<bool> *MCP_isContained = NULL;
+   std::vector<int> *MCP_PDG = nullptr;
+   std::vector<double> *MCP_length = nullptr;
+   std::vector<std::string> *MCP_process = nullptr;
+   std::vector<std::string> *MCP_endprocess = nullptr;
+   std::vector<int> *MCP_numdaughters = nullptr;
+   std::vector<double> *MCP_P = nullptr;
+   std::vector<double> *MCP_Px = nullptr;
+   std::vector<double> *MCP_Py = nullptr;
+   std::vector<double> *MCP_Pz = nullptr;
+   std::vector<double> *MCP_E = nullptr;
+   std::vector<double> *MCP_KE = nullptr;
+   std::vector<bool> *MCP_isContained = nullptr;
 
-   std::vector<double> *nu_vtx = NULL;
-   std::vector<double> *nu_vtx_spacecharge = NULL;
-   bool nu_isCC;
-   int nu_PDG;
-   double nu_E;
+   std::vector<double> *nu_vtx = nullptr;
+   std::vector<double> *nu_vtx_spacecharge = nullptr;
+   bool nu_isCC = 0;
+   int nu_PDG = 0;
+   double nu_E = 0;
 
-   std::map<std::string,bool> *CC1picutflow = NULL;
+   std::map<std::string,bool> *CC1picutflow = nullptr;
 
-   t -> SetBranchAddress("isData", &isData);
-   t -> SetBranchAddress("run_num", &run_num);
-   t -> SetBranchAddress("subrun_num", &subrun_num);
-   t -> SetBranchAddress("event_num", &event_num);
+   t -> SetBranchStatus("*",0);
+   // t -> SetBranchStatus("isData",1);
+   // t -> SetBranchAddress("isData", &isData);
+   // t -> SetBranchStatus("run_num",1);
+   // t -> SetBranchAddress("run_num", &run_num);
+   // t -> SetBranchStatus("subrun_num",1);
+   // t -> SetBranchAddress("subrun_num", &subrun_num);
+   // t -> SetBranchStatus("event_num",1);
+   // t -> SetBranchAddress("event_num", &event_num);
+   //
+   // t -> SetBranchStatus("Marco_cutflow",1);
+   // t -> SetBranchAddress("Marco_cutflow", &Marco_cutflow);
+   // t -> SetBranchStatus("Marco_selected",1);
+   // t -> SetBranchAddress("Marco_selected", &Marco_selected);
+   //
+   // t -> SetBranchStatus("Truth_topology",1);
+   // t -> SetBranchAddress("Truth_topology", &Truth_topology);
+   // t -> SetBranchStatus("TPCObj_PFP_track_length",1);
+   // t -> SetBranchAddress("TPCObj_PFP_track_length", &TPCObj_PFP_track_length);
+   // t -> SetBranchStatus("TPCObj_PFP_track_start",1);
+   // t -> SetBranchAddress("TPCObj_PFP_track_start", &TPCObj_PFP_track_start);
+   // t -> SetBranchStatus("TPCObj_PFP_track_end",1);
+   // t -> SetBranchAddress("TPCObj_PFP_track_end", &TPCObj_PFP_track_end);
+   // t -> SetBranchStatus("TPCObj_PFP_track_dqdx_truncmean",1);
+   // t -> SetBranchAddress("TPCObj_PFP_track_dqdx_truncmean", &TPCObj_PFP_track_dqdx_truncmean);
+   // t -> SetBranchStatus("TPCObj_PFP_isMIP",1);
+   // t -> SetBranchAddress("TPCObj_PFP_isMIP", &TPCObj_PFP_isMIP);
+   // t -> SetBranchStatus("TPCObj_PFP_shower_length",1);
+   // t -> SetBranchAddress("TPCObj_PFP_shower_length", &TPCObj_PFP_shower_length);
+   // t -> SetBranchStatus("TPCObj_PFP_shower_start",1);
+   // t -> SetBranchAddress("TPCObj_PFP_shower_start", &TPCObj_PFP_shower_start);
+   // t -> SetBranchStatus("TPCObj_NPFPs",1);
+   // t -> SetBranchAddress("TPCObj_NPFPs", &TPCObj_NPFPs);
+   // t -> SetBranchStatus("TPCObj_NTracks",1);
+   // t -> SetBranchAddress("TPCObj_NTracks", &TPCObj_NTracks);
+   // t -> SetBranchStatus("TPCObj_NShowers",1);
+   // t -> SetBranchAddress("TPCObj_NShowers", &TPCObj_NShowers);
+   // t -> SetBranchStatus("TPCObj_PFP_isTrack",1);
+   // t -> SetBranchAddress("TPCObj_PFP_isTrack", &TPCObj_PFP_isTrack);
+   // t -> SetBranchStatus("TPCObj_PFP_isShower",1);
+   // t -> SetBranchAddress("TPCObj_PFP_isShower", &TPCObj_PFP_isShower);
+   // t -> SetBranchStatus("TPCObj_PFP_isDaughter",1);
+   // t -> SetBranchAddress("TPCObj_PFP_isDaughter", &TPCObj_PFP_isDaughter);
+   // t -> SetBranchStatus("TPCObj_PFP_id",1);
+   // t -> SetBranchAddress("TPCObj_PFP_id", &TPCObj_PFP_id);
+   // t -> SetBranchStatus("TPCObj_PFP_MCPid",1);
+   // t -> SetBranchAddress("TPCObj_PFP_MCPid", &TPCObj_PFP_MCPid);
+   // t -> SetBranchStatus("TPCObj_PFP_truePDG",1);
+   // t -> SetBranchAddress("TPCObj_PFP_truePDG", &TPCObj_PFP_truePDG);
+   // t -> SetBranchStatus("TPCObj_PFP_trueE",1);
+   // t -> SetBranchAddress("TPCObj_PFP_trueE", &TPCObj_PFP_trueE);
+   // t -> SetBranchStatus("TPCObj_PFP_trueKE",1);
+   // t -> SetBranchAddress("TPCObj_PFP_trueKE", &TPCObj_PFP_trueKE);
+   // t -> SetBranchStatus("TPCObj_origin",1);
+   // t -> SetBranchAddress("TPCObj_origin", &TPCObj_origin);
+   // t -> SetBranchStatus("TPCObj_origin_extra",1);
+   // t -> SetBranchAddress("TPCObj_origin_extra", &TPCObj_origin_extra);
+   // t -> SetBranchStatus("TPCObj_reco_vtx",1);
+   // t -> SetBranchAddress("TPCObj_reco_vtx", &TPCObj_reco_vtx);
+   //
+   // t -> SetBranchStatus("MCP_PDG",1);
+   // t -> SetBranchAddress("MCP_PDG", &MCP_PDG);
+   // t -> SetBranchStatus("MCP_length",1);
+   // t -> SetBranchAddress("MCP_length", &MCP_length);
+   // t -> SetBranchStatus("MCP_process",1);
+   // t -> SetBranchAddress("MCP_process", &MCP_process);
+   // t -> SetBranchStatus("MCP_endprocess",1);
+   // t -> SetBranchAddress("MCP_endprocess", &MCP_endprocess);
+   // t -> SetBranchStatus("MCP_numdaughters",1);
+   // t -> SetBranchAddress("MCP_numdaughters", &MCP_numdaughters);
+   // t -> SetBranchStatus("MCP_P",1);
+   // t -> SetBranchAddress("MCP_P", &MCP_P);
+   // t -> SetBranchStatus("MCP_Px",1);
+   // t -> SetBranchAddress("MCP_Px", &MCP_Px);
+   // t -> SetBranchStatus("MCP_Py",1);
+   // t -> SetBranchAddress("MCP_Py", &MCP_Py);
+   // t -> SetBranchStatus("MCP_Pz",1);
+   // t -> SetBranchAddress("MCP_Pz", &MCP_Pz);
+   // t -> SetBranchStatus("MCP_E",1);
+   // t -> SetBranchAddress("MCP_E", &MCP_E);
+   // t -> SetBranchStatus("MCP_KE",1);
+   // t -> SetBranchAddress("MCP_KE", &MCP_KE);
+   // t -> SetBranchStatus("MCP_isContained",1);
+   // t -> SetBranchAddress("MCP_isContained", &MCP_isContained);
+   //
+   // t -> SetBranchStatus("nu_vtx",1);
+   // t -> SetBranchAddress("nu_vtx", &nu_vtx);
+   // t -> SetBranchStatus("nu_vtx_spacecharge",1);
+   // t -> SetBranchAddress("nu_vtx_spacecharge", &nu_vtx_spacecharge);
+   // t -> SetBranchStatus("nu_isCC",1);
+   // t -> SetBranchAddress("nu_isCC", &nu_isCC);
+   // t -> SetBranchStatus("nu_PDG",1);
+   // t -> SetBranchAddress("nu_PDG", &nu_PDG);
+   // t -> SetBranchStatus("nu_E",1);
+   // t -> SetBranchAddress("nu_E", &nu_E);
 
-   t -> SetBranchAddress("Marco_cutflow", &Marco_cutflow);
-   t -> SetBranchAddress("Marco_selected", &Marco_selected);
-
-   t -> SetBranchAddress("Truth_topology", &Truth_topology);
-   t -> SetBranchAddress("TPCObj_PFP_track_length", &TPCObj_PFP_track_length);
-   t -> SetBranchAddress("TPCObj_PFP_track_start", &TPCObj_PFP_track_start);
-   t -> SetBranchAddress("TPCObj_PFP_track_end", &TPCObj_PFP_track_end);
-   t -> SetBranchAddress("TPCObj_PFP_track_dqdx_truncmean", &TPCObj_PFP_track_dqdx_truncmean);
-   t -> SetBranchAddress("TPCObj_PFP_isMIP", &TPCObj_PFP_isMIP);
-   t -> SetBranchAddress("TPCObj_PFP_shower_length", &TPCObj_PFP_shower_length);
-   t -> SetBranchAddress("TPCObj_PFP_shower_start", &TPCObj_PFP_shower_start);
-   t -> SetBranchAddress("TPCObj_NPFPs", &TPCObj_NPFPs);
-   t -> SetBranchAddress("TPCObj_NTracks", &TPCObj_NTracks);
-   t -> SetBranchAddress("TPCObj_NShowers", &TPCObj_NShowers);
-   t -> SetBranchAddress("TPCObj_PFP_isTrack", &TPCObj_PFP_isTrack);
-   t -> SetBranchAddress("TPCObj_PFP_isShower", &TPCObj_PFP_isShower);
-   t -> SetBranchAddress("TPCObj_PFP_isDaughter", &TPCObj_PFP_isDaughter);
-   t -> SetBranchAddress("TPCObj_PFP_id", &TPCObj_PFP_id);
-   t -> SetBranchAddress("TPCObj_PFP_MCPid", &TPCObj_PFP_MCPid);
-   t -> SetBranchAddress("TPCObj_PFP_truePDG", &TPCObj_PFP_truePDG);
-   t -> SetBranchAddress("TPCObj_PFP_trueE", &TPCObj_PFP_trueE);
-   t -> SetBranchAddress("TPCObj_PFP_trueKE", &TPCObj_PFP_trueKE);
-   t -> SetBranchAddress("TPCObj_origin", &TPCObj_origin);
-   t -> SetBranchAddress("TPCObj_origin_extra", &TPCObj_origin_extra);
-   t -> SetBranchAddress("TPCObj_reco_vtx", &TPCObj_reco_vtx);
-
-   t -> SetBranchAddress("MCP_PDG", &MCP_PDG);
-   t -> SetBranchAddress("MCP_length", &MCP_length);
-   t -> SetBranchAddress("MCP_process", &MCP_process);
-   t -> SetBranchAddress("MCP_endprocess", &MCP_endprocess);
-   t -> SetBranchAddress("MCP_numdaughters", &MCP_numdaughters);
-   t -> SetBranchAddress("MCP_P", &MCP_P);
-   t -> SetBranchAddress("MCP_Px", &MCP_Px);
-   t -> SetBranchAddress("MCP_Py", &MCP_Py);
-   t -> SetBranchAddress("MCP_Pz", &MCP_Pz);
-   t -> SetBranchAddress("MCP_E", &MCP_E);
-   t -> SetBranchAddress("MCP_KE", &MCP_KE);
-   t -> SetBranchAddress("MCP_isContained", &MCP_isContained);
-
-   t -> SetBranchAddress("nu_vtx", &nu_vtx);
-   t -> SetBranchAddress("nu_vtx_spacecharge", &nu_vtx_spacecharge);
-   t -> SetBranchAddress("nu_isCC", &nu_isCC);
-   t -> SetBranchAddress("nu_PDG", &nu_PDG);
-   t -> SetBranchAddress("nu_E", &nu_E);
-
+   t -> SetBranchStatus("CC1picutflow",1);
    t -> SetBranchAddress("CC1picutflow", &CC1picutflow);
 
 
@@ -177,9 +226,9 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    const int nentries = t -> GetEntries();
 
    for (int i = 0; i < nentries; i++) {
-
+      std::cout << i << std::endl;
       t -> GetEntry(i);
-
+      std::cout << i << std::endl;
       // Check whether the event passes the requested cutflow map
       bool SelectedEvent = true;
       for(std::map<std::string,bool>::const_iterator iter = SelectionCutflow.begin(); iter != SelectionCutflow.end(); ++iter) {
@@ -357,13 +406,13 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    eff_nuE->SetMarkerColor(kRed);
    eff_nuE->SetMarkerStyle(21);
    eff_nuE->SetMarkerSize(1);
-   auto graph = eff_nuE->GetPaintedGraph(); 
+   auto graph = eff_nuE->GetPaintedGraph();
    graph->SetMinimum(0);
    graph->SetMaximum(1);
    pur_nuE->SetMarkerColor(kBlue);
    pur_nuE->SetMarkerStyle(21);
    pur_nuE->SetMarkerSize(1);
-   graph = pur_nuE->GetPaintedGraph(); 
+   graph = pur_nuE->GetPaintedGraph();
    graph->SetMinimum(0);
    graph->SetMaximum(1);
    gPad->Update();
@@ -375,13 +424,13 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    eff_muP->SetMarkerColor(kRed);
    eff_muP->SetMarkerStyle(21);
    eff_muP->SetMarkerSize(1);
-   graph = eff_muP->GetPaintedGraph(); 
+   graph = eff_muP->GetPaintedGraph();
    graph->SetMinimum(0);
    graph->SetMaximum(1);
    pur_muP->SetMarkerColor(kBlue);
    pur_muP->SetMarkerStyle(21);
    pur_muP->SetMarkerSize(1);
-   graph = pur_muP->GetPaintedGraph(); 
+   graph = pur_muP->GetPaintedGraph();
    graph->SetMinimum(0);
    graph->SetMaximum(1);
    gPad->Update();
@@ -393,13 +442,13 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    eff_muCosT->SetMarkerColor(kRed);
    eff_muCosT->SetMarkerStyle(21);
    eff_muCosT->SetMarkerSize(1);
-   graph = eff_muCosT->GetPaintedGraph(); 
+   graph = eff_muCosT->GetPaintedGraph();
    graph->SetMinimum(0);
    graph->SetMaximum(1);
    pur_muCosT->SetMarkerColor(kBlue);
    pur_muCosT->SetMarkerStyle(21);
    pur_muCosT->SetMarkerSize(1);
-   graph = pur_muCosT->GetPaintedGraph(); 
+   graph = pur_muCosT->GetPaintedGraph();
    graph->SetMinimum(0);
    graph->SetMaximum(1);
    gPad->Update();
@@ -411,13 +460,13 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    eff_muPhi->SetMarkerColor(kRed);
    eff_muPhi->SetMarkerStyle(21);
    eff_muPhi->SetMarkerSize(1);
-   graph = eff_muPhi->GetPaintedGraph(); 
+   graph = eff_muPhi->GetPaintedGraph();
    graph->SetMinimum(0);
    graph->SetMaximum(1);
    pur_muPhi->SetMarkerColor(kBlue);
    pur_muPhi->SetMarkerStyle(21);
    pur_muPhi->SetMarkerSize(1);
-   graph = pur_muPhi->GetPaintedGraph(); 
+   graph = pur_muPhi->GetPaintedGraph();
    graph->SetMinimum(0);
    graph->SetMaximum(1);
    gPad->Update();
