@@ -58,7 +58,6 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    std::vector<double> *TPCObj_PFP_track_length = nullptr;
    std::vector<std::vector<double>> *TPCObj_PFP_track_start = nullptr;
    std::vector<std::vector<double>> *TPCObj_PFP_track_end = nullptr;
-   std::vector<double> *TPCObj_PFP_track_dqdx_truncmean = nullptr;
    std::vector<bool> *TPCObj_PFP_isMIP = nullptr;
    std::vector<double> *TPCObj_PFP_shower_length = nullptr;
    std::vector<std::vector<double>> *TPCObj_PFP_shower_start = nullptr;
@@ -98,6 +97,12 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
 
    std::map<std::string,bool> *CC1picutflow = nullptr;
 
+   std::vector<double> *n2LLH_fwd_mu = nullptr;
+   std::vector<double> *n2LLH_bwd_mu = nullptr;
+   std::vector<double> *n2LLH_fwd_p = nullptr;
+   std::vector<double> *n2LLH_bwd_p = nullptr;
+   std::vector<double> *n2LLH_MIP = nullptr;
+
    t -> SetBranchStatus("*",0);
    t -> SetBranchStatus("isData",1);
    t -> SetBranchAddress("isData", &isData);
@@ -121,8 +126,6 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchAddress("TPCObj_PFP_track_start", &TPCObj_PFP_track_start);
    t -> SetBranchStatus("TPCObj_PFP_track_end",1);
    t -> SetBranchAddress("TPCObj_PFP_track_end", &TPCObj_PFP_track_end);
-   t -> SetBranchStatus("TPCObj_PFP_track_dqdx_truncmean",1);
-   t -> SetBranchAddress("TPCObj_PFP_track_dqdx_truncmean", &TPCObj_PFP_track_dqdx_truncmean);
    t -> SetBranchStatus("TPCObj_PFP_isMIP",1);
    t -> SetBranchAddress("TPCObj_PFP_isMIP", &TPCObj_PFP_isMIP);
    t -> SetBranchStatus("TPCObj_PFP_shower_length",1);
@@ -197,6 +200,17 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchStatus("CC1picutflow",1);
    t -> SetBranchAddress("CC1picutflow", &CC1picutflow);
 
+   t -> SetBranchStatus("TPCObj_PFP_n2LLH_fwd_mu",1);
+   t -> SetBranchAddress("TPCObj_PFP_n2LLH_fwd_mu",&n2LLH_fwd_mu);
+   t -> SetBranchStatus("TPCObj_PFP_n2LLH_bwd_mu",1);
+   t -> SetBranchAddress("TPCObj_PFP_n2LLH_bwd_mu",&n2LLH_bwd_mu);
+   t -> SetBranchStatus("TPCObj_PFP_n2LLH_fwd_p",1);
+   t -> SetBranchAddress("TPCObj_PFP_n2LLH_fwd_p",&n2LLH_fwd_p);
+   t -> SetBranchStatus("TPCObj_PFP_n2LLH_bwd_p",1);
+   t -> SetBranchAddress("TPCObj_PFP_n2LLH_bwd_p",&n2LLH_bwd_p);
+   t -> SetBranchStatus("TPCObj_PFP_n2LLH_MIP",1);
+   t -> SetBranchAddress("TPCObj_PFP_n2LLH_MIP",&n2LLH_MIP);
+
 
    TEfficiency* eff_nuE = new TEfficiency("eff_nuE",";True Neutrino Energy [GeV];",15,0,3);
    TEfficiency* eff_muP = new TEfficiency("eff_muP",";True Muon Momentum [GeV];",15,0,2);
@@ -217,12 +231,23 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    StackedHistPDGCode* isMIP_stack_byPDG = new StackedHistPDGCode("isMIP_stack_byPDG", ";#nu daughter track is MIP-like?;Selected Events (normalised to 3.782 #times 10^{19} POT)", 2, 0, 2);
    StackedHistPDGCode* mips_stack_byPDG = new StackedHistPDGCode("mips_stack_byPDG", ";Number of MIP-like #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 10, 0, 10);
    StackedHistPDGCode* pfps_stack_byPDG = new StackedHistPDGCode("pfps_stack_byPDG", ";Number of #nu daughter PFPs in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 10, 0, 10);
+   StackedHistPDGCode* n2llh_muMIPminusp_stack_byPDG = new StackedHistPDGCode("n2llh_muMIPminusp_stack_byPDG", ";n2llh_muMIPminusp for #nu daughter PFPs in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 54, -20, 7);
 
    TH2D* longest2tracks_byPDG_signal = new TH2D("longest2tracks_byPDG_signal",";True PDG of longest track;True PDG of second longest track",4,0,4,4,0,4);
    TH2D* longest2tracks_byPDG_bg = new TH2D("longest2tracks_byPDG_bg",";True PDG of longest track;True PDG of second longest track",4,0,4,4,0,4);
 
 //   TH1D* vtx_truereco_dist = new TH1D("vtx_truereco_dist",";Distance between true and reco vertices;Selected Events (normalised to 3.782 #times 10^{19} POT)",50,0,50);
    TH1D* vtx_truereco_spacecharge_dist = new TH1D("vtx_truereco_spacecharge_dist",";Distance between true and reco vertices (including spacecharge);Selected Events (normalised to 3.782 #times 10^{19} POT)",50,0,300);
+
+   double MIPcuts[] = {-10, -9, -8, -7, -6, -5, -4, -3, -2.5, -2, -1.5, -1, 0, 1, 2, 3, 4, 5, 6, 7};
+   int MIPcuts_size = sizeof(MIPcuts)/sizeof(MIPcuts[0]) - 1;
+   TEfficiency* eff_n2llh_muMIPminusp_atleast2MIP = new TEfficiency("eff_n2llh_muMIPminusp_atleast2MIP","Require at least 2 MIPs;Value of n2llh_muMIPminusp used for MIP classification;",MIPcuts_size,MIPcuts);
+   TEfficiency* eff_n2llh_muMIPminusp_exactly2MIP = new TEfficiency("eff_n2llh_muMIPminusp_exactly2MIP","Require exactly 2 MIPs;Value of n2llh_muMIPminusp used for MIP classification;",MIPcuts_size,MIPcuts);
+   TEfficiency* pur_n2llh_muMIPminusp_atleast2MIP = new TEfficiency("pur_n2llh_muMIPminusp_atleast2MIP","Require at least 2 MIPs;Value of n2llh_muMIPminusp used for MIP classification;",MIPcuts_size,MIPcuts);
+   TEfficiency* pur_n2llh_muMIPminusp_exactly2MIP = new TEfficiency("pur_n2llh_muMIPminusp_exactly2MIP","Require exactly 2 MIPs;Value of n2llh_muMIPminusp used for MIP classification;",MIPcuts_size,MIPcuts);
+   TH1D* effpur_n2llh_muMIPminusp_atleast2MIP = new TH1D("effpur_n2llh_muMIPminusp_atleast2MIP",";;",MIPcuts_size,MIPcuts);
+   TH1D* effpur_n2llh_muMIPminusp_exactly2MIP = new TH1D("effpur_n2llh_muMIPminusp_exactly2MIP",";;",MIPcuts_size,MIPcuts);
+
 
    const int nentries = t -> GetEntries();
 
@@ -238,6 +263,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          }
       }
 
+
       bool isSignal = false;
 
       // if signal...
@@ -248,7 +274,50 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          // Check neutrino flavour (just in case)
          if (nu_PDG != 14) std::cout << "WARNING: Signal event has neutrino with PDG code " << nu_PDG << " (should be 14)" << std::endl;
 
-         // Efficiency...
+      }
+
+      // MIP testing...
+      std::vector<double> n2llh_muMIPminusp_vect;
+      for(int j = 0; j < TPCObj_NPFPs; j++) {
+         if(TPCObj_PFP_isDaughter -> at(j) && TPCObj_PFP_track_length -> at(j) >= 0) {
+            double tr_n2llh_muMIP = std::min({n2LLH_fwd_mu->at(j),n2LLH_bwd_mu->at(j),n2LLH_MIP->at(j)});
+            double tr_n2llh_p = std::min(n2LLH_fwd_p->at(j),n2LLH_bwd_p->at(j));
+            double tr_n2llh_muMIPminusp = tr_n2llh_muMIP - tr_n2llh_p;
+            if(tr_n2llh_muMIP != -999) n2llh_muMIPminusp_vect.emplace_back(tr_n2llh_muMIPminusp);
+            else n2llh_muMIPminusp_vect.emplace_back(-999);
+         }
+         else n2llh_muMIPminusp_vect.emplace_back(-999);
+      }
+
+      for (const double& MIPcut : MIPcuts) {
+         std::vector<bool> TPCObj_PFP_isMIP_LLH;
+         for(const double& MIPvalue : n2llh_muMIPminusp_vect) {
+            if(MIPvalue < MIPcut && MIPvalue != -999) TPCObj_PFP_isMIP_LLH.emplace_back(true);
+            else TPCObj_PFP_isMIP_LLH.emplace_back(false);
+         }
+         int nMIPs = std::count(TPCObj_PFP_isMIP_LLH.begin(),TPCObj_PFP_isMIP_LLH.end(),true);
+         if(isSignal) eff_n2llh_muMIPminusp_atleast2MIP->Fill(SelectedEvent && nMIPs>=2, MIPcut);
+         if(isSignal) eff_n2llh_muMIPminusp_exactly2MIP->Fill(SelectedEvent && nMIPs==2, MIPcut);
+         if(SelectedEvent && nMIPs>=2) pur_n2llh_muMIPminusp_atleast2MIP->Fill(isSignal, MIPcut);
+         if(SelectedEvent && nMIPs==2) pur_n2llh_muMIPminusp_exactly2MIP->Fill(isSignal, MIPcut);
+      }
+
+      double MIPcut = -2.5;
+      std::vector<bool> TPCObj_PFP_isMIP_LLH;
+      for(const double& MIPvalue : n2llh_muMIPminusp_vect) {
+         if(MIPvalue < MIPcut && MIPvalue != -999) TPCObj_PFP_isMIP_LLH.emplace_back(true);
+         else TPCObj_PFP_isMIP_LLH.emplace_back(false);
+      }
+      if(std::count(TPCObj_PFP_isMIP_LLH.begin(),TPCObj_PFP_isMIP_LLH.end(),true)<2) SelectedEvent = false;
+
+      for(int j = 1; j <= MIPcuts_size; j++) {
+         effpur_n2llh_muMIPminusp_atleast2MIP->SetBinContent(j,10*eff_n2llh_muMIPminusp_atleast2MIP->GetEfficiency(j)*pur_n2llh_muMIPminusp_atleast2MIP->GetEfficiency(j));
+         effpur_n2llh_muMIPminusp_exactly2MIP->SetBinContent(j,10*eff_n2llh_muMIPminusp_exactly2MIP->GetEfficiency(j)*pur_n2llh_muMIPminusp_exactly2MIP->GetEfficiency(j));
+      }
+
+
+      // Efficiency...
+      if(isSignal) {
          eff_nuE -> Fill(SelectedEvent, nu_E);
 
          for (size_t j = 0; j < MCP_PDG -> size(); j++) {
@@ -261,6 +330,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
             }
          }
       } //end if signal
+
+
 
       if(SelectedEvent) {
 
@@ -310,9 +381,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
                }
                track_daughters++;
                vtxtrack_daughters.emplace_back(std::hypot(std::hypot(TPCObj_reco_vtx->at(0) - TPCObj_PFP_track_start->at(j).at(0), TPCObj_reco_vtx->at(1) - TPCObj_PFP_track_start->at(j).at(1)), TPCObj_reco_vtx->at(2) - TPCObj_PFP_track_start->at(j).at(2)));
-            }
-            if(TPCObj_PFP_isMIP -> at(j) && TPCObj_PFP_isDaughter -> at(j)) {
-               mip_daughters++;
+               if(TPCObj_PFP_isMIP_LLH.at(j)) mip_daughters++;
             }
          }
 
@@ -326,72 +395,39 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          }
          for(int j = 0; j < TPCObj_NPFPs; j++) {
             if(TPCObj_PFP_isDaughter -> at(j)) {
-               isMIP_stack_byPDG -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j), TPCObj_PFP_isMIP->at(j));
+               if(TPCObj_PFP_track_length -> at(j) < 0) continue;
+               isMIP_stack_byPDG -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j), TPCObj_PFP_isMIP_LLH.at(j));
                pfps_stack_byPDG -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j), track_daughters, 1./track_daughters);
-               if(mip_daughters>0) mips_stack_byPDG -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j), mip_daughters, 1./mip_daughters);
+               if(TPCObj_PFP_isMIP_LLH.at(j)) mips_stack_byPDG -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j), mip_daughters, 1./mip_daughters);
+
+               double tr_n2llh_muMIP = std::min({n2LLH_fwd_mu->at(j),n2LLH_bwd_mu->at(j),n2LLH_MIP->at(j)});
+               double tr_n2llh_p = std::min(n2LLH_fwd_p->at(j),n2LLH_bwd_p->at(j));
+               double tr_n2llh_muMIPminusp = tr_n2llh_muMIP - tr_n2llh_p;
+               if (tr_n2llh_muMIP!=-999) n2llh_muMIPminusp_stack_byPDG -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j), tr_n2llh_muMIPminusp);
             }
          }
 
          //Longest 2 daughter tracks by PDG...
          if(track_daughters >= 2) {
-            if(isSignal) {
-               if(maxPDG == kMuMinus) {
-                  if(maxPDG2 == kMuMinus) longest2tracks_byPDG_signal -> Fill(0., 0);
-                  else if(maxPDG2 == kPiPlus) longest2tracks_byPDG_signal -> Fill(0.,1);
-                  else if(maxPDG2 == kProton) longest2tracks_byPDG_signal -> Fill(0.,2);
-                  else longest2tracks_byPDG_signal -> Fill(0.,3);
-               }
-               else if(maxPDG == kPiPlus) {
-                  if(maxPDG2 == kMuMinus) longest2tracks_byPDG_signal -> Fill(1,0);
-                  else if(maxPDG2 == kPiPlus) longest2tracks_byPDG_signal -> Fill(1,1);
-                  else if(maxPDG2 == kProton) longest2tracks_byPDG_signal -> Fill(1,2);
-                  else longest2tracks_byPDG_signal -> Fill(1,3);
-               }
-               else if(maxPDG == kProton) {
-                  if(maxPDG2 == kMuMinus) longest2tracks_byPDG_signal -> Fill(2,0);
-                  else if(maxPDG2 == kPiPlus) longest2tracks_byPDG_signal -> Fill(2,1);
-                  else if(maxPDG2 == kProton) longest2tracks_byPDG_signal -> Fill(2,2);
-                  else longest2tracks_byPDG_signal -> Fill(2,3);
-               }
-               else {
-                  if(maxPDG2 == kMuMinus) longest2tracks_byPDG_signal -> Fill(3,0);
-                  else if(maxPDG2 == kPiPlus) longest2tracks_byPDG_signal -> Fill(3,1);
-                  else if(maxPDG2 == kProton) longest2tracks_byPDG_signal -> Fill(3,2);
-                  else longest2tracks_byPDG_signal -> Fill(3,3);
-               }
-            }
-            else {
-               if(maxPDG == kMuMinus) {
-                  if(maxPDG2 == kMuMinus) longest2tracks_byPDG_bg -> Fill(0., 0);
-                  else if(maxPDG2 == kPiPlus) longest2tracks_byPDG_bg -> Fill(0.,1);
-                  else if(maxPDG2 == kProton) longest2tracks_byPDG_bg -> Fill(0.,2);
-                  else longest2tracks_byPDG_bg -> Fill(0.,3);
-               }
-               else if(maxPDG == kPiPlus) {
-                  if(maxPDG2 == kMuMinus) longest2tracks_byPDG_bg -> Fill(1,0);
-                  else if(maxPDG2 == kPiPlus) longest2tracks_byPDG_bg -> Fill(1,1);
-                  else if(maxPDG2 == kProton) longest2tracks_byPDG_bg -> Fill(1,2);
-                  else longest2tracks_byPDG_bg -> Fill(1,3);
-               }
-               else if(maxPDG == kProton) {
-                  if(maxPDG2 == kMuMinus) longest2tracks_byPDG_bg -> Fill(2,0);
-                  else if(maxPDG2 == kPiPlus) longest2tracks_byPDG_bg -> Fill(2,1);
-                  else if(maxPDG2 == kProton) longest2tracks_byPDG_bg -> Fill(2,2);
-                  else longest2tracks_byPDG_bg -> Fill(2,3);
-               }
-               else {
-                  if(maxPDG2 == kMuMinus) longest2tracks_byPDG_bg -> Fill(3,0);
-                  else if(maxPDG2 == kPiPlus) longest2tracks_byPDG_bg -> Fill(3,1);
-                  else if(maxPDG2 == kProton) longest2tracks_byPDG_bg -> Fill(3,2);
-                  else longest2tracks_byPDG_bg -> Fill(3,3);
-               }
-            }
+            double maxPDG_fill, maxPDG2_fill;
+            if(maxPDG == kMuMinus) maxPDG_fill = 0.;
+            else if(maxPDG == kPiPlus) maxPDG_fill = 1;
+            else if(maxPDG == kProton) maxPDG_fill = 2;
+            else maxPDG_fill = 3;
+            if(maxPDG2 == kMuMinus) maxPDG2_fill = 0.;
+            else if(maxPDG2 == kPiPlus) maxPDG2_fill = 1;
+            else if(maxPDG2 == kProton) maxPDG2_fill = 2;
+            else maxPDG2_fill = 3;
+
+            if(isSignal) longest2tracks_byPDG_signal -> Fill(maxPDG_fill, maxPDG2_fill);
+            else longest2tracks_byPDG_bg -> Fill(maxPDG_fill, maxPDG2_fill);
          } //end longest 2 daughter tracks by PDG
 
          if (Truth_topology == kOutFV) {
 //            vtx_truereco_dist -> Fill(std::hypot(std::hypot(TPCObj_reco_vtx->at(0) - nu_vtx->at(0), TPCObj_reco_vtx->at(1) - nu_vtx->at(1)), TPCObj_reco_vtx->at(2) - nu_vtx->at(2)));
             vtx_truereco_spacecharge_dist -> Fill(std::hypot(std::hypot(TPCObj_reco_vtx->at(0) - nu_vtx_spacecharge->at(0), TPCObj_reco_vtx->at(1) - nu_vtx_spacecharge->at(1)), TPCObj_reco_vtx->at(2) - nu_vtx_spacecharge->at(2)));
          }
+
 
       } // end if(SelectedEvent)
    } //end loop over entries
@@ -493,13 +529,20 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    c1 -> SaveAs(TString::Format("%s_THStack_trklen_byPDG.eps",SaveString.c_str()));
 
    isMIP_stack_byPDG -> DrawStack(norm, c1);
-   c1 -> SaveAs(TString::Format("%s_THSTack_isMIP_byPDG.eps",SaveString.c_str()));
+   c1 -> SaveAs(TString::Format("%s_THStack_isMIP_byPDG.eps",SaveString.c_str()));
 
    mips_stack_byPDG -> DrawStack(norm, c1);
-   c1 -> SaveAs(TString::Format("%s_THSTack_mips_byPDG.eps",SaveString.c_str()));
+   c1 -> SaveAs(TString::Format("%s_THStack_mips_byPDG.eps",SaveString.c_str()));
 
    pfps_stack_byPDG -> DrawStack(norm, c1);
-   c1 -> SaveAs(TString::Format("%s_THSTack_pfps_byPDG.eps",SaveString.c_str()));
+   c1 -> SaveAs(TString::Format("%s_THStack_pfps_byPDG.eps",SaveString.c_str()));
+
+   n2llh_muMIPminusp_stack_byPDG -> DrawStack(norm, c1);
+   c1 -> SaveAs(TString::Format("%s_THStack_n2llh_muMIPminusp_byPDG.eps",SaveString.c_str()));
+
+   n2llh_muMIPminusp_stack_byPDG -> DrawStack(norm, c1, "pads");
+   c1 -> SaveAs(TString::Format("%s_nostack_n2llh_muMIPminusp_byPDG.eps",SaveString.c_str()));
+
 
    longest2tracks_byPDG_signal->GetXaxis()->SetBinLabel(1,PDGenum2str(kMuMinus).c_str());
    longest2tracks_byPDG_signal->GetXaxis()->SetBinLabel(2,PDGenum2str(kPiPlus).c_str());
@@ -529,6 +572,54 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    vtx_truereco_spacecharge_dist -> Scale(norm);
    vtx_truereco_spacecharge_dist -> Draw();
    c1 -> SaveAs(TString::Format("%s_vtx_truereco_spacecharge_dist.eps",SaveString.c_str()));
+
+   eff_n2llh_muMIPminusp_atleast2MIP -> Draw("AP");
+   pur_n2llh_muMIPminusp_atleast2MIP -> Draw("P SAME");
+   effpur_n2llh_muMIPminusp_atleast2MIP -> Draw("P SAME");
+   gPad->Update();
+   eff_n2llh_muMIPminusp_atleast2MIP->SetMarkerColor(kRed);
+   eff_n2llh_muMIPminusp_atleast2MIP->SetMarkerStyle(21);
+   eff_n2llh_muMIPminusp_atleast2MIP->SetMarkerSize(1);
+   graph = eff_n2llh_muMIPminusp_atleast2MIP->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   pur_n2llh_muMIPminusp_atleast2MIP->SetMarkerColor(kBlue);
+   pur_n2llh_muMIPminusp_atleast2MIP->SetMarkerStyle(21);
+   pur_n2llh_muMIPminusp_atleast2MIP->SetMarkerSize(1);
+   graph = pur_n2llh_muMIPminusp_atleast2MIP->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   effpur_n2llh_muMIPminusp_atleast2MIP->SetMarkerColor(kBlack);
+   effpur_n2llh_muMIPminusp_atleast2MIP->SetMarkerStyle(21);
+   effpur_n2llh_muMIPminusp_atleast2MIP->SetMarkerSize(1);
+   effpur_n2llh_muMIPminusp_atleast2MIP->SetMinimum(0);
+   effpur_n2llh_muMIPminusp_atleast2MIP->SetMaximum(1);
+   gPad->Update();
+   c1 -> SaveAs(TString::Format("%s_effpur_n2llh_muMIPminusp_atleast2MIP.eps",SaveString.c_str()));
+
+   eff_n2llh_muMIPminusp_exactly2MIP -> Draw("AP");
+   pur_n2llh_muMIPminusp_exactly2MIP -> Draw("P SAME");
+   effpur_n2llh_muMIPminusp_exactly2MIP -> Draw("P SAME");
+   gPad->Update();
+   eff_n2llh_muMIPminusp_exactly2MIP->SetMarkerColor(kRed);
+   eff_n2llh_muMIPminusp_exactly2MIP->SetMarkerStyle(21);
+   eff_n2llh_muMIPminusp_exactly2MIP->SetMarkerSize(1);
+   graph = eff_n2llh_muMIPminusp_exactly2MIP->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   pur_n2llh_muMIPminusp_exactly2MIP->SetMarkerColor(kBlue);
+   pur_n2llh_muMIPminusp_exactly2MIP->SetMarkerStyle(21);
+   pur_n2llh_muMIPminusp_exactly2MIP->SetMarkerSize(1);
+   graph = pur_n2llh_muMIPminusp_exactly2MIP->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   effpur_n2llh_muMIPminusp_exactly2MIP->SetMarkerColor(kBlack);
+   effpur_n2llh_muMIPminusp_exactly2MIP->SetMarkerStyle(21);
+   effpur_n2llh_muMIPminusp_exactly2MIP->SetMarkerSize(1);
+   effpur_n2llh_muMIPminusp_exactly2MIP->SetMinimum(0);
+   effpur_n2llh_muMIPminusp_exactly2MIP->SetMaximum(1);
+   gPad->Update();
+   c1 -> SaveAs(TString::Format("%s_effpur_n2llh_muMIPminusp_exactly2MIP.eps",SaveString.c_str()));
 
    std::cout << "Total Efficiency: " << (1. * (eff_nuE -> GetPassedHistogram() -> GetEntries()))/(eff_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
    std::cout << "Total Purity: " << (1. * (pur_nuE -> GetPassedHistogram() -> GetEntries()))/(pur_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;

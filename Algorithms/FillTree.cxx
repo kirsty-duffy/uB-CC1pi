@@ -107,22 +107,22 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
    // Events that are selected and cosmic/mixed/unknown origin will be overwritten later
    if (!isData){
 
-     auto const mctruth_h = evt.getValidHandle<std::vector<simb::MCTruth>>("generator"); // Get only GENIE MCtruth
-     simb::MCTruth top_mctruth = mctruth_h->at(0);
-     simb::MCNeutrino top_nu = top_mctruth.GetNeutrino();
-     simb::MCParticle top_neutrino = top_nu.Nu();
+      auto const mctruth_h = evt.getValidHandle<std::vector<simb::MCTruth>>("generator"); // Get only GENIE MCtruth
+      simb::MCTruth top_mctruth = mctruth_h->at(0);
+      simb::MCNeutrino top_nu = top_mctruth.GetNeutrino();
+      simb::MCParticle top_neutrino = top_nu.Nu();
 
-     const TLorentzVector& top_vertex = top_neutrino.Position(0);
-     double top_vertexXYZT[4];
-     top_vertex.GetXYZT(top_vertexXYZT);
+      const TLorentzVector& top_vertex = top_neutrino.Position(0);
+      double top_vertexXYZT[4];
+      top_vertex.GetXYZT(top_vertexXYZT);
 
 
-     if(inFV(top_vertexXYZT[0], top_vertexXYZT[1], top_vertexXYZT[2])){ // If true vertex is in the fiducial volume
-       Truth_topology = GetTopology(mctruth_h);
-	}
-     else{ // outFV topology
-       Truth_topology = kOutFV;
-     }
+      if(inFV(top_vertexXYZT[0], top_vertexXYZT[1], top_vertexXYZT[2])){ // If true vertex is in the fiducial volume
+         Truth_topology = GetTopology(mctruth_h);
+      }
+      else{ // outFV topology
+         Truth_topology = kOutFV;
+      }
    } // if !isData
 
 
@@ -143,18 +143,18 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       // Get topology from MC truth (MC only)
       // Overwrite what was done above for selected cosmic/mixed/unknown origin events only
       if (!isData){
-      	// For selected event, check TPC object origin for cosmic/mixed/unknown
-      	// Only overwrite events that don't have TPC_origin == 0
-      	// For TPC_origin == 0 events we want to keep the Truth_topology assigned above
-      	if (TPCObj_origin == 1){
-      	  Truth_topology = kCosmic;
-      	}
-      	else if (TPCObj_origin == 2){
-      	  Truth_topology = kMixed;
-      	}
-      	else if (TPCObj_origin != 0){ // if selected object has some other non-neutrino origin, set it to unknown
-      	  Truth_topology = kUnknown;
-      	}
+         // For selected event, check TPC object origin for cosmic/mixed/unknown
+         // Only overwrite events that don't have TPC_origin == 0
+         // For TPC_origin == 0 events we want to keep the Truth_topology assigned above
+         if (TPCObj_origin == 1){
+            Truth_topology = kCosmic;
+         }
+         else if (TPCObj_origin == 2){
+            Truth_topology = kMixed;
+         }
+         else if (TPCObj_origin != 0){ // if selected object has some other non-neutrino origin, set it to unknown
+            Truth_topology = kUnknown;
+         }
       } // if !isData
 
 
@@ -243,107 +243,103 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          double shower_length = -9999;
          std::vector<double> shower_start = {-9999, -9999, -9999};
 
-//         if(lar_pandora::LArPandoraHelper::IsTrack(pfp)) {
-            std::vector<art::Ptr<recob::Track>> tracks_pfp = tracks_from_pfps.at(pfp.key());
-            if(tracks_pfp.size() > 1) {
-               mf::LogError(__PRETTY_FUNCTION__) << "PFP associated to more than one track." << std::endl;
-               throw std::exception();
-            }
-            for (auto track : tracks_pfp){
-               track_length = track -> Length();
-               auto start = track -> Start();
-               track_start = {start.X(),start.Y(),start.Z()};
-               auto end = track -> End();
-               track_end = {end.X(),end.Y(),end.Z()};
+         std::vector<art::Ptr<recob::Track>> tracks_pfp = tracks_from_pfps.at(pfp.key());
+         if(tracks_pfp.size() > 1) {
+            mf::LogError(__PRETTY_FUNCTION__) << "PFP associated to more than one track." << std::endl;
+            throw std::exception();
+         }
+         for (auto track : tracks_pfp){
+            track_length = track -> Length();
+            auto start = track -> Start();
+            track_start = {start.X(),start.Y(),start.Z()};
+            auto end = track -> End();
+            track_end = {end.X(),end.Y(),end.Z()};
 
-               unsigned int trkid = track->ID();
+            unsigned int trkid = track->ID();
 
-               // Get calorimetry information
-               // Only fill when there is valid calorimetry information (of course)
-               if (calos_from_tracks.isValid()){
-                 std::vector< art::Ptr<anab::Calorimetry> > caloFromTrack = calos_from_tracks.at(track->ID());
+            // Get calorimetry information
+            // Only fill when there is valid calorimetry information (of course)
+            if (calos_from_tracks.isValid()){
+               std::vector< art::Ptr<anab::Calorimetry> > caloFromTrack = calos_from_tracks.at(track->ID());
 
-                 // for time being, only use Y plane calorimetry
-                 art::Ptr< anab:: Calorimetry > calo;
-                 for (auto c : caloFromTrack){
-                   int planenum = c->PlaneID().Plane;
-                   if (planenum != 2) continue; // Only use calorimetry from collection plane
-                   calo = c;
-                 }
-                 // Check that calo is a valid object - if so, set dedx_perhit and resrange_perhit
-                 if (calo){
-                   track_dedx_perhit = calo->dEdx();
-                   track_resrange_perhit = calo->ResidualRange();
-                 }
-              }  // end if(caloFromTracks.isValid())
-
+               // for time being, only use Y plane calorimetry
+               art::Ptr< anab:: Calorimetry > calo;
+               for (auto c : caloFromTrack){
+                  int planenum = c->PlaneID().Plane;
+                  if (planenum != 2) continue; // Only use calorimetry from collection plane
+                  calo = c;
+               }
+               // Check that calo is a valid object - if so, set dedx_perhit and resrange_perhit
+               if (calo){
+                  track_dedx_perhit = calo->dEdx();
+                  track_resrange_perhit = calo->ResidualRange();
+               }
+            }  // end if(caloFromTracks.isValid())
 
 
-              // Store isMIP
-              isMIP = IsMIP(trackPIDAssn, trkid);
+
+            // Store isMIP
+            isMIP = IsMIP(trackPIDAssn, trkid);
 
 
-               // Now get PID information from track association
-               // Note that this relies on you having the feature branch of lardataobj lardataobj/feature/kduffy_pidrefactor_v1_11_00_04 checked out, otherwise you won't be able to read these products
-               if (trackPIDAssn.isValid()){
+            // Now get PID information from track association
+            // Note that this relies on you having the feature branch of lardataobj lardataobj/feature/kduffy_pidrefactor_v1_11_00_04 checked out, otherwise you won't be able to read these products
+            if (trackPIDAssn.isValid()){
 
-                 std::vector<art::Ptr<anab::ParticleID>> trackPID = trackPIDAssn.at(track->ID());
-                 if (trackPID.size() != 0){
-                   // Only fill variables if the track-PID association exists
-                   std::vector<anab::sParticleIDAlgScores> AlgScoresVec = trackPID.at(0)->ParticleIDAlgScores();
-                    // Loop through AlgScoresVec and find the variables we want
-                    for (size_t i_algscore=0; i_algscore<AlgScoresVec.size(); i_algscore++){
+               std::vector<art::Ptr<anab::ParticleID>> trackPID = trackPIDAssn.at(track->ID());
+               if (trackPID.size() != 0){
+                  // Only fill variables if the track-PID association exists
+                  std::vector<anab::sParticleIDAlgScores> AlgScoresVec = trackPID.at(0)->ParticleIDAlgScores();
+                  // Loop through AlgScoresVec and find the variables we want
+                  for (size_t i_algscore=0; i_algscore<AlgScoresVec.size(); i_algscore++){
 
-                      anab::sParticleIDAlgScores AlgScore = AlgScoresVec.at(i_algscore);
+                     anab::sParticleIDAlgScores AlgScore = AlgScoresVec.at(i_algscore);
 
-                      if (AlgScore.fAlgName == "BraggPeakLLH"){
+                     if (AlgScore.fAlgName == "BraggPeakLLH"){
                         if (anab::kVariableType(AlgScore.fVariableType) == anab::kLogL_fwd){
-                          if (AlgScore.fAssumedPdg == 13)   Bragg_fwd_mu = AlgScore.fValue;
-                          if (AlgScore.fAssumedPdg == 2212) Bragg_fwd_p =  AlgScore.fValue;
-                          if (AlgScore.fAssumedPdg == 0)    noBragg_MIP = AlgScore.fValue;
+                           if (AlgScore.fAssumedPdg == 13)   Bragg_fwd_mu = AlgScore.fValue;
+                           if (AlgScore.fAssumedPdg == 2212) Bragg_fwd_p =  AlgScore.fValue;
+                           if (AlgScore.fAssumedPdg == 0)    noBragg_MIP = AlgScore.fValue;
                         }// if fVariableType == anab::kLogL_fwd
                         else if (anab::kVariableType(AlgScore.fVariableType) == anab::kLogL_bwd){
-                          if (AlgScore.fAssumedPdg == 13)   Bragg_bwd_mu = AlgScore.fValue;
-                          if (AlgScore.fAssumedPdg == 2212) Bragg_bwd_p =  AlgScore.fValue;
+                           if (AlgScore.fAssumedPdg == 13)   Bragg_bwd_mu = AlgScore.fValue;
+                           if (AlgScore.fAssumedPdg == 2212) Bragg_bwd_p =  AlgScore.fValue;
                         } // if fVariableType == anab::kLogL_bwd
-                      } // if fAlName = BraggPeakLLH
+                     } // if fAlName = BraggPeakLLH
 
-                      if (AlgScore.fAlgName == "PIDA" && anab::kVariableType(AlgScore.fVariableType) == anab::kPIDA){
+                     if (AlgScore.fAlgName == "PIDA" && anab::kVariableType(AlgScore.fVariableType) == anab::kPIDA){
                         PIDAval = AlgScore.fValue;
-                      }// if AlgName = PIDA && fVariableType == anab::kPIDA
+                     }// if AlgName = PIDA && fVariableType == anab::kPIDA
 
 
-                      if (AlgScore.fAlgName == "TruncatedMean"){
+                     if (AlgScore.fAlgName == "TruncatedMean"){
                         if (anab::kVariableType(AlgScore.fVariableType) == anab::kdEdxtruncmean) track_dedx_truncmean = AlgScore.fValue;
-                      }// if AlgName = TruncatedMean
+                     }// if AlgName = TruncatedMean
 
-                    } // end loop through AlgScoresVec
-                 } // end if trackPID.size() != 0
-                 // else{
-                 //    std::cout << "[CC1pi] Found valid trackPIDAssn but trackPID.size() == " << trackPID.size() << std::endl;
-                 // }
-               } // if (trackPIDAssn.isValid())
+                  } // end loop through AlgScoresVec
+               } // end if trackPID.size() != 0
                // else{
-               //    std::cout << "[CC1pi] Could not find valid trackPIDAssn" << std::endl;
+               //    std::cout << "[CC1pi] Found valid trackPIDAssn but trackPID.size() == " << trackPID.size() << std::endl;
                // }
+            } // if (trackPIDAssn.isValid())
+            // else{
+            //    std::cout << "[CC1pi] Could not find valid trackPIDAssn" << std::endl;
+            // }
 
-            } // end loop over tracks
+         } // end loop over tracks
 
-//         } // IsTrack
 
-//         else if(lar_pandora::LArPandoraHelper::IsShower(pfp)) {
-            std::vector<art::Ptr<recob::Shower>> showers_pfp = showers_from_pfps.at(pfp.key());
-            if(showers_pfp.size() > 1) {
-               mf::LogError(__PRETTY_FUNCTION__) << "PFP associated to more than one showers." << std::endl;
-               throw std::exception();
-            }
-            for (auto shower : showers_pfp) {
-               shower_length = shower -> Length();
-               auto start = shower -> ShowerStart();
-               shower_start = {start.X(),start.Y(),start.Z()};
-            }
+         std::vector<art::Ptr<recob::Shower>> showers_pfp = showers_from_pfps.at(pfp.key());
+         if(showers_pfp.size() > 1) {
+            mf::LogError(__PRETTY_FUNCTION__) << "PFP associated to more than one showers." << std::endl;
+            throw std::exception();
+         }
+         for (auto shower : showers_pfp) {
+            shower_length = shower -> Length();
+            auto start = shower -> ShowerStart();
+            shower_start = {start.X(),start.Y(),start.Z()};
+         }
 
-//         } // IsShower
 
          // Fill track/shower specific variables
          TPCObj_PFP_track_length.emplace_back(track_length);
