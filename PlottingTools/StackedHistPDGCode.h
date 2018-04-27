@@ -16,7 +16,7 @@ class StackedHistPDGCode{
   StackedHistPDGCode(std::string histname, std::string title, int nbins, double lowlimit, double highlimit);// Constructor
   void Fill(PDGCode particle_pdg, double value);
   void Fill(PDGCode particle_pdg, double value, double weight);
-  void DrawStack(double norm, TCanvas *c1);
+  void DrawStack(double norm, TCanvas *c1, TString option);
 
  protected:
   int nHists;
@@ -82,14 +82,15 @@ void StackedHistPDGCode::Fill(PDGCode particle_pdg, double value, double weight)
 }
 
 // -------------------------- Function to draw the histograms -------------------------- //
-void StackedHistPDGCode::DrawStack(double norm, TCanvas *c1)
+void StackedHistPDGCode::DrawStack(double norm, TCanvas *c1, TString option="")
 {
   // First: style the histograms
   StackedHistPDGCode::StyleHists();
 
   // Next: add histogramst to the stack and make TLegend
   // Only do this for histograms that have entries
-  TLegend *leg = new TLegend(0.55,0.7,0.95,0.95);
+//  TLegend *leg = new TLegend(0.55,0.7,0.95,0.95);
+  TLegend *leg = new TLegend(0.75,0.7,0.95,0.95);
 
   leg -> SetNColumns(2);
 
@@ -104,7 +105,7 @@ void StackedHistPDGCode::DrawStack(double norm, TCanvas *c1)
   }
 
   c1->cd();
-  stack->Draw("hist");
+  stack->Draw("hist"+option);
   leg->Draw();
 }
 

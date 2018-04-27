@@ -16,11 +16,11 @@ void Wrapper(TString FileName) {
 
    CC1picutflow["TwoTrackCut"] = true;
    MakePlots(CC1picutflow, "PassTwoTrackCut", FileName);
-
+/*
    CC1picutflow["TwoMIPCut"] = true;
    MakePlots(CC1picutflow, "PassTwoMIPCut", FileName);
 
    CC1picutflow["ExactlyTwoMIPCut"] = true;
    MakePlots(CC1picutflow, "PassExactlyTwoMIPCut", FileName);
-
+*/
 }
