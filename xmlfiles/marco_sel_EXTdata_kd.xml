@@ -1,0 +1,56 @@
+<!-- Project details -->
+<!DOCTYPE project [
+<!ENTITY release "v06_26_01_13">
+<!ENTITY name "marco_sel">
+<!ENTITY user "kduffy">
+<!ENTITY version "v06_26_01_13_EXTdata_v0">
+]>
+
+<project name="&name;">
+
+  <!-- Group -->
+  <group>uboone</group>
+
+  <!-- Project size (numevents is an upper limit) -->
+  <numevents>25000</numevents>
+  <numjobs>500</numjobs>
+
+  <!-- Where to look for fcl files (in addition to $FHICL_FILE_PATH) -->
+  <!-- fcldir>/pnfs/uboone/persistent/users/ddevitt/fcl/</fcldir -->
+
+  <!-- Batch OS -->
+  <os>SL6</os>
+
+  <!-- Larsoft information -->
+  <larsoft>
+    <!-- tag>&release;</tag -->
+    <!-- qual>e10:prof</qual -->
+    <local>/pnfs/uboone/resilient/users/kduffy/tars/pid_test.tar</local>
+  </larsoft>
+
+  <!-- requested memory, in MB -->
+  <memory>2000</memory>
+
+  <!-- Stages -->
+  <stage name = "Marco_selection">
+     <maxfilesperjob>1</maxfilesperjob>
+     <!-- <inputlist>/pnfs/uboone/persistent/users/kduffy/filelist/filepaths_prodgenie_bnb_nu_cosmic_uboone_mcc8.7_reco2_dev_next25000.txt</inputlist> -->
+     <inputdef>prod_reco_optfilter_extbnb_v12_mcc8_dev_gooodruns_v4s</inputdef>
+     <fcl>run_ubxsec_data_extbnb_BuildShowersAsTracks.fcl</fcl>
+     <outdir>/pnfs/uboone/persistent/users/kduffy/CC1pi/&version;/stage1/</outdir>
+     <logdir>/pnfs/uboone/persistent/users/kduffy/CC1pi/&version;/stage1/</logdir>
+     <workdir>/pnfs/uboone/resilient/users/kduffy/CC1pi/work/&version;/stage1/</workdir>
+     <bookdir>/uboone/data/users/kduffy/CC1pi/book/&version;/stage1/</bookdir>
+     <schema>root</schema>
+  </stage>
+  <stage name = "CC1pi_selection">
+     <maxfilesperjob>1</maxfilesperjob>
+     <!-- <inputlist>/pnfs/uboone/persistent/users/kduffy/filelist/stage1_out_files.txt</inputlist> -->
+     <fcl>CC1pi_data.fcl</fcl>
+     <outdir>/pnfs/uboone/persistent/users/kduffy/CC1pi/&version;/stage2/</outdir>
+     <logdir>/pnfs/uboone/persistent/users/kduffy/CC1pi/&version;/stage2/</logdir>
+     <workdir>/pnfs/uboone/resilient/users/kduffy/CC1pi/work/&version;/stage2/</workdir>
+     <bookdir>/uboone/data/users/kduffy/CC1pi/book/&version;/stage2/</bookdir>
+     <schema>root</schema>
+  </stage>
+</project>
