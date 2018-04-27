@@ -34,6 +34,7 @@
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 #include "nusimdata/SimulationBase/MCParticle.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
+#include "larreco/RecoAlg/TrackMomentumCalculator.h"
 
 // art includes
 #include "art/Framework/Principal/Event.h"
@@ -48,6 +49,7 @@
 #include "uboone/CC1pi/Algorithms/GetTopology.h"
 #include "uboone/CC1pi/Algorithms/TopologyEnums.h"
 #include "uboone/CC1pi/Algorithms/FVCheck.h"
+#include "uboone/CC1pi/Algorithms/PDGEnums.h"
 
 struct cc1pianavars{
 
@@ -87,6 +89,10 @@ struct cc1pianavars{
   std::vector<double> TPCObj_PFP_n2LLH_bwd_p;
   std::vector<double> TPCObj_PFP_n2LLH_MIP;
   std::vector<double> TPCObj_PFP_PIDA;
+  std::vector<double> TPCObj_PFP_track_depE;
+  std::vector<double> TPCObj_PFP_track_rangeE_mu;
+  std::vector<double> TPCObj_PFP_track_rangeE_pi;
+  std::vector<double> TPCObj_PFP_track_rangeE_p;
   int TPCObj_origin;
   int TPCObj_origin_extra;
   std::vector<double> TPCObj_reco_vtx;
