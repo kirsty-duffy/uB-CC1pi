@@ -280,7 +280,15 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
                if (calo){
                   track_dedx_perhit = calo->dEdx();
                   track_resrange_perhit = calo->ResidualRange();
-                  track_depE = calo->KineticEnergy();
+                  std::vector<double> trkpitchvec = calo->TrkPitchVec();
+                  //double ke = calo->KineticEnergy();
+
+                  // sum dE/dx * dx over all hits to get deposited energy
+                  track_depE = 0;
+                  for (size_t i_hit=0; i_hit < track_dedx_perhit.size(); i_hit++){
+                     track_depE += track_dedx_perhit.at(i_hit)*trkpitchvec.at(i_hit);
+                  }
+                  //std::cout << "[CC1pi] Track_depE = " << track_depE << ", KE = " << ke << std::endl;
                }
             }  // end if(caloFromTracks.isValid())
 
