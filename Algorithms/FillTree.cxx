@@ -37,8 +37,8 @@ void cc1pianavars::Clear(){
    TPCObj_NPFPs = -9999;
    TPCObj_NTracks = -9999;
    TPCObj_NShowers = -9999;
-   TPCObj_PFP_isTrack.clear();
-   TPCObj_PFP_isShower.clear();
+   TPCObj_PFP_PandoraClassedAsTrack.clear();
+   TPCObj_PFP_PandoraClassedAsShower.clear();
    TPCObj_PFP_isDaughter.clear();
    TPCObj_PFP_id.clear();
    TPCObj_PFP_MCPid.clear();
@@ -225,11 +225,6 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
       for (auto pfp : pfps) {
 
-         TPCObj_PFP_isTrack.emplace_back(lar_pandora::LArPandoraHelper::IsTrack(pfp));
-         TPCObj_PFP_isShower.emplace_back(lar_pandora::LArPandoraHelper::IsShower(pfp));
-         TPCObj_PFP_isDaughter.emplace_back(pfp->Parent()==(size_t)nuID);
-         TPCObj_PFP_id.emplace_back(pfp -> Self());
-
          //Set default values for track/shower specific variables
          double track_length = -9999;
          std::vector<double> track_start = {-9999, -9999, -9999};
@@ -392,6 +387,12 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          TPCObj_PFP_shower_length.emplace_back(shower_length);
          TPCObj_PFP_shower_start.emplace_back(shower_start);
 
+         // Fill non-specific variables
+         TPCObj_PFP_PandoraClassedAsTrack.emplace_back(lar_pandora::LArPandoraHelper::IsTrack(pfp));
+         TPCObj_PFP_PandoraClassedAsShower.emplace_back(lar_pandora::LArPandoraHelper::IsShower(pfp));
+         TPCObj_PFP_isDaughter.emplace_back(pfp->Parent()==(size_t)nuID && track_length != -9999); //If Pandora failed to make a track, don't count the PFP as a daughter (even if the associated shower technically is)
+         TPCObj_PFP_id.emplace_back(pfp -> Self());
+
 
          // Do reco-truth matching...
 
@@ -538,8 +539,8 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("TPCObj_NPFPs", &(vars->TPCObj_NPFPs));
    t -> Branch("TPCObj_NTracks", &(vars->TPCObj_NTracks));
    t -> Branch("TPCObj_NShowers", &(vars->TPCObj_NShowers));
-   t -> Branch("TPCObj_PFP_isTrack", &(vars->TPCObj_PFP_isTrack));
-   t -> Branch("TPCObj_PFP_isShower", &(vars->TPCObj_PFP_isShower));
+   t -> Branch("TPCObj_PFP_PandoraClassedAsTrack", &(vars->TPCObj_PFP_PandoraClassedAsTrack));
+   t -> Branch("TPCObj_PFP_PandoraClassedAsShower", &(vars->TPCObj_PFP_PandoraClassedAsShower));
    t -> Branch("TPCObj_PFP_isDaughter", &(vars->TPCObj_PFP_isDaughter));
    t -> Branch("TPCObj_PFP_id", &(vars->TPCObj_PFP_id));
    t -> Branch("TPCObj_PFP_MCPid", &(vars->TPCObj_PFP_MCPid));
