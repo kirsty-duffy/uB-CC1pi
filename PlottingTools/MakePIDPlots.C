@@ -1,3 +1,6 @@
+ #include "Theory_dEdx_resrange.h"
+ #include "Theory_dEdx_resrange.cxx"
+
 struct treevars{
   std::vector<std::vector<double>> *dEdxvec = nullptr;
   std::vector<std::vector<double>> *resrangevec = nullptr;
@@ -54,6 +57,8 @@ struct histograms{
   TH2F *hdEdx_rr_Muon = new TH2F("hdEdx_rr_Muon",";Residual Range (cm);dE/dx",1000,0,200,1000,0,50);
   TH2F *hdEdx_rr_Proton = new TH2F("hdEdx_rr_Proton",";Residual Range (cm);dE/dx",1000,0,200,1000,0,50);
 
+  TH2F *hdEdx_rr_fullrange_all = new TH2F("hdEdx_rr_fullrange_all",";Residual Range (cm);dE/dx",50,0,30,50,0,50);
+
   TH1F *hnegLLmu_all = new TH1F("neg2llhmu_all",";-2ln(L_{#mu});",60,0,30);
   TH1F *hnegLLmu_Muon = new TH1F("neg2llhmu_Muon","",60,0,30);
   TH1F *hnegLLmu_Proton = new TH1F("neg2llhmu_Proton","",60,0,30);
@@ -75,44 +80,44 @@ struct histograms{
   TH1F *hnegLLp_Pion = new TH1F("neg2llhp_Pion","",60,0,30);
 
   TH1F *hnegLLmuminusp_all = new TH1F("neg2llhmuminusp_all",";(-2ln(L_{#mu}))-(-2ln(L_{p}));",40,-20,7);
-  TH1F *hnegLLmuminusp_Muon = new TH1F("neg2llhmuminusp_Muon","",40,-20,7);
-  TH1F *hnegLLmuminusp_Proton = new TH1F("neg2llhmuminusp_Proton","",40,-20,7);
-  TH1F *hnegLLmuminusp_Pion = new TH1F("neg2llhmuminusp_Pion","",40,-20,7);
+  TH1F *hnegLLmuminusp_Muon = new TH1F("neg2llhmuminusp_Muon","",30,-20,7);
+  TH1F *hnegLLmuminusp_Proton = new TH1F("neg2llhmuminusp_Proton","",30,-20,7);
+  TH1F *hnegLLmuminusp_Pion = new TH1F("neg2llhmuminusp_Pion","",30,-20,7);
 
-  TH1F *hnegLLmuMIPminusp_all = new TH1F("neg2llhmuMIPminusp_all",";(-2ln(L_{#mu/MIP}))-(-2ln(L_{p}));",50,-20,7);
-  TH1F *hnegLLmuMIPminusp_Muon = new TH1F("neg2llhmuMIPminusp_Muon","",50,-20,7);
-  TH1F *hnegLLmuMIPminusp_Proton = new TH1F("neg2llhmuMIPminusp_Proton","",50,-20,7);
-  TH1F *hnegLLmuMIPminusp_Pion = new TH1F("neg2llhmuMIPminusp_Pion","",50,-20,7);
+  TH1F *hnegLLmuMIPminusp_all = new TH1F("neg2llhmuMIPminusp_all",";(-2ln(L_{#mu/MIP}))-(-2ln(L_{p}));",30,-20,7);
+  TH1F *hnegLLmuMIPminusp_Muon = new TH1F("neg2llhmuMIPminusp_Muon","",30,-20,7);
+  TH1F *hnegLLmuMIPminusp_Proton = new TH1F("neg2llhmuMIPminusp_Proton","",30,-20,7);
+  TH1F *hnegLLmuMIPminusp_Pion = new TH1F("neg2llhmuMIPminusp_Pion","",30,-20,7);
 
-  TH2F *hdepErangeEmu_all = new TH2F("hdepErangeEmu_all",";Deposited Energy;Energy by range (muon assumption)",100,0,800,100,0,800);
-  TH2F *hdepErangeEmu_Muon = new TH2F("hdepErangeEmu_Muon",";Deposited Energy;Energy by range (muon assumption)",100,0,800,100,0,800);
-  TH2F *hdepErangeEmu_Proton = new TH2F("hdepErangeEmu_Proton",";Deposited Energy;Energy by range (muon assumption)",100,0,800,100,0,800);
-  TH2F *hdepErangeEmu_Pion = new TH2F("hdepErangeEmu_Pion",";Deposited Energy;Energy by range (muon assumption)",100,0,800,100,0,800);
+  TH2F *hdepErangeEmu_all = new TH2F("hdepErangeEmu_all",";Deposited Energy;Energy by range (muon assumption)",50,0,800,50,0,800);
+  TH2F *hdepErangeEmu_Muon = new TH2F("hdepErangeEmu_Muon",";Deposited Energy;Energy by range (muon assumption)",50,0,800,50,0,800);
+  TH2F *hdepErangeEmu_Proton = new TH2F("hdepErangeEmu_Proton",";Deposited Energy;Energy by range (muon assumption)",50,0,800,50,0,800);
+  TH2F *hdepErangeEmu_Pion = new TH2F("hdepErangeEmu_Pion",";Deposited Energy;Energy by range (muon assumption)",50,0,800,50,0,800);
 
-  TH2F *hdepErangeEp_all = new TH2F("hdepErangeEp_all",";Deposited Energy;Energy by range (proton assumption)",100,0,800,100,0,800);
-  TH2F *hdepErangeEp_Muon = new TH2F("hdepErangeEp_Muon",";Deposited Energy;Energy by range (proton assumption)",100,0,800,100,0,800);
-  TH2F *hdepErangeEp_Proton = new TH2F("hdepErangeEp_Proton",";Deposited Energy;Energy by range (proton assumption)",100,0,800,100,0,800);
-  TH2F *hdepErangeEp_Pion = new TH2F("hdepErangeEp_Pion",";Deposited Energy;Energy by range (proton assumption)",100,0,800,100,0,800);
+  TH2F *hdepErangeEp_all = new TH2F("hdepErangeEp_all",";Deposited Energy;Energy by range (proton assumption)",50,0,800,50,0,800);
+  TH2F *hdepErangeEp_Muon = new TH2F("hdepErangeEp_Muon",";Deposited Energy;Energy by range (proton assumption)",50,0,800,50,0,800);
+  TH2F *hdepErangeEp_Proton = new TH2F("hdepErangeEp_Proton",";Deposited Energy;Energy by range (proton assumption)",50,0,800,50,0,800);
+  TH2F *hdepErangeEp_Pion = new TH2F("hdepErangeEp_Pion",";Deposited Energy;Energy by range (proton assumption)",50,0,800,50,0,800);
 
-  TH1F *hdepEminusrangeEmu_all = new TH1F("hdepEminusrangeEmu_all",";Deposited energy - energy by range (muon assumption)",100,-800,800);
-  TH1F *hdepEminusrangeEmu_Muon = new TH1F("hdepEminusrangeEmu_Muon",";Deposited energy - energy by range (muon assumption)",100,-800,800);
-  TH1F *hdepEminusrangeEmu_Proton = new TH1F("hdepEminusrangeEmu_Proton",";Deposited energy - energy by range (muon assumption)",100,-800,800);
-  TH1F *hdepEminusrangeEmu_Pion = new TH1F("hdepEminusrangeEmu_Pion",";Deposited energy - energy by range (muon assumption)",100,-800,800);
+  TH1F *hdepEminusrangeEmu_all = new TH1F("hdepEminusrangeEmu_all",";Deposited energy - energy by range (muon assumption)",50,-800,800);
+  TH1F *hdepEminusrangeEmu_Muon = new TH1F("hdepEminusrangeEmu_Muon",";Deposited energy - energy by range (muon assumption)",50,-800,800);
+  TH1F *hdepEminusrangeEmu_Proton = new TH1F("hdepEminusrangeEmu_Proton",";Deposited energy - energy by range (muon assumption)",50,-800,800);
+  TH1F *hdepEminusrangeEmu_Pion = new TH1F("hdepEminusrangeEmu_Pion",";Deposited energy - energy by range (muon assumption)",50,-800,800);
 
-  TH1F *hdepEminusrangeEp_all = new TH1F("hdepEminusrangeEp_all",";Deposited energy - energy by range (proton assumption)",100,-800,800);
-  TH1F *hdepEminusrangeEp_Muon = new TH1F("hdepEminusrangeEp_Muon",";Deposited energy - energy by range (proton assumption)",100,-800,800);
-  TH1F *hdepEminusrangeEp_Proton = new TH1F("hdepEminusrangeEp_Proton",";Deposited energy - energy by range (proton assumption)",100,-800,800);
-  TH1F *hdepEminusrangeEp_Pion = new TH1F("hdepEminusrangeEp_Pion",";Deposited energy - energy by range (proton assumption)",100,-800,800);
+  TH1F *hdepEminusrangeEp_all = new TH1F("hdepEminusrangeEp_all",";Deposited energy - energy by range (proton assumption)",50,-800,800);
+  TH1F *hdepEminusrangeEp_Muon = new TH1F("hdepEminusrangeEp_Muon",";Deposited energy - energy by range (proton assumption)",50,-800,800);
+  TH1F *hdepEminusrangeEp_Proton = new TH1F("hdepEminusrangeEp_Proton",";Deposited energy - energy by range (proton assumption)",50,-800,800);
+  TH1F *hdepEminusrangeEp_Pion = new TH1F("hdepEminusrangeEp_Pion",";Deposited energy - energy by range (proton assumption)",50,-800,800);
 
-  TH2F *hdepEmrangeEmuvsp_all = new TH2F("hdepEmrangeEmuvsp_all",";Deposited energy - energy by range (muon assumption);Deposited energy - energy by range (proton assumption)",100,-800,800,100,-800,800);
-  TH2F *hdepEmrangeEmuvsp_Muon = new TH2F("hdepEmrangeEmuvsp_Muon",";Deposited energy - energy by range (muon assumption);Deposited energy - energy by range (proton assumption)",100,-800,800,100,-800,800);
-  TH2F *hdepEmrangeEmuvsp_Proton = new TH2F("hdepEmrangeEmuvsp_Proton",";Deposited energy - energy by range (muon assumption);Deposited energy - energy by range (proton assumption)",100,-800,800,100,-800,800);
-  TH2F *hdepEmrangeEmuvsp_Pion = new TH2F("hdepEmrangeEmuvsp_Pion",";Deposited energy - energy by range (muon assumption);Deposited energy - energy by range (proton assumption)",100,-800,800,100,-800,800);
+  TH2F *hdepEmrangeEmuvsp_all = new TH2F("hdepEmrangeEmuvsp_all",";Deposited energy - energy by range (muon assumption);Deposited energy - energy by range (proton assumption)",50,-800,800,50,-800,800);
+  TH2F *hdepEmrangeEmuvsp_Muon = new TH2F("hdepEmrangeEmuvsp_Muon",";Deposited energy - energy by range (muon assumption);Deposited energy - energy by range (proton assumption)",50,-800,800,50,-800,800);
+  TH2F *hdepEmrangeEmuvsp_Proton = new TH2F("hdepEmrangeEmuvsp_Proton",";Deposited energy - energy by range (muon assumption);Deposited energy - energy by range (proton assumption)",50,-800,800,50,-800,800);
+  TH2F *hdepEmrangeEmuvsp_Pion = new TH2F("hdepEmrangeEmuvsp_Pion",";Deposited energy - energy by range (muon assumption);Deposited energy - energy by range (proton assumption)",50,-800,800,50,-800,800);
 
-  TH1F *hdepEminusrangeEp_cut_all = new TH1F("hdepEminusrangeEp_cut_all","Events with neg2LLmuMIPminusp < -2;Deposited energy - energy by range (proton assumption)",100,-800,800);
-  TH1F *hdepEminusrangeEp_cut_Muon = new TH1F("hdepEminusrangeEp_cut_Muon","Events with neg2LLmuMIPminusp < -2;Deposited energy - energy by range (proton assumption)",100,-800,800);
-  TH1F *hdepEminusrangeEp_cut_Proton = new TH1F("hdepEminusrangeEp_cut_Proton","Events with neg2LLmuMIPminusp < -2;Deposited energy - energy by range (proton assumption)",100,-800,800);
-  TH1F *hdepEminusrangeEp_cut_Pion = new TH1F("hdepEminusrangeEp_cut_Pion","Events with neg2LLmuMIPminusp < -2;Deposited energy - energy by range (proton assumption)",100,-800,800);
+  TH1F *hdepEminusrangeEp_cut_all = new TH1F("hdepEminusrangeEp_cut_all","Events with neg2LLmuMIPminusp < -2;Deposited energy - energy by range (proton assumption)",50,-800,800);
+  TH1F *hdepEminusrangeEp_cut_Muon = new TH1F("hdepEminusrangeEp_cut_Muon","Events with neg2LLmuMIPminusp < -2;Deposited energy - energy by range (proton assumption)",50,-800,800);
+  TH1F *hdepEminusrangeEp_cut_Proton = new TH1F("hdepEminusrangeEp_cut_Proton","Events with neg2LLmuMIPminusp < -2;Deposited energy - energy by range (proton assumption)",50,-800,800);
+  TH1F *hdepEminusrangeEp_cut_Pion = new TH1F("hdepEminusrangeEp_cut_Pion","Events with neg2LLmuMIPminusp < -2;Deposited energy - energy by range (proton assumption)",50,-800,800);
 };
 
 // ----------------------------------------------------------- //
@@ -211,6 +216,8 @@ void hists_setstyleMC(histograms *hists){
 // ----------------------------------------------------------- //
 
 void hists_areanormMC(histograms *hists){
+  hists->hdEdx_rr_fullrange_all->Scale(1.0/hists->hdEdx_rr_fullrange_all->Integral());
+
   hists->hnegLLmu_Muon->Scale(1.0/hists->hnegLLmu_all->Integral());
   hists->hnegLLMIP_Muon->Scale(1.0/hists->hnegLLMIP_all->Integral());
   hists->hnegLLmuMIP_Muon->Scale(1.0/hists->hnegLLmuMIP_all->Integral());
@@ -310,6 +317,7 @@ void FillHists(treevars *vars, histograms *hists){
     std::vector<double> resrange = vars->resrangevec->at(i_pfp);
 
     for (size_t i_dEdx=0; i_dEdx<dEdx.size(); i_dEdx++){
+      hists->hdEdx_rr_fullrange_all->Fill(resrange.at(i_dEdx),dEdx.at(i_dEdx));
       if (resrange.at(i_dEdx) > 100 && resrange.at(i_dEdx) < 150){
         hists->hdEdx_all->Fill(dEdx.at(i_dEdx));
         hists->hdEdx_rr_all->Fill(resrange.at(i_dEdx),dEdx.at(i_dEdx));
@@ -339,8 +347,8 @@ void FillHists(treevars *vars, histograms *hists){
     hists->hnegLLp_all->Fill(tr_n2llh_p);
     hists->hnegLLmuminusp_all->Fill(tr_n2llh_muminusp);
     hists->hnegLLmuMIPminusp_all->Fill(tr_n2llh_muMIPminusp);
-    hists->hdepErangeEmu_all->Fill(vars->depE->at(i_pfp),vars->rangeE_mu->at(i_pfp));
-    hists->hdepErangeEp_all->Fill(vars->depE->at(i_pfp),vars->rangeE_p->at(i_pfp));
+    // hists->hdepErangeEmu_all->Fill(vars->depE->at(i_pfp),vars->rangeE_mu->at(i_pfp));
+    // hists->hdepErangeEp_all->Fill(vars->depE->at(i_pfp),vars->rangeE_p->at(i_pfp));
     hists->hdepEminusrangeEmu_all->Fill(vars->depE->at(i_pfp)-vars->rangeE_mu->at(i_pfp));
     hists->hdepEminusrangeEp_all->Fill(vars->depE->at(i_pfp)-vars->rangeE_p->at(i_pfp));
     hists->hdepEmrangeEmuvsp_all->Fill(vars->depE->at(i_pfp)-vars->rangeE_mu->at(i_pfp),vars->depE->at(i_pfp)-vars->rangeE_p->at(i_pfp));
@@ -356,8 +364,8 @@ void FillHists(treevars *vars, histograms *hists){
       hists->hnegLLp_Muon->Fill(tr_n2llh_p);
       hists->hnegLLmuminusp_Muon->Fill(tr_n2llh_muminusp);
       hists->hnegLLmuMIPminusp_Muon->Fill(tr_n2llh_muMIPminusp);
-      hists->hdepErangeEmu_Muon->Fill(vars->depE->at(i_pfp),vars->rangeE_mu->at(i_pfp));
-      hists->hdepErangeEp_Muon->Fill(vars->depE->at(i_pfp),vars->rangeE_p->at(i_pfp));
+      // hists->hdepErangeEmu_Muon->Fill(vars->depE->at(i_pfp),vars->rangeE_mu->at(i_pfp));
+      // hists->hdepErangeEp_Muon->Fill(vars->depE->at(i_pfp),vars->rangeE_p->at(i_pfp));
       hists->hdepEminusrangeEmu_Muon->Fill(vars->depE->at(i_pfp)-vars->rangeE_mu->at(i_pfp));
       hists->hdepEminusrangeEp_Muon->Fill(vars->depE->at(i_pfp)-vars->rangeE_p->at(i_pfp));
       hists->hdepEmrangeEmuvsp_Muon->Fill(vars->depE->at(i_pfp)-vars->rangeE_mu->at(i_pfp),vars->depE->at(i_pfp)-vars->rangeE_p->at(i_pfp));
@@ -373,8 +381,8 @@ void FillHists(treevars *vars, histograms *hists){
       hists->hnegLLp_Proton->Fill(tr_n2llh_p);
       hists->hnegLLmuminusp_Proton->Fill(tr_n2llh_muminusp);
       hists->hnegLLmuMIPminusp_Proton->Fill(tr_n2llh_muMIPminusp);
-      hists->hdepErangeEmu_Proton->Fill(vars->depE->at(i_pfp),vars->rangeE_mu->at(i_pfp));
-      hists->hdepErangeEp_Proton->Fill(vars->depE->at(i_pfp),vars->rangeE_p->at(i_pfp));
+      // hists->hdepErangeEmu_Proton->Fill(vars->depE->at(i_pfp),vars->rangeE_mu->at(i_pfp));
+      // hists->hdepErangeEp_Proton->Fill(vars->depE->at(i_pfp),vars->rangeE_p->at(i_pfp));
       hists->hdepEminusrangeEmu_Proton->Fill(vars->depE->at(i_pfp)-vars->rangeE_mu->at(i_pfp));
       hists->hdepEminusrangeEp_Proton->Fill(vars->depE->at(i_pfp)-vars->rangeE_p->at(i_pfp));
       hists->hdepEmrangeEmuvsp_Proton->Fill(vars->depE->at(i_pfp)-vars->rangeE_mu->at(i_pfp),vars->depE->at(i_pfp)-vars->rangeE_p->at(i_pfp));
@@ -390,8 +398,8 @@ void FillHists(treevars *vars, histograms *hists){
       hists->hnegLLp_Pion->Fill(tr_n2llh_p);
       hists->hnegLLmuminusp_Pion->Fill(tr_n2llh_muminusp);
       hists->hnegLLmuMIPminusp_Pion->Fill(tr_n2llh_muMIPminusp);
-      hists->hdepErangeEmu_Pion->Fill(vars->depE->at(i_pfp),vars->rangeE_mu->at(i_pfp));
-      hists->hdepErangeEp_Pion->Fill(vars->depE->at(i_pfp),vars->rangeE_p->at(i_pfp));
+      // hists->hdepErangeEmu_Pion->Fill(vars->depE->at(i_pfp),vars->rangeE_mu->at(i_pfp));
+      // hists->hdepErangeEp_Pion->Fill(vars->depE->at(i_pfp),vars->rangeE_p->at(i_pfp));
       hists->hdepEminusrangeEmu_Pion->Fill(vars->depE->at(i_pfp)-vars->rangeE_mu->at(i_pfp));
       hists->hdepEminusrangeEp_Pion->Fill(vars->depE->at(i_pfp)-vars->rangeE_p->at(i_pfp));
       hists->hdepEmrangeEmuvsp_Pion->Fill(vars->depE->at(i_pfp)-vars->rangeE_mu->at(i_pfp),vars->depE->at(i_pfp)-vars->rangeE_p->at(i_pfp));
@@ -429,6 +437,56 @@ void MakePlots(TFile *outfile, histograms *MChists, histograms *EXThists=nullptr
   if (BNBhists) BNBhists->hdEdx_all->Write("hdEdx_all_BNB");
   if (EXThists) EXThists->hdEdx_all->Write("hdEdx_all_EXT");
 
+  MChists->hdEdx_rr_fullrange_all->Write("hdEdx_rr_fullrange_all");
+  if (BNBhists)
+  BNBhists->hdEdx_rr_fullrange_all->Write("hdEdx_rr_fullrange_all_BNB");
+  if (EXThists)
+  EXThists->hdEdx_rr_fullrange_all->Write("hdEdx_rr_fullrange_all_EXT");
+
+  TCanvas *c0 = new TCanvas();
+  c0->SetLogz();
+  MChists->hdEdx_rr_fullrange_all->SetTitle("MC");
+  MChists->hdEdx_rr_fullrange_all->Draw("colz");
+  // Overlay theoretical predictions
+  particleid::Theory_dEdx_resrange theory;
+  theory.g_ThdEdxRR_Muon->SetLineWidth(2);
+  theory.g_ThdEdxRR_Muon->SetLineColor(TColor::GetColor(8,64,129));
+  theory.g_ThdEdxRR_Muon->Draw("same l");
+  theory.g_ThdEdxRR_Proton->SetLineWidth(2);
+  theory.g_ThdEdxRR_Proton->SetLineColor(TColor::GetColor(215, 48, 39));
+  theory.g_ThdEdxRR_Proton->Draw("same l");
+  theory.g_ThdEdxRR_MuonNoBragg->SetLineWidth(2);
+  theory.g_ThdEdxRR_MuonNoBragg->SetLineColor(kBlack);
+  theory.g_ThdEdxRR_MuonNoBragg->Draw("same l");
+
+  TLegend *l_thpred = new TLegend(0.5,0.7,0.8,0.88);
+  l_thpred->SetFillColor(kWhite);
+  l_thpred->SetLineColor(kWhite);
+  l_thpred->SetTextFont(132);
+  l_thpred->AddEntry(theory.g_ThdEdxRR_Proton,"Proton theoretical prediction","l");
+  l_thpred->AddEntry(theory.g_ThdEdxRR_Muon,"Muon theoretical prediction","l");
+  l_thpred->AddEntry(theory.g_ThdEdxRR_MuonNoBragg,"MIP theoretical prediction","l");
+  l_thpred->Draw();
+  c0->Print("dEdxrr_fullrange_MC.png");
+  c0->Write("dEdxrr_fullrange_MCcanv");
+
+  TCanvas *c0a = new TCanvas();
+  c0a->SetLogz();
+  if (BNBhists && EXThists){
+    BNBhists->hdEdx_rr_fullrange_all->SetTitle("Data");
+    //BNBhists->hdEdx_rr_fullrange_all->Add(EXThists->hdEdx_rr_fullrange_all,1.0*EXTtoBNBscaling);
+    BNBhists->hdEdx_rr_fullrange_all->Sumw2();
+    BNBhists->hdEdx_rr_fullrange_all->Scale(1.0/BNBhists->hdEdx_rr_fullrange_all->Integral());
+    BNBhists->hdEdx_rr_fullrange_all->Draw("colz");
+
+    theory.g_ThdEdxRR_Muon->Draw("same l");
+    theory.g_ThdEdxRR_Proton->Draw("same l");
+    theory.g_ThdEdxRR_MuonNoBragg->Draw("same l");
+    l_thpred->Draw();
+    c0a->Print("dEdxrr_fullrange_Data.png");
+    c0a->Write("dEdxrr_fullrange_Datacanv");
+  }
+
   TCanvas *c1 = new TCanvas();
 
   MChists->hnegLLmu_all->Write();
@@ -450,9 +508,11 @@ void MakePlots(TFile *outfile, histograms *MChists, histograms *EXThists=nullptr
     BNBhists->hnegLLmu_all->Sumw2();
     BNBhists->hnegLLmu_all->Scale(1.0/BNBhists->hnegLLmu_all->Integral());
     BNBhists->hnegLLmu_all->Draw("same p e0");
+    double maxval = std::max(MChists->hnegLLmu_all->GetMaximum(),BNBhists->hnegLLmu_all->GetMaximum());
+    MChists->hnegLLmu_all->GetYaxis()->SetRangeUser(0,maxval*1.2);
   }
   l->Draw();
-  c1->Print("neg2LLmu.pdf");
+  c1->Print("neg2LLmu.png");
   c1->Write("neg2LLmucanv");
 
   if (BNBhists) BNBhists->hnegLLMIP_all->Write("hnegLLMIP_all_BNB");
@@ -474,9 +534,11 @@ void MakePlots(TFile *outfile, histograms *MChists, histograms *EXThists=nullptr
     BNBhists->hnegLLMIP_all->Sumw2();
     BNBhists->hnegLLMIP_all->Scale(1.0/BNBhists->hnegLLMIP_all->Integral());
     BNBhists->hnegLLMIP_all->Draw("same p e0");
+    double maxval = std::max(MChists->hnegLLMIP_all->GetMaximum(),BNBhists->hnegLLMIP_all->GetMaximum());
+    MChists->hnegLLMIP_all->GetYaxis()->SetRangeUser(0,maxval*1.2);
   }
   l->Draw();
-  c1->Print("neg2LLMIP.pdf");
+  c1->Print("neg2LLMIP.png");
   c1->Write("neg2LLMIPcanv");
 
   if (BNBhists) BNBhists->hnegLLmuMIP_all->Write("hnegLLmuMIP_all_BNB");
@@ -499,9 +561,11 @@ void MakePlots(TFile *outfile, histograms *MChists, histograms *EXThists=nullptr
     BNBhists->hnegLLmuMIP_all->Sumw2();
     BNBhists->hnegLLmuMIP_all->Scale(1.0/BNBhists->hnegLLmuMIP_all->Integral());
     BNBhists->hnegLLmuMIP_all->Draw("same p e0");
+    double maxval = std::max(MChists->hnegLLmuMIP_all->GetMaximum(),BNBhists->hnegLLmuMIP_all->GetMaximum());
+    MChists->hnegLLmuMIP_all->GetYaxis()->SetRangeUser(0,maxval*1.2);
   }
   l->Draw();
-  c1->Print("neg2LLmuMIP.pdf");
+  c1->Print("neg2LLmuMIP.png");
   c1->Write("neg2LLmuMIPcanv");
 
   if (BNBhists) BNBhists->hnegLLp_all->Write("hnegLLp_all_BNB");
@@ -523,9 +587,11 @@ void MakePlots(TFile *outfile, histograms *MChists, histograms *EXThists=nullptr
     BNBhists->hnegLLp_all->Sumw2();
     BNBhists->hnegLLp_all->Scale(1.0/BNBhists->hnegLLp_all->Integral());
     BNBhists->hnegLLp_all->Draw("same p e0");
+    double maxval = std::max(MChists->hnegLLp_all->GetMaximum(),BNBhists->hnegLLp_all->GetMaximum());
+    MChists->hnegLLp_all->GetYaxis()->SetRangeUser(0,maxval*1.2);
   }
   l->Draw();
-  c1->Print("neg2LLp.pdf");
+  c1->Print("neg2LLp.png");
   c1->Write("neg2LLpcanv");
 
   if (BNBhists) BNBhists->hnegLLmuminusp_all->Write("hnegLLmuminusp_all_BNB");
@@ -547,9 +613,11 @@ void MakePlots(TFile *outfile, histograms *MChists, histograms *EXThists=nullptr
     BNBhists->hnegLLmuminusp_all->Sumw2();
     BNBhists->hnegLLmuminusp_all->Scale(1.0/BNBhists->hnegLLmuminusp_all->Integral());
     BNBhists->hnegLLmuminusp_all->Draw("same p e0");
+    double maxval = std::max(MChists->hnegLLmuminusp_all->GetMaximum(),BNBhists->hnegLLmuminusp_all->GetMaximum());
+    MChists->hnegLLmuminusp_all->GetYaxis()->SetRangeUser(0,maxval*1.2);
   }
   l->Draw();
-  c1->Print("neg2LLmuminusp.pdf");
+  c1->Print("neg2LLmuminusp.png");
   c1->Write("neg2LLmuminuspcanv");
 
   if (BNBhists) BNBhists->hnegLLmuMIPminusp_all->Write("hnegLLmuMIPminusp_all_BNB");
@@ -571,49 +639,51 @@ void MakePlots(TFile *outfile, histograms *MChists, histograms *EXThists=nullptr
     BNBhists->hnegLLmuMIPminusp_all->Sumw2();
     BNBhists->hnegLLmuMIPminusp_all->Scale(1.0/BNBhists->hnegLLmuMIPminusp_all->Integral());
     BNBhists->hnegLLmuMIPminusp_all->Draw("same p e0");
+    double maxval = std::max(MChists->hnegLLmuMIPminusp_all->GetMaximum(),BNBhists->hnegLLmuMIPminusp_all->GetMaximum());
+    MChists->hnegLLmuMIPminusp_all->GetYaxis()->SetRangeUser(0,maxval*1.2);
   }
   l->Draw();
-  c1->Print("neg2LLmuMIPminusp.pdf");
+  c1->Print("neg2LLmuMIPminusp.png");
   c1->Write("neg2LLmuMIPminuspcanv");
 
-  if (BNBhists) BNBhists->hdepErangeEmu_all->Write("hdepErangeEmu_all_BNB");
-  if (EXThists) EXThists->hdepErangeEmu_all->Write("hdepErangeEmu_all_EXT");
+  // if (BNBhists) BNBhists->hdepErangeEmu_all->Write("hdepErangeEmu_all_BNB");
+  // if (EXThists) EXThists->hdepErangeEmu_all->Write("hdepErangeEmu_all_EXT");
+  //
+  // MChists->hdepErangeEmu_all->Write();
+  // MChists->hdepErangeEmu_Muon->Write();
+  // MChists->hdepErangeEmu_Proton->Write();
+  // MChists->hdepErangeEmu_Pion->Write();
+  //
+  // MChists->hdepErangeEmu_all->Draw();
+  // MChists->hdepErangeEmu_Muon->Draw("same");
+  // MChists->hdepErangeEmu_Pion->Draw("same");
+  // MChists->hdepErangeEmu_Proton->Draw("same");
+  // l->Draw();
+  // c1->Print("depErangeEmu.png");
+  // c1->Write("depErangeEmucanv");
 
-  MChists->hdepErangeEmu_all->Write();
-  MChists->hdepErangeEmu_Muon->Write();
-  MChists->hdepErangeEmu_Proton->Write();
-  MChists->hdepErangeEmu_Pion->Write();
-
-  MChists->hdepErangeEmu_all->Draw();
-  MChists->hdepErangeEmu_Muon->Draw("same");
-  MChists->hdepErangeEmu_Pion->Draw("same");
-  MChists->hdepErangeEmu_Proton->Draw("same");
-  l->Draw();
-  c1->Print("depErangeEmu.pdf");
-  c1->Write("depErangeEmucanv");
-
-  if (BNBhists) BNBhists->hdepErangeEp_all->Write("hdepErangeEp_all_BNB");
-  if (EXThists) EXThists->hdepErangeEp_all->Write("hdepErangeEp_all_EXT");
-
-  MChists->hdepErangeEp_all->Write();
-  MChists->hdepErangeEp_Muon->Write();
-  MChists->hdepErangeEp_Proton->Write();
-  MChists->hdepErangeEp_Pion->Write();
-
-  MChists->hdepErangeEp_all->Draw();
-  MChists->hdepErangeEp_Muon->Draw("same");
-  MChists->hdepErangeEp_Pion->Draw("same");
-  MChists->hdepErangeEp_Proton->Draw("same");
-  l->Draw();
-  c1->Print("depErangeEp.pdf");
-  c1->Write("depErangeEpcanv");
+  // if (BNBhists) BNBhists->hdepErangeEp_all->Write("hdepErangeEp_all_BNB");
+  // if (EXThists) EXThists->hdepErangeEp_all->Write("hdepErangeEp_all_EXT");
+  //
+  // MChists->hdepErangeEp_all->Write();
+  // MChists->hdepErangeEp_Muon->Write();
+  // MChists->hdepErangeEp_Proton->Write();
+  // MChists->hdepErangeEp_Pion->Write();
+  //
+  // MChists->hdepErangeEp_all->Draw();
+  // MChists->hdepErangeEp_Muon->Draw("same");
+  // MChists->hdepErangeEp_Pion->Draw("same");
+  // MChists->hdepErangeEp_Proton->Draw("same");
+  // l->Draw();
+  // c1->Print("depErangeEp.png");
+  // c1->Write("depErangeEpcanv");
 
   MChists->hdepEmrangeEmuvsp_all->Draw();
   MChists->hdepEmrangeEmuvsp_Muon->Draw("same");
   MChists->hdepEmrangeEmuvsp_Pion->Draw("same");
   MChists->hdepEmrangeEmuvsp_Proton->Draw("same");
   l->Draw();
-  c1->Print("depEmrangeEmuvsp.pdf");
+  c1->Print("depEmrangeEmuvsp.png");
   c1->Write("depEmrangeEmuvspcanv");
 
   if (BNBhists) BNBhists->hdepEminusrangeEmu_all->Write("hdepEminusrangeEmu_all_BNB");
@@ -635,9 +705,11 @@ void MakePlots(TFile *outfile, histograms *MChists, histograms *EXThists=nullptr
     BNBhists->hdepEminusrangeEmu_all->Sumw2();
     BNBhists->hdepEminusrangeEmu_all->Scale(1.0/BNBhists->hdepEminusrangeEmu_all->Integral());
     BNBhists->hdepEminusrangeEmu_all->Draw("same p e0");
+    double maxval = std::max(MChists->hdepEminusrangeEmu_all->GetMaximum(),BNBhists->hdepEminusrangeEmu_all->GetMaximum());
+    MChists->hdepEminusrangeEmu_all->GetYaxis()->SetRangeUser(0,maxval*1.2);
   }
   l->Draw();
-  c1->Print("depEminusrangeEmu.pdf");
+  c1->Print("depEminusrangeEmu.png");
   c1->Write("depEminusrangeEmucanv");
 
   if (BNBhists) BNBhists->hdepEminusrangeEp_all->Write("hdepEminusrangeEp_all_BNB");
@@ -659,9 +731,11 @@ void MakePlots(TFile *outfile, histograms *MChists, histograms *EXThists=nullptr
     BNBhists->hdepEminusrangeEp_all->Sumw2();
     BNBhists->hdepEminusrangeEp_all->Scale(1.0/BNBhists->hdepEminusrangeEp_all->Integral());
     BNBhists->hdepEminusrangeEp_all->Draw("same p e0");
+    double maxval = std::max(MChists->hdepEminusrangeEp_all->GetMaximum(),BNBhists->hdepEminusrangeEp_all->GetMaximum());
+    MChists->hdepEminusrangeEp_all->GetYaxis()->SetRangeUser(0,maxval*1.2);
   }
   l->Draw();
-  c1->Print("depEminusrangeEp.pdf");
+  c1->Print("depEminusrangeEp.png");
   c1->Write("depEminusrangeEpcanv");
 
   if (BNBhists) BNBhists->hdepEminusrangeEp_cut_all->Write("hdepEminusrangeEp_cut_all_BNB");
@@ -683,9 +757,11 @@ void MakePlots(TFile *outfile, histograms *MChists, histograms *EXThists=nullptr
     BNBhists->hdepEminusrangeEp_cut_all->Sumw2();
     BNBhists->hdepEminusrangeEp_cut_all->Scale(1.0/BNBhists->hdepEminusrangeEp_cut_all->Integral());
     BNBhists->hdepEminusrangeEp_cut_all->Draw("same p e0");
+    double maxval = std::max(MChists->hdepEminusrangeEp_cut_all->GetMaximum(),BNBhists->hdepEminusrangeEp_cut_all->GetMaximum());
+    MChists->hdepEminusrangeEp_cut_all->GetYaxis()->SetRangeUser(0,maxval*1.2);
   }
   l->Draw();
-  c1->Print("depEminusrangeEp_cut.pdf");
+  c1->Print("depEminusrangeEp_cut.png");
   c1->Write("depEminusrangeEp_cut_canv");
 }
 
