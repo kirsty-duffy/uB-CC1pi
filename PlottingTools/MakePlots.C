@@ -103,6 +103,11 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    std::vector<double> *n2LLH_bwd_p = nullptr;
    std::vector<double> *n2LLH_MIP = nullptr;
 
+   std::vector<double> *TPCObj_PFP_track_depE = nullptr;
+   std::vector<double> *TPCObj_PFP_track_rangeE_mu = nullptr;
+   std::vector<double> *TPCObj_PFP_track_rangeE_p = nullptr;
+
+
    t -> SetBranchStatus("*",0);
    t -> SetBranchStatus("isData",1);
    t -> SetBranchAddress("isData", &isData);
@@ -211,6 +216,13 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchStatus("TPCObj_PFP_n2LLH_MIP",1);
    t -> SetBranchAddress("TPCObj_PFP_n2LLH_MIP",&n2LLH_MIP);
 
+   t -> SetBranchStatus("TPCObj_PFP_track_depE",1);
+   t -> SetBranchAddress("TPCObj_PFP_track_depE",&TPCObj_PFP_track_depE);
+   t -> SetBranchStatus("TPCObj_PFP_track_rangeE_mu",1);
+   t -> SetBranchAddress("TPCObj_PFP_track_rangeE_mu",&TPCObj_PFP_track_rangeE_mu);
+   t -> SetBranchStatus("TPCObj_PFP_track_rangeE_p",1);
+   t -> SetBranchAddress("TPCObj_PFP_track_rangeE_p",&TPCObj_PFP_track_rangeE_p);
+
 
    TEfficiency* eff_nuE = new TEfficiency("eff_nuE",";True Neutrino Energy [GeV];",15,0,3);
    TEfficiency* eff_muP = new TEfficiency("eff_muP",";True Muon Momentum [GeV];",15,0,2);
@@ -233,6 +245,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    StackedHistPDGCode* pfps_stack_byPDG = new StackedHistPDGCode("pfps_stack_byPDG", ";Number of #nu daughter PFPs in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 10, 0, 10);
    StackedHistPDGCode* n2llh_muMIPminusp_stack_byPDG = new StackedHistPDGCode("n2llh_muMIPminusp_stack_byPDG", ";n2llh_muMIPminusp for #nu daughter PFPs in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 54, -20, 7);
    StackedHistPDGCode* n2llh_p_stack_byPDG = new StackedHistPDGCode("n2llh_p_stack_byPDG", ";n2llh_p for #nu daughter PFPs in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 54, 0, 27);
+   StackedHistPDGCode* depE_rangeE_mu_stack_byPDG = new StackedHistPDGCode("depE_rangeE_mu_stack_byPDG", ";Deposited energy - energy by range (muon assumption) [MeV];Selected Events (normalised to 3.782 #times 10^{19} POT)", 50, -100, 100);
+   StackedHistPDGCode* depE_rangeE_p_stack_byPDG = new StackedHistPDGCode("depE_rangeE_p_stack_byPDG", ";Deposited energy - energy by range (proton assumption) [MeV];Selected Events (normalised to 3.782 #times 10^{19} POT)", 50, -100, 100);
 
    TH2D* longest2tracks_byPDG_signal = new TH2D("longest2tracks_byPDG_signal",";True PDG of longest track;True PDG of second longest track",4,0,4,4,0,4);
    TH2D* longest2tracks_byPDG_bg = new TH2D("longest2tracks_byPDG_bg",";True PDG of longest track;True PDG of second longest track",4,0,4,4,0,4);
@@ -257,6 +271,31 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    TEfficiency* pur_n2llh_p_exactly2MIP = new TEfficiency("pur_n2llh_p_exactly2MIP","Require exactly 2 MIPs;Value of n2llh_p used for MIP classification;",MIPcuts_p_size,MIPcuts_p);
    TH1D* effpur_n2llh_p_atleast2MIP = new TH1D("effpur_n2llh_p_atleast2MIP",";;",MIPcuts_p_size,MIPcuts_p);
    TH1D* effpur_n2llh_p_exactly2MIP = new TH1D("effpur_n2llh_p_exactly2MIP",";;",MIPcuts_p_size,MIPcuts_p);
+
+   double MIPcuts_depE_rangeE_mu[] = {-20, -10, 0, 10, 20, 30, 40, 50, 60, 70, 80};
+   int MIPcuts_depE_rangeE_mu_size = sizeof(MIPcuts_depE_rangeE_mu)/sizeof(MIPcuts_depE_rangeE_mu[0]) - 1;
+   TEfficiency* eff_depE_rangeE_mu_atleast2MIP = new TEfficiency("eff_depE_rangeE_mu_atleast2MIP","Require at least 2 MIPs;Value of depE_rangeE_mu used for MIP classification;",MIPcuts_depE_rangeE_mu_size,MIPcuts_depE_rangeE_mu);
+   TEfficiency* eff_depE_rangeE_mu_exactly2MIP = new TEfficiency("eff_depE_rangeE_mu_exactly2MIP","Require exactly 2 MIPs;Value of depE_rangeE_mu used for MIP classification;",MIPcuts_depE_rangeE_mu_size,MIPcuts_depE_rangeE_mu);
+   TEfficiency* pur_depE_rangeE_mu_atleast2MIP = new TEfficiency("pur_depE_rangeE_mu_atleast2MIP","Require at least 2 MIPs;Value of depE_rangeE_mu used for MIP classification;",MIPcuts_depE_rangeE_mu_size,MIPcuts_depE_rangeE_mu);
+   TEfficiency* pur_depE_rangeE_mu_exactly2MIP = new TEfficiency("pur_depE_rangeE_mu_exactly2MIP","Require exactly 2 MIPs;Value of depE_rangeE_mu used for MIP classification;",MIPcuts_depE_rangeE_mu_size,MIPcuts_depE_rangeE_mu);
+   TH1D* effpur_depE_rangeE_mu_atleast2MIP = new TH1D("effpur_depE_rangeE_mu_atleast2MIP",";;",MIPcuts_depE_rangeE_mu_size,MIPcuts_depE_rangeE_mu);
+   TH1D* effpur_depE_rangeE_mu_exactly2MIP = new TH1D("effpur_depE_rangeE_mu_exactly2MIP",";;",MIPcuts_depE_rangeE_mu_size,MIPcuts_depE_rangeE_mu);
+
+   double MIPcuts_depE_rangeE_p[] = {-100, -90, -80, -70, -65, -60, -55, -50, -40, -30, -20, -10, 0};
+   int MIPcuts_depE_rangeE_p_size = sizeof(MIPcuts_depE_rangeE_p)/sizeof(MIPcuts_depE_rangeE_p[0]) - 1;
+   TEfficiency* eff_depE_rangeE_p_atleast2MIP = new TEfficiency("eff_depE_rangeE_p_atleast2MIP","Require at least 2 MIPs;Value of depE_rangeE_p used for MIP classification;",MIPcuts_depE_rangeE_p_size,MIPcuts_depE_rangeE_p);
+   TEfficiency* eff_depE_rangeE_p_exactly2MIP = new TEfficiency("eff_depE_rangeE_p_exactly2MIP","Require exactly 2 MIPs;Value of depE_rangeE_p used for MIP classification;",MIPcuts_depE_rangeE_p_size,MIPcuts_depE_rangeE_p);
+   TEfficiency* pur_depE_rangeE_p_atleast2MIP = new TEfficiency("pur_depE_rangeE_p_atleast2MIP","Require at least 2 MIPs;Value of depE_rangeE_p used for MIP classification;",MIPcuts_depE_rangeE_p_size,MIPcuts_depE_rangeE_p);
+   TEfficiency* pur_depE_rangeE_p_exactly2MIP = new TEfficiency("pur_depE_rangeE_p_exactly2MIP","Require exactly 2 MIPs;Value of depE_rangeE_p used for MIP classification;",MIPcuts_depE_rangeE_p_size,MIPcuts_depE_rangeE_p);
+   TH1D* effpur_depE_rangeE_p_atleast2MIP = new TH1D("effpur_depE_rangeE_p_atleast2MIP",";;",MIPcuts_depE_rangeE_p_size,MIPcuts_depE_rangeE_p);
+   TH1D* effpur_depE_rangeE_p_exactly2MIP = new TH1D("effpur_depE_rangeE_p_exactly2MIP",";;",MIPcuts_depE_rangeE_p_size,MIPcuts_depE_rangeE_p);
+
+   TEfficiency* eff_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP = new TEfficiency("eff_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP","Require at least 2 MIPs;Value of n2llh_muMIPminusp used for MIP classification;Value of depE_rangeE_p used for MIP classification",MIPcuts_muMIPminusp_size,MIPcuts_muMIPminusp,MIPcuts_depE_rangeE_p_size,MIPcuts_depE_rangeE_p);
+   TEfficiency* eff_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP = new TEfficiency("eff_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP","Require exactly 2 MIPs;Value of n2llh_muMIPminusp used for MIP classification;Value of depE_rangeE_p used for MIP classification",MIPcuts_muMIPminusp_size,MIPcuts_muMIPminusp,MIPcuts_depE_rangeE_p_size,MIPcuts_depE_rangeE_p);
+   TEfficiency* pur_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP = new TEfficiency("pur_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP","Require at least 2 MIPs;Value of n2llh_muMIPminusp used for MIP classification;Value of depE_rangeE_p used for MIP classification",MIPcuts_muMIPminusp_size,MIPcuts_muMIPminusp,MIPcuts_depE_rangeE_p_size,MIPcuts_depE_rangeE_p);
+   TEfficiency* pur_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP = new TEfficiency("pur_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP","Require exactly 2 MIPs;Value of n2llh_muMIPminusp used for MIP classification;Value of depE_rangeE_p used for MIP classification",MIPcuts_muMIPminusp_size,MIPcuts_muMIPminusp,MIPcuts_depE_rangeE_p_size,MIPcuts_depE_rangeE_p);
+   TH2D* effpur_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP = new TH2D("effpur_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP","Require at least 2 MIPs;Value of n2llh_muMIPminusp used for MIP classification;Value of depE_rangeE_p used for MIP classification",MIPcuts_muMIPminusp_size,MIPcuts_muMIPminusp,MIPcuts_depE_rangeE_p_size,MIPcuts_depE_rangeE_p);
+   TH2D* effpur_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP = new TH2D("effpur_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP","Require exactly 2 MIPs;Value of n2llh_muMIPminusp used for MIP classification;Value of depE_rangeE_p used for MIP classification",MIPcuts_muMIPminusp_size,MIPcuts_muMIPminusp,MIPcuts_depE_rangeE_p_size,MIPcuts_depE_rangeE_p);
 
 
    const int nentries = t -> GetEntries();
@@ -286,9 +325,11 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
 
       }
 
-      // MIP testing...
+      // Calculate derived MIP vars
       std::vector<double> n2llh_muMIPminusp_vect;
       std::vector<double> n2llh_p_vect;
+      std::vector<double> depE_rangeE_mu_vect;
+      std::vector<double> depE_rangeE_p_vect;
       for(int j = 0; j < TPCObj_NPFPs; j++) {
          if(TPCObj_PFP_isDaughter -> at(j) && n2LLH_fwd_mu -> at(j) != -999 && TPCObj_PFP_track_length -> at(j) >= 0) {
             double tr_n2llh_muMIP = std::min({n2LLH_fwd_mu->at(j),n2LLH_bwd_mu->at(j),n2LLH_MIP->at(j)});
@@ -297,10 +338,15 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
 
             n2llh_muMIPminusp_vect.emplace_back(tr_n2llh_muMIPminusp);
             n2llh_p_vect.emplace_back(tr_n2llh_p);
+
+            depE_rangeE_mu_vect.emplace_back(TPCObj_PFP_track_depE->at(j) - TPCObj_PFP_track_rangeE_mu->at(j));
+            depE_rangeE_p_vect.emplace_back(TPCObj_PFP_track_depE->at(j) - TPCObj_PFP_track_rangeE_p->at(j));
          }
          else {
             n2llh_muMIPminusp_vect.emplace_back(-999);
             n2llh_p_vect.emplace_back(-999);
+            depE_rangeE_mu_vect.emplace_back(-999);
+            depE_rangeE_p_vect.emplace_back(-999);
         }
       }
 
@@ -318,6 +364,11 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          if(SelectedEvent && nMIPs==2) pur_n2llh_muMIPminusp_exactly2MIP->Fill(isSignal, MIPcut);
       }
 
+      for(int j = 1; j <= MIPcuts_muMIPminusp_size; j++) {
+         effpur_n2llh_muMIPminusp_atleast2MIP->SetBinContent(j,10*eff_n2llh_muMIPminusp_atleast2MIP->GetEfficiency(j)*pur_n2llh_muMIPminusp_atleast2MIP->GetEfficiency(j));
+         effpur_n2llh_muMIPminusp_exactly2MIP->SetBinContent(j,10*eff_n2llh_muMIPminusp_exactly2MIP->GetEfficiency(j)*pur_n2llh_muMIPminusp_exactly2MIP->GetEfficiency(j));
+      }
+
       // n2llh_p eff/pur
       for (const double& MIPcut : MIPcuts_p) {
          std::vector<bool> TPCObj_PFP_isMIP_LLH;
@@ -332,22 +383,90 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          if(SelectedEvent && nMIPs==2) pur_n2llh_p_exactly2MIP->Fill(isSignal, MIPcut);
       }
 
-      double MIPcut = -2.5;
-      std::vector<bool> TPCObj_PFP_isMIP_LLH;
-      for(const double& MIPvalue : n2llh_muMIPminusp_vect) {
-         if(MIPvalue < MIPcut && MIPvalue != -999) TPCObj_PFP_isMIP_LLH.emplace_back(true);
-         else TPCObj_PFP_isMIP_LLH.emplace_back(false);
-      }
-      if(std::count(TPCObj_PFP_isMIP_LLH.begin(),TPCObj_PFP_isMIP_LLH.end(),true)<2) SelectedEvent = false;
-
-      for(int j = 1; j <= MIPcuts_muMIPminusp_size; j++) {
-         effpur_n2llh_muMIPminusp_atleast2MIP->SetBinContent(j,10*eff_n2llh_muMIPminusp_atleast2MIP->GetEfficiency(j)*pur_n2llh_muMIPminusp_atleast2MIP->GetEfficiency(j));
-         effpur_n2llh_muMIPminusp_exactly2MIP->SetBinContent(j,10*eff_n2llh_muMIPminusp_exactly2MIP->GetEfficiency(j)*pur_n2llh_muMIPminusp_exactly2MIP->GetEfficiency(j));
-      }
       for(int j = 1; j <= MIPcuts_p_size; j++) {
          effpur_n2llh_p_atleast2MIP->SetBinContent(j,10*eff_n2llh_p_atleast2MIP->GetEfficiency(j)*pur_n2llh_p_atleast2MIP->GetEfficiency(j));
          effpur_n2llh_p_exactly2MIP->SetBinContent(j,10*eff_n2llh_p_exactly2MIP->GetEfficiency(j)*pur_n2llh_p_exactly2MIP->GetEfficiency(j));
       }
+
+      // depE_rangeE_mu eff/pur
+      for (const double& MIPcut : MIPcuts_depE_rangeE_mu) {
+         std::vector<bool> TPCObj_PFP_isMIP_E;
+         for(const double& MIPvalue : depE_rangeE_mu_vect) {
+            if(MIPvalue < MIPcut && MIPvalue != -999) TPCObj_PFP_isMIP_E.emplace_back(true);
+            else TPCObj_PFP_isMIP_E.emplace_back(false);
+         }
+         int nMIPs = std::count(TPCObj_PFP_isMIP_E.begin(),TPCObj_PFP_isMIP_E.end(),true);
+         if(isSignal) eff_depE_rangeE_mu_atleast2MIP->Fill(SelectedEvent && nMIPs>=2, MIPcut);
+         if(isSignal) eff_depE_rangeE_mu_exactly2MIP->Fill(SelectedEvent && nMIPs==2, MIPcut);
+         if(SelectedEvent && nMIPs>=2) pur_depE_rangeE_mu_atleast2MIP->Fill(isSignal, MIPcut);
+         if(SelectedEvent && nMIPs==2) pur_depE_rangeE_mu_exactly2MIP->Fill(isSignal, MIPcut);
+      }
+
+      for(int j = 1; j <= MIPcuts_depE_rangeE_mu_size; j++) {
+         effpur_depE_rangeE_mu_atleast2MIP->SetBinContent(j,10*eff_depE_rangeE_mu_atleast2MIP->GetEfficiency(j)*pur_depE_rangeE_mu_atleast2MIP->GetEfficiency(j));
+         effpur_depE_rangeE_mu_exactly2MIP->SetBinContent(j,10*eff_depE_rangeE_mu_exactly2MIP->GetEfficiency(j)*pur_depE_rangeE_mu_exactly2MIP->GetEfficiency(j));
+      }
+
+      // depE_rangeE_p eff/pur
+      for (const double& MIPcut : MIPcuts_depE_rangeE_p) {
+         std::vector<bool> TPCObj_PFP_isMIP_E;
+         for(const double& MIPvalue : depE_rangeE_p_vect) {
+            if(MIPvalue < MIPcut && MIPvalue != -999) TPCObj_PFP_isMIP_E.emplace_back(true);
+            else TPCObj_PFP_isMIP_E.emplace_back(false);
+         }
+         int nMIPs = std::count(TPCObj_PFP_isMIP_E.begin(),TPCObj_PFP_isMIP_E.end(),true);
+         if(isSignal) eff_depE_rangeE_p_atleast2MIP->Fill(SelectedEvent && nMIPs>=2, MIPcut);
+         if(isSignal) eff_depE_rangeE_p_exactly2MIP->Fill(SelectedEvent && nMIPs==2, MIPcut);
+         if(SelectedEvent && nMIPs>=2) pur_depE_rangeE_p_atleast2MIP->Fill(isSignal, MIPcut);
+         if(SelectedEvent && nMIPs==2) pur_depE_rangeE_p_exactly2MIP->Fill(isSignal, MIPcut);
+      }
+
+      for(int j = 1; j <= MIPcuts_depE_rangeE_p_size; j++) {
+         effpur_depE_rangeE_p_atleast2MIP->SetBinContent(j,10*eff_depE_rangeE_p_atleast2MIP->GetEfficiency(j)*pur_depE_rangeE_p_atleast2MIP->GetEfficiency(j));
+         effpur_depE_rangeE_p_exactly2MIP->SetBinContent(j,10*eff_depE_rangeE_p_exactly2MIP->GetEfficiency(j)*pur_depE_rangeE_p_exactly2MIP->GetEfficiency(j));
+      }
+
+      // 2D eff/pur
+      for (const double& MIPcut_muMIPminusp : MIPcuts_muMIPminusp) {
+         for (const double& MIPcut_depE_rangeE_p : MIPcuts_depE_rangeE_p) {
+            std::vector<bool> TPCObj_PFP_isMIP;
+            for(int j = 0; j < n2llh_muMIPminusp_vect.size(); j++) {
+               if(n2llh_muMIPminusp_vect.at(j) < MIPcut_muMIPminusp && depE_rangeE_p_vect.at(j) < MIPcut_depE_rangeE_p && n2llh_muMIPminusp_vect.at(j) != -999) TPCObj_PFP_isMIP.emplace_back(true);
+               else TPCObj_PFP_isMIP.emplace_back(false);
+            }
+            int nMIPs = std::count(TPCObj_PFP_isMIP.begin(),TPCObj_PFP_isMIP.end(),true);
+            if(isSignal) eff_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP->Fill(SelectedEvent && nMIPs>=2, MIPcut_muMIPminusp, MIPcut_depE_rangeE_p);
+            if(isSignal) eff_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP->Fill(SelectedEvent && nMIPs==2, MIPcut_muMIPminusp, MIPcut_depE_rangeE_p);
+            if(SelectedEvent && nMIPs>=2) pur_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP->Fill(isSignal, MIPcut_muMIPminusp, MIPcut_depE_rangeE_p);
+            if(SelectedEvent && nMIPs==2) pur_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP->Fill(isSignal, MIPcut_muMIPminusp, MIPcut_depE_rangeE_p);
+         }
+      }
+
+      for(int j = 1; j <= MIPcuts_muMIPminusp_size; j++) {
+         for(int k = 1; k <= MIPcuts_depE_rangeE_p_size; k++) {
+            int bin = eff_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP->GetGlobalBin(j,k);
+            effpur_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP->SetBinContent(bin,10*eff_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP->GetEfficiency(bin)*pur_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP->GetEfficiency(bin));
+            effpur_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP->SetBinContent(bin,10*eff_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP->GetEfficiency(bin)*pur_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP->GetEfficiency(bin));
+         }
+      }
+
+      // Implement cut on n2llh_muMIPminusp
+      double MIPcut_muMIPminusp = -2.5;
+      std::vector<bool> TPCObj_PFP_isMIP_LLH;
+      for(const double& MIPvalue : n2llh_muMIPminusp_vect) {
+         if(MIPvalue < MIPcut_muMIPminusp && MIPvalue != -999) TPCObj_PFP_isMIP_LLH.emplace_back(true);
+         else TPCObj_PFP_isMIP_LLH.emplace_back(false);
+      }
+//      if(std::count(TPCObj_PFP_isMIP_LLH.begin(),TPCObj_PFP_isMIP_LLH.end(),true)!=2) SelectedEvent = false;
+
+      // Implement cut on depE_rangeE_p
+      double MIPcut_depE_rangeE_p = -60;
+      std::vector<bool> TPCObj_PFP_isMIP_E;
+      for(const double& MIPvalue : depE_rangeE_p_vect) {
+         if(MIPvalue < MIPcut_depE_rangeE_p && MIPvalue != -999) TPCObj_PFP_isMIP_E.emplace_back(true);
+         else TPCObj_PFP_isMIP_E.emplace_back(false);
+      }
+      if(std::count(TPCObj_PFP_isMIP_E.begin(),TPCObj_PFP_isMIP_E.end(),true)<2) SelectedEvent = false;
 
 
       // Efficiency...
@@ -441,6 +560,10 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
                   n2llh_muMIPminusp_stack_byPDG -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j), tr_n2llh_muMIPminusp);
                   n2llh_p_stack_byPDG -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j), tr_n2llh_p);
                }
+
+               depE_rangeE_mu_stack_byPDG -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j), TPCObj_PFP_track_depE->at(j) - TPCObj_PFP_track_rangeE_mu->at(j)); 
+               depE_rangeE_p_stack_byPDG -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j), TPCObj_PFP_track_depE->at(j) - TPCObj_PFP_track_rangeE_p->at(j)); 
+
             }
          }
 
@@ -586,6 +709,12 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    n2llh_p_stack_byPDG -> DrawStack(norm, c1, "pads");
    c1 -> SaveAs(TString::Format("%s_nostack_n2llh_p_byPDG.eps",SaveString.c_str()));
 
+   depE_rangeE_mu_stack_byPDG -> DrawStack(norm, c1);
+   c1 -> SaveAs(TString::Format("%s_THStack_depE_rangeE_mu_byPDG.eps",SaveString.c_str()));
+
+   depE_rangeE_p_stack_byPDG -> DrawStack(norm, c1);
+   c1 -> SaveAs(TString::Format("%s_THStack_depE_rangeE_p_byPDG.eps",SaveString.c_str()));
+
 
    longest2tracks_byPDG_signal->GetXaxis()->SetBinLabel(1,PDGenum2str(kMuMinus).c_str());
    longest2tracks_byPDG_signal->GetXaxis()->SetBinLabel(2,PDGenum2str(kPiPlus).c_str());
@@ -711,6 +840,116 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    effpur_n2llh_p_exactly2MIP->SetMaximum(1);
    gPad->Update();
    c1 -> SaveAs(TString::Format("%s_effpur_n2llh_p_exactly2MIP.eps",SaveString.c_str()));
+
+   eff_depE_rangeE_mu_atleast2MIP -> Draw("AP");
+   pur_depE_rangeE_mu_atleast2MIP -> Draw("P SAME");
+   effpur_depE_rangeE_mu_atleast2MIP -> Draw("P SAME");
+   gPad->Update();
+   eff_depE_rangeE_mu_atleast2MIP->SetMarkerColor(kRed);
+   eff_depE_rangeE_mu_atleast2MIP->SetMarkerStyle(21);
+   eff_depE_rangeE_mu_atleast2MIP->SetMarkerSize(1);
+   graph = eff_depE_rangeE_mu_atleast2MIP->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   pur_depE_rangeE_mu_atleast2MIP->SetMarkerColor(kBlue);
+   pur_depE_rangeE_mu_atleast2MIP->SetMarkerStyle(21);
+   pur_depE_rangeE_mu_atleast2MIP->SetMarkerSize(1);
+   graph = pur_depE_rangeE_mu_atleast2MIP->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   effpur_depE_rangeE_mu_atleast2MIP->SetMarkerColor(kBlack);
+   effpur_depE_rangeE_mu_atleast2MIP->SetMarkerStyle(21);
+   effpur_depE_rangeE_mu_atleast2MIP->SetMarkerSize(1);
+   effpur_depE_rangeE_mu_atleast2MIP->SetMinimum(0);
+   effpur_depE_rangeE_mu_atleast2MIP->SetMaximum(1);
+   gPad->Update();
+   c1 -> SaveAs(TString::Format("%s_effpur_depE_rangeE_mu_atleast2MIP.eps",SaveString.c_str()));
+
+   eff_depE_rangeE_mu_exactly2MIP -> Draw("AP");
+   pur_depE_rangeE_mu_exactly2MIP -> Draw("P SAME");
+   effpur_depE_rangeE_mu_exactly2MIP -> Draw("P SAME");
+   gPad->Update();
+   eff_depE_rangeE_mu_exactly2MIP->SetMarkerColor(kRed);
+   eff_depE_rangeE_mu_exactly2MIP->SetMarkerStyle(21);
+   eff_depE_rangeE_mu_exactly2MIP->SetMarkerSize(1);
+   graph = eff_depE_rangeE_mu_exactly2MIP->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   pur_depE_rangeE_mu_exactly2MIP->SetMarkerColor(kBlue);
+   pur_depE_rangeE_mu_exactly2MIP->SetMarkerStyle(21);
+   pur_depE_rangeE_mu_exactly2MIP->SetMarkerSize(1);
+   graph = pur_depE_rangeE_mu_exactly2MIP->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   effpur_depE_rangeE_mu_exactly2MIP->SetMarkerColor(kBlack);
+   effpur_depE_rangeE_mu_exactly2MIP->SetMarkerStyle(21);
+   effpur_depE_rangeE_mu_exactly2MIP->SetMarkerSize(1);
+   effpur_depE_rangeE_mu_exactly2MIP->SetMinimum(0);
+   effpur_depE_rangeE_mu_exactly2MIP->SetMaximum(1);
+   gPad->Update();
+   c1 -> SaveAs(TString::Format("%s_effpur_depE_rangeE_mu_exactly2MIP.eps",SaveString.c_str()));
+
+   eff_depE_rangeE_p_atleast2MIP -> Draw("AP");
+   pur_depE_rangeE_p_atleast2MIP -> Draw("P SAME");
+   effpur_depE_rangeE_p_atleast2MIP -> Draw("P SAME");
+   gPad->Update();
+   eff_depE_rangeE_p_atleast2MIP->SetMarkerColor(kRed);
+   eff_depE_rangeE_p_atleast2MIP->SetMarkerStyle(21);
+   eff_depE_rangeE_p_atleast2MIP->SetMarkerSize(1);
+   graph = eff_depE_rangeE_p_atleast2MIP->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   pur_depE_rangeE_p_atleast2MIP->SetMarkerColor(kBlue);
+   pur_depE_rangeE_p_atleast2MIP->SetMarkerStyle(21);
+   pur_depE_rangeE_p_atleast2MIP->SetMarkerSize(1);
+   graph = pur_depE_rangeE_p_atleast2MIP->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   effpur_depE_rangeE_p_atleast2MIP->SetMarkerColor(kBlack);
+   effpur_depE_rangeE_p_atleast2MIP->SetMarkerStyle(21);
+   effpur_depE_rangeE_p_atleast2MIP->SetMarkerSize(1);
+   effpur_depE_rangeE_p_atleast2MIP->SetMinimum(0);
+   effpur_depE_rangeE_p_atleast2MIP->SetMaximum(1);
+   gPad->Update();
+   c1 -> SaveAs(TString::Format("%s_effpur_depE_rangeE_p_atleast2MIP.eps",SaveString.c_str()));
+
+   eff_depE_rangeE_p_exactly2MIP -> Draw("AP");
+   pur_depE_rangeE_p_exactly2MIP -> Draw("P SAME");
+   effpur_depE_rangeE_p_exactly2MIP -> Draw("P SAME");
+   gPad->Update();
+   eff_depE_rangeE_p_exactly2MIP->SetMarkerColor(kRed);
+   eff_depE_rangeE_p_exactly2MIP->SetMarkerStyle(21);
+   eff_depE_rangeE_p_exactly2MIP->SetMarkerSize(1);
+   graph = eff_depE_rangeE_p_exactly2MIP->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   pur_depE_rangeE_p_exactly2MIP->SetMarkerColor(kBlue);
+   pur_depE_rangeE_p_exactly2MIP->SetMarkerStyle(21);
+   pur_depE_rangeE_p_exactly2MIP->SetMarkerSize(1);
+   graph = pur_depE_rangeE_p_exactly2MIP->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   effpur_depE_rangeE_p_exactly2MIP->SetMarkerColor(kBlack);
+   effpur_depE_rangeE_p_exactly2MIP->SetMarkerStyle(21);
+   effpur_depE_rangeE_p_exactly2MIP->SetMarkerSize(1);
+   effpur_depE_rangeE_p_exactly2MIP->SetMinimum(0);
+   effpur_depE_rangeE_p_exactly2MIP->SetMaximum(1);
+   gPad->Update();
+   c1 -> SaveAs(TString::Format("%s_effpur_depE_rangeE_p_exactly2MIP.eps",SaveString.c_str()));
+
+   gStyle->SetPaintTextFormat("4.2f");
+   eff_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP -> Draw("COLZ TEXT");
+   c1 -> SaveAs(TString::Format("%s_eff_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP.eps",SaveString.c_str()));
+   pur_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP -> Draw("COLZ TEXT");
+   c1 -> SaveAs(TString::Format("%s_pur_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP.eps",SaveString.c_str()));
+   effpur_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP -> Draw("COLZ TEXT");
+   c1 -> SaveAs(TString::Format("%s_effpur_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP.eps",SaveString.c_str()));
+   eff_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP -> Draw("COLZ TEXT");
+   c1 -> SaveAs(TString::Format("%s_eff_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP.eps",SaveString.c_str()));
+   pur_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP -> Draw("COLZ TEXT");
+   c1 -> SaveAs(TString::Format("%s_pur_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP.eps",SaveString.c_str()));
+   effpur_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP -> Draw("COLZ TEXT");
+   c1 -> SaveAs(TString::Format("%s_effpur_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP.eps",SaveString.c_str()));
 
    std::cout << "Total Efficiency: " << (1. * (eff_nuE -> GetPassedHistogram() -> GetEntries()))/(eff_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
    std::cout << "Total Purity: " << (1. * (pur_nuE -> GetPassedHistogram() -> GetEntries()))/(pur_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
