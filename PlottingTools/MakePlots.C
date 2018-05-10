@@ -466,7 +466,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          if(MIPvalue < MIPcut_depE_rangeE_p && MIPvalue != -999) TPCObj_PFP_isMIP_E.emplace_back(true);
          else TPCObj_PFP_isMIP_E.emplace_back(false);
       }
-      if(std::count(TPCObj_PFP_isMIP_E.begin(),TPCObj_PFP_isMIP_E.end(),true)<2) SelectedEvent = false;
+//      if(std::count(TPCObj_PFP_isMIP_E.begin(),TPCObj_PFP_isMIP_E.end(),true)<2) SelectedEvent = false;
 
 
       // Efficiency...
