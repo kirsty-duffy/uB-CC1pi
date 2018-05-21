@@ -14,7 +14,10 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "canvas/Persistency/Common/FindManyP.h"
 
-bool FVCheck(art::Event &evt);
+// CC1pi method includes
+#include "uboone/CC1pi/Algorithms/InputTags.h"
+
+bool FVCheck(art::Event &evt, InputTags *CC1piInputTags);
 
 bool inFV(double x, double y, double z);
 

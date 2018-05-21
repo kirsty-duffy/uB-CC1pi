@@ -8,6 +8,7 @@
 
 cc1pianavars::cc1pianavars(fhicl::ParameterSet const &p){
    pset = p;
+   CC1piInputTags = new InputTags(p);
 }
 
 
@@ -94,9 +95,9 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
    //std::cout << "[CC1pi::FillTree::SetReco2Vars] Using isData = " << isData << std::endl;
 
    art::Handle<std::vector<ubana::SelectionResult>> selection_h;
-   evt.getByLabel("UBXSec", selection_h);
+   evt.getByLabel(CC1piInputTags->fSelectionLabel, selection_h);
    if(!selection_h.isValid()){
-      mf::LogError(__PRETTY_FUNCTION__) << "SelectionResult product not found." << std::endl;
+      mf::LogError(__PRETTY_FUNCTION__) << "[FillTree] SelectionResult product not found." << std::endl;
       throw std::exception();
    }
    std::vector<art::Ptr<ubana::SelectionResult>> selection_v;
@@ -136,7 +137,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       Marco_selected = true;
 
       //Get TPCObject
-      art::FindManyP<ubana::TPCObject> TPCObject_from_selection(selection_h, evt, "UBXSec");
+      art::FindManyP<ubana::TPCObject> TPCObject_from_selection(selection_h, evt, CC1piInputTags->fSelectionLabel);
       art::Ptr<ubana::TPCObject> TPCObj_candidate = TPCObject_from_selection.at(0).at(0);
       art::Handle<std::vector<ubana::TPCObject>> TPCObj_h;
       evt.getByLabel("TPCObjectMaker", TPCObj_h);
@@ -173,13 +174,10 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       TPCObj_NTracks = tracks.size();
 
       // Get calo objects (for dedx)
-      // hardcoded InputTags - change this!!
       // Use association: pandoraNucalo, art::Assns<recob::Track,anab::Calorimetry,void>
       // (Couldn't find another way to do this except going back to track handle -.-)
-      art::InputTag _caloTag = "UBXSecpandoraNucali::CC1pi";//"pandoraNucali";
-      art::InputTag _trackTag = "pandoraNu::UBXSec";
-      auto const& track_h = evt.getValidHandle<std::vector<recob::Track>>(_trackTag);
-      art::FindManyP<anab::Calorimetry> calos_from_tracks(track_h, evt, _caloTag);
+      auto const& track_h = evt.getValidHandle<std::vector<recob::Track>>(CC1piInputTags->fTrackLabel);
+      art::FindManyP<anab::Calorimetry> calos_from_tracks(track_h, evt, CC1piInputTags->fCalorimetryLabel);
 
       // Also get track-PID association objects
       art::FindManyP<anab::ParticleID> trackPIDAssn(track_h, evt, "pid");
@@ -201,7 +199,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
       //Get PFPs (in event)
       art::Handle<std::vector<recob::PFParticle> > pfp_h;
-      evt.getByLabel("pandoraNu::UBXSec",pfp_h);
+      evt.getByLabel(CC1piInputTags->fTrackLabel,pfp_h);
       if(!pfp_h.isValid()){
          mf::LogError(__PRETTY_FUNCTION__) << "PFP product not found." << std::endl;
          throw std::exception();
@@ -220,8 +218,8 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          }
       }
 
-      art::FindManyP<recob::Track> tracks_from_pfps(pfp_h, evt, "pandoraNu::UBXSec");
-      art::FindManyP<recob::Shower> showers_from_pfps(pfp_h, evt, "pandoraNu::UBXSec");
+      art::FindManyP<recob::Track> tracks_from_pfps(pfp_h, evt, CC1piInputTags->fTrackLabel);
+      art::FindManyP<recob::Shower> showers_from_pfps(pfp_h, evt, CC1piInputTags->fTrackLabel);
 
       for (auto pfp : pfps) {
 

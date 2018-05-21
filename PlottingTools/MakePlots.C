@@ -297,6 +297,9 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    TH2D* effpur_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP = new TH2D("effpur_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP","Require at least 2 MIPs;Value of n2llh_muMIPminusp used for MIP classification;Value of depE_rangeE_p used for MIP classification",MIPcuts_muMIPminusp_size,MIPcuts_muMIPminusp,MIPcuts_depE_rangeE_p_size,MIPcuts_depE_rangeE_p);
    TH2D* effpur_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP = new TH2D("effpur_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP","Require exactly 2 MIPs;Value of n2llh_muMIPminusp used for MIP classification;Value of depE_rangeE_p used for MIP classification",MIPcuts_muMIPminusp_size,MIPcuts_muMIPminusp,MIPcuts_depE_rangeE_p_size,MIPcuts_depE_rangeE_p);
 
+   ofstream evdinfo;
+   evdinfo.open("evdinfo.txt");
+   evdinfo << "run_num subrun_num event_num track_daughters Truth_topology" << std::endl;
 
    const int nentries = t -> GetEntries();
 
@@ -324,6 +327,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          if (nu_PDG != 14) std::cout << "WARNING: Signal event has neutrino with PDG code " << nu_PDG << " (should be 14)" << std::endl;
 
       }
+
 
       // Calculate derived MIP vars
       std::vector<double> n2llh_muMIPminusp_vect;
@@ -589,8 +593,12 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          }
 
 
+         evdinfo << run_num << " " << subrun_num << " " << event_num << " " << track_daughters << " " << topologyenum2str(Truth_topology) << std::endl;
+
       } // end if(SelectedEvent)
    } //end loop over entries
+
+   evdinfo.close();
 
    gStyle->SetOptStat(0); //No stats box
 //   gStyle -> SetOptStat(111111); //Full stats box, including under/overflow

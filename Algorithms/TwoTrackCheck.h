@@ -18,7 +18,8 @@
 
 // CC1pi method includes
 #include "uboone/CC1pi/Algorithms/MIPConsistencyCheck_n2LLH.h"
+#include "uboone/CC1pi/Algorithms/InputTags.h"
 
-std::map<std::string,bool> TwoTrackCheck(art::Event &evt);
+std::map<std::string,bool> TwoTrackCheck(art::Event &evt, InputTags *CC1piInputTags);
 
 #endif

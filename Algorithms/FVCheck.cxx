@@ -20,19 +20,19 @@ bool inFV(double x, double y, double z){
    else return false;
 }
 
-bool FVCheck(art::Event &evt)
+bool FVCheck(art::Event &evt, InputTags *CC1piInputTags)
 {
    art::Handle<std::vector<ubana::SelectionResult>> selection_h;
-   evt.getByLabel("UBXSec", selection_h);
+   evt.getByLabel(CC1piInputTags->fSelectionLabel, selection_h);
    if(!selection_h.isValid()){
-      mf::LogError(__PRETTY_FUNCTION__) << "SelectionResult product not found." << std::endl;
+      mf::LogError(__PRETTY_FUNCTION__) << "[FVCheck] SelectionResult product not found." << std::endl;
       throw std::exception();
    }
    std::vector<art::Ptr<ubana::SelectionResult>> selection_v;
    art::fill_ptr_vector(selection_v, selection_h);
 
    // Get TPCObject
-   art::FindManyP<ubana::TPCObject> tpcobject_from_selection(selection_h, evt, "UBXSec");
+   art::FindManyP<ubana::TPCObject> tpcobject_from_selection(selection_h, evt, CC1piInputTags->fSelectionLabel);
    art::Ptr<ubana::TPCObject> tpcobj_candidate = tpcobject_from_selection.at(0).at(0);
 
    // Get neutrino candidate vertex from TPCObject

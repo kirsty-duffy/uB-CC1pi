@@ -41,7 +41,7 @@ physics:
       pid: @local::particleidconfig
       cc1piselec:
       {
-      	module_type : CC1piSelection
+         module_type : CC1piSelection
          MCTruthMatching:
          {
             tool_type:           "AssociationsTruth"

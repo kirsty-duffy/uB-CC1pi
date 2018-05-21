@@ -12,7 +12,7 @@ void Wrapper(TString FileName) {
    std::map<std::string,bool> CC1picutflow;
 
    CC1picutflow["MarcosSelec"] = true;
-   MakePlots(CC1picutflow, "PassMarcosSelec", FileName);
+//   MakePlots(CC1picutflow, "PassMarcosSelec", FileName);
 
    CC1picutflow["TwoTrackCut"] = true;
    MakePlots(CC1picutflow, "PassTwoTrackCut", FileName);
