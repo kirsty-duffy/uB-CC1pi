@@ -94,6 +94,7 @@ struct cc1pianavars{
   std::vector<double> TPCObj_PFP_track_rangeE_mu;
   std::vector<double> TPCObj_PFP_track_rangeE_pi;
   std::vector<double> TPCObj_PFP_track_rangeE_p;
+  std::vector<bool> TPCObj_PFP_track_isContained;
   int TPCObj_origin;
   int TPCObj_origin_extra;
   std::vector<double> TPCObj_reco_vtx;

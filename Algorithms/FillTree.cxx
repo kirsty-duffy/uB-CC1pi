@@ -56,6 +56,7 @@ void cc1pianavars::Clear(){
    TPCObj_PFP_track_rangeE_mu.clear();
    TPCObj_PFP_track_rangeE_pi.clear();
    TPCObj_PFP_track_rangeE_p.clear();
+   TPCObj_PFP_track_isContained.clear();
    TPCObj_origin = -9999;
    TPCObj_origin_extra = -9999;
    TPCObj_reco_vtx.clear();
@@ -240,6 +241,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          double track_depE = -9999;
          double track_rangeE_mu = -9999;
          double track_rangeE_p = -9999;
+         bool isContained = true;
          double shower_length = -9999;
          std::vector<double> shower_start = {-9999, -9999, -9999};
 
@@ -256,6 +258,18 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
             track_end = {end.X(),end.Y(),end.Z()};
 
             unsigned int trkid = track->ID();
+
+
+            // Test containment
+            recob::TrackTrajectory traj = track -> Trajectory();
+            for (int point = 0, npoints = traj.NPoints(); point < npoints; point++){
+               auto position = traj.LocationAtPoint(point);
+               if(!inFV(position.X(), position.Y(), position.Z())) {
+                  isContained = false;
+                  break;
+               }
+            }
+
 
             // Get calorimetry information
             // Only fill when there is valid calorimetry information (of course)
@@ -335,22 +349,22 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
             //    std::cout << "[CC1pi] Could not find valid trackPIDAssn" << std::endl;
             // }
 
-               // Get energy estimation by range (code for momentum by range copied from analysistree, then convert momentum to energy)
-               // Calculations only exist in TrackMomentumCalculator for muons and protons
-               // TrackMomentumCalculator returns GeV, multiply by 1000 to get MeV
-               trkf::TrackMomentumCalculator trkm;
-               double track_rangeP_mu = trkm.GetTrackMomentum(track->Length(),kMuMinus)*1000.;
-               double track_rangeP_p = trkm.GetTrackMomentum(track->Length(),kProton)*1000.;
+            // Get energy estimation by range (code for momentum by range copied from analysistree, then convert momentum to energy)
+            // Calculations only exist in TrackMomentumCalculator for muons and protons
+            // TrackMomentumCalculator returns GeV, multiply by 1000 to get MeV
+            trkf::TrackMomentumCalculator trkm;
+            double track_rangeP_mu = trkm.GetTrackMomentum(track->Length(),kMuMinus)*1000.;
+            double track_rangeP_p = trkm.GetTrackMomentum(track->Length(),kProton)*1000.;
 
-               // Now convert P->E
-               // From TrackMomentumCalculator::GetTrackMomentum: P = TMath::Sqrt((KE*KE)+(2*M*KE))
-               // P = TMath::Sqrt((E*E)-(M*M)) and E = KE+M
-               // => KE = TMath::Sqrt((P*P)+(M*M))-M
-               // TrackMometumCalculator uses Muon_M = 105.7 MeV, Proton_M = 938.272 MeV so use these values here
-               track_rangeE_mu = TMath::Sqrt((track_rangeP_mu*track_rangeP_mu)+(105.7*105.7)) - 105.7;
-               track_rangeE_p = TMath::Sqrt((track_rangeP_p*track_rangeP_p)+(938.272*938.272)) - 938.272;
+            // Now convert P->E
+            // From TrackMomentumCalculator::GetTrackMomentum: P = TMath::Sqrt((KE*KE)+(2*M*KE))
+            // P = TMath::Sqrt((E*E)-(M*M)) and E = KE+M
+            // => KE = TMath::Sqrt((P*P)+(M*M))-M
+            // TrackMometumCalculator uses Muon_M = 105.7 MeV, Proton_M = 938.272 MeV so use these values here
+            track_rangeE_mu = TMath::Sqrt((track_rangeP_mu*track_rangeP_mu)+(105.7*105.7)) - 105.7;
+            track_rangeE_p = TMath::Sqrt((track_rangeP_p*track_rangeP_p)+(938.272*938.272)) - 938.272;
 
-            } // end loop over tracks
+         } // end loop over tracks
 
 
          std::vector<art::Ptr<recob::Shower>> showers_pfp = showers_from_pfps.at(pfp.key());
@@ -382,6 +396,8 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          TPCObj_PFP_track_depE.emplace_back(track_depE);
          TPCObj_PFP_track_rangeE_mu.emplace_back(track_rangeE_mu);
          TPCObj_PFP_track_rangeE_p.emplace_back(track_rangeE_p);
+         TPCObj_PFP_track_isContained.emplace_back(isContained);
+
          TPCObj_PFP_shower_length.emplace_back(shower_length);
          TPCObj_PFP_shower_start.emplace_back(shower_start);
 
@@ -554,6 +570,7 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("TPCObj_PFP_track_depE", &(vars->TPCObj_PFP_track_depE));
    t -> Branch("TPCObj_PFP_track_rangeE_mu", &(vars->TPCObj_PFP_track_rangeE_mu));
    t -> Branch("TPCObj_PFP_track_rangeE_p", &(vars->TPCObj_PFP_track_rangeE_p));
+   t -> Branch("TPCObj_PFP_track_isContained", &(vars->TPCObj_PFP_track_isContained));
    t -> Branch("TPCObj_origin", &(vars->TPCObj_origin));
    t -> Branch("TPCObj_origin_extra", &(vars->TPCObj_origin_extra));
    t -> Branch("TPCObj_reco_vtx", &(vars->TPCObj_reco_vtx));
