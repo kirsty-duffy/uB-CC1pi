@@ -2,8 +2,12 @@
  #include "Theory_dEdx_resrange.cxx"
 
 struct treevars{
-  std::vector<std::vector<double>> *dEdxvec = nullptr;
-  std::vector<std::vector<double>> *resrangevec = nullptr;
+  std::vector<std::vector<double>> *dEdxvec_plane0 = nullptr;
+  std::vector<std::vector<double>> *dEdxvec_plane1 = nullptr;
+  std::vector<std::vector<double>> *dEdxvec_plane2 = nullptr;
+  std::vector<std::vector<double>> *resrangevec_plane0 = nullptr;
+  std::vector<std::vector<double>> *resrangevec_plane1 = nullptr;
+  std::vector<std::vector<double>> *resrangevec_plane2 = nullptr;
   std::vector<double> *n2LLH_fwd_mu = nullptr;
   std::vector<double> *n2LLH_bwd_mu = nullptr;
   std::vector<double> *n2LLH_fwd_p = nullptr;
@@ -13,17 +17,25 @@ struct treevars{
   std::vector<double> *rangeE_mu = nullptr;
   std::vector<double> *rangeE_p = nullptr;
   std::vector<double> *truePDG = nullptr;
-  std::vector<bool> *isTrack = nullptr;
+  std::vector<bool> *PandoraClassedAsTrack = nullptr;
 };
 
 // ----------------------------------------------------------- //
 
 void settreevars(TTree *intree, treevars *varstoset){
   intree->SetBranchStatus("*",0);
-  intree->SetBranchStatus("TPCObj_PFP_track_dedx_perhit",1);
-  intree->SetBranchAddress("TPCObj_PFP_track_dedx_perhit",&(varstoset->dEdxvec));
-  intree->SetBranchStatus("TPCObj_PFP_track_resrange_perhit",1);
-  intree->SetBranchAddress("TPCObj_PFP_track_resrange_perhit",&(varstoset->resrangevec));
+  intree->SetBranchStatus("TPCObj_PFP_track_dedx_perhit_plane0",1);
+  intree->SetBranchAddress("TPCObj_PFP_track_dedx_perhit_plane0",&(varstoset->dEdxvec_plane0));
+  intree->SetBranchStatus("TPCObj_PFP_track_dedx_perhit_plane1",1);
+  intree->SetBranchAddress("TPCObj_PFP_track_dedx_perhit_plane1",&(varstoset->dEdxvec_plane1));
+  intree->SetBranchStatus("TPCObj_PFP_track_dedx_perhit_plane2",1);
+  intree->SetBranchAddress("TPCObj_PFP_track_dedx_perhit_plane2",&(varstoset->dEdxvec_plane2));
+  intree->SetBranchStatus("TPCObj_PFP_track_resrange_perhit_plane0",1);
+  intree->SetBranchAddress("TPCObj_PFP_track_resrange_perhit_plane0",&(varstoset->resrangevec_plane0));
+  intree->SetBranchStatus("TPCObj_PFP_track_resrange_perhit_plane1",1);
+  intree->SetBranchAddress("TPCObj_PFP_track_resrange_perhit_plane1",&(varstoset->resrangevec_plane1));
+  intree->SetBranchStatus("TPCObj_PFP_track_resrange_perhit_plane2",1);
+  intree->SetBranchAddress("TPCObj_PFP_track_resrange_perhit_plane2",&(varstoset->resrangevec_plane2));
   intree->SetBranchStatus("TPCObj_PFP_n2LLH_fwd_mu",1);
   intree->SetBranchAddress("TPCObj_PFP_n2LLH_fwd_mu",&(varstoset->n2LLH_fwd_mu));
   intree->SetBranchStatus("TPCObj_PFP_n2LLH_bwd_mu",1);
@@ -42,22 +54,45 @@ void settreevars(TTree *intree, treevars *varstoset){
   intree->SetBranchAddress("TPCObj_PFP_track_rangeE_p",&(varstoset->rangeE_p));
   intree->SetBranchStatus("TPCObj_PFP_truePDG",1);
   intree->SetBranchAddress("TPCObj_PFP_truePDG",&(varstoset->truePDG));
-  intree->SetBranchStatus("TPCObj_PFP_isTrack",1);
-  intree->SetBranchAddress("TPCObj_PFP_isTrack",&(varstoset->isTrack));
+  intree->SetBranchStatus("TPCObj_PFP_PandoraClassedAsTrack",1);
+  intree->SetBranchAddress("TPCObj_PFP_PandoraClassedAsTrack",&(varstoset->PandoraClassedAsTrack));
 }
 
 // ----------------------------------------------------------- //
 
 struct histograms{
-  TH1F *hdEdx_all = new TH1F("hdEdx_all",";dE/dx;",100,0,10);
-  TH1F *hdEdx_Muon = new TH1F("hdEdx_Muon",";dE/dx;",100,0,10);
-  TH1F *hdEdx_Proton = new TH1F("hdEdx_Proton",";dE/dx;",100,0,10);
+  // Plane 0
+  TH1F *hdEdx_all_plane0 = new TH1F("hdEdx_all_plane0",";dE/dx (plane 0);",100,0,10);
+  TH1F *hdEdx_Muon_plane0 = new TH1F("hdEdx_Muon_plane0",";dE/dx (plane 0);",100,0,10);
+  TH1F *hdEdx_Proton_plane0 = new TH1F("hdEdx_Proton_plane0",";dE/dx (plane 0);",100,0,10);
+  TH2F *hdEdx_rr_all_plane0 = new TH2F("hdEdx_rr_all_plane0",";Residual Range (plane 0) (cm);dE/dx (plane 0)",1000,0,200,1000,0,50);
+  TH2F *hdEdx_rr_Muon_plane0 = new TH2F("hdEdx_rr_Muon_plane0",";Residual Range (plane 0) (cm);dE/dx (plane 0)",1000,0,200,1000,0,50);
+  TH2F *hdEdx_rr_Proton_plane0 = new TH2F("hdEdx_rr_Proton_plane0",";Residual Range (plane 0) (cm);dE/dx (plane 0)",1000,0,200,1000,0,50);
+  TH2F *hdEdx_rr_fullrange_all_plane0 = new TH2F("hdEdx_rr_fullrange_all_plane0",";Residual Range (plane 0) (cm);dE/dx (plane 0)",50,0,30,50,0,50);
+  TH2F *hdEdx_rr_fullrange_Muon_plane0 = new TH2F("hdEdx_rr_fullrange_Muon_plane0",";Residual Range (plane 0) (cm);dE/dx (plane 0)",50,0,30,50,0,50);
+  TH2F *hdEdx_rr_fullrange_Proton_plane0 = new TH2F("hdEdx_rr_fullrange_Proton_plane0",";Residual Range (plane 0) (cm);dE/dx (plane 0)",50,0,30,50,0,50);
 
-  TH2F *hdEdx_rr_all = new TH2F("hdEdx_rr_all",";Residual Range (cm);dE/dx",1000,0,200,1000,0,50);
-  TH2F *hdEdx_rr_Muon = new TH2F("hdEdx_rr_Muon",";Residual Range (cm);dE/dx",1000,0,200,1000,0,50);
-  TH2F *hdEdx_rr_Proton = new TH2F("hdEdx_rr_Proton",";Residual Range (cm);dE/dx",1000,0,200,1000,0,50);
+  // Plane 1
+  TH1F *hdEdx_all_plane1 = new TH1F("hdEdx_all_plane1",";dE/dx (plane 1);",100,0,10);
+  TH1F *hdEdx_Muon_plane1 = new TH1F("hdEdx_Muon_plane1",";dE/dx (plane 1);",100,0,10);
+  TH1F *hdEdx_Proton_plane1 = new TH1F("hdEdx_Proton_plane1",";dE/dx (plane 1);",100,0,10);
+  TH2F *hdEdx_rr_all_plane1 = new TH2F("hdEdx_rr_all_plane1",";Residual Range (plane 1) (cm);dE/dx (plane 1)",1000,0,200,1000,0,50);
+  TH2F *hdEdx_rr_Muon_plane1 = new TH2F("hdEdx_rr_Muon_plane1",";Residual Range (plane 1) (cm);dE/dx (plane 1)",1000,0,200,1000,0,50);
+  TH2F *hdEdx_rr_Proton_plane1 = new TH2F("hdEdx_rr_Proton_plane1",";Residual Range (plane 1) (cm);dE/dx (plane 1)",1000,0,200,1000,0,50);
+  TH2F *hdEdx_rr_fullrange_all_plane1 = new TH2F("hdEdx_rr_fullrange_all_plane1",";Residual Range (plane 1) (cm);dE/dx (plane 1)",50,0,30,50,0,50);
+  TH2F *hdEdx_rr_fullrange_Muon_plane1 = new TH2F("hdEdx_rr_fullrange_Muon_plane1",";Residual Range (plane 1) (cm);dE/dx (plane 1)",50,0,30,50,0,50);
+  TH2F *hdEdx_rr_fullrange_Proton_plane1 = new TH2F("hdEdx_rr_fullrange_Proton_plane1",";Residual Range (plane 1) (cm);dE/dx (plane 1)",50,0,30,50,0,50);
 
-  TH2F *hdEdx_rr_fullrange_all = new TH2F("hdEdx_rr_fullrange_all",";Residual Range (cm);dE/dx",50,0,30,50,0,50);
+  // Plane 2
+  TH1F *hdEdx_all_plane2 = new TH1F("hdEdx_all_plane2",";dE/dx (plane 2);",100,0,10);
+  TH1F *hdEdx_Muon_plane2 = new TH1F("hdEdx_Muon_plane2",";dE/dx (plane 2);",100,0,10);
+  TH1F *hdEdx_Proton_plane2 = new TH1F("hdEdx_Proton_plane2",";dE/dx (plane 2);",100,0,10);
+  TH2F *hdEdx_rr_all_plane2 = new TH2F("hdEdx_rr_all_plane2",";Residual Range (plane 2) (cm);dE/dx (plane 2)",1000,0,200,1000,0,50);
+  TH2F *hdEdx_rr_Muon_plane2 = new TH2F("hdEdx_rr_Muon_plane2",";Residual Range (plane 2) (cm);dE/dx (plane 2)",1000,0,200,1000,0,50);
+  TH2F *hdEdx_rr_Proton_plane2 = new TH2F("hdEdx_rr_Proton_plane2",";Residual Range (plane 2) (cm);dE/dx (plane 2)",1000,0,200,1000,0,50);
+  TH2F *hdEdx_rr_fullrange_all_plane2 = new TH2F("hdEdx_rr_fullrange_all_plane2",";Residual Range (plane 2) (cm);dE/dx (plane 2)",50,0,30,50,0,50);
+  TH2F *hdEdx_rr_fullrange_Muon_plane2 = new TH2F("hdEdx_rr_fullrange_Muon_plane2",";Residual Range (plane 2) (cm);dE/dx (plane 2)",50,0,30,50,0,50);
+  TH2F *hdEdx_rr_fullrange_Proton_plane2 = new TH2F("hdEdx_rr_fullrange_Proton_plane2",";Residual Range (plane 2) (cm);dE/dx (plane 2)",50,0,30,50,0,50);
 
   TH1F *hnegLLmu_all = new TH1F("neg2llhmu_all",";-2ln(L_{#mu});",60,0,30);
   TH1F *hnegLLmu_Muon = new TH1F("neg2llhmu_Muon","",60,0,30);
@@ -216,7 +251,15 @@ void hists_setstyleMC(histograms *hists){
 // ----------------------------------------------------------- //
 
 void hists_areanormMC(histograms *hists){
-  hists->hdEdx_rr_fullrange_all->Scale(1.0/hists->hdEdx_rr_fullrange_all->Integral());
+  hists->hdEdx_rr_fullrange_all_plane0->Scale(1.0/hists->hdEdx_rr_fullrange_all_plane0->Integral());
+  hists->hdEdx_rr_fullrange_Muon_plane0->Scale(1.0/hists->hdEdx_rr_fullrange_Muon_plane0->Integral());
+  hists->hdEdx_rr_fullrange_Proton_plane0->Scale(1.0/hists->hdEdx_rr_fullrange_Proton_plane0->Integral());
+  hists->hdEdx_rr_fullrange_all_plane1->Scale(1.0/hists->hdEdx_rr_fullrange_all_plane1->Integral());
+  hists->hdEdx_rr_fullrange_Muon_plane1->Scale(1.0/hists->hdEdx_rr_fullrange_Muon_plane1->Integral());
+  hists->hdEdx_rr_fullrange_Proton_plane1->Scale(1.0/hists->hdEdx_rr_fullrange_Proton_plane1->Integral());
+  hists->hdEdx_rr_fullrange_all_plane2->Scale(1.0/hists->hdEdx_rr_fullrange_all_plane2->Integral());
+  hists->hdEdx_rr_fullrange_Muon_plane2->Scale(1.0/hists->hdEdx_rr_fullrange_Muon_plane2->Integral());
+  hists->hdEdx_rr_fullrange_Proton_plane2->Scale(1.0/hists->hdEdx_rr_fullrange_Proton_plane2->Integral());
 
   hists->hnegLLmu_Muon->Scale(1.0/hists->hnegLLmu_all->Integral());
   hists->hnegLLMIP_Muon->Scale(1.0/hists->hnegLLMIP_all->Integral());
@@ -310,27 +353,87 @@ void FillHists(treevars *vars, histograms *hists){
 
     // Skip PFPs that Pandora doesn't reconstruct as tracks
     // This is probably not what we want to do for the CC1pi analysis, but is useful for making plots for general consumption/PID presentations
-    if (!vars->isTrack->at(i_pfp)) continue;
+    if (!vars->PandoraClassedAsTrack->at(i_pfp)) continue;
 
     // Make dE/dx plots
-    std::vector<double> dEdx = vars->dEdxvec->at(i_pfp);
-    std::vector<double> resrange = vars->resrangevec->at(i_pfp);
+    // -- plane 0
+    std::vector<double> dEdx_plane0 = vars->dEdxvec_plane0->at(i_pfp);
+    std::vector<double> resrange_plane0 = vars->resrangevec_plane0->at(i_pfp);
 
-    for (size_t i_dEdx=0; i_dEdx<dEdx.size(); i_dEdx++){
-      hists->hdEdx_rr_fullrange_all->Fill(resrange.at(i_dEdx),dEdx.at(i_dEdx));
-      if (resrange.at(i_dEdx) > 100 && resrange.at(i_dEdx) < 150){
-        hists->hdEdx_all->Fill(dEdx.at(i_dEdx));
-        hists->hdEdx_rr_all->Fill(resrange.at(i_dEdx),dEdx.at(i_dEdx));
+    for (size_t i_dEdx_plane0=0; i_dEdx_plane0<dEdx_plane0.size(); i_dEdx_plane0++){
+      hists->hdEdx_rr_fullrange_all_plane0->Fill(resrange_plane0.at(i_dEdx_plane0),dEdx_plane0.at(i_dEdx_plane0));
+      if (TMath::Abs(vars->truePDG->at(i_pfp))==13){
+        hists->hdEdx_rr_fullrange_Muon_plane0->Fill(resrange_plane0.at(i_dEdx_plane0),dEdx_plane0.at(i_dEdx_plane0));
       }
-      if (resrange.at(i_dEdx) > 100 && resrange.at(i_dEdx) < 150 && TMath::Abs(vars->truePDG->at(i_pfp))==13){
-        hists->hdEdx_Muon->Fill(dEdx.at(i_dEdx));
-        hists->hdEdx_rr_Muon->Fill(resrange.at(i_dEdx),dEdx.at(i_dEdx));
+      else if (TMath::Abs(vars->truePDG->at(i_pfp))==2212){
+        hists->hdEdx_rr_fullrange_Proton_plane0->Fill(resrange_plane0.at(i_dEdx_plane0),dEdx_plane0.at(i_dEdx_plane0));
       }
-      if (resrange.at(i_dEdx) > 100 && resrange.at(i_dEdx) < 150 && TMath::Abs(vars->truePDG->at(i_pfp))==2212){
-        hists->hdEdx_Proton->Fill(dEdx.at(i_dEdx));
-        hists->hdEdx_rr_Proton->Fill(resrange.at(i_dEdx),dEdx.at(i_dEdx));
+
+      if (resrange_plane0.at(i_dEdx_plane0) > 100 && resrange_plane0.at(i_dEdx_plane0) < 150){
+        hists->hdEdx_all_plane0->Fill(dEdx_plane0.at(i_dEdx_plane0));
+        hists->hdEdx_rr_all_plane0->Fill(resrange_plane0.at(i_dEdx_plane0),dEdx_plane0.at(i_dEdx_plane0));
       }
-    } // loop over hits (dEdx and resrange)
+      if (resrange_plane0.at(i_dEdx_plane0) > 100 && resrange_plane0.at(i_dEdx_plane0) < 150 && TMath::Abs(vars->truePDG->at(i_pfp))==13){
+        hists->hdEdx_Muon_plane0->Fill(dEdx_plane0.at(i_dEdx_plane0));
+        hists->hdEdx_rr_Muon_plane0->Fill(resrange_plane0.at(i_dEdx_plane0),dEdx_plane0.at(i_dEdx_plane0));
+      }
+      if (resrange_plane0.at(i_dEdx_plane0) > 100 && resrange_plane0.at(i_dEdx_plane0) < 150 && TMath::Abs(vars->truePDG->at(i_pfp))==2212){
+        hists->hdEdx_Proton_plane0->Fill(dEdx_plane0.at(i_dEdx_plane0));
+        hists->hdEdx_rr_Proton_plane0->Fill(resrange_plane0.at(i_dEdx_plane0),dEdx_plane0.at(i_dEdx_plane0));
+      }
+    } // loop over hits (dEdx and resrange), plane 0
+    // -- plane 1
+    std::vector<double> dEdx_plane1 = vars->dEdxvec_plane1->at(i_pfp);
+    std::vector<double> resrange_plane1 = vars->resrangevec_plane1->at(i_pfp);
+
+    for (size_t i_dEdx_plane1=0; i_dEdx_plane1<dEdx_plane1.size(); i_dEdx_plane1++){
+      hists->hdEdx_rr_fullrange_all_plane1->Fill(resrange_plane1.at(i_dEdx_plane1),dEdx_plane1.at(i_dEdx_plane1));
+      if (TMath::Abs(vars->truePDG->at(i_pfp))==13){
+        hists->hdEdx_rr_fullrange_Muon_plane1->Fill(resrange_plane1.at(i_dEdx_plane1),dEdx_plane1.at(i_dEdx_plane1));
+      }
+      else if (TMath::Abs(vars->truePDG->at(i_pfp))==2212){
+        hists->hdEdx_rr_fullrange_Proton_plane1->Fill(resrange_plane1.at(i_dEdx_plane1),dEdx_plane1.at(i_dEdx_plane1));
+      }
+
+      if (resrange_plane1.at(i_dEdx_plane1) > 100 && resrange_plane1.at(i_dEdx_plane1) < 150){
+        hists->hdEdx_all_plane1->Fill(dEdx_plane1.at(i_dEdx_plane1));
+        hists->hdEdx_rr_all_plane1->Fill(resrange_plane1.at(i_dEdx_plane1),dEdx_plane1.at(i_dEdx_plane1));
+      }
+      if (resrange_plane1.at(i_dEdx_plane1) > 100 && resrange_plane1.at(i_dEdx_plane1) < 150 && TMath::Abs(vars->truePDG->at(i_pfp))==13){
+        hists->hdEdx_Muon_plane1->Fill(dEdx_plane1.at(i_dEdx_plane1));
+        hists->hdEdx_rr_Muon_plane1->Fill(resrange_plane1.at(i_dEdx_plane1),dEdx_plane1.at(i_dEdx_plane1));
+      }
+      if (resrange_plane1.at(i_dEdx_plane1) > 100 && resrange_plane1.at(i_dEdx_plane1) < 150 && TMath::Abs(vars->truePDG->at(i_pfp))==2212){
+        hists->hdEdx_Proton_plane1->Fill(dEdx_plane1.at(i_dEdx_plane1));
+        hists->hdEdx_rr_Proton_plane1->Fill(resrange_plane1.at(i_dEdx_plane1),dEdx_plane1.at(i_dEdx_plane1));
+      }
+    } // loop over hits (dEdx and resrange), plane 1
+    // -- plane 2
+    std::vector<double> dEdx_plane2 = vars->dEdxvec_plane2->at(i_pfp);
+    std::vector<double> resrange_plane2 = vars->resrangevec_plane2->at(i_pfp);
+
+    for (size_t i_dEdx_plane2=0; i_dEdx_plane2<dEdx_plane2.size(); i_dEdx_plane2++){
+      hists->hdEdx_rr_fullrange_all_plane2->Fill(resrange_plane2.at(i_dEdx_plane2),dEdx_plane2.at(i_dEdx_plane2));
+      if (TMath::Abs(vars->truePDG->at(i_pfp))==13){
+        hists->hdEdx_rr_fullrange_Muon_plane2->Fill(resrange_plane2.at(i_dEdx_plane2),dEdx_plane2.at(i_dEdx_plane2));
+      }
+      else if (TMath::Abs(vars->truePDG->at(i_pfp))==2212){
+        hists->hdEdx_rr_fullrange_Proton_plane2->Fill(resrange_plane2.at(i_dEdx_plane2),dEdx_plane2.at(i_dEdx_plane2));
+      }
+
+      if (resrange_plane2.at(i_dEdx_plane2) > 100 && resrange_plane2.at(i_dEdx_plane2) < 150){
+        hists->hdEdx_all_plane2->Fill(dEdx_plane2.at(i_dEdx_plane2));
+        hists->hdEdx_rr_all_plane2->Fill(resrange_plane2.at(i_dEdx_plane2),dEdx_plane2.at(i_dEdx_plane2));
+      }
+      if (resrange_plane2.at(i_dEdx_plane2) > 100 && resrange_plane2.at(i_dEdx_plane2) < 150 && TMath::Abs(vars->truePDG->at(i_pfp))==13){
+        hists->hdEdx_Muon_plane2->Fill(dEdx_plane2.at(i_dEdx_plane2));
+        hists->hdEdx_rr_Muon_plane2->Fill(resrange_plane2.at(i_dEdx_plane2),dEdx_plane2.at(i_dEdx_plane2));
+      }
+      if (resrange_plane2.at(i_dEdx_plane2) > 100 && resrange_plane2.at(i_dEdx_plane2) < 150 && TMath::Abs(vars->truePDG->at(i_pfp))==2212){
+        hists->hdEdx_Proton_plane2->Fill(dEdx_plane2.at(i_dEdx_plane2));
+        hists->hdEdx_rr_Proton_plane2->Fill(resrange_plane2.at(i_dEdx_plane2),dEdx_plane2.at(i_dEdx_plane2));
+      }
+    } // loop over hits (dEdx and resrange), plane 2
 
 
     // Fill n2llh histograms
@@ -427,35 +530,94 @@ void MakePlots(TFile *outfile, histograms *MChists, histograms *EXThists=nullptr
 
   // Plot things!
   outfile->cd();
-  MChists->hdEdx_all->Write("hdEdx_all");
-  if (MChists->hdEdx_Muon->Integral() > 0) MChists->hdEdx_Muon->Write("hdEdx_Muon");
-  if (MChists->hdEdx_Proton->Integral() > 0) MChists->hdEdx_Proton->Write("hdEdx_Proton");
-  MChists->hdEdx_rr_all->Write("hdEdx_rr_all");
-  if (MChists->hdEdx_rr_Muon->Integral() > 0) MChists->hdEdx_rr_Muon->Write("hdEdx_rr_Muon");
-  if (MChists->hdEdx_rr_Proton->Integral() > 0) MChists->hdEdx_rr_Proton->Write("hdEdx_rr_Proton");
+  // -- plane 0
+  MChists->hdEdx_all_plane0->Write("hdEdx_all_plane0");
+  if (MChists->hdEdx_Muon_plane0->Integral() > 0) MChists->hdEdx_Muon_plane0->Write("hdEdx_Muon_plane0");
+  if (MChists->hdEdx_Proton_plane0->Integral() > 0) MChists->hdEdx_Proton_plane0->Write("hdEdx_Proton_plane0");
+  MChists->hdEdx_rr_all_plane0->Write("hdEdx_rr_all_plane0");
+  if (MChists->hdEdx_rr_Muon_plane0->Integral() > 0) MChists->hdEdx_rr_Muon_plane0->Write("hdEdx_rr_Muon_plane0");
+  if (MChists->hdEdx_rr_Proton_plane0->Integral() > 0) MChists->hdEdx_rr_Proton_plane0->Write("hdEdx_rr_Proton_plane0");
 
-  if (BNBhists) BNBhists->hdEdx_all->Write("hdEdx_all_BNB");
-  if (EXThists) EXThists->hdEdx_all->Write("hdEdx_all_EXT");
+  if (BNBhists) BNBhists->hdEdx_all_plane0->Write("hdEdx_all_plane0_BNB");
+  if (EXThists) EXThists->hdEdx_all_plane0->Write("hdEdx_all_plane0_EXT");
 
-  MChists->hdEdx_rr_fullrange_all->Write("hdEdx_rr_fullrange_all");
-  if (BNBhists)
-  BNBhists->hdEdx_rr_fullrange_all->Write("hdEdx_rr_fullrange_all_BNB");
-  if (EXThists)
-  EXThists->hdEdx_rr_fullrange_all->Write("hdEdx_rr_fullrange_all_EXT");
+  MChists->hdEdx_rr_fullrange_all_plane0->Write("hdEdx_rr_fullrange_all_plane0");
+  MChists->hdEdx_rr_fullrange_Muon_plane0->Write("hdEdx_rr_fullrange_Muon_plane0");
+  MChists->hdEdx_rr_fullrange_Proton_plane0->Write("hdEdx_rr_fullrange_Proton_plane0");
+  if (BNBhists){
+    BNBhists->hdEdx_rr_fullrange_all_plane0->Write("hdEdx_rr_fullrange_all_plane0_BNB");
+    BNBhists->hdEdx_rr_fullrange_Muon_plane0->Write("hdEdx_rr_fullrange_Muon_plane0_EXT");
+    BNBhists->hdEdx_rr_fullrange_Proton_plane0->Write("hdEdx_rr_fullrange_Proton_plane0_EXT");
+  }
+  if (EXThists){
+    EXThists->hdEdx_rr_fullrange_all_plane0->Write("hdEdx_rr_fullrange_all_plane0_EXT");
+    EXThists->hdEdx_rr_fullrange_Muon_plane0->Write("hdEdx_rr_fullrange_Muon_plane0_EXT");
+    EXThists->hdEdx_rr_fullrange_Proton_plane0->Write("hdEdx_rr_fullrange_Proton_plane0_EXT");
+  }
+  // -- plane 1
+  MChists->hdEdx_all_plane1->Write("hdEdx_all_plane1");
+  if (MChists->hdEdx_Muon_plane1->Integral() > 0) MChists->hdEdx_Muon_plane1->Write("hdEdx_Muon_plane1");
+  if (MChists->hdEdx_Proton_plane1->Integral() > 0) MChists->hdEdx_Proton_plane1->Write("hdEdx_Proton_plane1");
+  MChists->hdEdx_rr_all_plane1->Write("hdEdx_rr_all_plane1");
+  if (MChists->hdEdx_rr_Muon_plane1->Integral() > 0) MChists->hdEdx_rr_Muon_plane1->Write("hdEdx_rr_Muon_plane1");
+  if (MChists->hdEdx_rr_Proton_plane1->Integral() > 0) MChists->hdEdx_rr_Proton_plane1->Write("hdEdx_rr_Proton_plane1");
 
-  TCanvas *c0 = new TCanvas();
-  c0->SetLogz();
-  MChists->hdEdx_rr_fullrange_all->SetTitle("MC");
-  MChists->hdEdx_rr_fullrange_all->Draw("colz");
+  if (BNBhists) BNBhists->hdEdx_all_plane1->Write("hdEdx_all_plane1_BNB");
+  if (EXThists) EXThists->hdEdx_all_plane1->Write("hdEdx_all_plane1_EXT");
+
+  MChists->hdEdx_rr_fullrange_all_plane1->Write("hdEdx_rr_fullrange_all_plane1");
+  MChists->hdEdx_rr_fullrange_Muon_plane1->Write("hdEdx_rr_fullrange_Muon_plane1");
+  MChists->hdEdx_rr_fullrange_Proton_plane1->Write("hdEdx_rr_fullrange_Proton_plane1");
+  if (BNBhists){
+    BNBhists->hdEdx_rr_fullrange_all_plane1->Write("hdEdx_rr_fullrange_all_plane1_BNB");
+    BNBhists->hdEdx_rr_fullrange_Muon_plane1->Write("hdEdx_rr_fullrange_Muon_plane1_EXT");
+    BNBhists->hdEdx_rr_fullrange_Proton_plane1->Write("hdEdx_rr_fullrange_Proton_plane1_EXT");
+  }
+  if (EXThists){
+    EXThists->hdEdx_rr_fullrange_all_plane1->Write("hdEdx_rr_fullrange_all_plane1_EXT");
+    EXThists->hdEdx_rr_fullrange_Muon_plane1->Write("hdEdx_rr_fullrange_Muon_plane1_EXT");
+    EXThists->hdEdx_rr_fullrange_Proton_plane1->Write("hdEdx_rr_fullrange_Proton_plane1_EXT");
+  }
+  // -- plane 2
+  MChists->hdEdx_all_plane2->Write("hdEdx_all_plane2");
+  if (MChists->hdEdx_Muon_plane2->Integral() > 0) MChists->hdEdx_Muon_plane2->Write("hdEdx_Muon_plane2");
+  if (MChists->hdEdx_Proton_plane2->Integral() > 0) MChists->hdEdx_Proton_plane2->Write("hdEdx_Proton_plane2");
+  MChists->hdEdx_rr_all_plane2->Write("hdEdx_rr_all_plane2");
+  if (MChists->hdEdx_rr_Muon_plane2->Integral() > 0) MChists->hdEdx_rr_Muon_plane2->Write("hdEdx_rr_Muon_plane2");
+  if (MChists->hdEdx_rr_Proton_plane2->Integral() > 0) MChists->hdEdx_rr_Proton_plane2->Write("hdEdx_rr_Proton_plane2");
+
+  if (BNBhists) BNBhists->hdEdx_all_plane2->Write("hdEdx_all_plane2_BNB");
+  if (EXThists) EXThists->hdEdx_all_plane2->Write("hdEdx_all_plane2_EXT");
+
+  MChists->hdEdx_rr_fullrange_all_plane2->Write("hdEdx_rr_fullrange_all_plane2");
+  MChists->hdEdx_rr_fullrange_Muon_plane2->Write("hdEdx_rr_fullrange_Muon_plane2");
+  MChists->hdEdx_rr_fullrange_Proton_plane2->Write("hdEdx_rr_fullrange_Proton_plane2");
+  if (BNBhists){
+    BNBhists->hdEdx_rr_fullrange_all_plane2->Write("hdEdx_rr_fullrange_all_plane2_BNB");
+    BNBhists->hdEdx_rr_fullrange_Muon_plane2->Write("hdEdx_rr_fullrange_Muon_plane2_EXT");
+    BNBhists->hdEdx_rr_fullrange_Proton_plane2->Write("hdEdx_rr_fullrange_Proton_plane2_EXT");
+  }
+  if (EXThists){
+    EXThists->hdEdx_rr_fullrange_all_plane2->Write("hdEdx_rr_fullrange_all_plane2_EXT");
+    EXThists->hdEdx_rr_fullrange_Muon_plane2->Write("hdEdx_rr_fullrange_Muon_plane2_EXT");
+    EXThists->hdEdx_rr_fullrange_Proton_plane2->Write("hdEdx_rr_fullrange_Proton_plane2_EXT");
+  }
+
+
+  // -- plane 0
+  TCanvas *c0_plane0 = new TCanvas();
+  c0_plane0->SetLogz();
+  MChists->hdEdx_rr_fullrange_all_plane0->SetTitle("MC");
+  MChists->hdEdx_rr_fullrange_all_plane0->Draw("colz");
   // Overlay theoretical predictions
   particleid::Theory_dEdx_resrange theory;
-  theory.g_ThdEdxRR_Muon->SetLineWidth(2);
+  theory.g_ThdEdxRR_Muon->SetLineWidth(3);
   theory.g_ThdEdxRR_Muon->SetLineColor(TColor::GetColor(8,64,129));
   theory.g_ThdEdxRR_Muon->Draw("same l");
-  theory.g_ThdEdxRR_Proton->SetLineWidth(2);
+  theory.g_ThdEdxRR_Proton->SetLineWidth(3);
   theory.g_ThdEdxRR_Proton->SetLineColor(TColor::GetColor(215, 48, 39));
   theory.g_ThdEdxRR_Proton->Draw("same l");
-  theory.g_ThdEdxRR_MuonNoBragg->SetLineWidth(2);
+  theory.g_ThdEdxRR_MuonNoBragg->SetLineWidth(3);
   theory.g_ThdEdxRR_MuonNoBragg->SetLineColor(kBlack);
   theory.g_ThdEdxRR_MuonNoBragg->Draw("same l");
 
@@ -467,24 +629,82 @@ void MakePlots(TFile *outfile, histograms *MChists, histograms *EXThists=nullptr
   l_thpred->AddEntry(theory.g_ThdEdxRR_Muon,"Muon theoretical prediction","l");
   l_thpred->AddEntry(theory.g_ThdEdxRR_MuonNoBragg,"MIP theoretical prediction","l");
   l_thpred->Draw();
-  c0->Print("dEdxrr_fullrange_MC.png");
-  c0->Write("dEdxrr_fullrange_MCcanv");
+  c0_plane0->Print("dEdxrr_fullrange_plane0_MC.png");
+  c0_plane0->Write("dEdxrr_fullrange_MCcanv_plane0");
 
-  TCanvas *c0a = new TCanvas();
-  c0a->SetLogz();
-  if (BNBhists && EXThists){
-    BNBhists->hdEdx_rr_fullrange_all->SetTitle("Data");
+  TCanvas *c0_plane0a = new TCanvas();
+  c0_plane0a->SetLogz();
+  if (BNBhists){// || EXThists){
+    BNBhists->hdEdx_rr_fullrange_all_plane0->SetTitle("Data");
     //BNBhists->hdEdx_rr_fullrange_all->Add(EXThists->hdEdx_rr_fullrange_all,1.0*EXTtoBNBscaling);
-    BNBhists->hdEdx_rr_fullrange_all->Sumw2();
-    BNBhists->hdEdx_rr_fullrange_all->Scale(1.0/BNBhists->hdEdx_rr_fullrange_all->Integral());
-    BNBhists->hdEdx_rr_fullrange_all->Draw("colz");
+    BNBhists->hdEdx_rr_fullrange_all_plane0->Sumw2();
+    BNBhists->hdEdx_rr_fullrange_all_plane0->Scale(1.0/BNBhists->hdEdx_rr_fullrange_all_plane0->Integral());
+    BNBhists->hdEdx_rr_fullrange_all_plane0->Draw("colz");
 
     theory.g_ThdEdxRR_Muon->Draw("same l");
     theory.g_ThdEdxRR_Proton->Draw("same l");
     theory.g_ThdEdxRR_MuonNoBragg->Draw("same l");
     l_thpred->Draw();
-    c0a->Print("dEdxrr_fullrange_Data.png");
-    c0a->Write("dEdxrr_fullrange_Datacanv");
+    c0_plane0a->Print("dEdxrr_fullrange_plane0_Data.png");
+    c0_plane0a->Write("dEdxrr_fullrange_Datacanv_plane0");
+  }
+  // -- plane 1
+  TCanvas *c0_plane1 = new TCanvas();
+  c0_plane1->SetLogz();
+  MChists->hdEdx_rr_fullrange_all_plane1->SetTitle("MC");
+  MChists->hdEdx_rr_fullrange_all_plane1->Draw("colz");
+  // Overlay theoretical predictions
+  theory.g_ThdEdxRR_Muon->Draw("same l");
+  theory.g_ThdEdxRR_Proton->Draw("same l");
+  theory.g_ThdEdxRR_MuonNoBragg->Draw("same l");
+  l_thpred->Draw();
+  c0_plane1->Print("dEdxrr_fullrange_plane1_MC.png");
+  c0_plane1->Write("dEdxrr_fullrange_MCcanv_plane1");
+
+  TCanvas *c0_plane1a = new TCanvas();
+  c0_plane1a->SetLogz();
+  if (BNBhists){// || EXThists){
+    BNBhists->hdEdx_rr_fullrange_all_plane1->SetTitle("Data");
+    //BNBhists->hdEdx_rr_fullrange_all->Add(EXThists->hdEdx_rr_fullrange_all,1.0*EXTtoBNBscaling);
+    BNBhists->hdEdx_rr_fullrange_all_plane1->Sumw2();
+    BNBhists->hdEdx_rr_fullrange_all_plane1->Scale(1.0/BNBhists->hdEdx_rr_fullrange_all_plane1->Integral());
+    BNBhists->hdEdx_rr_fullrange_all_plane1->Draw("colz");
+
+    theory.g_ThdEdxRR_Muon->Draw("same l");
+    theory.g_ThdEdxRR_Proton->Draw("same l");
+    theory.g_ThdEdxRR_MuonNoBragg->Draw("same l");
+    l_thpred->Draw();
+    c0_plane1a->Print("dEdxrr_fullrange_plane1_Data.png");
+    c0_plane1a->Write("dEdxrr_fullrange_Datacanv_plane1");
+  }
+  // -- plane 2
+  TCanvas *c0_plane2 = new TCanvas();
+  c0_plane2->SetLogz();
+  MChists->hdEdx_rr_fullrange_all_plane2->SetTitle("MC");
+  MChists->hdEdx_rr_fullrange_all_plane2->Draw("colz");
+  // Overlay theoretical predictions
+  theory.g_ThdEdxRR_Muon->Draw("same l");
+  theory.g_ThdEdxRR_Proton->Draw("same l");
+  theory.g_ThdEdxRR_MuonNoBragg->Draw("same l");
+  l_thpred->Draw();
+  c0_plane2->Print("dEdxrr_fullrange_plane2_MC.png");
+  c0_plane2->Write("dEdxrr_fullrange_MCcanv_plane2");
+
+  TCanvas *c0_plane2a = new TCanvas();
+  c0_plane2a->SetLogz();
+  if (BNBhists){// || EXThists){
+    BNBhists->hdEdx_rr_fullrange_all_plane2->SetTitle("Data");
+    //BNBhists->hdEdx_rr_fullrange_all->Add(EXThists->hdEdx_rr_fullrange_all,1.0*EXTtoBNBscaling);
+    BNBhists->hdEdx_rr_fullrange_all_plane2->Sumw2();
+    BNBhists->hdEdx_rr_fullrange_all_plane2->Scale(1.0/BNBhists->hdEdx_rr_fullrange_all_plane2->Integral());
+    BNBhists->hdEdx_rr_fullrange_all_plane2->Draw("colz");
+
+    theory.g_ThdEdxRR_Muon->Draw("same l");
+    theory.g_ThdEdxRR_Proton->Draw("same l");
+    theory.g_ThdEdxRR_MuonNoBragg->Draw("same l");
+    l_thpred->Draw();
+    c0_plane2a->Print("dEdxrr_fullrange_plane2_Data.png");
+    c0_plane2a->Write("dEdxrr_fullrange_Datacanv_plane2");
   }
 
   TCanvas *c1 = new TCanvas();
