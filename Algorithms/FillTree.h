@@ -50,6 +50,7 @@
 #include "uboone/CC1pi/Algorithms/TopologyEnums.h"
 #include "uboone/CC1pi/Algorithms/FVCheck.h"
 #include "uboone/CC1pi/Algorithms/PDGEnums.h"
+#include "uboone/CC1pi/Algorithms/InputTags.h"
 
 struct cc1pianavars{
 
@@ -129,6 +130,8 @@ struct cc1pianavars{
   std::map<std::string,bool> CC1picutflow;
 
   fhicl::ParameterSet pset;
+
+  InputTags *CC1piInputTags;
 
   // Constructor (pass the fhicl parameters here)
   cc1pianavars(fhicl::ParameterSet const &p);

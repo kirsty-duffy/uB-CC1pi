@@ -3,19 +3,19 @@
 
 #include "TwoTrackCheck.h"
 
-std::map<std::string,bool> TwoTrackCheck(art::Event &evt)
+std::map<std::string,bool> TwoTrackCheck(art::Event &evt, InputTags *CC1piInputTags)
 {
    std::map<std::string,bool> CC1picutflow;
 
    art::Handle<std::vector<ubana::SelectionResult>> selection_h;
-   evt.getByLabel("UBXSec", selection_h);
+   evt.getByLabel(CC1piInputTags->fSelectionLabel, selection_h);
    if(!selection_h.isValid()){
-      mf::LogError(__PRETTY_FUNCTION__) << "SelectionResult product not found." << std::endl;
+      mf::LogError(__PRETTY_FUNCTION__) << "[TwoTrackCheck] SelectionResult product not found." << std::endl;
       throw std::exception();
    }
 
    //Get TPCObject
-   art::FindManyP<ubana::TPCObject> tpcobject_from_selection(selection_h, evt, "UBXSec");
+   art::FindManyP<ubana::TPCObject> tpcobject_from_selection(selection_h, evt, CC1piInputTags->fSelectionLabel);
    if(tpcobject_from_selection.at(0).size() == 0) {
       //No TPCObject
       CC1picutflow["TwoTrackCut"] = false;
@@ -63,16 +63,16 @@ std::map<std::string,bool> TwoTrackCheck(art::Event &evt)
 
    //Get PFPs (in event)
    art::Handle<std::vector<recob::PFParticle> > pfp_h;
-   evt.getByLabel("pandoraNu::UBXSec",pfp_h);
+   evt.getByLabel(CC1piInputTags->fTrackLabel,pfp_h);
    if(!pfp_h.isValid()){
       mf::LogError(__PRETTY_FUNCTION__) << "PFP product not found." << std::endl;
       throw std::exception();
    }
 
-   art::FindManyP<recob::Track> tracks_from_pfps(pfp_h, evt, "pandoraNu::UBXSec");
+   art::FindManyP<recob::Track> tracks_from_pfps(pfp_h, evt, CC1piInputTags->fTrackLabel);
 
    // Also get track-PID association objects
-   auto const& track_h = evt.getValidHandle<std::vector<recob::Track>>("pandoraNu::UBXSec");
+   auto const& track_h = evt.getValidHandle<std::vector<recob::Track>>(CC1piInputTags->fTrackLabel);
    art::FindManyP<anab::ParticleID> trackPIDAssn(track_h, evt, "pid");
 
    // Every PFP could in theory have more than one track

@@ -27,6 +27,7 @@
 // Include CC1pi files from elsewhere
 #include "uboone/CC1pi/Algorithms/TwoTrackCheck.h"
 #include "uboone/CC1pi/Algorithms/FVCheck.h"
+#include "uboone/CC1pi/Algorithms/InputTags.h"
 
 class MinTwoTrackFilter;
 
@@ -50,6 +51,9 @@ private:
 
   // Declare member data here.
 
+  // Input Tags
+  InputTags *CC1piInputTags;
+
 };
 
 
@@ -58,6 +62,9 @@ MinTwoTrackFilter::MinTwoTrackFilter(fhicl::ParameterSet const & p)
 // Initialize member data here.
 {
   // Call appropriate produces<>() functions here.
+
+  // Instantiate struct to hold input tags
+  CC1piInputTags = new InputTags(p);
 }
 
 bool MinTwoTrackFilter::filter(art::Event & evt)
@@ -65,9 +72,9 @@ bool MinTwoTrackFilter::filter(art::Event & evt)
 
   // ----- Cut: must pass Marco's selection ----- //
    art::Handle<std::vector<ubana::SelectionResult>> selection_h;
-   evt.getByLabel("UBXSec", selection_h);
+   evt.getByLabel(CC1piInputTags->fSelectionLabel, selection_h);
    if(!selection_h.isValid()){
-      mf::LogError(__PRETTY_FUNCTION__) << "SelectionResult product not found." << std::endl;
+      mf::LogError(__PRETTY_FUNCTION__) << "[MinTwoTrackFilter] SelectionResult product not found." << std::endl;
       throw std::exception();
    }
    std::vector<art::Ptr<ubana::SelectionResult>> selection_v;
@@ -77,14 +84,14 @@ bool MinTwoTrackFilter::filter(art::Event & evt)
 
    // Check if "passing" events still pass Marco's full FV cut
    if (PassesMarcosSelec) {
-      if(!FVCheck(evt)) {
+      if(!FVCheck(evt, CC1piInputTags)) {
          PassesMarcosSelec = false;
       }
    }
    
 
    // ----- Cut: must have >= 2 tracks ----- //
-   std::map<std::string,bool> _TwoTrackCheck = TwoTrackCheck(evt);
+   std::map<std::string,bool> _TwoTrackCheck = TwoTrackCheck(evt, CC1piInputTags);
 
    // Now decide whether to keep the event
    // Keep only events which pass Marco's selection and the TwoTrackCut check

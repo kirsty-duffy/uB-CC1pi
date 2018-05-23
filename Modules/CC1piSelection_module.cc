@@ -31,6 +31,7 @@
 #include "uboone/CC1pi/Algorithms/FillTree.h"
 #include "uboone/CC1pi/Algorithms/TwoTrackCheck.h"
 #include "uboone/CC1pi/Algorithms/FVCheck.h"
+#include "uboone/CC1pi/Algorithms/InputTags.h"
 
 class CC1piSelection;
 
@@ -65,6 +66,9 @@ class CC1piSelection : public art::EDProducer {
       // Variables for output tree
       cc1pianavars *anavars;
 
+      // Input Tags
+      InputTags *CC1piInputTags;
+
       // CC1pi selection variables
       std::map<std::string,bool> _CC1picutflow;
 
@@ -87,6 +91,9 @@ CC1piSelection::CC1piSelection(fhicl::ParameterSet const & p)
    // Instantiate struct to hold variables (and pass fhicl parameters)
    anavars = new cc1pianavars(p);
 
+   // Instantiate struct to hold input tags
+   CC1piInputTags = new InputTags(p);
+
    // Instantiate tree and make branches
    _outtree = tfs->make<TTree>("outtree","");
    MakeAnaBranches(_outtree,anavars);
@@ -108,9 +115,9 @@ void CC1piSelection::produce(art::Event & evt)
 
    // ----- Cut: must pass Marco's selection ----- //
    art::Handle<std::vector<ubana::SelectionResult>> selection_h;
-   evt.getByLabel("UBXSec", selection_h);
+   evt.getByLabel(CC1piInputTags->fSelectionLabel, selection_h);
    if(!selection_h.isValid()){
-      mf::LogError(__PRETTY_FUNCTION__) << "SelectionResult product not found." << std::endl;
+      mf::LogError(__PRETTY_FUNCTION__) << "[CC1piSelection] SelectionResult product not found." << std::endl;
       throw std::exception();
    }
    std::vector<art::Ptr<ubana::SelectionResult>> selection_v;
@@ -119,12 +126,12 @@ void CC1piSelection::produce(art::Event & evt)
    bool PassesMarcosSelec = selection_v.at(0)->GetSelectionStatus();
    _CC1picutflow = selection_v.at(0)->GetCutFlowStatus();
 
-   std::map<std::string,bool> TwoTrackcutflow = TwoTrackCheck(evt);
+   std::map<std::string,bool> TwoTrackcutflow = TwoTrackCheck(evt, CC1piInputTags);
    _CC1picutflow.insert(TwoTrackcutflow.begin(), TwoTrackcutflow.end());
 
    // Check if "passing" events still pass the full FV cut
    if (PassesMarcosSelec) {
-      if(!FVCheck(evt)) {
+      if(!FVCheck(evt, CC1piInputTags)) {
          PassesMarcosSelec = false;
          _CC1picutflow["fiducial_volume"] = false;
       }
