@@ -158,7 +158,7 @@ void CC1piSelection::endSubRun(art::SubRun &sr) {
    // Note: the entire subrun's POT is recorded in the tree for every event.
    // You must only add it once per subrun to get the correct number.
 
-   std::cout << "Hello I'm ending a subRun and setting POT" << std::endl;
+   //std::cout << "Hello I'm ending a subRun and setting POT" << std::endl;
    art::Handle<sumdata::POTSummary> potsum_h;
 
    // MC
@@ -183,7 +183,6 @@ void CC1piSelection::endSubRun(art::SubRun &sr) {
    }
 
    _pot_tree->Fill();
-
 }
 
 DEFINE_ART_MODULE(CC1piSelection)
