@@ -19,7 +19,7 @@ services:
    TPCEnergyCalib: @local::microboone_tpcenergycalib_service
 }
 
-services.DetectorClocksService.InheritClockConfig:   false     
+services.DetectorClocksService.InheritClockConfig:   false
 services.DetectorClocksService.TriggerOffsetTPC:     -400
 
 services.SpaceCharge.EnableCorrSCE:       true
@@ -31,8 +31,8 @@ source:
   module_type   : RootInput
   maxEvents     : -1
   fileNames     : [ ]
-  inputCommands : [ 
-  "keep *", 
+  inputCommands : [
+  "keep *",
   "drop sumdata::RunData_*_*_*" # Workaround for LArSoft bug 18943
   ]
 }
@@ -53,6 +53,7 @@ physics.producers.cc1piselec:
   TrackLabel:            "pandoraNu::CC1pi"
   CalorimetryLabel:      "UBXSecpandoraNucali::CC1pi"
   SelectionLabel:        "UBXSec::CC1pi"
+  ParticleIdChi2Label:   "pandoraNupid::CC1pi"
 }
 physics.producers.UBXSecpandoraNucali.TrackModuleLabel:       "pandoraNu::CC1pi"
 physics.producers.UBXSecpandoraNucali.CalorimetryModuleLabel: "pandoraNucalo::CC1pi"
