@@ -53,6 +53,8 @@
 
 struct cc1pianavars{
 
+  std::string fPIDLabelChi2;
+
   bool isData;
   art::RunNumber_t run_num;
   art::SubRunNumber_t subrun_num;
@@ -66,9 +68,11 @@ struct cc1pianavars{
   std::vector<double> TPCObj_PFP_track_length;
   std::vector<std::vector<double>> TPCObj_PFP_track_start;
   std::vector<std::vector<double>> TPCObj_PFP_track_end;
-  std::vector<double> TPCObj_PFP_track_dedx_truncmean;
-  std::vector<std::vector<double>> TPCObj_PFP_track_dedx_perhit;
-  std::vector<std::vector<double>> TPCObj_PFP_track_resrange_perhit;
+  std::vector<double> TPCObj_PFP_track_theta;
+  std::vector<double> TPCObj_PFP_track_phi;
+  std::vector<std::vector<double>> TPCObj_PFP_track_dedx_truncmean;
+  std::vector<std::vector<std::vector<double>>> TPCObj_PFP_track_dedx_perhit;
+  std::vector<std::vector<std::vector<double>>> TPCObj_PFP_track_resrange_perhit;
   std::vector<bool> TPCObj_PFP_isMIP;
   std::vector<double> TPCObj_PFP_shower_length;
   std::vector<std::vector<double>> TPCObj_PFP_shower_start;
@@ -83,19 +87,25 @@ struct cc1pianavars{
   std::vector<int> TPCObj_PFP_truePDG;
   std::vector<double> TPCObj_PFP_trueE;
   std::vector<double> TPCObj_PFP_trueKE;
-  std::vector<double> TPCObj_PFP_n2LLH_fwd_mu;
-  std::vector<double> TPCObj_PFP_n2LLH_fwd_p;
-  std::vector<double> TPCObj_PFP_n2LLH_bwd_mu;
-  std::vector<double> TPCObj_PFP_n2LLH_bwd_p;
-  std::vector<double> TPCObj_PFP_n2LLH_MIP;
-  std::vector<double> TPCObj_PFP_PIDA;
-  std::vector<double> TPCObj_PFP_track_depE;
-  std::vector<double> TPCObj_PFP_track_rangeE_mu;
-  std::vector<double> TPCObj_PFP_track_rangeE_pi;
-  std::vector<double> TPCObj_PFP_track_rangeE_p;
+  std::vector<double> TPCObj_PFP_trueEndP;
   int TPCObj_origin;
   int TPCObj_origin_extra;
   std::vector<double> TPCObj_reco_vtx;
+  // PID variables
+  std::vector<std::vector<double>> TPCObj_PFP_n2LLH_fwd_mu;
+  std::vector<std::vector<double>> TPCObj_PFP_n2LLH_fwd_p;
+  std::vector<std::vector<double>> TPCObj_PFP_n2LLH_fwd_pi;
+  std::vector<std::vector<double>> TPCObj_PFP_n2LLH_bwd_mu;
+  std::vector<std::vector<double>> TPCObj_PFP_n2LLH_bwd_p;
+  std::vector<std::vector<double>> TPCObj_PFP_n2LLH_bwd_pi;
+  std::vector<std::vector<double>> TPCObj_PFP_n2LLH_MIP;
+  std::vector<std::vector<double>> TPCObj_PFP_PIDA;
+  std::vector<std::vector<double>> TPCObj_PFP_track_depE;
+  std::vector<std::vector<double>> TPCObj_PFP_track_Chi2Proton;
+  std::vector<std::vector<double>> TPCObj_PFP_track_Chi2Muon;
+  std::vector<std::vector<double>> TPCObj_PFP_track_Chi2Pion;
+  std::vector<double> TPCObj_PFP_track_rangeE_mu;
+  std::vector<double> TPCObj_PFP_track_rangeE_p;
 
   std::vector<int> MCP_PDG;
   std::vector<double> MCP_length;

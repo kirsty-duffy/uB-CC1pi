@@ -8,6 +8,8 @@
 
 cc1pianavars::cc1pianavars(fhicl::ParameterSet const &p){
    pset = p;
+
+   fPIDLabelChi2 = p.get<std::string>("ParticleIdChi2Label");
 }
 
 
@@ -28,6 +30,8 @@ void cc1pianavars::Clear(){
    TPCObj_PFP_track_length.clear();
    TPCObj_PFP_track_start.clear();
    TPCObj_PFP_track_end.clear();
+   TPCObj_PFP_track_theta.clear();
+   TPCObj_PFP_track_phi.clear();
    TPCObj_PFP_track_dedx_truncmean.clear();
    TPCObj_PFP_track_dedx_perhit.clear();
    TPCObj_PFP_track_resrange_perhit.clear();
@@ -45,15 +49,20 @@ void cc1pianavars::Clear(){
    TPCObj_PFP_truePDG.clear();
    TPCObj_PFP_trueE.clear();
    TPCObj_PFP_trueKE.clear();
+   TPCObj_PFP_trueEndP.clear();
    TPCObj_PFP_n2LLH_fwd_mu.clear();
    TPCObj_PFP_n2LLH_fwd_p.clear();
+   TPCObj_PFP_n2LLH_fwd_pi.clear();
    TPCObj_PFP_n2LLH_bwd_mu.clear();
    TPCObj_PFP_n2LLH_bwd_p.clear();
+   TPCObj_PFP_n2LLH_bwd_pi.clear();
    TPCObj_PFP_n2LLH_MIP.clear();
    TPCObj_PFP_PIDA.clear();
    TPCObj_PFP_track_depE.clear();
+   TPCObj_PFP_track_Chi2Proton.clear();
+   TPCObj_PFP_track_Chi2Muon.clear();
+   TPCObj_PFP_track_Chi2Pion.clear();
    TPCObj_PFP_track_rangeE_mu.clear();
-   TPCObj_PFP_track_rangeE_pi.clear();
    TPCObj_PFP_track_rangeE_p.clear();
    TPCObj_origin = -9999;
    TPCObj_origin_extra = -9999;
@@ -82,7 +91,6 @@ void cc1pianavars::Clear(){
 }
 
 void cc1pianavars::SetReco2Vars(art::Event &evt){
-
    // Set all the values that are in the reco2 file
    // This just cleans the module up - move all these lines to here instead of in the module
 
@@ -185,6 +193,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       art::FindManyP<anab::ParticleID> trackPIDAssn(track_h, evt, "pid");
       // std::cout << "[CC1pi] trackPIDAssn.IsValid() = " << trackPIDAssn.isValid() << std::endl;
       // std::cout << "[CC1pi] trackPIDAssn.size() = " << trackPIDAssn.size() << std::endl;
+      art::FindManyP<anab::ParticleID> trackPIDAssnforChi2(track_h, evt, fPIDLabelChi2);
 
       //Get showers (in TPCObject)
       art::FindManyP<recob::Shower> showers_from_TPCObject(TPCObj_h, evt, "TPCObjectMaker");
@@ -229,17 +238,24 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          double track_length = -9999;
          std::vector<double> track_start = {-9999, -9999, -9999};
          std::vector<double> track_end = {-9999, -9999, -9999};
-         double track_dedx_truncmean = -9999;
-         std::vector<double> track_dedx_perhit = {-9999};
-         std::vector<double> track_resrange_perhit = {-9999};
+         double track_theta = -9999.;
+         double track_phi = -9999.;
+         std::vector<double> track_dedx_truncmean(3,-9999.);
+         std::vector<std::vector<double>> track_dedx_perhit(3);
+         std::vector<std::vector<double>> track_resrange_perhit(3);
          bool isMIP = false;
-         double Bragg_fwd_mu = -999;
-         double Bragg_fwd_p = -999;
-         double Bragg_bwd_mu = -999;
-         double Bragg_bwd_p = -999;
-         double noBragg_MIP = -999;
-         double PIDAval = -999;
-         double track_depE = -9999;
+         std::vector<double> Bragg_fwd_mu(3,-999.);
+         std::vector<double> Bragg_fwd_p(3,-999.);
+         std::vector<double> Bragg_fwd_pi(3,-999.);
+         std::vector<double> Bragg_bwd_mu(3,-999.);
+         std::vector<double> Bragg_bwd_p(3,-999.);
+         std::vector<double> Bragg_bwd_pi(3,-999.);
+         std::vector<double> noBragg_MIP(3,-999.);
+         std::vector<double> PIDAval(3,-999.);
+         std::vector<double> track_depE(3,-999.);
+         std::vector<double> track_Chi2Proton(3,-999.);
+         std::vector<double> track_Chi2Muon(3,-999.);
+         std::vector<double> track_Chi2Pion(3,-999.);
          double track_rangeE_mu = -9999;
          double track_rangeE_p = -9999;
          double shower_length = -9999;
@@ -252,6 +268,8 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          }
          for (auto track : tracks_pfp){
             track_length = track -> Length();
+            track_theta = track -> Theta();
+            track_phi = track -> Phi();
             auto start = track -> Start();
             track_start = {start.X(),start.Y(),start.Z()};
             auto end = track -> End();
@@ -265,25 +283,26 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
                std::vector< art::Ptr<anab::Calorimetry> > caloFromTrack = calos_from_tracks.at(track->ID());
 
                // for time being, only use Y plane calorimetry
-               art::Ptr< anab:: Calorimetry > calo;
+               art::Ptr< anab:: Calorimetry > calo_plane0;
+               art::Ptr< anab:: Calorimetry > calo_plane1;
+               art::Ptr< anab:: Calorimetry > calo_plane2;
                for (auto c : caloFromTrack){
                   int planenum = c->PlaneID().Plane;
-                  if (planenum != 2) continue; // Only use calorimetry from collection plane
-                  calo = c;
-               }
-               // Check that calo is a valid object - if so, set dedx_perhit and resrange_perhit
-               if (calo){
-                  track_dedx_perhit = calo->dEdx();
-                  track_resrange_perhit = calo->ResidualRange();
-                  std::vector<double> trkpitchvec = calo->TrkPitchVec();
-                  //double ke = calo->KineticEnergy();
 
-                  // sum dE/dx * dx over all hits to get deposited energy
-                  track_depE = 0;
-                  for (size_t i_hit=0; i_hit < track_dedx_perhit.size(); i_hit++){
-                     track_depE += track_dedx_perhit.at(i_hit)*trkpitchvec.at(i_hit);
+                  if (planenum < 0 || planenum > 2){
+                     std::cout << "[CC1pi::FillTree] No calorimetry information for plane number " << planenum << std::endl;
+                     continue;
                   }
-                  //std::cout << "[CC1pi] Track_depE = " << track_depE << ", KE = " << ke << std::endl;
+
+                  track_dedx_perhit.at(planenum) = c->dEdx();
+                  track_resrange_perhit.at(planenum) = c->ResidualRange();
+
+                  std::vector<double> trkpitchvec = c->TrkPitchVec();
+                  double track_depE_tmp = 0;
+                  for (size_t i_hit=0; i_hit < c->dEdx().size(); i_hit++){
+                     track_depE_tmp += c->dEdx().at(i_hit)*trkpitchvec.at(i_hit);
+                  }
+                  track_depE.at(planenum) = track_depE_tmp;
                }
             }  // end if(caloFromTracks.isValid())
 
@@ -291,7 +310,6 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
             // Store isMIP
             isMIP = IsMIP(trackPIDAssn, trkid);
-
 
             // Now get PID information from track association
             // Note that this relies on you having the feature branch of lardataobj lardataobj/feature/kduffy_pidrefactor_v1_11_00_04 checked out, otherwise you won't be able to read these products
@@ -305,26 +323,41 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
                   for (size_t i_algscore=0; i_algscore<AlgScoresVec.size(); i_algscore++){
 
                      anab::sParticleIDAlgScores AlgScore = AlgScoresVec.at(i_algscore);
+                     int planeid = AlgScore.fPlaneID.Plane;
+
+                     if (planeid < 0 || planeid > 2){
+                       std::cout << "[CC1pi::FillTree] No ParticleID information for planeid " << planeid << std::endl;
+                       continue;
+                     }
+
+                     std::cout << "PlaneID = " << planeid << ", AlgScore.fAssumedPdg = " << AlgScore.fAssumedPdg << ", AlgName = " << AlgScore.fAlgName << std::endl;
 
                      if (AlgScore.fAlgName == "BraggPeakLLH"){
                         if (anab::kVariableType(AlgScore.fVariableType) == anab::kLogL_fwd){
-                           if (AlgScore.fAssumedPdg == 13)   Bragg_fwd_mu = AlgScore.fValue;
-                           if (AlgScore.fAssumedPdg == 2212) Bragg_fwd_p =  AlgScore.fValue;
-                           if (AlgScore.fAssumedPdg == 0)    noBragg_MIP = AlgScore.fValue;
+                           std::cout << "BragPeakLLH fwd --- PlaneID = " << planeid << ", AlgScore.fAssumedPdg = " << AlgScore.fAssumedPdg << ", AlgScore.fValue = " << AlgScore.fValue << std::endl;
+                           if (AlgScore.fAssumedPdg == 13)   Bragg_fwd_mu.at(planeid) = AlgScore.fValue;
+                           if (AlgScore.fAssumedPdg == 2212) Bragg_fwd_p.at(planeid) =  AlgScore.fValue;
+                           if (AlgScore.fAssumedPdg == 211) Bragg_fwd_pi.at(planeid) =  AlgScore.fValue;
+                           if (AlgScore.fAssumedPdg == 0)   {
+                              noBragg_MIP.at(planeid) = AlgScore.fValue;
+                              std::cout << "noBragg_MIP.at(" << planeid << ") = " << AlgScore.fValue << std::endl;
+                           }
                         }// if fVariableType == anab::kLogL_fwd
                         else if (anab::kVariableType(AlgScore.fVariableType) == anab::kLogL_bwd){
-                           if (AlgScore.fAssumedPdg == 13)   Bragg_bwd_mu = AlgScore.fValue;
-                           if (AlgScore.fAssumedPdg == 2212) Bragg_bwd_p =  AlgScore.fValue;
+                           std::cout << "BragPeakLLH bwd --- PlaneID = " << planeid << ", AlgScore.fAssumedPdg = " << AlgScore.fAssumedPdg << ", AlgScore.fValue = " << AlgScore.fValue << std::endl;
+                           if (AlgScore.fAssumedPdg == 13)   Bragg_bwd_mu.at(planeid) = AlgScore.fValue;
+                           if (AlgScore.fAssumedPdg == 2212) Bragg_bwd_p.at(planeid) =  AlgScore.fValue;
+                           if (AlgScore.fAssumedPdg == 211) Bragg_bwd_pi.at(planeid) =  AlgScore.fValue;
                         } // if fVariableType == anab::kLogL_bwd
                      } // if fAlName = BraggPeakLLH
 
-                     if (AlgScore.fAlgName == "PIDA" && anab::kVariableType(AlgScore.fVariableType) == anab::kPIDA){
-                        PIDAval = AlgScore.fValue;
+                     if (AlgScore.fAlgName == "PIDA_median" && anab::kVariableType(AlgScore.fVariableType) == anab::kPIDA){
+                        PIDAval.at(planeid) = AlgScore.fValue;
                      }// if AlgName = PIDA && fVariableType == anab::kPIDA
 
 
                      if (AlgScore.fAlgName == "TruncatedMean"){
-                        if (anab::kVariableType(AlgScore.fVariableType) == anab::kdEdxtruncmean) track_dedx_truncmean = AlgScore.fValue;
+                        if (anab::kVariableType(AlgScore.fVariableType) == anab::kdEdxtruncmean) track_dedx_truncmean.at(planeid) = AlgScore.fValue;
                      }// if AlgName = TruncatedMean
 
                   } // end loop through AlgScoresVec
@@ -337,23 +370,46 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
             //    std::cout << "[CC1pi] Could not find valid trackPIDAssn" << std::endl;
             // }
 
-               // Get energy estimation by range (code for momentum by range copied from analysistree, then convert momentum to energy)
-               // Calculations only exist in TrackMomentumCalculator for muons and protons
-               // TrackMomentumCalculator returns GeV, multiply by 1000 to get MeV
-               trkf::TrackMomentumCalculator trkm;
-               double track_rangeP_mu = trkm.GetTrackMomentum(track->Length(),kMuMinus)*1000.;
-               double track_rangeP_p = trkm.GetTrackMomentum(track->Length(),kProton)*1000.;
+         // Get Chi2 objects from a different ParticleID data product
+         if (!trackPIDAssnforChi2.isValid()){
+            std::cout << "[ParticleIDValidation] trackPIDAssnforChi2.isValid() == false. Not filling Chi2 variables." << std::endl;
+            track_Chi2Proton = {-9999,-9999,-9999};
+            track_Chi2Pion   = {-9999,-9999,-9999};
+            track_Chi2Muon   = {-9999,-9999,-9999};
+         }
+         else{
+            std::vector<art::Ptr<anab::ParticleID>> trackPIDforChi2 = trackPIDAssnforChi2.at(track->ID());
 
-               // Now convert P->E
-               // From TrackMomentumCalculator::GetTrackMomentum: P = TMath::Sqrt((KE*KE)+(2*M*KE))
-               // P = TMath::Sqrt((E*E)-(M*M)) and E = KE+M
-               // => KE = TMath::Sqrt((P*P)+(M*M))-M
-               // TrackMometumCalculator uses Muon_M = 105.7 MeV, Proton_M = 938.272 MeV so use these values here
-               track_rangeE_mu = TMath::Sqrt((track_rangeP_mu*track_rangeP_mu)+(105.7*105.7)) - 105.7;
-               track_rangeE_p = TMath::Sqrt((track_rangeP_p*track_rangeP_p)+(938.272*938.272)) - 938.272;
+            for (size_t i_chi2pid=0; i_chi2pid<trackPIDforChi2.size(); i_chi2pid++){
+              //std::cout << "trackPIDforChi2.at(" << i_chi2pid << ")->PlaneID().Plane = " << trackPIDforChi2.at(i_chi2pid)->PlaneID().Plane << std::endl;
+              int planeid = trackPIDforChi2.at(i_chi2pid)->PlaneID().Plane;
+              if (planeid < 0 || planeid > 2){
+                std::cout << "[CC1pi::FillTree] No Chi2 ParticleID information for planeid " << planeid << std::endl;
+                continue;
+              }
 
-            } // end loop over tracks
+              track_Chi2Proton.at(planeid) = trackPIDforChi2.at(i_chi2pid)->Chi2Proton();
+              track_Chi2Pion.at(planeid)   = trackPIDforChi2.at(i_chi2pid)->Chi2Pion();
+              track_Chi2Muon.at(planeid)   = trackPIDforChi2.at(i_chi2pid)->Chi2Muon();
+            } // end loop over i_plane
+         } // end else
 
+         // Get energy estimation by range (code for momentum by range copied from analysistree, then convert momentum to energy)
+         // Calculations only exist in TrackMomentumCalculator for muons and protons
+         // TrackMomentumCalculator returns GeV, multiply by 1000 to get MeV
+         trkf::TrackMomentumCalculator trkm;
+         double track_rangeP_mu = trkm.GetTrackMomentum(track->Length(),kMuMinus)*1000.;
+         double track_rangeP_p = trkm.GetTrackMomentum(track->Length(),kProton)*1000.;
+
+         // Now convert P->E
+         // From TrackMomentumCalculator::GetTrackMomentum: P = TMath::Sqrt((KE*KE)+(2*M*KE))
+         // P = TMath::Sqrt((E*E)-(M*M)) and E = KE+M
+         // => KE = TMath::Sqrt((P*P)+(M*M))-M
+         // TrackMometumCalculator uses Muon_M = 105.7 MeV, Proton_M = 938.272 MeV so use these values here
+         track_rangeE_mu = TMath::Sqrt((track_rangeP_mu*track_rangeP_mu)+(105.7*105.7)) - 105.7;
+         track_rangeE_p = TMath::Sqrt((track_rangeP_p*track_rangeP_p)+(938.272*938.272)) - 938.272;
+
+         } // end loop over tracks
 
          std::vector<art::Ptr<recob::Shower>> showers_pfp = showers_from_pfps.at(pfp.key());
          if(showers_pfp.size() > 1) {
@@ -371,17 +427,24 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          TPCObj_PFP_track_length.emplace_back(track_length);
          TPCObj_PFP_track_start.emplace_back(track_start);
          TPCObj_PFP_track_end.emplace_back(track_end);
+         TPCObj_PFP_track_theta.emplace_back(track_theta);
+         TPCObj_PFP_track_phi.emplace_back(track_phi);
          TPCObj_PFP_track_dedx_truncmean.emplace_back(track_dedx_truncmean);
          TPCObj_PFP_track_dedx_perhit.emplace_back(track_dedx_perhit);
          TPCObj_PFP_track_resrange_perhit.emplace_back(track_resrange_perhit);
          TPCObj_PFP_isMIP.emplace_back(isMIP);
          TPCObj_PFP_n2LLH_fwd_mu.emplace_back(Bragg_fwd_mu);
          TPCObj_PFP_n2LLH_fwd_p.emplace_back(Bragg_fwd_p);
+         TPCObj_PFP_n2LLH_fwd_pi.emplace_back(Bragg_fwd_pi);
          TPCObj_PFP_n2LLH_bwd_mu.emplace_back(Bragg_bwd_mu);
          TPCObj_PFP_n2LLH_bwd_p.emplace_back(Bragg_bwd_p);
+         TPCObj_PFP_n2LLH_bwd_pi.emplace_back(Bragg_bwd_pi);
          TPCObj_PFP_n2LLH_MIP.emplace_back(noBragg_MIP);
          TPCObj_PFP_PIDA.emplace_back(PIDAval);
          TPCObj_PFP_track_depE.emplace_back(track_depE);
+         TPCObj_PFP_track_Chi2Proton.emplace_back(track_Chi2Proton);
+         TPCObj_PFP_track_Chi2Muon.emplace_back(track_Chi2Muon);
+         TPCObj_PFP_track_Chi2Pion.emplace_back(track_Chi2Pion);
          TPCObj_PFP_track_rangeE_mu.emplace_back(track_rangeE_mu);
          TPCObj_PFP_track_rangeE_p.emplace_back(track_rangeE_p);
          TPCObj_PFP_shower_length.emplace_back(shower_length);
@@ -420,6 +483,12 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          TPCObj_PFP_truePDG.emplace_back(mcp -> PdgCode());
          TPCObj_PFP_trueE.emplace_back(mcp -> E());
          TPCObj_PFP_trueKE.emplace_back(mcp -> E() - mcp -> Mass());
+         TVector3 trueEndP(mcp -> EndPx(), mcp -> EndPy(), mcp -> EndPz());
+         TPCObj_PFP_trueEndP.emplace_back(trueEndP.Mag());
+         // std::cout << "trueEndP = " << mcp->EndPx() << ", " << mcp->EndPy() << ", " << mcp->EndPz() << std::endl;
+         // std::cout << "trueEndP.Mag() = " << trueEndP.Mag() << std::endl;
+         // std::cout << "EndE = " << mcp -> EndE() << std::endl;
+         // std::cout << "EndE - Mass = " << mcp->EndE() - mcp -> Mass() << std::endl;
 
       } // loop over pfps
 
@@ -530,6 +599,8 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("TPCObj_PFP_track_length", &(vars->TPCObj_PFP_track_length));
    t -> Branch("TPCObj_PFP_track_start", &(vars->TPCObj_PFP_track_start));
    t -> Branch("TPCObj_PFP_track_end", &(vars->TPCObj_PFP_track_end));
+   t -> Branch("TPCObj_PFP_track_theta", &(vars->TPCObj_PFP_track_theta));
+   t -> Branch("TPCObj_PFP_track_phi", &(vars->TPCObj_PFP_track_phi));
    t -> Branch("TPCObj_PFP_track_dedx_truncmean", &(vars->TPCObj_PFP_track_dedx_truncmean));
    t -> Branch("TPCObj_PFP_track_dedx_perhit",&(vars->TPCObj_PFP_track_dedx_perhit));
    t -> Branch("TPCObj_PFP_track_resrange_perhit",&(vars->TPCObj_PFP_track_resrange_perhit));
@@ -547,13 +618,19 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("TPCObj_PFP_truePDG", &(vars->TPCObj_PFP_truePDG));
    t -> Branch("TPCObj_PFP_trueE", &(vars->TPCObj_PFP_trueE));
    t -> Branch("TPCObj_PFP_trueKE", &(vars->TPCObj_PFP_trueKE));
+   t -> Branch("TPCObj_PFP_trueEndP", &(vars->TPCObj_PFP_trueEndP));
    t -> Branch("TPCObj_PFP_n2LLH_fwd_mu", &(vars->TPCObj_PFP_n2LLH_fwd_mu));
    t -> Branch("TPCObj_PFP_n2LLH_fwd_p", &(vars->TPCObj_PFP_n2LLH_fwd_p));
+   t -> Branch("TPCObj_PFP_n2LLH_fwd_pi", &(vars->TPCObj_PFP_n2LLH_fwd_pi));
    t -> Branch("TPCObj_PFP_n2LLH_bwd_mu", &(vars->TPCObj_PFP_n2LLH_bwd_mu));
    t -> Branch("TPCObj_PFP_n2LLH_bwd_p", &(vars->TPCObj_PFP_n2LLH_bwd_p));
+   t -> Branch("TPCObj_PFP_n2LLH_bwd_pi", &(vars->TPCObj_PFP_n2LLH_bwd_pi));
    t -> Branch("TPCObj_PFP_n2LLH_MIP", &(vars->TPCObj_PFP_n2LLH_MIP));
    t -> Branch("TPCObj_PFP_PIDA", &(vars->TPCObj_PFP_PIDA));
    t -> Branch("TPCObj_PFP_track_depE", &(vars->TPCObj_PFP_track_depE));
+   t -> Branch("TPCObj_PFP_track_Chi2Proton", &(vars->TPCObj_PFP_track_Chi2Proton));
+   t -> Branch("TPCObj_PFP_track_Chi2Muon", &(vars->TPCObj_PFP_track_Chi2Muon));
+   t -> Branch("TPCObj_PFP_track_Chi2Pion", &(vars->TPCObj_PFP_track_Chi2Pion));
    t -> Branch("TPCObj_PFP_track_rangeE_mu", &(vars->TPCObj_PFP_track_rangeE_mu));
    t -> Branch("TPCObj_PFP_track_rangeE_p", &(vars->TPCObj_PFP_track_rangeE_p));
    t -> Branch("TPCObj_origin", &(vars->TPCObj_origin));

@@ -49,6 +49,7 @@ physics:
             G4ProducerLabel:     "largeant"
             MCTruthAssociations: { MinHitEnergyFraction: 0.1 }
          }
+         ParticleIdChi2Label: "pandoraNupid::UBXSec"
       }
    }
 
