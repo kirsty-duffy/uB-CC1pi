@@ -65,8 +65,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    int TPCObj_NPFPs = 0;
    int TPCObj_NTracks = 0;
    int TPCObj_NShowers = 0;
-   std::vector<bool> *TPCObj_PFP_PandoraClassedAsTrack = nullptr;
-   std::vector<bool> *TPCObj_PFP_PandoraClassedAsShower = nullptr;
+//   std::vector<bool> *TPCObj_PFP_PandoraClassedAsTrack = nullptr;
+//   std::vector<bool> *TPCObj_PFP_PandoraClassedAsShower = nullptr;
    std::vector<bool> *TPCObj_PFP_isDaughter = nullptr;
    std::vector<std::vector<int>> *TPCObj_PFP_daughterids = nullptr;
    std::vector<int> *TPCObj_PFP_id = nullptr;
@@ -146,10 +146,10 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchAddress("TPCObj_NTracks", &TPCObj_NTracks);
    t -> SetBranchStatus("TPCObj_NShowers",1);
    t -> SetBranchAddress("TPCObj_NShowers", &TPCObj_NShowers);
-   t -> SetBranchStatus("TPCObj_PFP_PandoraClassedAsTrack",1);
-   t -> SetBranchAddress("TPCObj_PFP_PandoraClassedAsTrack", &TPCObj_PFP_PandoraClassedAsTrack);
-   t -> SetBranchStatus("TPCObj_PFP_PandoraClassedAsShower",1);
-   t -> SetBranchAddress("TPCObj_PFP_PandoraClassedAsShower", &TPCObj_PFP_PandoraClassedAsShower);
+//   t -> SetBranchStatus("TPCObj_PFP_PandoraClassedAsTrack",1);
+//   t -> SetBranchAddress("TPCObj_PFP_PandoraClassedAsTrack", &TPCObj_PFP_PandoraClassedAsTrack);
+//   t -> SetBranchStatus("TPCObj_PFP_PandoraClassedAsShower",1);
+//   t -> SetBranchAddress("TPCObj_PFP_PandoraClassedAsShower", &TPCObj_PFP_PandoraClassedAsShower);
    t -> SetBranchStatus("TPCObj_PFP_isDaughter",1);
    t -> SetBranchAddress("TPCObj_PFP_isDaughter", &TPCObj_PFP_isDaughter);
    t -> SetBranchStatus("TPCObj_PFP_daughterids",1);
@@ -243,7 +243,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
 
    StackedHistTopology* len_stack = new StackedHistTopology("len_stack", ";Longest Track Length [cm];Selected Eevents(normalised to 3.782 #times 10^{19} POT)", 30, 0, 700);
    StackedHistTopology* mips_stack = new StackedHistTopology("mips_stack", ";Number of MIP-like #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 10, 0, 10);
-   StackedHistTopology* vtxtrack_stack = new StackedHistTopology("vtxtrack_stack", ";Distance between vertex and start of #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 20, 0, 20);
+   StackedHistTopology* vtxtrack_stack = new StackedHistTopology("vtxtrack_stack", ";Distance between vertex and start of #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 20, 5, 25);
    StackedHistTopology* pfps_stack = new StackedHistTopology("pfps_stack", ";Number of #nu daughter PFPs in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 10, 0, 10);
 
    StackedHistPDGCode* len_stack_byPDG = new StackedHistPDGCode("len_stack_byPDG", ";Longest Track Length [cm];Selected Events (normalised to 3.782 #times 10^{19} POT)", 30, 0, 700);
@@ -304,6 +304,12 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    TH2D* effpur_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP = new TH2D("effpur_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP","Require at least 2 MIPs;Value of n2llh_muMIPminusp used for MIP classification;Value of depE_rangeE_p used for MIP classification",MIPcuts_muMIPminusp_size,MIPcuts_muMIPminusp,MIPcuts_depE_rangeE_p_size,MIPcuts_depE_rangeE_p);
    TH2D* effpur_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP = new TH2D("effpur_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP","Require exactly 2 MIPs;Value of n2llh_muMIPminusp used for MIP classification;Value of depE_rangeE_p used for MIP classification",MIPcuts_muMIPminusp_size,MIPcuts_muMIPminusp,MIPcuts_depE_rangeE_p_size,MIPcuts_depE_rangeE_p);
 
+   double distcuts[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+   int distcuts_size = sizeof(distcuts)/sizeof(distcuts[0]) - 1;
+   TEfficiency* eff_distcut = new TEfficiency("eff_distcut",";Value used for distance cut;",distcuts_size,distcuts);
+   TEfficiency* pur_distcut = new TEfficiency("pur_distcut",";Value used for distance cut;",distcuts_size,distcuts);
+   TH1D* effpur_distcut = new TH1D("effpur_distcut",";;",distcuts_size,distcuts);
+
    //ofstream evdinfo;
    //evdinfo.open("evdinfo.txt");
    //evdinfo << "run_num subrun_num event_num track_daughters Truth_topology" << std::endl;
@@ -334,6 +340,34 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          if (nu_PDG != 14) std::cout << "WARNING: Signal event has neutrino with PDG code " << nu_PDG << " (should be 14)" << std::endl;
 
       }
+
+      // Test vertex to track start distance cut...
+      double maxdist = 0;
+      for(int j = 0; j < TPCObj_NPFPs; j++) {
+         if(!(TPCObj_PFP_isDaughter -> at(j))) continue;
+
+         double vtxtrackdist = std::hypot(std::hypot(TPCObj_reco_vtx->at(0) - TPCObj_PFP_track_start->at(j).at(0), TPCObj_reco_vtx->at(1) - TPCObj_PFP_track_start->at(j).at(1)), TPCObj_reco_vtx->at(2) - TPCObj_PFP_track_start->at(j).at(2));
+         if(vtxtrackdist > maxdist) maxdist = vtxtrackdist;
+/*
+         for(int k = j+1; k < TPCObj_NPFPs; k++) {
+            if(!(TPCObj_PFP_isDaughter -> at(k))) continue;
+
+            double tracktrackdist = std::hypot(std::hypot(TPCObj_PFP_track_start->at(k).at(0) - TPCObj_PFP_track_start->at(j).at(0), TPCObj_PFP_track_start->at(k).at(1) - TPCObj_PFP_track_start->at(j).at(1)), TPCObj_PFP_track_start->at(k).at(2) - TPCObj_PFP_track_start->at(j).at(2));
+            if(tracktrackdist > maxdist) maxdist = tracktrackdist;
+         }
+*/
+      }
+
+      // distance cut eff/pur
+      for (const double& distcut : distcuts) {
+         if(isSignal) eff_distcut->Fill(SelectedEvent && maxdist < distcut, distcut);
+         if(SelectedEvent && maxdist < distcut) pur_distcut->Fill(isSignal, distcut);
+      }
+
+      for(int j = 1; j <= distcuts_size; j++) {
+         effpur_distcut->SetBinContent(j,10*eff_distcut->GetEfficiency(j)*pur_distcut->GetEfficiency(j));
+      }
+
 
       // Calculate derived MIP vars
       std::vector<double> n2llh_muMIPminusp_vect;
@@ -964,6 +998,30 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    c1 -> SaveAs(TString::Format("%s_pur_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP.eps",SaveString.c_str()));
    effpur_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP -> Draw("COLZ TEXT");
    c1 -> SaveAs(TString::Format("%s_effpur_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP.eps",SaveString.c_str()));
+
+   eff_distcut -> Draw("AP");
+   pur_distcut -> Draw("P SAME");
+   effpur_distcut -> Draw("P SAME");
+   gPad->Update();
+   eff_distcut->SetMarkerColor(kRed);
+   eff_distcut->SetMarkerStyle(21);
+   eff_distcut->SetMarkerSize(1);
+   graph = eff_distcut->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   pur_distcut->SetMarkerColor(kBlue);
+   pur_distcut->SetMarkerStyle(21);
+   pur_distcut->SetMarkerSize(1);
+   graph = pur_distcut->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   effpur_distcut->SetMarkerColor(kBlack);
+   effpur_distcut->SetMarkerStyle(21);
+   effpur_distcut->SetMarkerSize(1);
+   effpur_distcut->SetMinimum(0);
+   effpur_distcut->SetMaximum(1);
+   gPad->Update();
+   c1 -> SaveAs(TString::Format("%s_effpur_distcut.eps",SaveString.c_str()));
 
    std::cout << "Total Efficiency: " << (1. * (eff_nuE -> GetPassedHistogram() -> GetEntries()))/(eff_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
    std::cout << "Total Purity: " << (1. * (pur_nuE -> GetPassedHistogram() -> GetEntries()))/(pur_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;

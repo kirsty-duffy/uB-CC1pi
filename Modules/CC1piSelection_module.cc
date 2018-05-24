@@ -105,9 +105,26 @@ CC1piSelection::CC1piSelection(fhicl::ParameterSet const & p)
 
 void CC1piSelection::produce(art::Event & evt)
 {
-   // Check if we're looking at data or MC (important for POT counting in endSubRun
+   // Check if we're looking at data or MC (important for POT counting in endSubRun)
    _isData = evt.isRealData();
    std::cout << "[CC1pi] Using isData = " << _isData << std::endl;
+
+   // Check TPC boundary
+   std::cout << "TPC Boundary (according to Geometry): " << std::endl;
+   auto const* geo = lar::providerFrom<geo::Geometry>();
+   for (size_t i = 0; i < geo -> NTPC(); i++){
+      double local[3] = {0.,0.,0.};
+      double world[3] = {0.,0.,0.};
+      const geo::TPCGeo &tpc = geo->TPC(i);
+      tpc.LocalToWorld(local,world);
+      std::cout << "minx = " << world[0]-geo->DetHalfWidth(i) << std::endl;
+      std::cout << "maxx = " << world[0]+geo->DetHalfWidth(i) << std::endl;
+      std::cout << "miny = " << world[1]-geo->DetHalfHeight(i) << std::endl;
+      std::cout << "maxy = " << world[1]+geo->DetHalfHeight(i) << std::endl;
+      std::cout << "minz = " << world[2]-geo->DetLength(i)/2. << std::endl;
+      std::cout << "maxz = " << world[2]+geo->DetLength(i)/2. << std::endl;
+   }
+
 
    // Set anavars values to default
    // (this will prevent bugs if any variables don't get set for a given event)
