@@ -79,6 +79,7 @@ struct cc1pianavars{
   std::vector<bool> TPCObj_PFP_PandoraClassedAsTrack;
   std::vector<bool> TPCObj_PFP_PandoraClassedAsShower;
   std::vector<bool> TPCObj_PFP_isDaughter;
+  std::vector<std::vector<int>> TPCObj_PFP_daughterids;
   std::vector<int> TPCObj_PFP_id;
   std::vector<int> TPCObj_PFP_MCPid;
   std::vector<int> TPCObj_PFP_truePDG;

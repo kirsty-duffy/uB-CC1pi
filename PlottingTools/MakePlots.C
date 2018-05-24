@@ -55,6 +55,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    bool Marco_selected = 0;
 
    NuIntTopology Truth_topology = kUnknown;
+   
    std::vector<double> *TPCObj_PFP_track_length = nullptr;
    std::vector<std::vector<double>> *TPCObj_PFP_track_start = nullptr;
    std::vector<std::vector<double>> *TPCObj_PFP_track_end = nullptr;
@@ -64,14 +65,16 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    int TPCObj_NPFPs = 0;
    int TPCObj_NTracks = 0;
    int TPCObj_NShowers = 0;
-   std::vector<bool> *TPCObj_PFP_isTrack = nullptr;
-   std::vector<bool> *TPCObj_PFP_isShower = nullptr;
+   std::vector<bool> *TPCObj_PFP_PandoraClassedAsTrack = nullptr;
+   std::vector<bool> *TPCObj_PFP_PandoraClassedAsShower = nullptr;
    std::vector<bool> *TPCObj_PFP_isDaughter = nullptr;
+   std::vector<std::vector<int>> *TPCObj_PFP_daughterids = nullptr;
    std::vector<int> *TPCObj_PFP_id = nullptr;
    std::vector<int> *TPCObj_PFP_MCPid = nullptr;
    std::vector<int> *TPCObj_PFP_truePDG = nullptr;
    std::vector<double> *TPCObj_PFP_trueE = nullptr;
    std::vector<double> *TPCObj_PFP_trueKE = nullptr;
+   std::vector<bool> *TPCObj_PFP_track_isContained = nullptr;
    int TPCObj_origin = 0;
    int TPCObj_origin_extra = 0;
    std::vector<double> *TPCObj_reco_vtx = nullptr;
@@ -143,12 +146,14 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchAddress("TPCObj_NTracks", &TPCObj_NTracks);
    t -> SetBranchStatus("TPCObj_NShowers",1);
    t -> SetBranchAddress("TPCObj_NShowers", &TPCObj_NShowers);
-   t -> SetBranchStatus("TPCObj_PFP_isTrack",1);
-   t -> SetBranchAddress("TPCObj_PFP_isTrack", &TPCObj_PFP_isTrack);
-   t -> SetBranchStatus("TPCObj_PFP_isShower",1);
-   t -> SetBranchAddress("TPCObj_PFP_isShower", &TPCObj_PFP_isShower);
+   t -> SetBranchStatus("TPCObj_PFP_PandoraClassedAsTrack",1);
+   t -> SetBranchAddress("TPCObj_PFP_PandoraClassedAsTrack", &TPCObj_PFP_PandoraClassedAsTrack);
+   t -> SetBranchStatus("TPCObj_PFP_PandoraClassedAsShower",1);
+   t -> SetBranchAddress("TPCObj_PFP_PandoraClassedAsShower", &TPCObj_PFP_PandoraClassedAsShower);
    t -> SetBranchStatus("TPCObj_PFP_isDaughter",1);
    t -> SetBranchAddress("TPCObj_PFP_isDaughter", &TPCObj_PFP_isDaughter);
+   t -> SetBranchStatus("TPCObj_PFP_daughterids",1);
+   t -> SetBranchAddress("TPCObj_PFP_daughterids", &TPCObj_PFP_daughterids);
    t -> SetBranchStatus("TPCObj_PFP_id",1);
    t -> SetBranchAddress("TPCObj_PFP_id", &TPCObj_PFP_id);
    t -> SetBranchStatus("TPCObj_PFP_MCPid",1);
@@ -159,6 +164,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchAddress("TPCObj_PFP_trueE", &TPCObj_PFP_trueE);
    t -> SetBranchStatus("TPCObj_PFP_trueKE",1);
    t -> SetBranchAddress("TPCObj_PFP_trueKE", &TPCObj_PFP_trueKE);
+   t -> SetBranchStatus("TPCObj_PFP_track_isContained",1);
+   t -> SetBranchAddress("TPCObj_PFP_track_isContained", &TPCObj_PFP_track_isContained);
    t -> SetBranchStatus("TPCObj_origin",1);
    t -> SetBranchAddress("TPCObj_origin", &TPCObj_origin);
    t -> SetBranchStatus("TPCObj_origin_extra",1);
@@ -297,9 +304,9 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    TH2D* effpur_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP = new TH2D("effpur_n2llh_muMIPminusp_depE_rangeE_p_atleast2MIP","Require at least 2 MIPs;Value of n2llh_muMIPminusp used for MIP classification;Value of depE_rangeE_p used for MIP classification",MIPcuts_muMIPminusp_size,MIPcuts_muMIPminusp,MIPcuts_depE_rangeE_p_size,MIPcuts_depE_rangeE_p);
    TH2D* effpur_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP = new TH2D("effpur_n2llh_muMIPminusp_depE_rangeE_p_exactly2MIP","Require exactly 2 MIPs;Value of n2llh_muMIPminusp used for MIP classification;Value of depE_rangeE_p used for MIP classification",MIPcuts_muMIPminusp_size,MIPcuts_muMIPminusp,MIPcuts_depE_rangeE_p_size,MIPcuts_depE_rangeE_p);
 
-   ofstream evdinfo;
-   evdinfo.open("evdinfo.txt");
-   evdinfo << "run_num subrun_num event_num track_daughters Truth_topology" << std::endl;
+   //ofstream evdinfo;
+   //evdinfo.open("evdinfo.txt");
+   //evdinfo << "run_num subrun_num event_num track_daughters Truth_topology" << std::endl;
 
    const int nentries = t -> GetEntries();
 
@@ -327,7 +334,6 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          if (nu_PDG != 14) std::cout << "WARNING: Signal event has neutrino with PDG code " << nu_PDG << " (should be 14)" << std::endl;
 
       }
-
 
       // Calculate derived MIP vars
       std::vector<double> n2llh_muMIPminusp_vect;
@@ -593,12 +599,12 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          }
 
 
-         evdinfo << run_num << " " << subrun_num << " " << event_num << " " << track_daughters << " " << topologyenum2str(Truth_topology) << std::endl;
+         //evdinfo << run_num << " " << subrun_num << " " << event_num << " " << track_daughters << " " << topologyenum2str(Truth_topology) << std::endl;
 
       } // end if(SelectedEvent)
    } //end loop over entries
 
-   evdinfo.close();
+   //evdinfo.close();
 
    gStyle->SetOptStat(0); //No stats box
 //   gStyle -> SetOptStat(111111); //Full stats box, including under/overflow

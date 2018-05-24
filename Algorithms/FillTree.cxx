@@ -41,6 +41,7 @@ void cc1pianavars::Clear(){
    TPCObj_PFP_PandoraClassedAsTrack.clear();
    TPCObj_PFP_PandoraClassedAsShower.clear();
    TPCObj_PFP_isDaughter.clear();
+   TPCObj_PFP_daughterids.clear();
    TPCObj_PFP_id.clear();
    TPCObj_PFP_MCPid.clear();
    TPCObj_PFP_truePDG.clear();
@@ -242,6 +243,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          double track_rangeE_mu = -9999;
          double track_rangeE_p = -9999;
          bool isContained = true;
+   
          double shower_length = -9999;
          std::vector<double> shower_start = {-9999, -9999, -9999};
 
@@ -405,6 +407,8 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          TPCObj_PFP_PandoraClassedAsTrack.emplace_back(lar_pandora::LArPandoraHelper::IsTrack(pfp));
          TPCObj_PFP_PandoraClassedAsShower.emplace_back(lar_pandora::LArPandoraHelper::IsShower(pfp));
          TPCObj_PFP_isDaughter.emplace_back(pfp->Parent()==(size_t)nuID && track_length != -9999); //If Pandora failed to make a track, don't count the PFP as a daughter (even if the associated shower technically is)
+         std::vector<int> daughterids(pfp->Daughters().begin(),pfp->Daughters().end());
+         TPCObj_PFP_daughterids.emplace_back(daughterids);
          TPCObj_PFP_id.emplace_back(pfp -> Self());
 
 
@@ -556,6 +560,7 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("TPCObj_PFP_PandoraClassedAsTrack", &(vars->TPCObj_PFP_PandoraClassedAsTrack));
    t -> Branch("TPCObj_PFP_PandoraClassedAsShower", &(vars->TPCObj_PFP_PandoraClassedAsShower));
    t -> Branch("TPCObj_PFP_isDaughter", &(vars->TPCObj_PFP_isDaughter));
+   t -> Branch("TPCObj_PFP_daughterids", &(vars->TPCObj_PFP_daughterids));
    t -> Branch("TPCObj_PFP_id", &(vars->TPCObj_PFP_id));
    t -> Branch("TPCObj_PFP_MCPid", &(vars->TPCObj_PFP_MCPid));
    t -> Branch("TPCObj_PFP_truePDG", &(vars->TPCObj_PFP_truePDG));
