@@ -327,21 +327,15 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
                        continue;
                      }
 
-                     std::cout << "PlaneID = " << planeid << ", AlgScore.fAssumedPdg = " << AlgScore.fAssumedPdg << ", AlgName = " << AlgScore.fAlgName << std::endl;
 
                      if (AlgScore.fAlgName == "BraggPeakLLH"){
                         if (anab::kVariableType(AlgScore.fVariableType) == anab::kLogL_fwd){
-                           std::cout << "BragPeakLLH fwd --- PlaneID = " << planeid << ", AlgScore.fAssumedPdg = " << AlgScore.fAssumedPdg << ", AlgScore.fValue = " << AlgScore.fValue << std::endl;
                            if (AlgScore.fAssumedPdg == 13)   Bragg_fwd_mu.at(planeid) = AlgScore.fValue;
                            if (AlgScore.fAssumedPdg == 2212) Bragg_fwd_p.at(planeid) =  AlgScore.fValue;
                            if (AlgScore.fAssumedPdg == 211) Bragg_fwd_pi.at(planeid) =  AlgScore.fValue;
-                           if (AlgScore.fAssumedPdg == 0)   {
-                              noBragg_MIP.at(planeid) = AlgScore.fValue;
-                              std::cout << "noBragg_MIP.at(" << planeid << ") = " << AlgScore.fValue << std::endl;
-                           }
+                           if (AlgScore.fAssumedPdg == 0) noBragg_MIP.at(planeid) = AlgScore.fValue;
                         }// if fVariableType == anab::kLogL_fwd
                         else if (anab::kVariableType(AlgScore.fVariableType) == anab::kLogL_bwd){
-                           std::cout << "BragPeakLLH bwd --- PlaneID = " << planeid << ", AlgScore.fAssumedPdg = " << AlgScore.fAssumedPdg << ", AlgScore.fValue = " << AlgScore.fValue << std::endl;
                            if (AlgScore.fAssumedPdg == 13)   Bragg_bwd_mu.at(planeid) = AlgScore.fValue;
                            if (AlgScore.fAssumedPdg == 2212) Bragg_bwd_p.at(planeid) =  AlgScore.fValue;
                            if (AlgScore.fAssumedPdg == 211) Bragg_bwd_pi.at(planeid) =  AlgScore.fValue;
