@@ -1,0 +1,30 @@
+# This will work for both bnbon and extbnb data
+
+#include "services_microboone.fcl"
+#include "config_particle_identification.fcl"
+#include "calibration_microboone.fcl"
+#include "caldata_microboone.fcl"
+#include "config_particle_identification_fiducialvolume.fcl"
+#include "config_particle_identification_braggalgo.fcl"
+
+# These bits I think should all be the same for data and MC
+#include "CC1pi_common.fcl"
+
+services.TFileService.fileName: "CC1pi_out_data.root"
+
+physics.producermods: [ @sequence::cc1pi_producermods ]
+
+physics.producers.pid.BraggAlgo: @local::braggalgo_mcc8_data
+physics.producers.UBXSecpandoraNucali.CaloAlg: @local::microboone_calorimetryalgmcc84data
+
+physics.producers.UBXSecpandoraNucali.TrackModuleLabel:       "pandoraNu::UBXSec"
+physics.producers.UBXSecpandoraNucali.CalorimetryModuleLabel: "pandoraNucalo::UBXSec"
+physics.producers.pid.ProducerLabels:
+{
+  TrackLabel       : "pandoraNu::UBXSec"
+  CalorimetryLabel : "UBXSecpandoraNucali::CC1pi"
+}
+physics.producers.cc1piselec.TrackLabel:          "pandoraNu::UBXSec"
+physics.producers.cc1piselec.CalorimetryLabel:    "UBXSecpandoraNucali::CC1pi"
+physics.producers.cc1piselec.SelectionLabel:      "UBXSec::UBXSec"
+physics.producers.cc1piselec.ParticleIdChi2Label: "pandoraNupid::UBXSec"

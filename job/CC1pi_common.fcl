@@ -1,0 +1,95 @@
+# This fcl contains all the cc1pi-specific bits that we need. It should define the CC1pi modules (which I'm using to mean anything we've done ourselve on top of Marco's analysis, so includes calibration, PID, and cc1pi selection).
+# The actual bits that we need to tell it how to run things (like defining the trigger_paths etc) have been moved to the bottom section of this file
+
+# I have commented out services for now because it overwrites something in Marco's code (not exactly sure what) and causes some events to fail his selection when they should pass.
+# services:
+# {
+#    TFileService: { fileName: "CC1pi_out.root" }
+#    #TimeTracker: {}
+#    #RandomNumberGenerator: {}
+#    message: @local::standard_info
+#    @table::microboone_simulation_services
+#    SpaceCharge: @local::microboone_spacecharge
+#    TPCEnergyCalib: @local::microboone_tpcenergycalib_service
+# }
+#
+# services.DetectorClocksService.InheritClockConfig:   false
+# services.DetectorClocksService.TriggerOffsetTPC:     -400
+#
+# services.SpaceCharge.EnableCorrSCE:       true
+# services.SpaceCharge.EnableSimEfieldSCE:  true
+# services.SpaceCharge.EnableSimSpatialSCE: true
+
+services.TPCEnergyCalib: @local::microboone_tpcenergycalib_service
+
+physics.producers.UBXSecpandoraNucali: @local::microboone_calibrationdedx
+physics.producers.pid: @local::particleidconfig
+physics.producers.cc1piselec:
+{
+  module_type : CC1piSelection
+  MCTruthMatching:
+  {
+    tool_type:           "AssociationsTruth"
+    #AssnsProducerLabels: ["gaushitTruthMatch", "crHitRemovalTruthMatch", "trajclusterTruthMatch"]
+    AssnsProducerLabels: [ ]
+    G4ProducerLabel:     "largeant"
+    MCTruthAssociations: { MinHitEnergyFraction: 0.1 }
+  }
+  TrackLabel:            "pandoraNu::CC1pi"
+  CalorimetryLabel:      "UBXSecpandoraNucali::CC1pi"
+  SelectionLabel:        "UBXSec::CC1pi"
+  ParticleIdChi2Label:   "pandoraNupid::CC1pi"
+}
+
+
+physics.producers.UBXSecpandoraNucali.TrackModuleLabel:       "pandoraNu::CC1pi"
+physics.producers.UBXSecpandoraNucali.CalorimetryModuleLabel: "pandoraNucalo::CC1pi"
+physics.producers.pid.ProducerLabels:
+{
+  TrackLabel       : "pandoraNu::CC1pi"
+  CalorimetryLabel : "UBXSecpandoraNucali::CC1pi"
+}
+
+
+cc1pi_producermods: [
+   "UBXSecpandoraNucali",
+   "pid",
+   "cc1piselec"
+]
+
+# ----------------------------------------------- #
+# ----------------------------------------------- #
+# Now here's the bit where we define the actual stuff that runs (like trigger_paths etc)
+
+process_name: CC1pi
+
+source:
+{
+  module_type   : RootInput
+  maxEvents     : -1
+  fileNames     : [ ]
+  inputCommands : [
+  "keep *",
+  "drop sumdata::RunData_*_*_*" # Workaround for LArSoft bug 18943
+  ]
+}
+
+outputs:
+{
+   out1:
+   {
+     module_type  : RootOutput
+     fileName     : "%ifb_%tc_CC1pi_artrootout.root"
+     dataTier     : "cc1pi"
+     SelectEvents : [ ]
+   }
+}
+
+# Producermods is CC1pi modules only by default (changed in subsequent fcl files when we need to)
+# Actually, in all the "run_blah.fcl" fcl files I'm writing I explicitly define the producermods, but I think it's good to have a default (and maybe if we don't it'll default to something in Marco's fcls)
+physics.producermods: [ @sequence::cc1pi_producermods ]
+
+ physics.outputFiles   : [ out1 ]
+
+ physics.trigger_paths : [ producermods ]
+ physics.end_paths     : [ outputFiles ]

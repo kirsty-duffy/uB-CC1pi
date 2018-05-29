@@ -1,0 +1,21 @@
+#include "config_particle_identification.fcl"
+#include "calibration_microboone.fcl"
+#include "caldata_microboone.fcl"
+#include "config_particle_identification_fiducialvolume.fcl"
+#include "config_particle_identification_braggalgo.fcl"
+
+# This line should be different for MC/BNB data/EXT data
+#include "run_ubxsec_mc_bnbcosmic.fcl"
+
+# These bits I think should all be the same for data and MC
+#include "UBXSec_for_CC1pi.fcl"
+#include "BuildShowersAsTracks.fcl"
+#include "CC1pi_common.fcl"
+
+services.TFileService.fileName: "CC1pi_out.root"
+
+physics.producermods: [ @sequence::ubxsec_producermods , @sequence::cc1pi_producermods ]
+
+physics.end_paths : [ outputFiles ]
+
+physics.producers.pid.BraggAlgo: @local::braggalgo_mcc8
