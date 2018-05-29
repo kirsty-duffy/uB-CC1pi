@@ -269,7 +269,8 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
             track_length = track -> Length();
             track_theta = track -> Theta();
             track_phi = track -> Phi();
-            if (track->HasMomentum()) track_mom = track -> VertexMomentum();
+            //if (track->HasMomentum()) 
+            track_mom = track -> VertexMomentum();
             auto start = track -> Start();
             track_start = {start.X(),start.Y(),start.Z()};
             auto end = track -> End();
