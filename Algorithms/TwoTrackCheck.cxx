@@ -72,8 +72,8 @@ std::map<std::string,bool> TwoTrackCheck(art::Event &evt, InputTags *CC1piInputT
    art::FindManyP<recob::Track> tracks_from_pfps(pfp_h, evt, CC1piInputTags->fTrackLabel);
 
    // Also get track-PID association objects
-   auto const& track_h = evt.getValidHandle<std::vector<recob::Track>>(CC1piInputTags->fTrackLabel);
-   art::FindManyP<anab::ParticleID> trackPIDAssn(track_h, evt, "pid");
+   //auto const& track_h = evt.getValidHandle<std::vector<recob::Track>>(CC1piInputTags->fTrackLabel);
+   //art::FindManyP<anab::ParticleID> trackPIDAssn(track_h, evt, "pid");
 
    // Every PFP could in theory have more than one track
    // At least for pandoraNu, however, it "should" always be one-to-one
@@ -86,7 +86,8 @@ std::map<std::string,bool> TwoTrackCheck(art::Event &evt, InputTags *CC1piInputT
          throw std::exception();
       }
       for (auto track : daughter_tracks){
-         if(IsMIP(trackPIDAssn,track->ID())) MIPs++;
+         //if(IsMIP(trackPIDAssn,track->ID())) MIPs++;
+         if(IsMIP(track, evt)) MIPs++;
       }
    }
 
