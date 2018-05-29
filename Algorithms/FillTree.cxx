@@ -32,6 +32,7 @@ void cc1pianavars::Clear(){
    TPCObj_PFP_track_end.clear();
    TPCObj_PFP_track_theta.clear();
    TPCObj_PFP_track_phi.clear();
+   TPCObj_PFP_track_mom.clear();
    TPCObj_PFP_track_dedx_truncmean.clear();
    TPCObj_PFP_track_dedx_perhit.clear();
    TPCObj_PFP_track_resrange_perhit.clear();
@@ -237,6 +238,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          std::vector<double> track_end = {-9999, -9999, -9999};
          double track_theta = -9999.;
          double track_phi = -9999.;
+         double track_mom = -9999.;
          std::vector<double> track_dedx_truncmean(3,-9999.);
          std::vector<std::vector<double>> track_dedx_perhit(3);
          std::vector<std::vector<double>> track_resrange_perhit(3);
@@ -267,12 +269,13 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
             track_length = track -> Length();
             track_theta = track -> Theta();
             track_phi = track -> Phi();
+            if (track->HasMomentum()) track_mom = track -> VertexMomentum();
             auto start = track -> Start();
             track_start = {start.X(),start.Y(),start.Z()};
             auto end = track -> End();
             track_end = {end.X(),end.Y(),end.Z()};
 
-            unsigned int trkid = track->ID();
+            //unsigned int trkid = track->ID();
 
             // Get calorimetry information
             // Only fill when there is valid calorimetry information (of course)
@@ -306,7 +309,8 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
 
             // Store isMIP
-            isMIP = IsMIP(trackPIDAssn, trkid);
+            //isMIP = IsMIP(trackPIDAssn, trkid);
+            isMIP = IsMIP(track, evt);
 
             // Now get PID information from track association
             // Note that this relies on you having the feature branch of lardataobj lardataobj/feature/kduffy_pidrefactor_v1_11_00_04 checked out, otherwise you won't be able to read these products
@@ -420,6 +424,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          TPCObj_PFP_track_end.emplace_back(track_end);
          TPCObj_PFP_track_theta.emplace_back(track_theta);
          TPCObj_PFP_track_phi.emplace_back(track_phi);
+         TPCObj_PFP_track_mom.emplace_back(track_mom);
          TPCObj_PFP_track_dedx_truncmean.emplace_back(track_dedx_truncmean);
          TPCObj_PFP_track_dedx_perhit.emplace_back(track_dedx_perhit);
          TPCObj_PFP_track_resrange_perhit.emplace_back(track_resrange_perhit);
@@ -592,6 +597,7 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("TPCObj_PFP_track_end", &(vars->TPCObj_PFP_track_end));
    t -> Branch("TPCObj_PFP_track_theta", &(vars->TPCObj_PFP_track_theta));
    t -> Branch("TPCObj_PFP_track_phi", &(vars->TPCObj_PFP_track_phi));
+   t -> Branch("TPCObj_PFP_track_mom", &(vars->TPCObj_PFP_track_mom));
    t -> Branch("TPCObj_PFP_track_dedx_truncmean", &(vars->TPCObj_PFP_track_dedx_truncmean));
    t -> Branch("TPCObj_PFP_track_dedx_perhit",&(vars->TPCObj_PFP_track_dedx_perhit));
    t -> Branch("TPCObj_PFP_track_resrange_perhit",&(vars->TPCObj_PFP_track_resrange_perhit));

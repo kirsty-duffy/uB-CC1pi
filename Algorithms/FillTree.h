@@ -45,7 +45,7 @@
 #include "canvas/Persistency/Common/FindManyP.h"
 
 // CC1pi method includes
-#include "uboone/CC1pi/Algorithms/MIPConsistencyCheck_n2LLH.h"
+#include "uboone/CC1pi/Algorithms/MIPConsistencyCheck_Marco.h"
 #include "uboone/CC1pi/Algorithms/GetTopology.h"
 #include "uboone/CC1pi/Algorithms/TopologyEnums.h"
 #include "uboone/CC1pi/Algorithms/FVCheck.h"
@@ -71,6 +71,7 @@ struct cc1pianavars{
   std::vector<std::vector<double>> TPCObj_PFP_track_end;
   std::vector<double> TPCObj_PFP_track_theta;
   std::vector<double> TPCObj_PFP_track_phi;
+  std::vector<double> TPCObj_PFP_track_mom;
   std::vector<std::vector<double>> TPCObj_PFP_track_dedx_truncmean;
   std::vector<std::vector<std::vector<double>>> TPCObj_PFP_track_dedx_perhit;
   std::vector<std::vector<std::vector<double>>> TPCObj_PFP_track_resrange_perhit;
