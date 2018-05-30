@@ -42,6 +42,7 @@ void cc1pianavars::Clear(){
    TPCObj_PFP_track_resrange_perhit.clear();
    TPCObj_PFP_isMIP.clear();
    TPCObj_PFP_track_isContained.clear();
+   TPCObj_PFP_track_AngleBetweenTracks.clear();
 
    // Shower variables
    TPCObj_PFP_shower_length.clear();
@@ -245,6 +246,8 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       art::FindManyP<recob::Track> tracks_from_pfps(pfp_h, evt, CC1piInputTags->fTrackLabel);
       art::FindManyP<recob::Shower> showers_from_pfps(pfp_h, evt, CC1piInputTags->fTrackLabel);
 
+      std::vector<TVector3> vtxDirs = {};
+
       for (auto pfp : pfps) {
 
          //Set default values for track/shower specific variables
@@ -273,7 +276,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          double track_rangeE_mu = -9999;
          double track_rangeE_p = -9999;
          bool isContained = true;
-   
+
          double shower_length = -9999;
          std::vector<double> shower_start = {-9999, -9999, -9999};
 
@@ -292,6 +295,8 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
             track_start = {start.X(),start.Y(),start.Z()};
             auto end = track -> End();
             track_end = {end.X(),end.Y(),end.Z()};
+
+            vtxDirs.emplace_back(track -> VertexDirection());
 
             //unsigned int trkid = track->ID();
 
@@ -450,7 +455,6 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
             shower_start = {start.X(),start.Y(),start.Z()};
          }
 
-
          // Fill track/shower specific variables
          TPCObj_PFP_track_length.emplace_back(track_length);
          TPCObj_PFP_track_start.emplace_back(track_start);
@@ -529,6 +533,14 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
       } // loop over pfps
 
+      // Calculate angle between tracks
+      for (size_t track1 = 0; track1 < vtxDirs.size(); track1++) {
+         std::vector<double> angles = {};
+         for (size_t track2 = 0; track2 < vtxDirs.size(); track2++) {
+            angles.emplace_back(vtxDirs.at(track1).Angle(vtxDirs.at(track2)));
+         }
+         TPCObj_PFP_track_AngleBetweenTracks.emplace_back(angles);
+      }
 
       // Get neutrino candidate vertex from TPCObject
       recob::Vertex TPCObj_nu_vtx = TPCObj_candidate->GetVertex();
@@ -646,6 +658,7 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("TPCObj_PFP_track_resrange_perhit",&(vars->TPCObj_PFP_track_resrange_perhit));
    t -> Branch("TPCObj_PFP_isMIP", &(vars->TPCObj_PFP_isMIP));
    t -> Branch("TPCObj_PFP_track_isContained", &(vars->TPCObj_PFP_track_isContained));
+   t -> Branch("TPCObj_PFP_track_AngleBetweenTracks", &(vars->TPCObj_PFP_track_AngleBetweenTracks));
 
    t -> Branch("TPCObj_PFP_shower_length", &(vars->TPCObj_PFP_shower_length));
    t -> Branch("TPCObj_PFP_shower_start", &(vars->TPCObj_PFP_shower_start));

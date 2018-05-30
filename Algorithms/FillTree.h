@@ -79,6 +79,7 @@ struct cc1pianavars{
   std::vector<std::vector<std::vector<double>>> TPCObj_PFP_track_resrange_perhit;
   std::vector<bool> TPCObj_PFP_isMIP;
   std::vector<bool> TPCObj_PFP_track_isContained;
+  std::vector<std::vector<double>> TPCObj_PFP_track_AngleBetweenTracks;
 
   // Shower variables
   std::vector<double> TPCObj_PFP_shower_length;

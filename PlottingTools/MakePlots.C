@@ -46,23 +46,33 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    TChain *t = new TChain("cc1piselec/outtree");
    t -> Add(FileName);
 
+   // Event variables
    bool isData;
    unsigned int run_num;
    unsigned int subrun_num;
    unsigned int event_num;
 
+   NuIntTopology Truth_topology = kUnknown;
+
+   // Selection result variables
    std::map<std::string,bool> *Marco_cutflow = nullptr;
    bool Marco_selected = 0;
-
-   NuIntTopology Truth_topology = kUnknown;
+   std::map<std::string,bool> *CC1picutflow = nullptr;
    
+   // Track variables
    std::vector<double> *TPCObj_PFP_track_length = nullptr;
    std::vector<std::vector<double>> *TPCObj_PFP_track_start = nullptr;
    std::vector<std::vector<double>> *TPCObj_PFP_track_end = nullptr;
-   std::vector<std::vector<double>> *TPCObj_PFP_track_mom = nullptr;
+   std::vector<double> *TPCObj_PFP_track_mom = nullptr;
    std::vector<bool> *TPCObj_PFP_isMIP = nullptr;
+   std::vector<bool> *TPCObj_PFP_track_isContained = nullptr;
+   std::vector<std::vector<double>> *TPCObj_PFP_track_AngleBetweenTracks = nullptr;
+
+   // Shower variables
    std::vector<double> *TPCObj_PFP_shower_length = nullptr;
    std::vector<std::vector<double>> *TPCObj_PFP_shower_start = nullptr;
+
+   // PFP reco variables
    int TPCObj_NPFPs = 0;
    int TPCObj_NTracks = 0;
    int TPCObj_NShowers = 0;
@@ -71,15 +81,17 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    std::vector<bool> *TPCObj_PFP_isDaughter = nullptr;
    std::vector<std::vector<int>> *TPCObj_PFP_daughterids = nullptr;
    std::vector<int> *TPCObj_PFP_id = nullptr;
+   std::vector<double> *TPCObj_reco_vtx = nullptr;
+
+   // PFP true variables
    std::vector<int> *TPCObj_PFP_MCPid = nullptr;
    std::vector<int> *TPCObj_PFP_truePDG = nullptr;
    std::vector<double> *TPCObj_PFP_trueE = nullptr;
    std::vector<double> *TPCObj_PFP_trueKE = nullptr;
-   std::vector<bool> *TPCObj_PFP_track_isContained = nullptr;
    int TPCObj_origin = 0;
    int TPCObj_origin_extra = 0;
-   std::vector<double> *TPCObj_reco_vtx = nullptr;
 
+   // MCParticle variables 
    std::vector<int> *MCP_PDG = nullptr;
    std::vector<double> *MCP_length = nullptr;
    std::vector<std::string> *MCP_process = nullptr;
@@ -93,14 +105,14 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    std::vector<double> *MCP_KE = nullptr;
    std::vector<bool> *MCP_isContained = nullptr;
 
+   // True neutrino variables
    std::vector<double> *nu_vtx = nullptr;
    std::vector<double> *nu_vtx_spacecharge = nullptr;
    bool nu_isCC = 0;
    int nu_PDG = 0;
    double nu_E = 0;
 
-   std::map<std::string,bool> *CC1picutflow = nullptr;
-
+   // PID variables
    std::vector<std::vector<double>> *n2LLH_fwd_mu = nullptr;
    std::vector<std::vector<double>> *n2LLH_bwd_mu = nullptr;
    std::vector<std::vector<double>> *n2LLH_fwd_p = nullptr;
@@ -113,6 +125,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
 
 
    t -> SetBranchStatus("*",0);
+
    t -> SetBranchStatus("isData",1);
    t -> SetBranchAddress("isData", &isData);
    t -> SetBranchStatus("run_num",1);
@@ -122,27 +135,36 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchStatus("event_num",1);
    t -> SetBranchAddress("event_num", &event_num);
 
+   t -> SetBranchStatus("Truth_topology",1);
+   t -> SetBranchAddress("Truth_topology", &Truth_topology);
+
    t -> SetBranchStatus("Marco_cutflow",1);
    t -> SetBranchAddress("Marco_cutflow", &Marco_cutflow);
    t -> SetBranchStatus("Marco_selected",1);
    t -> SetBranchAddress("Marco_selected", &Marco_selected);
+   t -> SetBranchStatus("CC1picutflow",1);
+   t -> SetBranchAddress("CC1picutflow", &CC1picutflow);
 
-   t -> SetBranchStatus("Truth_topology",1);
-   t -> SetBranchAddress("Truth_topology", &Truth_topology);
    t -> SetBranchStatus("TPCObj_PFP_track_length",1);
    t -> SetBranchAddress("TPCObj_PFP_track_length", &TPCObj_PFP_track_length);
-   t -> SetBranchStatus("TPCObj_PFP_track_mom",1);
-   t -> SetBranchAddress("TPCObj_PFP_track_mom", &TPCObj_PFP_track_mom);
    t -> SetBranchStatus("TPCObj_PFP_track_start",1);
    t -> SetBranchAddress("TPCObj_PFP_track_start", &TPCObj_PFP_track_start);
    t -> SetBranchStatus("TPCObj_PFP_track_end",1);
    t -> SetBranchAddress("TPCObj_PFP_track_end", &TPCObj_PFP_track_end);
+   t -> SetBranchStatus("TPCObj_PFP_track_mom",1);
+   t -> SetBranchAddress("TPCObj_PFP_track_mom", &TPCObj_PFP_track_mom);
    t -> SetBranchStatus("TPCObj_PFP_isMIP",1);
    t -> SetBranchAddress("TPCObj_PFP_isMIP", &TPCObj_PFP_isMIP);
+   t -> SetBranchStatus("TPCObj_PFP_track_isContained",1);
+   t -> SetBranchAddress("TPCObj_PFP_track_isContained", &TPCObj_PFP_track_isContained);
+   t -> SetBranchStatus("TPCObj_PFP_track_AngleBetweenTracks",1);
+   t -> SetBranchAddress("TPCObj_PFP_track_AngleBetweenTracks", &TPCObj_PFP_track_AngleBetweenTracks);
+
    t -> SetBranchStatus("TPCObj_PFP_shower_length",1);
    t -> SetBranchAddress("TPCObj_PFP_shower_length", &TPCObj_PFP_shower_length);
    t -> SetBranchStatus("TPCObj_PFP_shower_start",1);
    t -> SetBranchAddress("TPCObj_PFP_shower_start", &TPCObj_PFP_shower_start);
+
    t -> SetBranchStatus("TPCObj_NPFPs",1);
    t -> SetBranchAddress("TPCObj_NPFPs", &TPCObj_NPFPs);
    t -> SetBranchStatus("TPCObj_NTracks",1);
@@ -159,6 +181,9 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchAddress("TPCObj_PFP_daughterids", &TPCObj_PFP_daughterids);
    t -> SetBranchStatus("TPCObj_PFP_id",1);
    t -> SetBranchAddress("TPCObj_PFP_id", &TPCObj_PFP_id);
+   t -> SetBranchStatus("TPCObj_reco_vtx",1);
+   t -> SetBranchAddress("TPCObj_reco_vtx", &TPCObj_reco_vtx);
+
    t -> SetBranchStatus("TPCObj_PFP_MCPid",1);
    t -> SetBranchAddress("TPCObj_PFP_MCPid", &TPCObj_PFP_MCPid);
    t -> SetBranchStatus("TPCObj_PFP_truePDG",1);
@@ -167,14 +192,10 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchAddress("TPCObj_PFP_trueE", &TPCObj_PFP_trueE);
    t -> SetBranchStatus("TPCObj_PFP_trueKE",1);
    t -> SetBranchAddress("TPCObj_PFP_trueKE", &TPCObj_PFP_trueKE);
-   t -> SetBranchStatus("TPCObj_PFP_track_isContained",1);
-   t -> SetBranchAddress("TPCObj_PFP_track_isContained", &TPCObj_PFP_track_isContained);
    t -> SetBranchStatus("TPCObj_origin",1);
    t -> SetBranchAddress("TPCObj_origin", &TPCObj_origin);
    t -> SetBranchStatus("TPCObj_origin_extra",1);
    t -> SetBranchAddress("TPCObj_origin_extra", &TPCObj_origin_extra);
-   t -> SetBranchStatus("TPCObj_reco_vtx",1);
-   t -> SetBranchAddress("TPCObj_reco_vtx", &TPCObj_reco_vtx);
 
    t -> SetBranchStatus("MCP_PDG",1);
    t -> SetBranchAddress("MCP_PDG", &MCP_PDG);
@@ -211,9 +232,6 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchAddress("nu_PDG", &nu_PDG);
    t -> SetBranchStatus("nu_E",1);
    t -> SetBranchAddress("nu_E", &nu_E);
-
-   t -> SetBranchStatus("CC1picutflow",1);
-   t -> SetBranchAddress("CC1picutflow", &CC1picutflow);
 
    t -> SetBranchStatus("TPCObj_PFP_n2LLH_fwd_mu",1);
    t -> SetBranchAddress("TPCObj_PFP_n2LLH_fwd_mu",&n2LLH_fwd_mu);
@@ -278,6 +296,28 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
       }
       else{
          len_stack_MIPs_byPDG[j] = new StackedHistPDGCode(histname.c_str(), ";Longest Track Length [cm];Selected Events (normalised to 3.782 #times 10^{19} POT)", 30, 0, 300);
+      }
+   }
+
+   StackedHistPDGCode* mom_stack_byPDG[10];
+   for (int j=0; j<10; j++){
+      std::string histname = std::string("mom_stack_byPDG_track")+std::to_string(j);
+      if (j==0){
+         mom_stack_byPDG[j] = new StackedHistPDGCode(histname.c_str(), ";Longest Track Length [cm];Selected Events (normalised to 3.782 #times 10^{19} POT)", 30, 0, 700);
+      }
+      else{
+         mom_stack_byPDG[j] = new StackedHistPDGCode(histname.c_str(), ";Longest Track Length [cm];Selected Events (normalised to 3.782 #times 10^{19} POT)", 30, 0, 300);
+      }
+   }
+
+   StackedHistPDGCode* mom_stack_MIPs_byPDG[5];
+   for (int j=0; j<5; j++){
+      std::string histname = std::string("mom_stack_MIPs_byPDG_track")+std::to_string(j);
+      if (j==0){
+         mom_stack_MIPs_byPDG[j] = new StackedHistPDGCode(histname.c_str(), ";Longest Track Length [cm];Selected Events (normalised to 3.782 #times 10^{19} POT)", 30, 0, 700);
+      }
+      else{
+         mom_stack_MIPs_byPDG[j] = new StackedHistPDGCode(histname.c_str(), ";Longest Track Length [cm];Selected Events (normalised to 3.782 #times 10^{19} POT)", 30, 0, 300);
       }
    }
 
