@@ -9,6 +9,7 @@ struct InputTags{
    art::InputTag fTrackLabel;
    art::InputTag fCalorimetryLabel;
    art::InputTag fSelectionLabel;
+   art::InputTag fPIDLabelChi2;
 
    // Constructor (pass the fhicl parameters here)
    InputTags(fhicl::ParameterSet const &p);

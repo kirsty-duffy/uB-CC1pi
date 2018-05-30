@@ -1,0 +1,9 @@
+# This fcl contains the lines we need to tell pandora to build showers as tracks.
+# I (Kirsty) think that this same file can be used for data and MC. The only difference should be whether "run_ubxsec_mc_bnbcosmic.fcl", "run_ubxsec_data_bnbon.fcl", or "run_ubxsec_data_extbnb.fcl" is included before this fcl is included - one of them must be!
+
+# Tell pandora to produce tracks even for PFPs it thinks are showers
+physics.producers.pandoraNu.BuildShowersAsTracks: true
+
+# Make Marco's module stop filtering (will pass all events)
+# See https://cdcvs.fnal.gov/redmine/projects/art/wiki/Filtering_events for details
+outputs.out1.SelectEvents: [ ]

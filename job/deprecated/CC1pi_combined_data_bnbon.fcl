@@ -1,0 +1,148 @@
+#include "services_microboone.fcl"
+#include "config_particle_identification.fcl"
+#include "calibration_microboone.fcl"
+#include "caldata_microboone.fcl"
+#include "config_particle_identification_fiducialvolume.fcl"
+#include "config_particle_identification_braggalgo.fcl"
+#include "run_ubxsec_data_bnbon_BuildShowersAsTracks.fcl"
+
+process_name: CC1pi
+
+services:
+{
+   TFileService: { fileName: "CC1pi_out_data_bnbon.root" }
+   #TimeTracker: {}
+   #RandomNumberGenerator: {}
+   message: @local::standard_info
+   @table::microboone_simulation_services
+   SpaceCharge: @local::microboone_spacecharge
+   TPCEnergyCalib: @local::microboone_tpcenergycalib_service
+}
+
+services.DetectorClocksService.InheritClockConfig:   false
+services.DetectorClocksService.TriggerOffsetTPC:     -400
+
+services.SpaceCharge.EnableCorrSCE:       true
+services.SpaceCharge.EnableSimEfieldSCE:  true
+services.SpaceCharge.EnableSimSpatialSCE: true
+
+source:
+{
+  module_type   : RootInput
+  maxEvents     : -1
+  fileNames     : [ ]
+  inputCommands : [
+  "keep *",
+  "drop sumdata::RunData_*_*_*" # Workaround for LArSoft bug 18943
+  ]
+}
+
+physics.producers.UBXSecpandoraNucali: @local::microboone_calibrationdedx
+physics.producers.pid: @local::particleidconfig
+physics.producers.cc1piselec:
+{
+  module_type : CC1piSelection
+  MCTruthMatching:
+  {
+    tool_type:           "AssociationsTruth"
+    #AssnsProducerLabels: ["gaushitTruthMatch", "crHitRemovalTruthMatch", "trajclusterTruthMatch"]
+    AssnsProducerLabels: [ ]
+    G4ProducerLabel:     "largeant"
+    MCTruthAssociations: { MinHitEnergyFraction: 0.1 }
+  }
+  TrackLabel:            "pandoraNu::CC1pi"
+  CalorimetryLabel:      "UBXSecpandoraNucali::CC1pi"
+  SelectionLabel:        "UBXSec::CC1pi"
+  ParticleIdChi2Label:   "pandoraNupid::CC1pi"
+}
+physics.producers.UBXSecpandoraNucali.TrackModuleLabel:       "pandoraNu::CC1pi"
+physics.producers.UBXSecpandoraNucali.CalorimetryModuleLabel: "pandoraNucalo::CC1pi"
+physics.producers.pid.ProducerLabels:
+{
+  TrackLabel       : "pandoraNu::CC1pi"
+  CalorimetryLabel : "UBXSecpandoraNucali::CC1pi"
+}
+physics.producers.pid.BraggAlgo: @local::braggalgo_mcc8
+
+physics.filters.tpcneutrinoidfilternumuccinc.VertexModuleLabelVec: [ "pandoraNu::CC1pi" ]
+physics.filters.tpcneutrinoidfilternumuccinc.VtxTrackAssnModuleLabelVec: [ "UBXSec::CC1pi" ]
+physics.producers.CandidateConsistency.ShowerProducer: "pandoraNu::CC1pi"
+physics.producers.CandidateConsistency.TPCObjectProducer: "TPCObjectMaker::CC1pi"
+physics.producers.CandidateConsistency.TrackProducer: "pandoraNu::CC1pi"
+physics.producers.NeutrinoFlashMatch.PFParticleModule: "pandoraNu::CC1pi"
+physics.producers.NeutrinoFlashMatch.TrackModule: "pandoraNu::CC1pi"
+physics.producers.RecoTrueMatcher.HitProducer: "pandoraCosmicHitRemoval::CC1pi"
+physics.producers.RecoTrueMatcher.MCPHitAssProducer: "pandoraCosmicHitRemoval::CC1pi"
+physics.producers.RecoTrueMatcher.PFParticleProducer: "pandoraNu::CC1pi"
+physics.producers.RecoTrueMatcher.SpacePointProducer: "pandoraNu::CC1pi"
+physics.producers.TPCObjectMaker.HitProducer: "pandoraCosmicHitRemoval::CC1pi"
+physics.producers.TPCObjectMaker.MCPHitAssProducer: "pandoraCosmicHitRemoval::CC1pi"
+physics.producers.TPCObjectMaker.PFParticleProducer: "pandoraNu::CC1pi"
+physics.producers.TPCObjectMaker.ShowerProducer: "pandoraNu::CC1pi"
+physics.producers.TPCObjectMaker.SpacePointProducer: "pandoraNu::CC1pi"
+physics.producers.TPCObjectMaker.TrackProducer: "pandoraNu::CC1pi"
+physics.producers.TPCObjectMaker.VertexProducer: "pandoraNu::CC1pi"
+physics.producers.UBXSec.FluxEventWeightMultisimProducer: "fluxeventweightmultisim::CC1pi"
+physics.producers.UBXSec.GenieEventWeightMultisimProducer: "genieeventweightmultisim::CC1pi"
+physics.producers.UBXSec.GenieEventWeightPMOneProducer: "genieeventweightpm1::CC1pi"
+physics.producers.UBXSec.HitProducer: "pandoraCosmicHitRemoval::CC1pi"
+physics.producers.UBXSec.PFParticleProducer: "pandoraNu::CC1pi"
+physics.producers.UBXSec.ParticleIDProducer: "pandoraNupid::CC1pi"
+physics.producers.UBXSec.SpacePointProducer: "pandoraNu::CC1pi"
+physics.producers.pandoraCosmicHitRemoval.CosmicProducerLabels: [
+   "pandoraCosmicTrackPFPart::CC1pi",
+   "pandoraCosmicFlashTag::CC1pi",
+   "pandoraCosmicACPTTagger::CC1pi",
+   "pandoraCosmicStoppingMu::CC1pi"
+]
+physics.producers.pandoraNu.HitFinderModuleLabel: "pandoraCosmicHitRemoval::CC1pi"
+physics.producers.pandoraNuGeoCosmicTag.PFParticleProducer: "pandoraNu::CC1pi"
+physics.producers.pandoraNuGeoCosmicTag.TrackProducer: "pandoraNu::CC1pi"
+physics.producers.pandoraNuMCSMu.inputs.inputLabel: "pandoraNu::CC1pi"
+physics.producers.pandoraNuMCSPi.inputs.inputLabel: "pandoraNu::CC1pi"
+physics.producers.pandoraNucalo.SpacePointModuleLabel: "pandoraNu::CC1pi"
+physics.producers.pandoraNucalo.TrackModuleLabel: "pandoraNu::CC1pi"
+physics.producers.pandoraNupid.CalorimetryModuleLabel: "pandoraNucalo::CC1pi"
+physics.producers.pandoraNupid.TrackModuleLabel: "pandoraNu::CC1pi"
+
+outputs:
+{
+   out1:
+   {
+     module_type  : RootOutput
+     fileName     : "%ifb_%tc_CC1pi_artrootout.root"
+     dataTier     : "cc1pi"
+     SelectEvents : [ ]
+   }
+}
+
+physics.producermods: [
+   "pandoraCosmicTPCObj",
+   "RecoTrueMatcherCosmic",
+   "pandoraCosmicTrackPFPart",
+   "pandoraCosmicFlashTag",
+   "pandoraCosmicACPTTagger",
+   "pandoraCosmicStoppingMu",
+   "pandoraCosmicHitRemoval",
+   "pandoraNu",
+   "pandoraNucalo",
+   "pandoraNupid",
+   "pandoraNuMCSMu",
+   "pandoraNuMCSPi",
+   "RecoTrueMatcher",
+   "TPCObjectMaker",
+   "pandoraNuGeoCosmicTag",
+   "NeutrinoMCFlash",
+   "NeutrinoFlashMatch",
+   "CandidateConsistency",
+   "UBXSec",
+#   "tpcneutrinoidfilternumuccinc",
+   "UBXSecpandoraNucali",
+   "pid",
+   "cc1piselec"
+]
+
+physics.outputFiles   : [ out1 ]
+
+physics.trigger_paths : [ producermods ]
+physics.end_paths     : [ outputFiles ]
