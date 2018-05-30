@@ -1,0 +1,45 @@
+<!-- Project details -->
+<!DOCTYPE project [
+<!ENTITY release "v06_26_01_13">
+<!ENTITY name "combined_sel">
+<!ENTITY user "ddevitt">
+<!ENTITY version "v06_26_01_13_combined_v1">
+]>
+
+<project name="&name;">
+
+  <!-- Group -->
+  <group>uboone</group>
+
+  <!-- Project size (numevents is an upper limit) -->
+  <numevents>25000</numevents>
+  <numjobs>500</numjobs>
+
+  <!-- Where to look for fcl files (in addition to $FHICL_FILE_PATH) -->
+  <!-- fcldir>/pnfs/uboone/persistent/users/ddevitt/fcl/</fcldir -->
+
+  <!-- Batch OS -->
+  <os>SL6</os>
+
+  <!-- Larsoft information -->
+  <larsoft>
+    <!-- tag>&release;</tag -->
+    <!-- qual>e10:prof</qual -->
+    <local>/pnfs/uboone/resilient/users/ddevitt/tars/&version;.tar</local>
+  </larsoft>
+
+  <!-- requested memory, in MB -->
+  <memory>4000</memory>
+
+  <!-- Stages -->
+  <stage name = "Selection">
+     <maxfilesperjob>1</maxfilesperjob>
+     <inputlist>/pnfs/uboone/persistent/users/ddevitt/filelist/filepaths_prodgenie_bnb_nu_cosmic_uboone_mcc8.7_reco2_dev_first25000.txt</inputlist>
+     <fcl>run_UBXSec_CC1pi_mc_bnbcosmic.fcl</fcl>
+     <outdir>/pnfs/uboone/persistent/users/ddevitt/out/&version;/</outdir>
+     <logdir>/pnfs/uboone/persistent/users/ddevitt/out/&version;/</logdir>
+     <workdir>/pnfs/uboone/resilient/users/ddevitt/work/&version;/</workdir>
+     <bookdir>/uboone/data/users/ddevitt/book/&version;/</bookdir>
+     <schema>root</schema>
+  </stage>
+</project>
