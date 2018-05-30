@@ -289,8 +289,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
             track_length = track -> Length();
             track_theta = track -> Theta();
             track_phi = track -> Phi();
-            //if (track->HasMomentum()) 
-            track_mom = track -> VertexMomentum();
+            //if (track->HasMomentum()) track_mom = track -> VertexMomentum(); // Commented out because I don't think this is right, we need to think more about if we can use momentum
             auto start = track -> Start();
             track_start = {start.X(),start.Y(),start.Z()};
             auto end = track -> End();
@@ -662,7 +661,7 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
 
    t -> Branch("TPCObj_PFP_shower_length", &(vars->TPCObj_PFP_shower_length));
    t -> Branch("TPCObj_PFP_shower_start", &(vars->TPCObj_PFP_shower_start));
-   
+
    t -> Branch("TPCObj_NPFPs", &(vars->TPCObj_NPFPs));
    t -> Branch("TPCObj_NTracks", &(vars->TPCObj_NTracks));
    t -> Branch("TPCObj_NShowers", &(vars->TPCObj_NShowers));
