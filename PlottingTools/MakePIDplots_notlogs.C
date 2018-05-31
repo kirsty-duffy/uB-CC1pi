@@ -157,7 +157,8 @@ void MakePIDplots(std::string mcfile, double POTscaling=0., std::string onbeamda
   // Make histograms to fill
   const size_t nplots = PIDvarstoplot_dummy.size();
   hist1D *mc_hists[nplanes][nplots];
-  for (int i_pl=0; i_pl<nplanes; i_pl++){
+  //for (int i_pl=0; i_pl<nplanes; i_pl++){
+  for (int i_pl=2; i_pl<3; i_pl++){
     for (int i_h=0; i_h<nplots; i_h++){
       mc_hists[i_pl][i_h] = new hist1D(std::string("h_")+histnames.at(i_h)+std::string("_plane")+std::to_string(i_pl),std::string("Plane ")+std::to_string(i_pl)+histtitles.at(i_h),bins.at(i_h).at(0),bins.at(i_h).at(1),bins.at(i_h).at(2));
     }
@@ -170,7 +171,8 @@ void MakePIDplots(std::string mcfile, double POTscaling=0., std::string onbeamda
     CalcPIDvars(&mc_vars);
     std::vector<std::vector<std::vector<double>>> PIDvarstoplot = GetPIDvarstoplot(&mc_vars);
 
-    for (size_t i_pl=0; i_pl < nplanes; i_pl++){
+    //for (size_t i_pl=0; i_pl < nplanes; i_pl++){
+    for (size_t i_pl=2; i_pl < 3; i_pl++){
       for (size_t i_h = 0; i_h < nplots; i_h++){
         FillHist(mc_hists[i_pl][i_h],PIDvarstoplot.at(i_h),i_pl,mc_vars.TPCObj_PFP_PandoraClassedAsTrack,mc_vars.TPCObj_PFP_truePDG);
       }
@@ -183,7 +185,8 @@ void MakePIDplots(std::string mcfile, double POTscaling=0., std::string onbeamda
   hist1D *onb_hists[nplanes][nplots];
   if (t_onbeam){
     // Make histograms to fill
-    for (size_t i_pl=0; i_pl < nplanes; i_pl++){
+    //for (size_t i_pl=0; i_pl < nplanes; i_pl++){
+    for (size_t i_pl=2; i_pl < 3; i_pl++){
       for (int i_h=0; i_h<nplots; i_h++){
         onb_hists[i_pl][i_h] = new hist1D(std::string("h_ondat_")+histnames.at(i_h)+std::string("_plane")+std::to_string(i_pl),std::string("Plane ")+std::to_string(i_pl)+histtitles.at(i_h),bins.at(i_h).at(0),bins.at(i_h).at(1),bins.at(i_h).at(2));
       }
@@ -197,7 +200,8 @@ void MakePIDplots(std::string mcfile, double POTscaling=0., std::string onbeamda
       std::vector<std::vector<std::vector<double>>> PIDvarstoplot = GetPIDvarstoplot(&onbeam_vars);
 
 
-      for (size_t i_pl=0; i_pl < nplanes; i_pl++){
+      //for (size_t i_pl=0; i_pl < nplanes; i_pl++){
+      for (size_t i_pl=2; i_pl < 3; i_pl++){
         for (size_t i_h = 0; i_h < nplots; i_h++){
           FillHist(onb_hists[i_pl][i_h],PIDvarstoplot.at(i_h),i_pl,onbeam_vars.TPCObj_PFP_PandoraClassedAsTrack); // 0 because there is no "true PDG" for data
         }
@@ -210,7 +214,8 @@ void MakePIDplots(std::string mcfile, double POTscaling=0., std::string onbeamda
   hist1D *offb_hists[nplanes][nplots];
   if (t_offbeam){
     // Make histograms to fill
-    for (size_t i_pl=0; i_pl < nplanes; i_pl++){
+    //for (size_t i_pl=0; i_pl < nplanes; i_pl++){
+    for (size_t i_pl=2; i_pl < 3; i_pl++){
       for (int i_h=0; i_h<nplots; i_h++){
         offb_hists[i_pl][i_h] = new hist1D(std::string("h_offdat_")+histnames.at(i_h)+std::string("_plane")+std::to_string(i_pl),std::string("Plane ")+std::to_string(i_pl)+histtitles.at(i_h),bins.at(i_h).at(0),bins.at(i_h).at(1),bins.at(i_h).at(2));
       }
@@ -223,7 +228,8 @@ void MakePIDplots(std::string mcfile, double POTscaling=0., std::string onbeamda
       CalcPIDvars(&offbeam_vars);
       std::vector<std::vector<std::vector<double>>> PIDvarstoplot = GetPIDvarstoplot(&offbeam_vars);
 
-      for (size_t i_pl=0; i_pl < nplanes; i_pl++){
+      //for (size_t i_pl=0; i_pl < nplanes; i_pl++){
+      for (size_t i_pl=2; i_pl < 3; i_pl++){
         for (size_t i_h = 0; i_h < nplots; i_h++){
           FillHist(offb_hists[i_pl][i_h],PIDvarstoplot.at(i_h),i_pl,offbeam_vars.TPCObj_PFP_PandoraClassedAsTrack); // 0 because there is no "true PDG" for data
         }
@@ -234,7 +240,8 @@ void MakePIDplots(std::string mcfile, double POTscaling=0., std::string onbeamda
 
   // -------------------- Now make all the plots
 
-  for (size_t i_pl=0; i_pl < nplanes; i_pl++){
+  //for (size_t i_pl=0; i_pl < nplanes; i_pl++){
+  for (size_t i_pl=2; i_pl < 3; i_pl++){
     for (size_t i_h=0; i_h < nplots; i_h++){
       TCanvas *c1 = new TCanvas();
       if (onminusoffbeam){
