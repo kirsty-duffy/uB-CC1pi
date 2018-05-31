@@ -63,6 +63,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    std::vector<double> *TPCObj_PFP_track_length = nullptr;
    std::vector<std::vector<double>> *TPCObj_PFP_track_start = nullptr;
    std::vector<std::vector<double>> *TPCObj_PFP_track_end = nullptr;
+   std::vector<double> *TPCObj_PFP_track_theta = nullptr;
+   std::vector<double> *TPCObj_PFP_track_phi = nullptr;
    std::vector<double> *TPCObj_PFP_track_mom = nullptr;
    std::vector<bool> *TPCObj_PFP_isMIP = nullptr;
    std::vector<bool> *TPCObj_PFP_track_isContained = nullptr;
@@ -151,6 +153,10 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchAddress("TPCObj_PFP_track_start", &TPCObj_PFP_track_start);
    t -> SetBranchStatus("TPCObj_PFP_track_end",1);
    t -> SetBranchAddress("TPCObj_PFP_track_end", &TPCObj_PFP_track_end);
+   t -> SetBranchStatus("TPCObj_PFP_track_theta",1);
+   t -> SetBranchAddress("TPCObj_PFP_track_theta", &TPCObj_PFP_track_theta);
+   t -> SetBranchStatus("TPCObj_PFP_track_phi",1);
+   t -> SetBranchAddress("TPCObj_PFP_track_phi", &TPCObj_PFP_track_phi);
    t -> SetBranchStatus("TPCObj_PFP_track_mom",1);
    t -> SetBranchAddress("TPCObj_PFP_track_mom", &TPCObj_PFP_track_mom);
    t -> SetBranchStatus("TPCObj_PFP_isMIP",1);
@@ -375,6 +381,13 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    TEfficiency* eff_distcut = new TEfficiency("eff_distcut",";Value used for distance cut;",distcuts_size,distcuts);
    TEfficiency* pur_distcut = new TEfficiency("pur_distcut",";Value used for distance cut;",distcuts_size,distcuts);
    TH1D* effpur_distcut = new TH1D("effpur_distcut",";;",distcuts_size,distcuts);
+
+   TH1D* AngleBetweenTracks = new TH1D("AngleBetweenTracks",";Angle between selected tracks;Entries",30,0,3.14);
+   StackedHistTopology* AngleBetweenTracks_stack = new StackedHistTopology("AngleBetweenTracks_stack",";Angle between selected tracks;Entries",30,0,3.14);
+   TH1D* AngleBetweenTracks_Close = new TH1D("AngleBetweenTracks_Close",";Angle between selected tracks that are within 3 cm;Entries",30,0,3.14);
+   StackedHistTopology* AngleBetweenTracks_Close_stack = new StackedHistTopology("AngleBetweenTracks_Close_stack",";Angle between selected tracks that are within 3 cm;Entries",30,0,3.14);
+   StackedHistTopology* AngleBetweenTracks_Close_sameID_stack = new StackedHistTopology("AngleBetweenTracks_Close_sameID_stack",";Angle between selected tracks that are within 3 cm and match the same MCP;Entries",30,0,3.14);
+   StackedHistTopology* AngleBetweenTracks_Close_diffID_stack = new StackedHistTopology("AngleBetweenTracks_Close_diffID_stack",";Angle between selected tracks that are within 3 cm and match different MCPs;Entries",30,0,3.14);
 
    //ofstream evdinfo;
    //evdinfo.open("evdinfo.txt");
@@ -737,6 +750,48 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
             vtx_truereco_spacecharge_dist -> Fill(std::hypot(std::hypot(TPCObj_reco_vtx->at(0) - nu_vtx_spacecharge->at(0), TPCObj_reco_vtx->at(1) - nu_vtx_spacecharge->at(1)), TPCObj_reco_vtx->at(2) - nu_vtx_spacecharge->at(2)));
          }
 
+/*         
+         // Angle between tracks...
+         for(size_t track1 = 0; track1 < TPCObj_PFP_track_AngleBetweenTracks->size(); track1++) {
+            for(size_t track2 = track1+1; track2 < TPCObj_PFP_track_AngleBetweenTracks->size(); track2++) {
+               AngleBetweenTracks -> Fill(TPCObj_PFP_track_AngleBetweenTracks->at(track1).at(track2));
+               AngleBetweenTracks_stack -> Fill(Truth_topology, TPCObj_PFP_track_AngleBetweenTracks->at(track1).at(track2));
+            }
+         }
+*/
+         // Angle between track (using theta and phi)...
+         for (int track1 = 0; track1 < TPCObj_NPFPs; track1++) {
+            if(TPCObj_PFP_track_length -> at(track1) < 0) continue;
+
+            for (int track2 = track1+1; track2 < TPCObj_NPFPs; track2++) {
+               if(TPCObj_PFP_track_length -> at(track2) < 0) continue;
+
+               TVector3 v0(1,1,1);
+               TVector3 v1(1,1,1);
+               v0.SetMag(1);
+               v1.SetMag(1);
+               v0.SetTheta(TPCObj_PFP_track_theta->at(track1));
+               v1.SetTheta(TPCObj_PFP_track_theta->at(track2));
+               v0.SetPhi(TPCObj_PFP_track_phi->at(track1));
+               v1.SetPhi(TPCObj_PFP_track_phi->at(track2));
+               double angle = TMath::ACos(v0.Dot(v1));
+               AngleBetweenTracks -> Fill(angle);
+               AngleBetweenTracks_stack -> Fill(Truth_topology, angle);
+
+               TVector3 start1(TPCObj_PFP_track_start->at(track1).at(0),TPCObj_PFP_track_start->at(track1).at(1),TPCObj_PFP_track_start->at(track1).at(2));
+               TVector3 end1(TPCObj_PFP_track_end->at(track1).at(0),TPCObj_PFP_track_end->at(track1).at(1),TPCObj_PFP_track_end->at(track1).at(2));
+               TVector3 start2(TPCObj_PFP_track_start->at(track2).at(0),TPCObj_PFP_track_start->at(track2).at(1),TPCObj_PFP_track_start->at(track2).at(2));
+               TVector3 end2(TPCObj_PFP_track_end->at(track2).at(0),TPCObj_PFP_track_end->at(track2).at(1),TPCObj_PFP_track_end->at(track2).at(2));
+               std::vector<double> distances = { (start1-start2).Mag(),(start1-end2).Mag(), (end1-start2).Mag(), (end1-end2).Mag() };
+               double mindist = *std::min_element(distances.begin(),distances.end());
+               if(mindist < 3) {
+                  AngleBetweenTracks_Close -> Fill(angle);
+                  AngleBetweenTracks_Close_stack -> Fill(Truth_topology, angle);
+                  if(TPCObj_PFP_MCPid->at(track1)==TPCObj_PFP_MCPid->at(track2)) AngleBetweenTracks_Close_sameID_stack -> Fill(Truth_topology, angle);
+                  else AngleBetweenTracks_Close_diffID_stack -> Fill(Truth_topology, angle);
+               }
+            }
+         }
 
          //evdinfo << run_num << " " << subrun_num << " " << event_num << " " << track_daughters << " " << topologyenum2str(Truth_topology) << std::endl;
 
@@ -1144,6 +1199,19 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    effpur_distcut->SetMaximum(1);
    gPad->Update();
    c1 -> SaveAs(TString::Format("%s_effpur_distcut.eps",SaveString.c_str()));
+
+   AngleBetweenTracks -> Draw();
+   c1 -> SaveAs(TString::Format("%s_AngleBetweenTracks.eps",SaveString.c_str()));
+   AngleBetweenTracks_stack -> DrawStack(1,c1);
+   c1 -> SaveAs(TString::Format("%s_AngleBetweenTracks_stack.eps",SaveString.c_str()));
+   AngleBetweenTracks_Close -> Draw();
+   c1 -> SaveAs(TString::Format("%s_AngleBetweenTracks_Close.eps",SaveString.c_str()));
+   AngleBetweenTracks_Close_stack -> DrawStack(1,c1);
+   c1 -> SaveAs(TString::Format("%s_AngleBetweenTracks_Close_stack.eps",SaveString.c_str()));
+   AngleBetweenTracks_Close_sameID_stack -> DrawStack(1,c1);
+   c1 -> SaveAs(TString::Format("%s_AngleBetweenTracks_Close_sameID_stack.eps",SaveString.c_str()));
+   AngleBetweenTracks_Close_diffID_stack -> DrawStack(1,c1);
+   c1 -> SaveAs(TString::Format("%s_AngleBetweenTracks_Close_diffID_stack.eps",SaveString.c_str()));
 
    std::cout << "Total Efficiency: " << (1. * (eff_nuE -> GetPassedHistogram() -> GetEntries()))/(eff_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
    std::cout << "Total Purity: " << (1. * (pur_nuE -> GetPassedHistogram() -> GetEntries()))/(pur_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
