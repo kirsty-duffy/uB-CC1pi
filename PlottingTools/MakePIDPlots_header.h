@@ -1,3 +1,14 @@
+#include "../Algorithms/TopologyEnums.h"
+#include "TTree.h"
+#include "TH1.h"
+#include "TColor.h"
+#include "TLegend.h"
+#include "TCanvas.h"
+#include "THStack.h"
+#include "TStyle.h"
+#include "TFile.h"
+#include <vector>
+
 struct treevars{
   // These are the variables that are filled directly from the tree
   std::vector<int> *TPCObj_PFP_truePDG = nullptr;
@@ -18,6 +29,7 @@ struct treevars{
   std::vector<double> *TPCObj_PFP_track_rangeE_p = nullptr;
 
   std::vector<double> *TPCObj_PFP_trueEndP = nullptr;
+  NuIntTopology Truth_topology = kUnknown;
 
   // These are derived quantities - derived from the values above in CalcPIDvars
   std::vector<std::vector<double>> *TPCObj_PFP_n2LLH_p;
@@ -86,6 +98,8 @@ void settreevars(TTree *intree, treevars *varstoset){
   intree->SetBranchAddress("TPCObj_PFP_track_rangeE_p", &(varstoset->TPCObj_PFP_track_rangeE_p));
   intree->SetBranchStatus("TPCObj_PFP_trueEndP",1);
   intree->SetBranchAddress("TPCObj_PFP_trueEndP", &(varstoset->TPCObj_PFP_trueEndP));
+  intree->SetBranchStatus("Truth_topology",1);
+  intree->SetBranchAddress("Truth_topology", &(varstoset->Truth_topology));
 
   // intree->GetEntry(0);
   // size_t ntracks = varstoset->TPCObj_PFP_n2LLH_fwd_p->size();
@@ -166,8 +180,8 @@ void CalcPIDvars(treevars *vars){
   vars->TPCObj_PFP_Lmumippi_0to1 = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
 
   // Now calculate the values for all variables
-  for (size_t i_track=0; i_track < vecsize; i_track++){
-    for (size_t i_pl=0; i_pl < nplanes; i_pl++){
+  for (int i_track=0; i_track < vecsize; i_track++){
+    for (int i_pl=0; i_pl < nplanes; i_pl++){
       vars->TPCObj_PFP_n2LLH_p->at(i_track).at(i_pl)     = std::min(vars->TPCObj_PFP_n2LLH_fwd_p->at(i_track).at(i_pl)     , vars->TPCObj_PFP_n2LLH_bwd_p->at(i_track).at(i_pl));
       vars->TPCObj_PFP_n2LLH_mu->at(i_track).at(i_pl)    = std::min(vars->TPCObj_PFP_n2LLH_fwd_mu->at(i_track).at(i_pl)    , vars->TPCObj_PFP_n2LLH_bwd_mu->at(i_track).at(i_pl));
       vars->TPCObj_PFP_n2LLH_pi->at(i_track).at(i_pl)    = std::min(vars->TPCObj_PFP_n2LLH_fwd_pi->at(i_track).at(i_pl)    , vars->TPCObj_PFP_n2LLH_bwd_pi->at(i_track).at(i_pl));
@@ -456,7 +470,7 @@ void DrawMCEffPur(TCanvas *c, hist1D *hists, bool MIPlow){
   l->SetLineColor(kWhite);
   l->SetFillColor(kWhite);
 
-  for (int i_h=0; i_h<histstoeval.size(); i_h++){
+  for (size_t i_h=0; i_h<histstoeval.size(); i_h++){
     TH1D *heff = (TH1D*)hists->h_all->Clone("heff");
     TH1D *hpur = (TH1D*)hists->h_all->Clone("hpur");
     TH1D *heffpur = (TH1D*)hists->h_all->Clone("heffpur");
@@ -529,5 +543,149 @@ void DrawMCEffPur(TCanvas *c, hist1D *hists, bool MIPlow){
     c->cd(histstoeval.size()+1);
     l->Draw();
   }
+
+}
+
+
+
+
+
+// --------------------------------------------------- //
+// This struct contains signal vs background histograms and all functions related to them
+
+struct histCC1piselEffPur{
+  TH1D *h_cc1pi_sel;
+  TH1D *h_bg_sel;
+  TH1D *h_cc1pi_notsel;
+  // TH1D *h_bg_notsel;
+
+  TLegend *l;
+
+  // Constructor for this struct of hists
+  histCC1piselEffPur(std::string name, std::string title, double nbins, double binlow, double binhigh){
+    h_cc1pi_sel = new TH1D(std::string(name+"_cc1pi_sel").c_str(),title.c_str(),nbins,binlow,binhigh);
+    h_bg_sel = new TH1D(std::string(name+"_bg_sel").c_str(),title.c_str(),nbins,binlow,binhigh);
+    h_cc1pi_notsel = new TH1D(std::string(name+"_cc1pi_notsel").c_str(),title.c_str(),nbins,binlow,binhigh);
+    // h_bg_notsel = new TH1D(std::string(name+"_bg_notsel").c_str(),title.c_str(),nbins,binlow,binhigh);
+
+
+    // h_cc1pi_sel->SetFillColor(TColor::GetColor(8,64,129));
+    // h_cc1pi_all->SetFillColor(TColor::GetColor(8,64,129));
+    // h_bg_sel->SetFillColor(TColor::GetColor(197,197,197));
+    // h_bg_all->SetFillColor(TColor::GetColor(197,197,197));
+    //
+    // l = new TLegend(0.59,0.64,0.81,0.87);
+    // l->AddEntry(h_p,"True cc1#pi^{+}","f");
+    // l->AddEntry(h_mu,"True other","f");
+  }
+};
+
+  void FillCC1piEffPurHist(histCC1piselEffPur *hists, std::vector<std::vector<double>> value_vec, int plane, std::vector<bool> *pandoraclassedastrack, NuIntTopology topology, bool MIPlow){
+    // Loop through all bins in the histograms, and evaluate a cut value at the centre of each bin
+    for (int i_bin=1; i_bin < hists->h_cc1pi_sel->GetXaxis()->GetNbins()+1; i_bin++){
+      double cutval = hists->h_cc1pi_sel->GetXaxis()->GetBinCenter(i_bin);
+
+      // value_vec is a vector corresponding to the TPCObject. It has one entry per track in the TPCObject, and each of those entries has three entries (one for each plane)
+      // Loop through value_vec and calculate number of MIPs for the correct plane for every track
+      // Remember that plane=3 is code for (plane0+plane1+plane2)/3
+      int n_mips = 0;
+      for (size_t i_track=0; i_track<value_vec.size(); i_track++){
+        double value = -9999;
+        if (plane==3){
+          value = (value_vec.at(i_track).at(0)+value_vec.at(i_track).at(1)+value_vec.at(i_track).at(2))/3.;
+        }
+        else{
+          value = value_vec.at(i_track).at(plane);
+        }
+
+        // if (value == -9999 || value == -999) continue;
+         if (!pandoraclassedastrack->at(i_track)) {};
+
+        if (MIPlow && value < cutval){
+          n_mips++;
+        }
+        else if (!MIPlow && value > cutval){
+          n_mips++;
+        }
+      } // end loop over tracks in TPCObject
+
+      // If event has at least 2 MIPs, it is selected. Fill that into the relevant histograms
+      if (n_mips >= 2){
+        if (topology == kCC1piplus0p || topology == kCC1piplus1p || topology == kCC1piplusNp){
+          hists->h_cc1pi_sel->Fill(cutval);
+        }
+        else {
+          hists->h_bg_sel->Fill(cutval);
+        }
+      }
+      else { // if not at least 2 MIPs
+        if (topology == kCC1piplus0p || topology == kCC1piplus1p || topology == kCC1piplusNp){
+          hists->h_cc1pi_notsel->Fill(cutval);
+        }
+        // else {
+        //   hists->h_bg_notsel->Fill(cutval);
+        // }
+      }
+    } // End loop over bins in the histograms
+  }
+
+void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists){
+  TH1D *heff = (TH1D*)hists->h_cc1pi_sel->Clone("heff");
+  TH1D *hpur = (TH1D*)hists->h_cc1pi_sel->Clone("hpur");
+  TH1D *heffpur = (TH1D*)hists->h_cc1pi_sel->Clone("heffpur");
+
+  heff->Clear();
+  hpur->Clear();
+  heffpur->Clear();
+
+  TLegend *l = new TLegend(0.59,0.64,0.81,0.87);
+  l->SetTextFont(132);
+  l->SetLineColor(kWhite);
+  l->SetFillColor(kWhite);
+
+  for (int i_bin=1; i_bin < heff->GetXaxis()->GetNbins()+1; i_bin++){
+    double selected_cc1pi = hists->h_cc1pi_sel->GetBinContent(i_bin);
+    double total_cc1pi = hists->h_cc1pi_sel->GetBinContent(i_bin)+hists->h_cc1pi_notsel->GetBinContent(i_bin);
+    double selected_all = hists->h_cc1pi_sel->GetBinContent(i_bin)+hists->h_bg_sel->GetBinContent(i_bin);
+
+    double eff = selected_cc1pi/total_cc1pi;
+    double pur = selected_cc1pi/selected_all;
+
+    heff->SetBinContent(i_bin,eff);
+    hpur->SetBinContent(i_bin,pur);
+    heffpur->SetBinContent(i_bin,eff*pur);
+  }
+
+  heff->SetLineColor(kRed);
+  heff->SetMarkerColor(kRed);
+  heff->SetMarkerStyle(20);
+  heff->SetMarkerSize(.3
+  );
+  hpur->SetLineColor(kBlue);
+  hpur->SetMarkerColor(kBlue);
+  hpur->SetMarkerStyle(20);
+  hpur->SetMarkerSize(.3
+  );
+  heffpur->SetLineColor(kBlack);
+  heffpur->SetMarkerColor(kBlack);
+  heffpur->SetMarkerStyle(20);
+  heffpur->SetMarkerSize(.3
+  );
+
+  heff->GetYaxis()->SetRangeUser(0,1.1);
+
+  c->cd();
+  heff->Draw("p");
+  hpur->Draw("same p");
+  heffpur->Draw("same p");
+
+  l->AddEntry(heff,"Efficiency","p");
+  l->AddEntry(hpur,"Purity","p");
+  l->AddEntry(heffpur,"Efficiency #times Purity","p");
+  l->Draw();
+
+  c->Draw();
+  c->Modified();
+  c->Update();
 
 }

@@ -165,9 +165,12 @@ void MakePIDEfficiencyPlots(std::string mcfile){
   // Make histograms to fill
   const size_t nplots = PIDvarstoplot_dummy.size();
   hist1D *mc_hists[nplanes][nplots];
-  for (int i_pl=0; i_pl<nplanes; i_pl++){
-    for (int i_h=0; i_h<nplots; i_h++){
+  histCC1piselEffPur *mc_hists_cc1pieffpur[nplanes][nplots];
+  for (size_t i_pl=0; i_pl<nplanes; i_pl++){
+    for (size_t i_h=0; i_h<nplots; i_h++){
       mc_hists[i_pl][i_h] = new hist1D(std::string("h_")+histnames.at(i_h)+std::string("_plane")+std::to_string(i_pl),std::string("Plane ")+std::to_string(i_pl)+histtitles.at(i_h),bins.at(i_h).at(0),bins.at(i_h).at(1),bins.at(i_h).at(2));
+
+      mc_hists_cc1pieffpur[i_pl][i_h] = new histCC1piselEffPur(std::string("hCC1pieffpur_")+histnames.at(i_h)+std::string("_plane")+std::to_string(i_pl),std::string("Plane ")+std::to_string(i_pl)+histtitles.at(i_h),bins.at(i_h).at(0),bins.at(i_h).at(1),bins.at(i_h).at(2));
     }
   }
 
@@ -177,9 +180,12 @@ void MakePIDEfficiencyPlots(std::string mcfile){
     CalcPIDvars(&mc_vars);
     std::vector<std::vector<std::vector<double>>> PIDvarstoplot = GetPIDvarstoplot(&mc_vars);
 
-    for (size_t i_pl=0; i_pl < nplanes; i_pl++){
+    //for (size_t i_pl=0; i_pl < nplanes; i_pl++){
+    for (size_t i_pl=2; i_pl < 3; i_pl++){
       for (size_t i_h = 0; i_h < nplots; i_h++){
         FillHist(mc_hists[i_pl][i_h],PIDvarstoplot.at(i_h),i_pl,mc_vars.TPCObj_PFP_PandoraClassedAsTrack,mc_vars.TPCObj_PFP_truePDG);
+
+        FillCC1piEffPurHist(mc_hists_cc1pieffpur[i_pl][i_h],PIDvarstoplot.at(i_h),i_pl,mc_vars.TPCObj_PFP_PandoraClassedAsTrack,mc_vars.Truth_topology,MIPlow.at(i_h));
       }
     }
 
@@ -189,12 +195,25 @@ void MakePIDEfficiencyPlots(std::string mcfile){
 
   // -------------------- Now make all the plots
 
-  for (size_t i_pl=0; i_pl < nplanes; i_pl++){
+  // for (size_t i_pl=0; i_pl < nplanes; i_pl++){
+  for (size_t i_pl=2; i_pl < 3; i_pl++){
     for (size_t i_h=0; i_h < nplots; i_h++){
-      TCanvas *c1 = new TCanvas();
+      TCanvas *c1 = new TCanvas("c1","c1");
       DrawMCEffPur(c1, mc_hists[i_pl][i_h],MIPlow.at(i_h));
-      c1->Print(std::string(histnames[i_h]+std::string("_plane")+std::to_string(i_pl)+".png").c_str());
+      std::string printname = std::string(histnames[i_h]+std::string("_plane")+std::to_string(i_pl)+".png");
+      c1->Print(printname.c_str());
+      c1->Clear();
+
+      DrawCC1piMCEffPur(c1, mc_hists_cc1pieffpur[i_pl][i_h]);
+      c1->Print(std::string(std::string("CC1pi_")+printname).c_str());
       delete c1;
+    }
+  }
+
+  // for (size_t i_pl=0; i_pl < nplanes; i_pl++){
+  for (size_t i_pl=2; i_pl < 3; i_pl++){
+    for (size_t i_h=0; i_h < nplots; i_h++){
+
     }
   }
 }
