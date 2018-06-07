@@ -15,7 +15,7 @@
 
 services.TFileService.fileName: "CC1pi_out_data_bnbon.root"
 
-physics.producermods: [ @sequence::ubxsec_producermods , @sequence::cc1pi_producermods ]
+physics.producermods: [ @sequence::ubxsec_data_producers , @sequence::cc1pi_producermods ]
 
 physics.producers.pid.BraggAlgo: @local::braggalgo_mcc8_data
 physics.producers.UBXSecpandoraNucali.CaloAlg: @local::microboone_calorimetryalgmcc84data
