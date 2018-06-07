@@ -106,13 +106,13 @@ struct cc1pianavars{
   int TPCObj_origin_extra;
 
   // PID variables
-  std::vector<std::vector<double>> TPCObj_PFP_n2LLH_fwd_mu;
-  std::vector<std::vector<double>> TPCObj_PFP_n2LLH_fwd_p;
-  std::vector<std::vector<double>> TPCObj_PFP_n2LLH_fwd_pi;
-  std::vector<std::vector<double>> TPCObj_PFP_n2LLH_bwd_mu;
-  std::vector<std::vector<double>> TPCObj_PFP_n2LLH_bwd_p;
-  std::vector<std::vector<double>> TPCObj_PFP_n2LLH_bwd_pi;
-  std::vector<std::vector<double>> TPCObj_PFP_n2LLH_MIP;
+  std::vector<std::vector<double>> TPCObj_PFP_LH_fwd_mu;
+  std::vector<std::vector<double>> TPCObj_PFP_LH_fwd_p;
+  std::vector<std::vector<double>> TPCObj_PFP_LH_fwd_pi;
+  std::vector<std::vector<double>> TPCObj_PFP_LH_bwd_mu;
+  std::vector<std::vector<double>> TPCObj_PFP_LH_bwd_p;
+  std::vector<std::vector<double>> TPCObj_PFP_LH_bwd_pi;
+  std::vector<std::vector<double>> TPCObj_PFP_LH_MIP;
   std::vector<std::vector<double>> TPCObj_PFP_PIDA;
   std::vector<std::vector<double>> TPCObj_PFP_track_depE;
   std::vector<std::vector<double>> TPCObj_PFP_track_Chi2Proton;

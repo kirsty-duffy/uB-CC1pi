@@ -69,13 +69,13 @@ void cc1pianavars::Clear(){
    TPCObj_origin_extra = -9999;
 
    // PID variables
-   TPCObj_PFP_n2LLH_fwd_mu.clear();
-   TPCObj_PFP_n2LLH_fwd_p.clear();
-   TPCObj_PFP_n2LLH_fwd_pi.clear();
-   TPCObj_PFP_n2LLH_bwd_mu.clear();
-   TPCObj_PFP_n2LLH_bwd_p.clear();
-   TPCObj_PFP_n2LLH_bwd_pi.clear();
-   TPCObj_PFP_n2LLH_MIP.clear();
+   TPCObj_PFP_LH_fwd_mu.clear();
+   TPCObj_PFP_LH_fwd_p.clear();
+   TPCObj_PFP_LH_fwd_pi.clear();
+   TPCObj_PFP_LH_bwd_mu.clear();
+   TPCObj_PFP_LH_bwd_p.clear();
+   TPCObj_PFP_LH_bwd_pi.clear();
+   TPCObj_PFP_LH_MIP.clear();
    TPCObj_PFP_PIDA.clear();
    TPCObj_PFP_track_depE.clear();
    TPCObj_PFP_track_Chi2Proton.clear();
@@ -367,17 +367,17 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
 
                      if (AlgScore.fAlgName == "BraggPeakLLH"){
-                        if (anab::kVariableType(AlgScore.fVariableType) == anab::kLogL_fwd){
+                        if (anab::kVariableType(AlgScore.fVariableType) == anab::kLikelihood_fwd){
                            if (AlgScore.fAssumedPdg == 13)   Bragg_fwd_mu.at(planeid) = AlgScore.fValue;
                            if (AlgScore.fAssumedPdg == 2212) Bragg_fwd_p.at(planeid) =  AlgScore.fValue;
                            if (AlgScore.fAssumedPdg == 211) Bragg_fwd_pi.at(planeid) =  AlgScore.fValue;
                            if (AlgScore.fAssumedPdg == 0) noBragg_MIP.at(planeid) = AlgScore.fValue;
-                        }// if fVariableType == anab::kLogL_fwd
-                        else if (anab::kVariableType(AlgScore.fVariableType) == anab::kLogL_bwd){
+                        }// if fVariableType == anab::kLikelihood_fwd
+                        else if (anab::kVariableType(AlgScore.fVariableType) == anab::kLikelihood_bwd){
                            if (AlgScore.fAssumedPdg == 13)   Bragg_bwd_mu.at(planeid) = AlgScore.fValue;
                            if (AlgScore.fAssumedPdg == 2212) Bragg_bwd_p.at(planeid) =  AlgScore.fValue;
                            if (AlgScore.fAssumedPdg == 211) Bragg_bwd_pi.at(planeid) =  AlgScore.fValue;
-                        } // if fVariableType == anab::kLogL_bwd
+                        } // if fVariableType == anab::kLikelihood_bwd
                      } // if fAlName = BraggPeakLLH
 
                      if (AlgScore.fAlgName == "PIDA_median" && anab::kVariableType(AlgScore.fVariableType) == anab::kPIDA){
@@ -470,13 +470,13 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          TPCObj_PFP_shower_length.emplace_back(shower_length);
          TPCObj_PFP_shower_start.emplace_back(shower_start);
 
-         TPCObj_PFP_n2LLH_fwd_mu.emplace_back(Bragg_fwd_mu);
-         TPCObj_PFP_n2LLH_fwd_p.emplace_back(Bragg_fwd_p);
-         TPCObj_PFP_n2LLH_fwd_pi.emplace_back(Bragg_fwd_pi);
-         TPCObj_PFP_n2LLH_bwd_mu.emplace_back(Bragg_bwd_mu);
-         TPCObj_PFP_n2LLH_bwd_p.emplace_back(Bragg_bwd_p);
-         TPCObj_PFP_n2LLH_bwd_pi.emplace_back(Bragg_bwd_pi);
-         TPCObj_PFP_n2LLH_MIP.emplace_back(noBragg_MIP);
+         TPCObj_PFP_LH_fwd_mu.emplace_back(Bragg_fwd_mu);
+         TPCObj_PFP_LH_fwd_p.emplace_back(Bragg_fwd_p);
+         TPCObj_PFP_LH_fwd_pi.emplace_back(Bragg_fwd_pi);
+         TPCObj_PFP_LH_bwd_mu.emplace_back(Bragg_bwd_mu);
+         TPCObj_PFP_LH_bwd_p.emplace_back(Bragg_bwd_p);
+         TPCObj_PFP_LH_bwd_pi.emplace_back(Bragg_bwd_pi);
+         TPCObj_PFP_LH_MIP.emplace_back(noBragg_MIP);
          TPCObj_PFP_PIDA.emplace_back(PIDAval);
          TPCObj_PFP_track_depE.emplace_back(track_depE);
          TPCObj_PFP_track_Chi2Proton.emplace_back(track_Chi2Proton);
@@ -680,13 +680,13 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("TPCObj_origin", &(vars->TPCObj_origin));
    t -> Branch("TPCObj_origin_extra", &(vars->TPCObj_origin_extra));
 
-   t -> Branch("TPCObj_PFP_n2LLH_fwd_mu", &(vars->TPCObj_PFP_n2LLH_fwd_mu));
-   t -> Branch("TPCObj_PFP_n2LLH_fwd_p", &(vars->TPCObj_PFP_n2LLH_fwd_p));
-   t -> Branch("TPCObj_PFP_n2LLH_fwd_pi", &(vars->TPCObj_PFP_n2LLH_fwd_pi));
-   t -> Branch("TPCObj_PFP_n2LLH_bwd_mu", &(vars->TPCObj_PFP_n2LLH_bwd_mu));
-   t -> Branch("TPCObj_PFP_n2LLH_bwd_p", &(vars->TPCObj_PFP_n2LLH_bwd_p));
-   t -> Branch("TPCObj_PFP_n2LLH_bwd_pi", &(vars->TPCObj_PFP_n2LLH_bwd_pi));
-   t -> Branch("TPCObj_PFP_n2LLH_MIP", &(vars->TPCObj_PFP_n2LLH_MIP));
+   t -> Branch("TPCObj_PFP_LH_fwd_mu", &(vars->TPCObj_PFP_LH_fwd_mu));
+   t -> Branch("TPCObj_PFP_LH_fwd_p", &(vars->TPCObj_PFP_LH_fwd_p));
+   t -> Branch("TPCObj_PFP_LH_fwd_pi", &(vars->TPCObj_PFP_LH_fwd_pi));
+   t -> Branch("TPCObj_PFP_LH_bwd_mu", &(vars->TPCObj_PFP_LH_bwd_mu));
+   t -> Branch("TPCObj_PFP_LH_bwd_p", &(vars->TPCObj_PFP_LH_bwd_p));
+   t -> Branch("TPCObj_PFP_LH_bwd_pi", &(vars->TPCObj_PFP_LH_bwd_pi));
+   t -> Branch("TPCObj_PFP_LH_MIP", &(vars->TPCObj_PFP_LH_MIP));
    t -> Branch("TPCObj_PFP_PIDA", &(vars->TPCObj_PFP_PIDA));
    t -> Branch("TPCObj_PFP_track_depE", &(vars->TPCObj_PFP_track_depE));
    t -> Branch("TPCObj_PFP_track_Chi2Proton", &(vars->TPCObj_PFP_track_Chi2Proton));

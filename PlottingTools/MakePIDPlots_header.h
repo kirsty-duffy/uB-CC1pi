@@ -13,13 +13,13 @@ struct treevars{
   // These are the variables that are filled directly from the tree
   std::vector<int> *TPCObj_PFP_truePDG = nullptr;
   std::vector<bool> *TPCObj_PFP_PandoraClassedAsTrack = nullptr;
-  std::vector<std::vector<double>> *TPCObj_PFP_n2LLH_fwd_mu = nullptr;
-  std::vector<std::vector<double>> *TPCObj_PFP_n2LLH_fwd_p = nullptr;
-  std::vector<std::vector<double>> *TPCObj_PFP_n2LLH_fwd_pi = nullptr;
-  std::vector<std::vector<double>> *TPCObj_PFP_n2LLH_bwd_mu = nullptr;
-  std::vector<std::vector<double>> *TPCObj_PFP_n2LLH_bwd_p = nullptr;
-  std::vector<std::vector<double>> *TPCObj_PFP_n2LLH_bwd_pi = nullptr;
-  std::vector<std::vector<double>> *TPCObj_PFP_n2LLH_MIP = nullptr;
+  std::vector<std::vector<double>> *TPCObj_PFP_LH_fwd_mu = nullptr;
+  std::vector<std::vector<double>> *TPCObj_PFP_LH_fwd_p = nullptr;
+  std::vector<std::vector<double>> *TPCObj_PFP_LH_fwd_pi = nullptr;
+  std::vector<std::vector<double>> *TPCObj_PFP_LH_bwd_mu = nullptr;
+  std::vector<std::vector<double>> *TPCObj_PFP_LH_bwd_p = nullptr;
+  std::vector<std::vector<double>> *TPCObj_PFP_LH_bwd_pi = nullptr;
+  std::vector<std::vector<double>> *TPCObj_PFP_LH_MIP = nullptr;
   std::vector<std::vector<double>> *TPCObj_PFP_PIDA = nullptr;
   std::vector<std::vector<double>> *TPCObj_PFP_track_depE = nullptr;
   std::vector<std::vector<double>> *TPCObj_PFP_track_Chi2Proton = nullptr;
@@ -32,25 +32,12 @@ struct treevars{
   NuIntTopology Truth_topology = kUnknown;
 
   // These are derived quantities - derived from the values above in CalcPIDvars
-  std::vector<std::vector<double>> *TPCObj_PFP_n2LLH_p;
-  std::vector<std::vector<double>> *TPCObj_PFP_n2LLH_mu;
-  std::vector<std::vector<double>> *TPCObj_PFP_n2LLH_pi;
-  std::vector<std::vector<double>> *TPCObj_PFP_n2LLH_mip;
-  std::vector<std::vector<double>> *TPCObj_PFP_n2LLH_minmumip;
-  std::vector<std::vector<double>> *TPCObj_PFP_n2LLH_muminusp;
-  std::vector<std::vector<double>> *TPCObj_PFP_n2LLH_mipminusp;
-  std::vector<std::vector<double>> *TPCObj_PFP_n2LLH_minmumipminusp;
-  std::vector<std::vector<double>> *TPCObj_PFP_depE_minus_rangeE_mu;
-  std::vector<std::vector<double>> *TPCObj_PFP_depE_minus_rangeE_p;
-  std::vector<std::vector<double>> *TPCObj_PFP_chi2_muminusp;
-
-  // These variables are for when "neglogl" is actually not a log, but just a likelihood (then we want the maximum likelihood, and likelihood ratio instead of subtraction)
-  std::vector<std::vector<double>> *TPCObj_PFP_max_Lp;
-  std::vector<std::vector<double>> *TPCObj_PFP_max_Lmu;
-  std::vector<std::vector<double>> *TPCObj_PFP_max_Lpi;
-  std::vector<std::vector<double>> *TPCObj_PFP_max_Lk;
-  std::vector<std::vector<double>> *TPCObj_PFP_max_Lmip;
-  std::vector<std::vector<double>> *TPCObj_PFP_max_Lmaxmumip;
+  std::vector<std::vector<double>> *TPCObj_PFP_LH_p;
+  std::vector<std::vector<double>> *TPCObj_PFP_LH_mu;
+  std::vector<std::vector<double>> *TPCObj_PFP_LH_pi;
+  std::vector<std::vector<double>> *TPCObj_PFP_LH_k;
+  std::vector<std::vector<double>> *TPCObj_PFP_LH_mip;
+  std::vector<std::vector<double>> *TPCObj_PFP_LH_maxmumip;
   std::vector<std::vector<double>> *TPCObj_PFP_Lmuoverp;
   std::vector<std::vector<double>> *TPCObj_PFP_Lmipoverp;
   std::vector<std::vector<double>> *TPCObj_PFP_Lmaxmumipoverp;
@@ -60,6 +47,9 @@ struct treevars{
   std::vector<std::vector<double>> *TPCObj_PFP_Lp_0to1;
   std::vector<std::vector<double>> *TPCObj_PFP_Lmumip_0to1;
   std::vector<std::vector<double>> *TPCObj_PFP_Lmumippi_0to1;
+  std::vector<std::vector<double>> *TPCObj_PFP_depE_minus_rangeE_mu;
+  std::vector<std::vector<double>> *TPCObj_PFP_depE_minus_rangeE_p;
+  std::vector<std::vector<double>> *TPCObj_PFP_chi2_muminusp;
 };
 
 void settreevars(TTree *intree, treevars *varstoset){
@@ -68,20 +58,20 @@ void settreevars(TTree *intree, treevars *varstoset){
   intree->SetBranchAddress("TPCObj_PFP_truePDG", &(varstoset->TPCObj_PFP_truePDG));
   intree->SetBranchStatus("TPCObj_PFP_PandoraClassedAsTrack",1);
   intree->SetBranchAddress("TPCObj_PFP_PandoraClassedAsTrack", &(varstoset->TPCObj_PFP_PandoraClassedAsTrack));
-  intree->SetBranchStatus("TPCObj_PFP_n2LLH_fwd_mu",1);
-  intree->SetBranchAddress("TPCObj_PFP_n2LLH_fwd_mu", &(varstoset->TPCObj_PFP_n2LLH_fwd_mu));
-  intree->SetBranchStatus("TPCObj_PFP_n2LLH_fwd_p",1);
-  intree->SetBranchAddress("TPCObj_PFP_n2LLH_fwd_p", &(varstoset->TPCObj_PFP_n2LLH_fwd_p));
-  intree->SetBranchStatus("TPCObj_PFP_n2LLH_fwd_pi",1);
-  intree->SetBranchAddress("TPCObj_PFP_n2LLH_fwd_pi", &(varstoset->TPCObj_PFP_n2LLH_fwd_pi));
-  intree->SetBranchStatus("TPCObj_PFP_n2LLH_bwd_mu",1);
-  intree->SetBranchAddress("TPCObj_PFP_n2LLH_bwd_mu", &(varstoset->TPCObj_PFP_n2LLH_bwd_mu));
-  intree->SetBranchStatus("TPCObj_PFP_n2LLH_bwd_p",1);
-  intree->SetBranchAddress("TPCObj_PFP_n2LLH_bwd_p", &(varstoset->TPCObj_PFP_n2LLH_bwd_p));
-  intree->SetBranchStatus("TPCObj_PFP_n2LLH_bwd_pi",1);
-  intree->SetBranchAddress("TPCObj_PFP_n2LLH_bwd_pi", &(varstoset->TPCObj_PFP_n2LLH_bwd_pi));
-  intree->SetBranchStatus("TPCObj_PFP_n2LLH_MIP",1);
-  intree->SetBranchAddress("TPCObj_PFP_n2LLH_MIP", &(varstoset->TPCObj_PFP_n2LLH_MIP));
+  intree->SetBranchStatus("TPCObj_PFP_LH_fwd_mu",1);
+  intree->SetBranchAddress("TPCObj_PFP_LH_fwd_mu", &(varstoset->TPCObj_PFP_LH_fwd_mu));
+  intree->SetBranchStatus("TPCObj_PFP_LH_fwd_p",1);
+  intree->SetBranchAddress("TPCObj_PFP_LH_fwd_p", &(varstoset->TPCObj_PFP_LH_fwd_p));
+  intree->SetBranchStatus("TPCObj_PFP_LH_fwd_pi",1);
+  intree->SetBranchAddress("TPCObj_PFP_LH_fwd_pi", &(varstoset->TPCObj_PFP_LH_fwd_pi));
+  intree->SetBranchStatus("TPCObj_PFP_LH_bwd_mu",1);
+  intree->SetBranchAddress("TPCObj_PFP_LH_bwd_mu", &(varstoset->TPCObj_PFP_LH_bwd_mu));
+  intree->SetBranchStatus("TPCObj_PFP_LH_bwd_p",1);
+  intree->SetBranchAddress("TPCObj_PFP_LH_bwd_p", &(varstoset->TPCObj_PFP_LH_bwd_p));
+  intree->SetBranchStatus("TPCObj_PFP_LH_bwd_pi",1);
+  intree->SetBranchAddress("TPCObj_PFP_LH_bwd_pi", &(varstoset->TPCObj_PFP_LH_bwd_pi));
+  intree->SetBranchStatus("TPCObj_PFP_LH_MIP",1);
+  intree->SetBranchAddress("TPCObj_PFP_LH_MIP", &(varstoset->TPCObj_PFP_LH_MIP));
   intree->SetBranchStatus("TPCObj_PFP_PIDA",1);
   intree->SetBranchAddress("TPCObj_PFP_PIDA", &(varstoset->TPCObj_PFP_PIDA));
   intree->SetBranchStatus("TPCObj_PFP_track_depE",1);
@@ -100,75 +90,19 @@ void settreevars(TTree *intree, treevars *varstoset){
   intree->SetBranchAddress("TPCObj_PFP_trueEndP", &(varstoset->TPCObj_PFP_trueEndP));
   intree->SetBranchStatus("Truth_topology",1);
   intree->SetBranchAddress("Truth_topology", &(varstoset->Truth_topology));
-
-  // intree->GetEntry(0);
-  // size_t ntracks = varstoset->TPCObj_PFP_n2LLH_fwd_p->size();
-  // size_t nplanes = varstoset->TPCObj_PFP_n2LLH_fwd_p->at(0)->size();
-
-  // Assume 3 planes
-
-  // varstoset->TPCObj_PFP_n2LLH_p = new std::vector<std::vector<double>>;
-  // varstoset->TPCObj_PFP_n2LLH_mu = new std::vector<std::vector<double>>;
-  // varstoset->TPCObj_PFP_n2LLH_pi = new std::vector<std::vector<double>>;
-  // varstoset->TPCObj_PFP_n2LLH_mip = new std::vector<std::vector<double>>;
-  // varstoset->TPCObj_PFP_n2LLH_minmumip = new std::vector<std::vector<double>>;
-  // varstoset->TPCObj_PFP_n2LLH_muminusp = new std::vector<std::vector<double>>;
-  // varstoset->TPCObj_PFP_n2LLH_mipminusp = new std::vector<std::vector<double>>;
-  // varstoset->TPCObj_PFP_n2LLH_minmumipminusp = new std::vector<std::vector<double>>;
-  // varstoset->TPCObj_PFP_depE_minus_rangeE_mu = new std::vector<std::vector<double>>;
-  // varstoset->TPCObj_PFP_depE_minus_rangeE_p = new std::vector<std::vector<double>>;
-  // varstoset->TPCObj_PFP_chi2_muminusp = new std::vector<std::vector<double>>;
-  //
-  // varstoset->TPCObj_PFP_n2LLH_p.at(0) = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_n2LLH_mu.at(0) = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_n2LLH_pi.at(0) = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_n2LLH_mip.at(0) = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_n2LLH_minmumip.at(0) = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_n2LLH_muminusp.at(0) = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_n2LLH_mipminusp.at(0) = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_n2LLH_minmumipminusp.at(0) = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_depE_minus_rangeE_mu.at(0) = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_depE_minus_rangeE_p.at(0) = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_chi2_muminusp.at(0) = new std::vector<double>(3);
-  //
-  // varstoset->TPCObj_PFP_max_Lp = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_max_Lmu = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_max_Lpi = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_max_Lmip = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_max_Lmaxmumip = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_Lmuoverp = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_Lmipoverp = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_Lminmumipoverp = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_Lmu_0to1 = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_Lmip_0to1 = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_Lpi_0to1 = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_Lp_0to1 = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_Lmumip_0to1 = new std::vector<double>(3);
-  // varstoset->TPCObj_PFP_Lmumippi_0to1 = new std::vector<double>(3);
 }
 
 void CalcPIDvars(treevars *vars){
 
   // Initialise vectors that we are going to fill with calculated values
-  int vecsize = vars->TPCObj_PFP_n2LLH_fwd_p->size();
+  int vecsize = vars->TPCObj_PFP_LH_fwd_p->size();
   int nplanes = 3;
 
-  vars->TPCObj_PFP_n2LLH_p = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
-  vars->TPCObj_PFP_n2LLH_mu = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
-  vars->TPCObj_PFP_n2LLH_pi = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
-  vars->TPCObj_PFP_n2LLH_mip = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
-  vars->TPCObj_PFP_n2LLH_minmumip = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
-  vars->TPCObj_PFP_n2LLH_muminusp = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
-  vars->TPCObj_PFP_n2LLH_mipminusp = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
-  vars->TPCObj_PFP_n2LLH_minmumipminusp = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
-  vars->TPCObj_PFP_chi2_muminusp = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
-  vars->TPCObj_PFP_depE_minus_rangeE_mu = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
-  vars->TPCObj_PFP_depE_minus_rangeE_p = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
-  vars->TPCObj_PFP_max_Lp = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
-  vars->TPCObj_PFP_max_Lmu = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
-  vars->TPCObj_PFP_max_Lpi = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
-  vars->TPCObj_PFP_max_Lmip = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
-  vars->TPCObj_PFP_max_Lmaxmumip = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
+  vars->TPCObj_PFP_LH_p = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
+  vars->TPCObj_PFP_LH_mu = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
+  vars->TPCObj_PFP_LH_pi = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
+  vars->TPCObj_PFP_LH_mip = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
+  vars->TPCObj_PFP_LH_maxmumip = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
   vars->TPCObj_PFP_Lmuoverp = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
   vars->TPCObj_PFP_Lmipoverp = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
   vars->TPCObj_PFP_Lmaxmumipoverp = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
@@ -178,43 +112,35 @@ void CalcPIDvars(treevars *vars){
   vars->TPCObj_PFP_Lp_0to1 = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
   vars->TPCObj_PFP_Lmumip_0to1 = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
   vars->TPCObj_PFP_Lmumippi_0to1 = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
+  vars->TPCObj_PFP_chi2_muminusp = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
+  vars->TPCObj_PFP_depE_minus_rangeE_mu = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
+  vars->TPCObj_PFP_depE_minus_rangeE_p = new std::vector<std::vector<double>>(vecsize, std::vector<double>(nplanes));
 
   // Now calculate the values for all variables
   for (int i_track=0; i_track < vecsize; i_track++){
     for (int i_pl=0; i_pl < nplanes; i_pl++){
-      vars->TPCObj_PFP_n2LLH_p->at(i_track).at(i_pl)     = std::min(vars->TPCObj_PFP_n2LLH_fwd_p->at(i_track).at(i_pl)     , vars->TPCObj_PFP_n2LLH_bwd_p->at(i_track).at(i_pl));
-      vars->TPCObj_PFP_n2LLH_mu->at(i_track).at(i_pl)    = std::min(vars->TPCObj_PFP_n2LLH_fwd_mu->at(i_track).at(i_pl)    , vars->TPCObj_PFP_n2LLH_bwd_mu->at(i_track).at(i_pl));
-      vars->TPCObj_PFP_n2LLH_pi->at(i_track).at(i_pl)    = std::min(vars->TPCObj_PFP_n2LLH_fwd_pi->at(i_track).at(i_pl)    , vars->TPCObj_PFP_n2LLH_bwd_pi->at(i_track).at(i_pl));
-      vars->TPCObj_PFP_n2LLH_mip->at(i_track).at(i_pl)   = vars->TPCObj_PFP_n2LLH_MIP->at(i_track).at(i_pl);
 
-      vars->TPCObj_PFP_n2LLH_minmumip->at(i_track).at(i_pl) = std::min(vars->TPCObj_PFP_n2LLH_mu->at(i_track).at(i_pl), vars->TPCObj_PFP_n2LLH_mip->at(i_track).at(i_pl));
+      vars->TPCObj_PFP_LH_p->at(i_track).at(i_pl) = std::max(vars->TPCObj_PFP_LH_fwd_p->at(i_track).at(i_pl)     , vars->TPCObj_PFP_LH_bwd_p->at(i_track).at(i_pl));
+      vars->TPCObj_PFP_LH_mu->at(i_track).at(i_pl) = std::max(vars->TPCObj_PFP_LH_fwd_mu->at(i_track).at(i_pl)    , vars->TPCObj_PFP_LH_bwd_mu->at(i_track).at(i_pl));
+      vars->TPCObj_PFP_LH_pi->at(i_track).at(i_pl) = std::max(vars->TPCObj_PFP_LH_fwd_pi->at(i_track).at(i_pl)    , vars->TPCObj_PFP_LH_bwd_pi->at(i_track).at(i_pl));
+      vars->TPCObj_PFP_LH_mip->at(i_track).at(i_pl) = vars->TPCObj_PFP_LH_MIP->at(i_track).at(i_pl);
+      vars->TPCObj_PFP_LH_maxmumip->at(i_track).at(i_pl) = std::max(vars->TPCObj_PFP_LH_mu->at(i_track).at(i_pl), vars->TPCObj_PFP_LH_mip->at(i_track).at(i_pl));
+      vars->TPCObj_PFP_Lmuoverp->at(i_track).at(i_pl) = vars->TPCObj_PFP_LH_mu->at(i_track).at(i_pl) / vars->TPCObj_PFP_LH_p->at(i_track).at(i_pl);
+      vars->TPCObj_PFP_Lmipoverp->at(i_track).at(i_pl) = vars->TPCObj_PFP_LH_mip->at(i_track).at(i_pl) / vars->TPCObj_PFP_LH_p->at(i_track).at(i_pl);
+      vars->TPCObj_PFP_Lmaxmumipoverp->at(i_track).at(i_pl) = vars->TPCObj_PFP_LH_maxmumip->at(i_track).at(i_pl) / vars->TPCObj_PFP_LH_p->at(i_track).at(i_pl);
 
-      vars->TPCObj_PFP_n2LLH_muminusp->at(i_track).at(i_pl) = vars->TPCObj_PFP_n2LLH_mu->at(i_track).at(i_pl) - vars->TPCObj_PFP_n2LLH_p->at(i_track).at(i_pl);
-      vars->TPCObj_PFP_n2LLH_mipminusp->at(i_track).at(i_pl) = vars->TPCObj_PFP_n2LLH_mip->at(i_track).at(i_pl) - vars->TPCObj_PFP_n2LLH_p->at(i_track).at(i_pl);
-      vars->TPCObj_PFP_n2LLH_minmumipminusp->at(i_track).at(i_pl) = vars->TPCObj_PFP_n2LLH_minmumip->at(i_track).at(i_pl) - vars->TPCObj_PFP_n2LLH_p->at(i_track).at(i_pl);
+      vars->TPCObj_PFP_Lmu_0to1->at(i_track).at(i_pl) = vars->TPCObj_PFP_LH_mu->at(i_track).at(i_pl)/(vars->TPCObj_PFP_LH_p->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_mu->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_pi->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_mip->at(i_track).at(i_pl));
+      vars->TPCObj_PFP_Lmip_0to1->at(i_track).at(i_pl) = vars->TPCObj_PFP_LH_mip->at(i_track).at(i_pl)/(vars->TPCObj_PFP_LH_p->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_mu->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_pi->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_mip->at(i_track).at(i_pl));
+      vars->TPCObj_PFP_Lpi_0to1->at(i_track).at(i_pl) = vars->TPCObj_PFP_LH_pi->at(i_track).at(i_pl)/(vars->TPCObj_PFP_LH_p->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_mu->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_pi->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_mip->at(i_track).at(i_pl));
+      vars->TPCObj_PFP_Lp_0to1->at(i_track).at(i_pl) = vars->TPCObj_PFP_LH_p->at(i_track).at(i_pl)/(vars->TPCObj_PFP_LH_p->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_mu->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_pi->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_mip->at(i_track).at(i_pl));
+
+      vars->TPCObj_PFP_Lmumip_0to1->at(i_track).at(i_pl) = (vars->TPCObj_PFP_LH_mu->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_mip->at(i_track).at(i_pl))/(vars->TPCObj_PFP_LH_p->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_mu->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_pi->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_mip->at(i_track).at(i_pl));
+      vars->TPCObj_PFP_Lmumippi_0to1->at(i_track).at(i_pl) = (vars->TPCObj_PFP_LH_mu->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_mip->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_pi->at(i_track).at(i_pl))/(vars->TPCObj_PFP_LH_p->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_mu->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_pi->at(i_track).at(i_pl)+vars->TPCObj_PFP_LH_mip->at(i_track).at(i_pl));
 
       vars->TPCObj_PFP_chi2_muminusp->at(i_track).at(i_pl) = vars->TPCObj_PFP_track_Chi2Muon->at(i_track).at(i_pl) - vars->TPCObj_PFP_track_Chi2Proton->at(i_track).at(i_pl);
 
       vars->TPCObj_PFP_depE_minus_rangeE_mu->at(i_track).at(i_pl) = vars->TPCObj_PFP_track_depE->at(i_track).at(i_pl) - vars->TPCObj_PFP_track_rangeE_mu->at(i_track);
       vars->TPCObj_PFP_depE_minus_rangeE_p->at(i_track).at(i_pl) = vars->TPCObj_PFP_track_depE->at(i_track).at(i_pl) - vars->TPCObj_PFP_track_rangeE_p->at(i_track);
-
-      // These variables are for when "neglogl" is actually not a log, but just a likelihood (then we want the maximum likelihood, and likelihood ratio instead of subtraction)
-      vars->TPCObj_PFP_max_Lp->at(i_track).at(i_pl) = std::max(vars->TPCObj_PFP_n2LLH_fwd_p->at(i_track).at(i_pl)     , vars->TPCObj_PFP_n2LLH_bwd_p->at(i_track).at(i_pl));
-      vars->TPCObj_PFP_max_Lmu->at(i_track).at(i_pl) = std::max(vars->TPCObj_PFP_n2LLH_fwd_mu->at(i_track).at(i_pl)    , vars->TPCObj_PFP_n2LLH_bwd_mu->at(i_track).at(i_pl));
-      vars->TPCObj_PFP_max_Lpi->at(i_track).at(i_pl) = std::max(vars->TPCObj_PFP_n2LLH_fwd_pi->at(i_track).at(i_pl)    , vars->TPCObj_PFP_n2LLH_bwd_pi->at(i_track).at(i_pl));
-      vars->TPCObj_PFP_max_Lmip->at(i_track).at(i_pl) = vars->TPCObj_PFP_n2LLH_MIP->at(i_track).at(i_pl);
-      vars->TPCObj_PFP_max_Lmaxmumip->at(i_track).at(i_pl) = std::max(vars->TPCObj_PFP_n2LLH_mu->at(i_track).at(i_pl), vars->TPCObj_PFP_n2LLH_mip->at(i_track).at(i_pl));
-      vars->TPCObj_PFP_Lmuoverp->at(i_track).at(i_pl) = vars->TPCObj_PFP_n2LLH_mu->at(i_track).at(i_pl) / vars->TPCObj_PFP_n2LLH_p->at(i_track).at(i_pl);
-      vars->TPCObj_PFP_Lmipoverp->at(i_track).at(i_pl) = vars->TPCObj_PFP_n2LLH_mip->at(i_track).at(i_pl) / vars->TPCObj_PFP_n2LLH_p->at(i_track).at(i_pl);
-      vars->TPCObj_PFP_Lmaxmumipoverp->at(i_track).at(i_pl) = vars->TPCObj_PFP_n2LLH_minmumip->at(i_track).at(i_pl) / vars->TPCObj_PFP_n2LLH_p->at(i_track).at(i_pl);
-
-      vars->TPCObj_PFP_Lmu_0to1->at(i_track).at(i_pl) = vars->TPCObj_PFP_n2LLH_mu->at(i_track).at(i_pl)/(vars->TPCObj_PFP_n2LLH_p->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_mu->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_pi->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_mip->at(i_track).at(i_pl));
-      vars->TPCObj_PFP_Lmip_0to1->at(i_track).at(i_pl) = vars->TPCObj_PFP_n2LLH_mip->at(i_track).at(i_pl)/(vars->TPCObj_PFP_n2LLH_p->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_mu->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_pi->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_mip->at(i_track).at(i_pl));
-      vars->TPCObj_PFP_Lpi_0to1->at(i_track).at(i_pl) = vars->TPCObj_PFP_n2LLH_pi->at(i_track).at(i_pl)/(vars->TPCObj_PFP_n2LLH_p->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_mu->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_pi->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_mip->at(i_track).at(i_pl));
-      vars->TPCObj_PFP_Lp_0to1->at(i_track).at(i_pl) = vars->TPCObj_PFP_n2LLH_p->at(i_track).at(i_pl)/(vars->TPCObj_PFP_n2LLH_p->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_mu->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_pi->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_mip->at(i_track).at(i_pl));
-
-      vars->TPCObj_PFP_Lmumip_0to1->at(i_track).at(i_pl) = (vars->TPCObj_PFP_n2LLH_mu->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_mip->at(i_track).at(i_pl))/(vars->TPCObj_PFP_n2LLH_p->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_mu->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_pi->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_mip->at(i_track).at(i_pl));
-      vars->TPCObj_PFP_Lmumippi_0to1->at(i_track).at(i_pl) = (vars->TPCObj_PFP_n2LLH_mu->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_mip->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_pi->at(i_track).at(i_pl))/(vars->TPCObj_PFP_n2LLH_p->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_mu->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_pi->at(i_track).at(i_pl)+vars->TPCObj_PFP_n2LLH_mip->at(i_track).at(i_pl));
     }
   }
 }
@@ -226,22 +152,11 @@ void CalcPIDvars(treevars *vars){
 
 void ClearPIDvars(treevars *vars){
 
-  delete vars->TPCObj_PFP_n2LLH_p;
-  delete vars->TPCObj_PFP_n2LLH_mu;
-  delete vars->TPCObj_PFP_n2LLH_pi;
-  delete vars->TPCObj_PFP_n2LLH_mip;
-  delete vars->TPCObj_PFP_n2LLH_minmumip;
-  delete vars->TPCObj_PFP_n2LLH_muminusp;
-  delete vars->TPCObj_PFP_n2LLH_mipminusp;
-  delete vars->TPCObj_PFP_n2LLH_minmumipminusp;
-  delete vars->TPCObj_PFP_chi2_muminusp;
-  delete vars->TPCObj_PFP_depE_minus_rangeE_mu;
-  delete vars->TPCObj_PFP_depE_minus_rangeE_p;
-  delete vars->TPCObj_PFP_max_Lp;
-  delete vars->TPCObj_PFP_max_Lmu;
-  delete vars->TPCObj_PFP_max_Lpi;
-  delete vars->TPCObj_PFP_max_Lmip;
-  delete vars->TPCObj_PFP_max_Lmaxmumip;
+  delete vars->TPCObj_PFP_LH_p;
+  delete vars->TPCObj_PFP_LH_mu;
+  delete vars->TPCObj_PFP_LH_pi;
+  delete vars->TPCObj_PFP_LH_mip;
+  delete vars->TPCObj_PFP_LH_maxmumip;
   delete vars->TPCObj_PFP_Lmuoverp;
   delete vars->TPCObj_PFP_Lmipoverp;
   delete vars->TPCObj_PFP_Lmaxmumipoverp;
@@ -251,6 +166,9 @@ void ClearPIDvars(treevars *vars){
   delete vars->TPCObj_PFP_Lp_0to1;
   delete vars->TPCObj_PFP_Lmumip_0to1;
   delete vars->TPCObj_PFP_Lmumippi_0to1;
+  delete vars->TPCObj_PFP_chi2_muminusp;
+  delete vars->TPCObj_PFP_depE_minus_rangeE_mu;
+  delete vars->TPCObj_PFP_depE_minus_rangeE_p;
 }
 
 // --------------------------------------------------- //

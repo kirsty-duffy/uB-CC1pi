@@ -3,11 +3,11 @@
 // What variables do we want these plots as a function of?
 std::vector<std::vector<std::vector<double>>> GetPIDvarstoplot(treevars *vars){
   std::vector<std::vector<std::vector<double>>> varstoplot = {
-    *(vars->TPCObj_PFP_max_Lp)
-    ,*(vars->TPCObj_PFP_max_Lmu)
-    ,*(vars->TPCObj_PFP_max_Lpi)
-    ,*(vars->TPCObj_PFP_max_Lmip)
-    ,*(vars->TPCObj_PFP_max_Lmaxmumip)
+    *(vars->TPCObj_PFP_LH_p)
+    ,*(vars->TPCObj_PFP_LH_mu)
+    ,*(vars->TPCObj_PFP_LH_pi)
+    ,*(vars->TPCObj_PFP_LH_mip)
+    ,*(vars->TPCObj_PFP_LH_maxmumip)
     ,*(vars->TPCObj_PFP_track_Chi2Muon)
     ,*(vars->TPCObj_PFP_track_Chi2Proton)
     ,*(vars->TPCObj_PFP_track_Chi2Pion)
