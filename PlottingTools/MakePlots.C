@@ -77,8 +77,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    int TPCObj_NPFPs = 0;
    int TPCObj_NTracks = 0;
    int TPCObj_NShowers = 0;
-//   std::vector<bool> *TPCObj_PFP_PandoraClassedAsTrack = nullptr;
-//   std::vector<bool> *TPCObj_PFP_PandoraClassedAsShower = nullptr;
+   std::vector<bool> *TPCObj_PFP_PandoraClassedAsTrack = nullptr;
+   std::vector<bool> *TPCObj_PFP_PandoraClassedAsShower = nullptr;
    std::vector<bool> *TPCObj_PFP_isDaughter = nullptr;
    std::vector<std::vector<int>> *TPCObj_PFP_daughterids = nullptr;
    std::vector<int> *TPCObj_PFP_id = nullptr;
@@ -174,10 +174,10 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchAddress("TPCObj_NTracks", &TPCObj_NTracks);
    t -> SetBranchStatus("TPCObj_NShowers",1);
    t -> SetBranchAddress("TPCObj_NShowers", &TPCObj_NShowers);
-//   t -> SetBranchStatus("TPCObj_PFP_PandoraClassedAsTrack",1);
-//   t -> SetBranchAddress("TPCObj_PFP_PandoraClassedAsTrack", &TPCObj_PFP_PandoraClassedAsTrack);
-//   t -> SetBranchStatus("TPCObj_PFP_PandoraClassedAsShower",1);
-//   t -> SetBranchAddress("TPCObj_PFP_PandoraClassedAsShower", &TPCObj_PFP_PandoraClassedAsShower);
+   t -> SetBranchStatus("TPCObj_PFP_PandoraClassedAsTrack",1);
+   t -> SetBranchAddress("TPCObj_PFP_PandoraClassedAsTrack", &TPCObj_PFP_PandoraClassedAsTrack);
+   t -> SetBranchStatus("TPCObj_PFP_PandoraClassedAsShower",1);
+   t -> SetBranchAddress("TPCObj_PFP_PandoraClassedAsShower", &TPCObj_PFP_PandoraClassedAsShower);
    t -> SetBranchStatus("TPCObj_PFP_isDaughter",1);
    t -> SetBranchAddress("TPCObj_PFP_isDaughter", &TPCObj_PFP_isDaughter);
    t -> SetBranchStatus("TPCObj_PFP_daughterids",1);
@@ -267,7 +267,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
 
    StackedHistTopology* len_stack = new StackedHistTopology("len_stack", ";Longest Track Length [cm];Selected Eevents(normalised to 3.782 #times 10^{19} POT)", 30, 0, 700);
    StackedHistTopology* mips_stack = new StackedHistTopology("mips_stack", ";Number of MIP-like #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 10, 0, 10);
-   StackedHistTopology* vtxtrack_stack = new StackedHistTopology("vtxtrack_stack", ";Distance between vertex and start of #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 20, 5, 25);
+   StackedHistTopology* vtxtrack_stack = new StackedHistTopology("vtxtrack_stack", ";Distance between vertex and start of #nu daughter tracks in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 25, 0, 25);
    StackedHistTopology* pfps_stack = new StackedHistTopology("pfps_stack", ";Number of #nu daughter PFPs in selected TPCObject;Selected Events (normalised to 3.782 #times 10^{19} POT)", 10, 0, 10);
 
    StackedHistPDGCode* isMIP_stack_byPDG = new StackedHistPDGCode("isMIP_stack_byPDG", ";#nu daughter track is MIP-like?;Selected Events (normalised to 3.782 #times 10^{19} POT)", 2, 0, 2);
@@ -364,9 +364,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    StackedHistTopology* AngleBetweenTracks_Close_sameID_stack = new StackedHistTopology("AngleBetweenTracks_Close_sameID_stack",";Angle between selected tracks that are within 3 cm and match the same MCP;Entries",30,0,3.14);
    StackedHistTopology* AngleBetweenTracks_Close_diffID_stack = new StackedHistTopology("AngleBetweenTracks_Close_diffID_stack",";Angle between selected tracks that are within 3 cm and match different MCPs;Entries",30,0,3.14);
 
-   //ofstream evdinfo;
-   //evdinfo.open("evdinfo.txt");
-   //evdinfo << "run_num subrun_num event_num track_daughters Truth_topology" << std::endl;
+   ofstream evdinfo;
+   evdinfo.open("evdinfo.txt");
 
    const int nentries = t -> GetEntries();
 
@@ -566,11 +565,47 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
       }
 //      if(std::count(TPCObj_PFP_isMIP_E.begin(),TPCObj_PFP_isMIP_E.end(),true)<2) SelectedEvent = false;
 
+      // Implement cut on angle between tracks
+      for (int track1 = 0; track1 < TPCObj_NPFPs; track1++) {
+         if(TPCObj_PFP_track_length -> at(track1) < 0) continue;
+
+         for (int track2 = track1+1; track2 < TPCObj_NPFPs; track2++) {
+            if(TPCObj_PFP_track_length -> at(track2) < 0) continue;
+
+            TVector3 v0(1,1,1);
+            TVector3 v1(1,1,1);
+            v0.SetMag(1);
+            v1.SetMag(1);
+            v0.SetTheta(TPCObj_PFP_track_theta->at(track1));
+            v1.SetTheta(TPCObj_PFP_track_theta->at(track2));
+            v0.SetPhi(TPCObj_PFP_track_phi->at(track1));
+            v1.SetPhi(TPCObj_PFP_track_phi->at(track2));
+            double angle = TMath::ACos(v0.Dot(v1));
+
+            TVector3 start1(TPCObj_PFP_track_start->at(track1).at(0),TPCObj_PFP_track_start->at(track1).at(1),TPCObj_PFP_track_start->at(track1).at(2));
+            TVector3 end1(TPCObj_PFP_track_end->at(track1).at(0),TPCObj_PFP_track_end->at(track1).at(1),TPCObj_PFP_track_end->at(track1).at(2));
+            TVector3 start2(TPCObj_PFP_track_start->at(track2).at(0),TPCObj_PFP_track_start->at(track2).at(1),TPCObj_PFP_track_start->at(track2).at(2));
+            TVector3 end2(TPCObj_PFP_track_end->at(track2).at(0),TPCObj_PFP_track_end->at(track2).at(1),TPCObj_PFP_track_end->at(track2).at(2));
+            std::vector<double> distances = { (start1-start2).Mag(),(start1-end2).Mag(), (end1-start2).Mag(), (end1-end2).Mag() };
+            double mindist = *std::min_element(distances.begin(),distances.end());
+
+//            if(mindist < 3 && angle > 3.04) SelectedEvent = false;
+         }
+      }
+
+      // Implement cut on containment
+      for (int track = 0; track < TPCObj_NPFPs; track++) {
+         if(TPCObj_PFP_track_length -> at(track) < 0) continue;
+         if(!(TPCObj_PFP_track_isContained -> at(track))) {
+//            SelectedEvent = false;
+            break;
+         }
+      }
+
 
    // -----! hack in some cuts to see what they do to efficiency/purity
    // At least two MIP-like tracks
    //if (std::count(TPCObj_PFP_isMIP->begin(),TPCObj_PFP_isMIP->end(),true)<2) SelectedEvent = false;
-
 
       if(SelectedEvent) {
 
@@ -743,7 +778,29 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
             }
          }
 
-         //evdinfo << run_num << " " << subrun_num << " " << event_num << " " << track_daughters << " " << topologyenum2str(Truth_topology) << std::endl;
+         // Record event display info
+//         if(isSignal) {
+         if(!isSignal) {
+            evdinfo << "Run/Subrun/Event: " << run_num << " " << subrun_num << " " << event_num << std::endl;
+            evdinfo << "True topology: " << topologyenum2str(Truth_topology) << std::endl;
+            evdinfo << "Reco daughter tracks: " << track_daughters << std::endl;
+            evdinfo << "Reco nu vertex position (x,y,z): " << TPCObj_reco_vtx->at(0) << " " << TPCObj_reco_vtx->at(1) << " " << TPCObj_reco_vtx->at(2) << std::endl;
+            evdinfo << "PFP hierarchy: " << std::endl;
+
+            for(int PFP = 0; PFP < TPCObj_NPFPs; PFP++) {
+               evdinfo << TPCObj_PFP_id->at(PFP);
+               if(TPCObj_PFP_track_length -> at(PFP) < 0) {
+                  if(TPCObj_PFP_PandoraClassedAsShower->at(PFP)) evdinfo << " (No track made)";
+                  else evdinfo << " (Neutrino)";
+               }
+               evdinfo << std::endl;
+
+               for(size_t daughter = 0; daughter < TPCObj_PFP_daughterids->at(PFP).size(); daughter++) {
+                  evdinfo << "      " << TPCObj_PFP_daughterids->at(PFP).at(daughter) << std::endl;
+               }
+            }
+            evdinfo << std::endl;
+         }
 
       } // end if(SelectedEvent)
 
@@ -771,7 +828,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
       } //end if signal
    } //end loop over entries
 
-   //evdinfo.close();
+   evdinfo.close();
 
    gStyle->SetOptStat(0); //No stats box
 //   gStyle -> SetOptStat(111111); //Full stats box, including under/overflow
