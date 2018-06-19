@@ -80,6 +80,8 @@ struct cc1pianavars{
   std::vector<bool> TPCObj_PFP_isMIP;
   std::vector<bool> TPCObj_PFP_track_isContained;
   std::vector<std::vector<double>> TPCObj_PFP_track_AngleBetweenTracks;
+  std::vector<std::vector<std::vector<double>>> TPCObj_PFP_track_trajPoint_Position;
+  std::vector<std::vector<std::vector<double>>> TPCObj_PFP_track_trajPoint_Direction;
 
   // Shower variables
   std::vector<double> TPCObj_PFP_shower_length;

@@ -43,6 +43,8 @@ void cc1pianavars::Clear(){
    TPCObj_PFP_isMIP.clear();
    TPCObj_PFP_track_isContained.clear();
    TPCObj_PFP_track_AngleBetweenTracks.clear();
+   TPCObj_PFP_track_trajPoint_Position.clear();
+   TPCObj_PFP_track_trajPoint_Direction.clear();
 
    // Shower variables
    TPCObj_PFP_shower_length.clear();
@@ -261,6 +263,8 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          std::vector<std::vector<double>> track_dedx_perhit(3);
          std::vector<std::vector<double>> track_resrange_perhit(3);
          bool isMIP = false;
+         std::vector<std::vector<double>> track_trajpoint_position;
+         std::vector<std::vector<double>> track_trajpoint_direction;
          std::vector<double> Bragg_fwd_mu(3,-999.);
          std::vector<double> Bragg_fwd_p(3,-999.);
          std::vector<double> Bragg_fwd_pi(3,-999.);
@@ -304,6 +308,13 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
             recob::TrackTrajectory traj = track -> Trajectory();
             for (int point = 0, npoints = traj.NPoints(); point < npoints; point++){
                auto position = traj.LocationAtPoint(point);
+               std::vector<double> trajpoint_position(3,-9999.);
+               trajpoint_position = {position.X(), position.Y(), position.Z()};
+               track_trajpoint_position.emplace_back(trajpoint_position);
+               TVector3 direction = track->DirectionAtPoint(point);
+               std::vector<double> trajpoint_direction(3,-9999.);
+               trajpoint_direction = {direction.X(), direction.Y(), direction.Z()};
+               track_trajpoint_direction.emplace_back(trajpoint_direction);
                if(!inFV(position.X(), position.Y(), position.Z())) {
                   isContained = false;
                   break;
@@ -466,6 +477,8 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          TPCObj_PFP_track_resrange_perhit.emplace_back(track_resrange_perhit);
          TPCObj_PFP_isMIP.emplace_back(isMIP);
          TPCObj_PFP_track_isContained.emplace_back(isContained);
+         TPCObj_PFP_track_trajPoint_Position.emplace_back(track_trajpoint_position);
+         TPCObj_PFP_track_trajPoint_Direction.emplace_back(track_trajpoint_direction);
 
          TPCObj_PFP_shower_length.emplace_back(shower_length);
          TPCObj_PFP_shower_start.emplace_back(shower_start);
@@ -658,6 +671,8 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("TPCObj_PFP_isMIP", &(vars->TPCObj_PFP_isMIP));
    t -> Branch("TPCObj_PFP_track_isContained", &(vars->TPCObj_PFP_track_isContained));
    t -> Branch("TPCObj_PFP_track_AngleBetweenTracks", &(vars->TPCObj_PFP_track_AngleBetweenTracks));
+   t -> Branch("TPCObj_PFP_track_trajPoint_Position", &(vars->TPCObj_PFP_track_trajPoint_Position));
+   t -> Branch("TPCObj_PFP_track_trajPoint_Direction", &(vars->TPCObj_PFP_track_trajPoint_Direction));
 
    t -> Branch("TPCObj_PFP_shower_length", &(vars->TPCObj_PFP_shower_length));
    t -> Branch("TPCObj_PFP_shower_start", &(vars->TPCObj_PFP_shower_start));
