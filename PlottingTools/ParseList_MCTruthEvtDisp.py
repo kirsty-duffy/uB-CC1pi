@@ -58,6 +58,9 @@ for iline in range(0,len(input_lines)):
         sam_file = subprocess.Popen("samweb list-files \"defname:prodgenie_bnb_nu_cosmic_uboone_mcc8.7_reco2_dev and run_number = %s.%s and first_event <= %s and last_event >= %s\""%(run,subrun,event,event), shell=True, stdout=subprocess.PIPE).stdout.read()
         rootfile = subprocess.Popen("grep %s /pnfs/uboone/persistent/users/ddevitt/filelist/stage1_out_files.txt"%sam_file[:-6], shell=True, stdout=subprocess.PIPE).stdout.read()
         #print rootfile[:-1]
+        # Check if rootfile was found
+        if (rootfile == ""):
+            continue;
         # Write the rootfile name to the new file so we don't have to look it up
         outputFile.write("------------------\n")
         outputFile.write(rootfile)
