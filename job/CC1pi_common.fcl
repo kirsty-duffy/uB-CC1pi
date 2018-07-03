@@ -39,6 +39,13 @@ physics.producers.cc1piselec:
   CalorimetryLabel:      "UBXSecpandoraNucali::CC1pi"
   SelectionLabel:        "UBXSec::CC1pi"
   ParticleIdChi2Label:   "pandoraNupid::CC1pi"
+  PFParticleProducer:    "pandoraNu::CC1pi"
+  SpacePointProducer:    "pandoraNu::CC1pi"
+  ResidualsStdCutUp:     2.5
+  ResidualsStdCutDown:   0
+  ResidualsMeanCutDown:  -0.7
+  ResidualsMeanCutUp:    0.7
+  PercUsedHitsCut:       0.7
 }
 
 

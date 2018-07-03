@@ -276,7 +276,7 @@ void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists){
 
    heff->GetYaxis()->SetRangeUser(0,1);
 
-   gStyle->SetOptStat(0); // No stats box
+   //gStyle->SetOptStat(0); // No stats box
 
    c->cd();
    heff->Draw("p");

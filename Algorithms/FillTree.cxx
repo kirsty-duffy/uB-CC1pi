@@ -45,6 +45,9 @@ void cc1pianavars::Clear(){
    TPCObj_PFP_track_AngleBetweenTracks.clear();
    TPCObj_PFP_track_trajPoint_Position.clear();
    TPCObj_PFP_track_trajPoint_Direction.clear();
+   TPCObj_PFP_track_residual_mean.clear();
+   TPCObj_PFP_track_residual_std.clear();
+   TPCObj_PFP_track_perc_used_hits.clear();
 
    // Shower variables
    TPCObj_PFP_shower_length.clear();
@@ -280,6 +283,8 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          double track_rangeE_mu = -9999;
          double track_rangeE_p = -9999;
          bool isContained = true;
+         std::pair<double,double> residual_mean_std(-9999,-9999);
+         double perc_used_hits = -9999;
 
          double shower_length = -9999;
          std::vector<double> shower_start = {-9999, -9999, -9999};
@@ -452,6 +457,10 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
             track_rangeE_mu = TMath::Sqrt((track_rangeP_mu*track_rangeP_mu)+(105.7*105.7)) - 105.7;
             track_rangeE_p = TMath::Sqrt((track_rangeP_p*track_rangeP_p)+(938.272*938.272)) - 938.272;
 
+
+            // Shower Rejection
+            ShowerCheck(evt, CC1piInputTags, pfp, track, residual_mean_std, perc_used_hits);
+
          } // end loop over tracks
 
          std::vector<art::Ptr<recob::Shower>> showers_pfp = showers_from_pfps.at(pfp.key());
@@ -479,6 +488,9 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          TPCObj_PFP_track_isContained.emplace_back(isContained);
          TPCObj_PFP_track_trajPoint_Position.emplace_back(track_trajpoint_position);
          TPCObj_PFP_track_trajPoint_Direction.emplace_back(track_trajpoint_direction);
+         TPCObj_PFP_track_residual_mean.emplace_back(residual_mean_std.first);
+         TPCObj_PFP_track_residual_std.emplace_back(residual_mean_std.second);
+         TPCObj_PFP_track_perc_used_hits.emplace_back(perc_used_hits);
 
          TPCObj_PFP_shower_length.emplace_back(shower_length);
          TPCObj_PFP_shower_start.emplace_back(shower_start);
@@ -673,6 +685,9 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("TPCObj_PFP_track_AngleBetweenTracks", &(vars->TPCObj_PFP_track_AngleBetweenTracks));
    t -> Branch("TPCObj_PFP_track_trajPoint_Position", &(vars->TPCObj_PFP_track_trajPoint_Position));
    t -> Branch("TPCObj_PFP_track_trajPoint_Direction", &(vars->TPCObj_PFP_track_trajPoint_Direction));
+   t -> Branch("TPCObj_PFP_track_residual_mean", &(vars->TPCObj_PFP_track_residual_mean));
+   t -> Branch("TPCObj_PFP_track_residual_std", &(vars->TPCObj_PFP_track_residual_std));
+   t -> Branch("TPCObj_PFP_track_perc_used_hits", &(vars->TPCObj_PFP_track_perc_used_hits));
 
    t -> Branch("TPCObj_PFP_shower_length", &(vars->TPCObj_PFP_shower_length));
    t -> Branch("TPCObj_PFP_shower_start", &(vars->TPCObj_PFP_shower_start));

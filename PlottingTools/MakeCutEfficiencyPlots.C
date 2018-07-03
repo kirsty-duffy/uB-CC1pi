@@ -15,7 +15,7 @@ std::vector<std::vector<double>> GetCutvarstoplot(treevars *vars){
 std::vector<std::vector<double>> bins = {
    {20,0.3,3},    // Lmipoverp
    {20,0.5,0.9},  // Lmumipovermumipp
-   {10,2.95,3.15} // BrokenTrackAngle
+   {20,1,3.15} // BrokenTrackAngle
 };
 
 // Histogram titles in the same order as the vector above
@@ -97,6 +97,14 @@ void MakeCutEfficiencyPlots(std::string mcfile){
       DrawCC1piMCEffPur(c1, mc_hists_cc1pieffpur[i_h]);
       std::string printname = std::string(histnames[i_h]+".png");
       c1->Print(std::string(std::string("CC1pi_")+printname).c_str());
+
+      mc_hists_cc1pieffpur[i_h]->h_cc1pi_sel->Draw();
+      c1->Print(std::string(std::string("CC1pi_sel_")+printname).c_str());
+      mc_hists_cc1pieffpur[i_h]->h_cc1pi_notsel->Draw();
+      c1->Print(std::string(std::string("CC1pi_notsel_")+printname).c_str());
+      mc_hists_cc1pieffpur[i_h]->h_bg_sel->Draw();
+      c1->Print(std::string(std::string("Background_sel_")+printname).c_str());
+
       delete c1;
    }
 
