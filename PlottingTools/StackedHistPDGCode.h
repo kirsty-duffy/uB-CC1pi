@@ -17,6 +17,8 @@ class StackedHistPDGCode{
   void Fill(PDGCode particle_pdg, double value);
   void Fill(PDGCode particle_pdg, double value, double weight);
   void DrawStack(double norm, TCanvas *c1, TString option);
+  void DrawOverlay(double norm, TCanvas *c1, TString option);
+  void DrawOverlayMuPi(double norm, TCanvas *c1, TString option);
 
  protected:
   int nHists;
@@ -25,7 +27,8 @@ class StackedHistPDGCode{
   THStack *stack;
   TH1F *hists[25];
 
-  void StyleHists();
+  void StyleHistsStack();
+  void StyleHistsOverlay();
   unsigned int GetHistN(PDGCode particle_pdg);
   PDGCode GetPDGFromHistN(unsigned int hist_n);
 };
@@ -45,8 +48,8 @@ StackedHistPDGCode::StackedHistPDGCode(std::string histname, std::string title, 
   hist_order.push_back(kNuTauBar);
   hist_order.push_back(kMuMinus);
   hist_order.push_back(kMuPlus);
-  hist_order.push_back(kPiMinus);
   hist_order.push_back(kPiPlus);
+  hist_order.push_back(kPiMinus);
   hist_order.push_back(kPiZero);
   hist_order.push_back(kElectron);
   hist_order.push_back(kPositron);
@@ -55,6 +58,8 @@ StackedHistPDGCode::StackedHistPDGCode(std::string histname, std::string title, 
   hist_order.push_back(kPhoton);
   hist_order.push_back(kProton);
   hist_order.push_back(kNeutron);
+  hist_order.push_back(kKaPlus);
+  hist_order.push_back(kKaMinus);
   hist_order.push_back(kPDGUnknown);
 
   nHists = hist_order.size();
@@ -62,7 +67,7 @@ StackedHistPDGCode::StackedHistPDGCode(std::string histname, std::string title, 
   stack = new THStack(histname.c_str(),title.c_str());
   for (int i_hist=0; i_hist < nHists; i_hist++){
     std::string histname_i = std::string(histname)+std::string("_")+std::to_string(i_hist);
-    hists[i_hist] = new TH1F(histname_i.c_str(),"",nbins,lowlimit,highlimit);
+    hists[i_hist] = new TH1F(histname_i.c_str(),title.c_str(),nbins,lowlimit,highlimit);
   }
 }
 
@@ -85,7 +90,7 @@ void StackedHistPDGCode::Fill(PDGCode particle_pdg, double value, double weight)
 void StackedHistPDGCode::DrawStack(double norm, TCanvas *c1, TString option="")
 {
   // First: style the histograms
-  StackedHistPDGCode::StyleHists();
+  StackedHistPDGCode::StyleHistsStack();
 
   // Next: add histogramst to the stack and make TLegend
   // Only do this for histograms that have entries
@@ -109,30 +114,171 @@ void StackedHistPDGCode::DrawStack(double norm, TCanvas *c1, TString option="")
   leg->Draw();
 }
 
+// -------------------------- Function to draw the histograms -------------------------- //
+void StackedHistPDGCode::DrawOverlay(double norm, TCanvas *c1, TString option="")
+{
+  // First: style the histograms
+  StackedHistPDGCode::StyleHistsOverlay();
+
+  // Next: add histogramst to the stack and make TLegend
+  // Only do this for histograms that have entries
+//  TLegend *leg = new TLegend(0.55,0.7,0.95,0.95);
+  TLegend *leg = new TLegend(0.75,0.7,0.95,0.95);
+
+  leg -> SetNColumns(2);
+
+  bool drawn_first = false;
+
+  for (int i_hist=0; i_hist < nHists; i_hist++){
+    if (hists[i_hist]->GetEntries() == 0) continue;
+
+    if (norm == 0.) hists[i_hist]->Scale(1.0/hists[i_hist]->Integral());
+    else hists[i_hist]->Scale(norm);
+
+    PDGCode pdg_for_legend = StackedHistPDGCode::GetPDGFromHistN((unsigned int)i_hist);
+    leg->AddEntry(hists[i_hist],PDGenum2str(pdg_for_legend).c_str(),"f");
+
+    hists[i_hist]->SetFillStyle(3004);
+    hists[i_hist]->SetLineWidth(2);
+
+    c1->cd();
+    if (!drawn_first){
+      hists[i_hist]->GetYaxis()->SetRangeUser(0,1.);
+      hists[i_hist]->Draw("hist"+option);
+      drawn_first = true;
+    }
+    else{
+      hists[i_hist]->Draw("hist same"+option);
+    }
+  }
+
+  c1->cd();
+  leg->Draw();
+}
+
+// -------------------------- Function to draw the histograms -------------------------- //
+void StackedHistPDGCode::DrawOverlayMuPi(double norm, TCanvas *c1, TString option="")
+{
+  // First: style the histograms
+  StackedHistPDGCode::StyleHistsOverlay();
+
+  // Next: make TLegend
+  // Only do this for histograms that have entries
+  TLegend *leg = new TLegend(0.75,0.7,0.95,0.95);
+
+  bool drawn_first = false;
+
+  TH1D *clone_hist_muplus = nullptr;
+  TH1D *clone_hist_piplus = nullptr;
+
+  for (int i_hist=0; i_hist < nHists; i_hist++){
+    if (hists[i_hist]->GetEntries() == 0) continue;
+
+    TH1D *hist = (TH1D*)hists[i_hist]->Clone("hist");
+
+    std::string legend_entry = "";
+    PDGCode pdg_for_legend = StackedHistPDGCode::GetPDGFromHistN((unsigned int)i_hist);
+
+    if (pdg_for_legend == kMuPlus) {
+      clone_hist_muplus = (TH1D*)hist->Clone("clone_hist_muplus");
+      continue;
+    }
+    else if (pdg_for_legend == kPiPlus){
+      clone_hist_piplus = (TH1D*)hist->Clone("clone_hist_piplus");
+      continue;
+    }
+    else if (pdg_for_legend == kMuMinus){
+      legend_entry = "#mu^{+/-}";
+      if (clone_hist_muplus){
+        hist->Add(clone_hist_muplus);
+      }
+    }
+    else if (pdg_for_legend == kPiMinus){
+      legend_entry = "#pi^{+/-}";
+      if (clone_hist_piplus){
+        hist->Add(clone_hist_piplus);
+      }
+    }
+    else continue; // Only plot muons and pions here
+
+    leg->AddEntry(hist,legend_entry.c_str(),"f");
+
+    if (norm == 0.) hist->Scale(1.0/hist->Integral());
+    else hist->Scale(norm);
+
+    hist->SetFillStyle(3004);
+    hist->SetLineWidth(2);
+    hist->Rebin(2);
+
+    c1->cd();
+    if (!drawn_first){
+      hist->GetYaxis()->SetRangeUser(0,1.);
+      hist->Draw("hist"+option);
+      drawn_first = true;
+    }
+    else{
+      hist->Draw("hist same"+option);
+    }
+  }
+
+  c1->cd();
+  leg->Draw();
+}
+
 // -------------------------- Function to style the histograms -------------------------- //
 // Private: only called by DrawStack function in this file
-void StackedHistPDGCode::StyleHists()
+void StackedHistPDGCode::StyleHistsStack()
 {
   // Set fill color for all histograms
-  hists[0] ->SetFillColor(kOrange);
-  hists[1] ->SetFillColor(kOrange-3);
-  hists[2] ->SetFillColor(kOrange+2);
-  hists[3] ->SetFillColor(kRed);
-  hists[4] ->SetFillColor(kRed+2);
-  hists[5] ->SetFillColor(kPink-7);
-  hists[6] ->SetFillColor(kPink+10);
-  hists[7] ->SetFillColor(kMagenta+1);
-  hists[8] ->SetFillColor(kViolet+1);
-  hists[9] ->SetFillColor(kBlue+2);
-  hists[10]->SetFillColor(kBlue);
-  hists[11]->SetFillColor(kAzure+1);
-  hists[12]->SetFillColor(kCyan+2);
-  hists[13]->SetFillColor(kCyan);
-  hists[14]->SetFillColor(kGreen+1);
-  hists[15]->SetFillColor(kGreen+3);
-  hists[16]->SetFillColor(kGray);
-  hists[17]->SetFillColor(kGray+2);
-  hists[18]->SetFillColor(kBlack);
+  hists[0] ->SetFillColor(kOrange); // kNuMu
+  hists[1] ->SetFillColor(kOrange-3); // kNuMuBar
+  hists[2] ->SetFillColor(kOrange+2); // kNuE
+  hists[3] ->SetFillColor(kRed); // kNuEBar
+  hists[4] ->SetFillColor(kRed+2); // kNuTau
+  hists[5] ->SetFillColor(kPink-7); // kNuTauBar
+  hists[6] ->SetFillColor(kPink+10); // kMuMinus
+  hists[8] ->SetFillColor(kViolet+1); // kPiMinus
+  hists[7] ->SetFillColor(kMagenta+1); // kMuPlus
+  hists[9] ->SetFillColor(kBlue+2); // kPiPlus
+  hists[10]->SetFillColor(kBlue); // kPiZero
+  hists[11]->SetFillColor(kAzure+1); // kElectron
+  hists[12]->SetFillColor(kCyan+2); // kPositron
+  hists[13]->SetFillColor(kCyan); // kTauMinus
+  hists[14]->SetFillColor(kGreen+1); // kTauPlus
+  hists[15]->SetFillColor(kOrange-2); // kPhoton
+  hists[16]->SetFillColor(kGray); // kProton
+  hists[17]->SetFillColor(kGray+2); // kNeutron
+  hists[18]->SetFillColor(kGreen+3); // kKaonPlus
+  hists[19]->SetFillColor(kGreen+2); // kKaonMinus
+  hists[20]->SetFillColor(kBlack); // kPDGUnknown
+}
+
+// -------------------------- Function to style the histograms -------------------------- //
+// Private: only called by DrawOverlay function in this file
+void StackedHistPDGCode::StyleHistsOverlay()
+{
+  // Set line color for all histograms
+  hists[0] ->SetLineColor(kOrange); // kNuMu
+  hists[1] ->SetLineColor(kOrange-3); // kNuMuBar
+  hists[2] ->SetLineColor(kOrange+2); // kNuE
+  hists[3] ->SetLineColor(kRed); // kNuEBar
+  hists[4] ->SetLineColor(kRed+2); // kNuTau
+  hists[5] ->SetLineColor(kPink-7); // kNuTauBar
+  hists[6] ->SetLineColor(kPink+10); // kMuMinus
+  hists[8] ->SetLineColor(kViolet+1); // kPiMinus
+  hists[7] ->SetLineColor(kMagenta+1); // kMuPlus
+  hists[9] ->SetLineColor(kBlue+2); // kPiPlus
+  hists[10]->SetLineColor(kBlue); // kPiZero
+  hists[11]->SetLineColor(kAzure+1); // kElectron
+  hists[12]->SetLineColor(kCyan+2); // kPositron
+  hists[13]->SetLineColor(kCyan); // kTauMinus
+  hists[14]->SetLineColor(kGreen+1); // kTauPlus
+  hists[15]->SetLineColor(kOrange-2); // kPhoton
+  hists[16]->SetLineColor(kGray); // kProton
+  hists[17]->SetLineColor(kGray+2); // kNeutron
+  hists[18]->SetLineColor(kGreen+3); // kKaonPlus
+  hists[19]->SetLineColor(kGreen+2); // kKaonMinus
+  hists[20]->SetLineColor(kBlack); // kPDGUnknown
 }
 
 
