@@ -1,4 +1,4 @@
-LH#include "MakePlots.h"
+#include "MakePlots.h"
 
 double GetPOT(TString FileName) {
 
@@ -68,6 +68,9 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    std::vector<bool> *TPCObj_PFP_isMIP = nullptr;
    std::vector<bool> *TPCObj_PFP_track_isContained = nullptr;
    std::vector<std::vector<double>> *TPCObj_PFP_track_AngleBetweenTracks = nullptr;
+   std::vector<double> *TPCObj_PFP_track_residual_mean = nullptr;
+   std::vector<double> *TPCObj_PFP_track_residual_std = nullptr;
+   std::vector<double> *TPCObj_PFP_track_perc_used_hits = nullptr;
 
    // Shower variables
    std::vector<double> *TPCObj_PFP_shower_length = nullptr;
@@ -162,6 +165,12 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    t -> SetBranchAddress("TPCObj_PFP_track_isContained", &TPCObj_PFP_track_isContained);
    t -> SetBranchStatus("TPCObj_PFP_track_AngleBetweenTracks",1);
    t -> SetBranchAddress("TPCObj_PFP_track_AngleBetweenTracks", &TPCObj_PFP_track_AngleBetweenTracks);
+   t -> SetBranchStatus("TPCObj_PFP_track_residual_mean",1);
+   t -> SetBranchAddress("TPCObj_PFP_track_residual_mean", &TPCObj_PFP_track_residual_mean);
+   t -> SetBranchStatus("TPCObj_PFP_track_residual_std",1);
+   t -> SetBranchAddress("TPCObj_PFP_track_residual_std", &TPCObj_PFP_track_residual_std);
+   t -> SetBranchStatus("TPCObj_PFP_track_perc_used_hits",1);
+   t -> SetBranchAddress("TPCObj_PFP_track_perc_used_hits", &TPCObj_PFP_track_perc_used_hits);
 
    t -> SetBranchStatus("TPCObj_PFP_shower_length",1);
    t -> SetBranchAddress("TPCObj_PFP_shower_length", &TPCObj_PFP_shower_length);
@@ -278,6 +287,11 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    StackedHistPDGCode* depE_rangeE_mu_stack_byPDG = new StackedHistPDGCode("depE_rangeE_mu_stack_byPDG", ";Deposited energy - energy by range (muon assumption) [MeV];Selected Events (normalised to 3.782 #times 10^{19} POT)", 50, -100, 100);
    StackedHistPDGCode* depE_rangeE_p_stack_byPDG = new StackedHistPDGCode("depE_rangeE_p_stack_byPDG", ";Deposited energy - energy by range (proton assumption) [MeV];Selected Events (normalised to 3.782 #times 10^{19} POT)", 50, -100, 100);
 
+   StackedHistPDGCode* perc_used_hits_stack_byPDG = new StackedHistPDGCode("perc_used_hits_stack_byPDG", ";Fraction of used hits in cluster;", 26, 0, 1);
+   StackedHistPDGCode* residual_mean_stack_byPDG = new StackedHistPDGCode("residual_mean_stack_byPDG", ";<r_{i}>;", 26, -2.9, 2.9);
+   StackedHistPDGCode* residual_std_stack_byPDG = new StackedHistPDGCode("residual_std_stack_byPDG", ";#sigma_{r_{i}};", 26, 0, 6.5);
+
+
    // Stacked plots for longest/second-longest/third-longest etc. track
    // For now, only consider up to 10 longest tracks but that can be easily changed
    StackedHistPDGCode* len_stack_byPDG[10];
@@ -326,6 +340,24 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    TH1D* effpur_LH_p_atleast2MIP = new TH1D("effpur_LH_p_atleast2MIP",";;",MIPcuts_p_size,MIPcuts_p);
    TH1D* effpur_LH_p_exactly2MIP = new TH1D("effpur_LH_p_exactly2MIP",";;",MIPcuts_p_size,MIPcuts_p);
 
+   double MIPcuts_new_MIP_P[] = {1.0/4, 1.0/3, 1.0/2, 1.0/1.1, 1, 1.1, 2, 3, 4, 5};
+   int MIPcuts_new_MIP_P_size = sizeof(MIPcuts_new_MIP_P)/sizeof(MIPcuts_new_MIP_P[0]) - 1;
+   TEfficiency* eff_LH_MIP_P_atleast2MIP = new TEfficiency("eff_LH_MIP_P_atleast2MIP","Require at least 2 MIPs;Value of LH_MIP/LH_P used for MIP classification;",MIPcuts_new_MIP_P_size,MIPcuts_new_MIP_P);
+   TEfficiency* eff_LH_MIP_P_exactly2MIP = new TEfficiency("eff_LH_MIP_P_exactly2MIP","Require exactly 2 MIPs;Value of LH_MIP/LH_P used for MIP classification;",MIPcuts_new_MIP_P_size,MIPcuts_new_MIP_P);
+   TEfficiency* pur_LH_MIP_P_atleast2MIP = new TEfficiency("pur_LH_MIP_P_atleast2MIP","Require at least 2 MIPs;Value of LH_MIP/LH_P used for MIP classification;",MIPcuts_new_MIP_P_size,MIPcuts_new_MIP_P);
+   TEfficiency* pur_LH_MIP_P_exactly2MIP = new TEfficiency("pur_LH_MIP_P_exactly2MIP","Require exactly 2 MIPs;Value of LH_MIP/LH_P used for MIP classification;",MIPcuts_new_MIP_P_size,MIPcuts_new_MIP_P);
+   TH1D* effpur_LH_MIP_P_atleast2MIP = new TH1D("effpur_LH_MIP_P_atleast2MIP",";;",MIPcuts_new_MIP_P_size,MIPcuts_new_MIP_P);
+   TH1D* effpur_LH_MIP_P_exactly2MIP = new TH1D("effpur_LH_MIP_P_exactly2MIP",";;",MIPcuts_new_MIP_P_size,MIPcuts_new_MIP_P);
+
+   double MIPcuts_new_MU_MIP_MU_MIP_P[] = {0.5, 0.6, 0.65, 0.66, 0.67, 0.68, 0.69, 0.7, 0.71, 0.72, 0.73, 0.74, 0.75, 0.8, 0.9, 1};
+   int MIPcuts_new_MU_MIP_MU_MIP_P_size = sizeof(MIPcuts_new_MU_MIP_MU_MIP_P)/sizeof(MIPcuts_new_MU_MIP_MU_MIP_P[0]) - 1;
+   TEfficiency* eff_LH_MU_MIP_MU_MIP_P_atleast2MIP = new TEfficiency("eff_LH_MU_MIP_MU_MIP_P_atleast2MIP","Require at least 2 MIPs;Value of (LH_mu+LH_MIP)/(LH_mu+LH_MIP+LH_p) used for MIP classification;",MIPcuts_new_MU_MIP_MU_MIP_P_size,MIPcuts_new_MU_MIP_MU_MIP_P);
+   TEfficiency* eff_LH_MU_MIP_MU_MIP_P_exactly2MIP = new TEfficiency("eff_LH_MU_MIP_MU_MIP_P_exactly2MIP","Require exactly 2 MIPs;Value of (LH_mu+LH_MIP)/(LH_mu+LH_MIP+LH_p) used for MIP classification;",MIPcuts_new_MU_MIP_MU_MIP_P_size,MIPcuts_new_MU_MIP_MU_MIP_P);
+   TEfficiency* pur_LH_MU_MIP_MU_MIP_P_atleast2MIP = new TEfficiency("pur_LH_MU_MIP_MU_MIP_P_atleast2MIP","Require at least 2 MIPs;Value of (LH_mu+LH_MIP)/(LH_mu+LH_MIP+LH_p) used for MIP classification;",MIPcuts_new_MU_MIP_MU_MIP_P_size,MIPcuts_new_MU_MIP_MU_MIP_P);
+   TEfficiency* pur_LH_MU_MIP_MU_MIP_P_exactly2MIP = new TEfficiency("pur_LH_MU_MIP_MU_MIP_P_exactly2MIP","Require exactly 2 MIPs;Value of (LH_mu+LH_MIP)/(LH_mu+LH_MIP+LH_p) used for MIP classification;",MIPcuts_new_MU_MIP_MU_MIP_P_size,MIPcuts_new_MU_MIP_MU_MIP_P);
+   TH1D* effpur_LH_MU_MIP_MU_MIP_P_atleast2MIP = new TH1D("effpur_LH_MU_MIP_MU_MIP_P_atleast2MIP",";;",MIPcuts_new_MU_MIP_MU_MIP_P_size,MIPcuts_new_MU_MIP_MU_MIP_P);
+   TH1D* effpur_LH_MU_MIP_MU_MIP_P_exactly2MIP = new TH1D("effpur_LH_MU_MIP_MU_MIP_P_exactly2MIP",";;",MIPcuts_new_MU_MIP_MU_MIP_P_size,MIPcuts_new_MU_MIP_MU_MIP_P);
+
    double MIPcuts_depE_rangeE_mu[] = {-20, -10, 0, 10, 20, 30, 40, 50, 60, 70, 80};
    int MIPcuts_depE_rangeE_mu_size = sizeof(MIPcuts_depE_rangeE_mu)/sizeof(MIPcuts_depE_rangeE_mu[0]) - 1;
    TEfficiency* eff_depE_rangeE_mu_atleast2MIP = new TEfficiency("eff_depE_rangeE_mu_atleast2MIP","Require at least 2 MIPs;Value of depE_rangeE_mu used for MIP classification;",MIPcuts_depE_rangeE_mu_size,MIPcuts_depE_rangeE_mu);
@@ -357,17 +389,26 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    TEfficiency* pur_distcut = new TEfficiency("pur_distcut",";Value used for distance cut;",distcuts_size,distcuts);
    TH1D* effpur_distcut = new TH1D("effpur_distcut",";;",distcuts_size,distcuts);
 
+   TEfficiency* eff_daughterdistcut = new TEfficiency("eff_daughterdistcut",";Value used for distance cut;",distcuts_size,distcuts);
+   TEfficiency* pur_daughterdistcut = new TEfficiency("pur_daughterdistcut",";Value used for distance cut;",distcuts_size,distcuts);
+   TH1D* effpur_daughterdistcut = new TH1D("effpur_daughterdistcut",";;",distcuts_size,distcuts);
+
    TH1D* AngleBetweenTracks = new TH1D("AngleBetweenTracks",";Angle between selected tracks;Entries",30,0,3.14);
    StackedHistTopology* AngleBetweenTracks_stack = new StackedHistTopology("AngleBetweenTracks_stack",";Angle between selected tracks;Entries",30,0,3.14);
    TH1D* AngleBetweenTracks_Close = new TH1D("AngleBetweenTracks_Close",";Angle between selected tracks that are within 3 cm;Entries",30,0,3.14);
    StackedHistTopology* AngleBetweenTracks_Close_stack = new StackedHistTopology("AngleBetweenTracks_Close_stack",";Angle between selected tracks that are within 3 cm;Entries",30,0,3.14);
    StackedHistTopology* AngleBetweenTracks_Close_sameID_stack = new StackedHistTopology("AngleBetweenTracks_Close_sameID_stack",";Angle between selected tracks that are within 3 cm and match the same MCP;Entries",30,0,3.14);
    StackedHistTopology* AngleBetweenTracks_Close_diffID_stack = new StackedHistTopology("AngleBetweenTracks_Close_diffID_stack",";Angle between selected tracks that are within 3 cm and match different MCPs;Entries",30,0,3.14);
+   StackedHistTopology* BrokenTrackMultiplicity_stack = new StackedHistTopology("BrokenTrackMultiplicity_stack",";Number of tracks near the broken track vertex;Entries",5,2,7);
+   StackedHistTopology* BrokenTrackMultiplicity_sameID_stack = new StackedHistTopology("BrokenTrackMultiplicity_sameID",";Number of tracks near the broken track vertex for true broken tracks;Entries",5,2,7);
+   StackedHistTopology* BrokenTrackMultiplicity_diffID_stack = new StackedHistTopology("BrokenTrackMultiplicity_diffID",";Number of tracks near the broken track vertex for not true broken tracks;Entries",5,2,7);
 
    ofstream evdinfo;
    evdinfo.open("evdinfo.txt");
 
    const int nentries = t -> GetEntries();
+
+   int failedevents = 0;
 
    for (int i = 0; i < nentries; i++) {
       t -> GetEntry(i);
@@ -394,7 +435,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
 
       }
 
-      // Test vertex to track start distance cut...
+      // Test event-level vertex to track start distance cut...
       double maxdist = 0;
       for(int j = 0; j < TPCObj_NPFPs; j++) {
          if(!(TPCObj_PFP_isDaughter -> at(j))) continue;
@@ -421,20 +462,46 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          effpur_distcut->SetBinContent(j,10*eff_distcut->GetEfficiency(j)*pur_distcut->GetEfficiency(j));
       }
 
+      // Test per-track vertex to track start distance cut for what we consider daughters
+      for (const double& distcut : distcuts) {
+         double daughters = 0;
+         for(int j = 0; j < TPCObj_NPFPs; j++) {
+//            if(!(TPCObj_PFP_isDaughter -> at(j))) continue; // Also require Pandora to count them as daughters
+            if(TPCObj_PFP_track_length -> at(j) == -9999) continue; // Don't consider the neutrino or showers that didn't get re-reco'd as a track (only necessary if we don't use TPCObj_PFP_isDaughter above)
+
+            double vtxtrackdist = std::hypot(std::hypot(TPCObj_reco_vtx->at(0) - TPCObj_PFP_track_start->at(j).at(0), TPCObj_reco_vtx->at(1) - TPCObj_PFP_track_start->at(j).at(1)), TPCObj_reco_vtx->at(2) - TPCObj_PFP_track_start->at(j).at(2));
+            if(vtxtrackdist < distcut) daughters++;
+         }
+
+         // eff/pur
+         if(isSignal) eff_daughterdistcut->Fill(SelectedEvent && daughters>=2, distcut);
+         if(SelectedEvent && daughters>=2) pur_daughterdistcut->Fill(isSignal, distcut);
+
+         for(int j = 1; j <= distcuts_size; j++) {
+            effpur_daughterdistcut->SetBinContent(j,10*eff_daughterdistcut->GetEfficiency(j)*pur_daughterdistcut->GetEfficiency(j));
+         }
+      }
+
 
       // Calculate derived MIP vars
       std::vector<double> LH_muMIPminusp_vect;
       std::vector<double> LH_p_vect;
+      std::vector<double> LH_MIP_P_vect;
+      std::vector<double> LH_MU_MIP_MU_MIP_P_vect;
       std::vector<double> depE_rangeE_mu_vect;
       std::vector<double> depE_rangeE_p_vect;
       for(int j = 0; j < TPCObj_NPFPs; j++) {
          if(TPCObj_PFP_isDaughter -> at(j) && LH_fwd_mu -> at(j).at(2) != -999 && TPCObj_PFP_track_length -> at(j) >= 0) {
-            double tr_LH_muMIP = std::min({LH_fwd_mu->at(j).at(2),LH_bwd_mu->at(j).at(2),LH_MIP->at(j).at(2)});
-            double tr_LH_p = std::min(LH_fwd_p->at(j).at(2),LH_bwd_p->at(j).at(2));
+            double tr_LH_muMIP = std::max({LH_fwd_mu->at(j).at(2),LH_bwd_mu->at(j).at(2),LH_MIP->at(j).at(2)});
+            double tr_LH_p = std::max(LH_fwd_p->at(j).at(2),LH_bwd_p->at(j).at(2));
+            double tr_LH_MIP = LH_MIP->at(j).at(2);
+            double tr_LH_mu = std::max({LH_fwd_mu->at(j).at(2),LH_bwd_mu->at(j).at(2)});
             double tr_LH_muMIPminusp = tr_LH_muMIP - tr_LH_p;
 
             LH_muMIPminusp_vect.emplace_back(tr_LH_muMIPminusp);
             LH_p_vect.emplace_back(tr_LH_p);
+            LH_MIP_P_vect.emplace_back(tr_LH_MIP/tr_LH_p);
+            LH_MU_MIP_MU_MIP_P_vect.emplace_back((tr_LH_mu+tr_LH_MIP)/(tr_LH_mu+tr_LH_MIP+tr_LH_p));
 
             depE_rangeE_mu_vect.emplace_back(TPCObj_PFP_track_depE->at(j).at(2) - TPCObj_PFP_track_rangeE_mu->at(j));
             depE_rangeE_p_vect.emplace_back(TPCObj_PFP_track_depE->at(j).at(2) - TPCObj_PFP_track_rangeE_p->at(j));
@@ -442,6 +509,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          else {
             LH_muMIPminusp_vect.emplace_back(-999);
             LH_p_vect.emplace_back(-999);
+            LH_MIP_P_vect.emplace_back(-999);
+            LH_MU_MIP_MU_MIP_P_vect.emplace_back(-999);
             depE_rangeE_mu_vect.emplace_back(-999);
             depE_rangeE_p_vect.emplace_back(-999);
         }
@@ -483,6 +552,44 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
       for(int j = 1; j <= MIPcuts_p_size; j++) {
          effpur_LH_p_atleast2MIP->SetBinContent(j,10*eff_LH_p_atleast2MIP->GetEfficiency(j)*pur_LH_p_atleast2MIP->GetEfficiency(j));
          effpur_LH_p_exactly2MIP->SetBinContent(j,10*eff_LH_p_exactly2MIP->GetEfficiency(j)*pur_LH_p_exactly2MIP->GetEfficiency(j));
+      }
+
+      // LH_MIP_P eff/pur
+      for (const double& MIPcut : MIPcuts_new_MIP_P) {
+         std::vector<bool> TPCObj_PFP_isMIP_LLH;
+         for(const double& MIPvalue : LH_MIP_P_vect) {
+            if(MIPvalue > MIPcut && MIPvalue != -999) TPCObj_PFP_isMIP_LLH.emplace_back(true);
+            else TPCObj_PFP_isMIP_LLH.emplace_back(false);
+         }
+         int nMIPs = std::count(TPCObj_PFP_isMIP_LLH.begin(),TPCObj_PFP_isMIP_LLH.end(),true);
+         if(isSignal) eff_LH_MIP_P_atleast2MIP->Fill(SelectedEvent && nMIPs>=2, MIPcut);
+         if(isSignal) eff_LH_MIP_P_exactly2MIP->Fill(SelectedEvent && nMIPs==2, MIPcut);
+         if(SelectedEvent && nMIPs>=2) pur_LH_MIP_P_atleast2MIP->Fill(isSignal, MIPcut);
+         if(SelectedEvent && nMIPs==2) pur_LH_MIP_P_exactly2MIP->Fill(isSignal, MIPcut);
+      }
+
+      for(int j = 1; j <= MIPcuts_new_MIP_P_size; j++) {
+         effpur_LH_MIP_P_atleast2MIP->SetBinContent(j,10*eff_LH_MIP_P_atleast2MIP->GetEfficiency(j)*pur_LH_MIP_P_atleast2MIP->GetEfficiency(j));
+         effpur_LH_MIP_P_exactly2MIP->SetBinContent(j,10*eff_LH_MIP_P_exactly2MIP->GetEfficiency(j)*pur_LH_MIP_P_exactly2MIP->GetEfficiency(j));
+      }
+
+      // LH_MU_MIP_MU_MIP_P eff/pur
+      for (const double& MIPcut : MIPcuts_new_MU_MIP_MU_MIP_P) {
+         std::vector<bool> TPCObj_PFP_isMIP_LLH;
+         for(const double& MIPvalue : LH_MU_MIP_MU_MIP_P_vect) {
+            if(MIPvalue > MIPcut && MIPvalue != -999) TPCObj_PFP_isMIP_LLH.emplace_back(true);
+            else TPCObj_PFP_isMIP_LLH.emplace_back(false);
+         }
+         int nMIPs = std::count(TPCObj_PFP_isMIP_LLH.begin(),TPCObj_PFP_isMIP_LLH.end(),true);
+         if(isSignal) eff_LH_MU_MIP_MU_MIP_P_atleast2MIP->Fill(SelectedEvent && nMIPs>=2, MIPcut);
+         if(isSignal) eff_LH_MU_MIP_MU_MIP_P_exactly2MIP->Fill(SelectedEvent && nMIPs==2, MIPcut);
+         if(SelectedEvent && nMIPs>=2) pur_LH_MU_MIP_MU_MIP_P_atleast2MIP->Fill(isSignal, MIPcut);
+         if(SelectedEvent && nMIPs==2) pur_LH_MU_MIP_MU_MIP_P_exactly2MIP->Fill(isSignal, MIPcut);
+      }
+
+      for(int j = 1; j <= MIPcuts_new_MU_MIP_MU_MIP_P_size; j++) {
+         effpur_LH_MU_MIP_MU_MIP_P_atleast2MIP->SetBinContent(j,10*eff_LH_MU_MIP_MU_MIP_P_atleast2MIP->GetEfficiency(j)*pur_LH_MU_MIP_MU_MIP_P_atleast2MIP->GetEfficiency(j));
+         effpur_LH_MU_MIP_MU_MIP_P_exactly2MIP->SetBinContent(j,10*eff_LH_MU_MIP_MU_MIP_P_exactly2MIP->GetEfficiency(j)*pur_LH_MU_MIP_MU_MIP_P_exactly2MIP->GetEfficiency(j));
       }
 
       // depE_rangeE_mu eff/pur
@@ -565,6 +672,15 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
       }
 //      if(std::count(TPCObj_PFP_isMIP_E.begin(),TPCObj_PFP_isMIP_E.end(),true)<2) SelectedEvent = false;
 
+      // Implement cut on LH_MIP_P
+      double MIPcut_LH_MIP_P = 1;
+      std::vector<bool> TPCObj_PFP_isMIP_LH_MIP_P;
+      for(const double& MIPvalue : LH_MIP_P_vect) {
+         if(MIPvalue > MIPcut_LH_MIP_P && MIPvalue != -999) TPCObj_PFP_isMIP_LH_MIP_P.emplace_back(true);
+         else TPCObj_PFP_isMIP_LH_MIP_P.emplace_back(false);
+      }
+//      if(std::count(TPCObj_PFP_isMIP_LH_MIP_P.begin(),TPCObj_PFP_isMIP_LH_MIP_P.end(),true)!=2) SelectedEvent = false;
+
       // Implement cut on angle between tracks
       for (int track1 = 0; track1 < TPCObj_NPFPs; track1++) {
          if(TPCObj_PFP_track_length -> at(track1) < 0) continue;
@@ -572,15 +688,14 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          for (int track2 = track1+1; track2 < TPCObj_NPFPs; track2++) {
             if(TPCObj_PFP_track_length -> at(track2) < 0) continue;
 
-            TVector3 v0(1,1,1);
             TVector3 v1(1,1,1);
-            v0.SetMag(1);
+            TVector3 v2(1,1,1);
             v1.SetMag(1);
-            v0.SetTheta(TPCObj_PFP_track_theta->at(track1));
-            v1.SetTheta(TPCObj_PFP_track_theta->at(track2));
-            v0.SetPhi(TPCObj_PFP_track_phi->at(track1));
-            v1.SetPhi(TPCObj_PFP_track_phi->at(track2));
-            double angle = TMath::ACos(v0.Dot(v1));
+            v2.SetMag(1);
+            v1.SetTheta(TPCObj_PFP_track_theta->at(track1));
+            v2.SetTheta(TPCObj_PFP_track_theta->at(track2));
+            v1.SetPhi(TPCObj_PFP_track_phi->at(track1));
+            v2.SetPhi(TPCObj_PFP_track_phi->at(track2));
 
             TVector3 start1(TPCObj_PFP_track_start->at(track1).at(0),TPCObj_PFP_track_start->at(track1).at(1),TPCObj_PFP_track_start->at(track1).at(2));
             TVector3 end1(TPCObj_PFP_track_end->at(track1).at(0),TPCObj_PFP_track_end->at(track1).at(1),TPCObj_PFP_track_end->at(track1).at(2));
@@ -589,7 +704,23 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
             std::vector<double> distances = { (start1-start2).Mag(),(start1-end2).Mag(), (end1-start2).Mag(), (end1-end2).Mag() };
             double mindist = *std::min_element(distances.begin(),distances.end());
 
-//            if(mindist < 3 && angle > 3.04) SelectedEvent = false;
+            // Flip tracks if the closest point isn't start-start
+            if(mindist==distances.at(1) || mindist==distances.at(3)) {
+               v2=-1*v2;
+               TVector3 oldstart2=start2;
+               start2=end2;
+               end2=oldstart2;
+            }
+            if(mindist==distances.at(2) || mindist==distances.at(3)) {
+               v1=-1*v1;
+               TVector3 oldstart1=start1;
+               start1=end1;
+               end1=oldstart1;
+            }
+
+            double angle = TMath::ACos(v1.Dot(v2));
+
+//            if(mindist < 3 && angle > 3.06) SelectedEvent = false;
          }
       }
 
@@ -608,6 +739,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    //if (std::count(TPCObj_PFP_isMIP->begin(),TPCObj_PFP_isMIP->end(),true)<2) SelectedEvent = false;
 
       if(SelectedEvent) {
+
+         if(std::count(TPCObj_PFP_track_length->begin(),TPCObj_PFP_track_length->end(),-9999)>1) failedevents++;
 
          //if (nu_PDG != 14) std::cout << "WARNING: Selected event has neutrino with PDG code " << nu_PDG << " (should be 14)" << std::endl;
 
@@ -708,6 +841,10 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
                depE_rangeE_mu_stack_byPDG -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j), TPCObj_PFP_track_depE->at(j).at(2) - TPCObj_PFP_track_rangeE_mu->at(j));
                depE_rangeE_p_stack_byPDG -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j), TPCObj_PFP_track_depE->at(j).at(2) - TPCObj_PFP_track_rangeE_p->at(j));
 
+               perc_used_hits_stack_byPDG -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j), TPCObj_PFP_track_perc_used_hits->at(j));
+               residual_mean_stack_byPDG -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j), TPCObj_PFP_track_residual_mean->at(j));
+               residual_std_stack_byPDG -> Fill((PDGCode)TPCObj_PFP_truePDG->at(j), TPCObj_PFP_track_residual_std->at(j));
+
             }
          }
 
@@ -748,17 +885,14 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
             for (int track2 = track1+1; track2 < TPCObj_NPFPs; track2++) {
                if(TPCObj_PFP_track_length -> at(track2) < 0) continue;
 
-               TVector3 v0(1,1,1);
                TVector3 v1(1,1,1);
-               v0.SetMag(1);
+               TVector3 v2(1,1,1);
                v1.SetMag(1);
-               v0.SetTheta(TPCObj_PFP_track_theta->at(track1));
-               v1.SetTheta(TPCObj_PFP_track_theta->at(track2));
-               v0.SetPhi(TPCObj_PFP_track_phi->at(track1));
-               v1.SetPhi(TPCObj_PFP_track_phi->at(track2));
-               double angle = TMath::ACos(v0.Dot(v1));
-               AngleBetweenTracks -> Fill(angle);
-               AngleBetweenTracks_stack -> Fill(Truth_topology, angle);
+               v2.SetMag(1);
+               v1.SetTheta(TPCObj_PFP_track_theta->at(track1));
+               v2.SetTheta(TPCObj_PFP_track_theta->at(track2));
+               v1.SetPhi(TPCObj_PFP_track_phi->at(track1));
+               v2.SetPhi(TPCObj_PFP_track_phi->at(track2));
 
                TVector3 start1(TPCObj_PFP_track_start->at(track1).at(0),TPCObj_PFP_track_start->at(track1).at(1),TPCObj_PFP_track_start->at(track1).at(2));
                TVector3 end1(TPCObj_PFP_track_end->at(track1).at(0),TPCObj_PFP_track_end->at(track1).at(1),TPCObj_PFP_track_end->at(track1).at(2));
@@ -766,6 +900,25 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
                TVector3 end2(TPCObj_PFP_track_end->at(track2).at(0),TPCObj_PFP_track_end->at(track2).at(1),TPCObj_PFP_track_end->at(track2).at(2));
                std::vector<double> distances = { (start1-start2).Mag(),(start1-end2).Mag(), (end1-start2).Mag(), (end1-end2).Mag() };
                double mindist = *std::min_element(distances.begin(),distances.end());
+
+               // Flip tracks if the closest point isn't start-start
+               if(mindist==distances.at(1) || mindist==distances.at(3)) {
+                  v2=-1*v2;
+                  TVector3 oldstart2=start2;
+                  start2=end2;
+                  end2=oldstart2;
+               }
+               if(mindist==distances.at(2) || mindist==distances.at(3)) {
+                  v1=-1*v1;
+                  TVector3 oldstart1=start1;
+                  start1=end1;
+                  end1=oldstart1;
+               }
+
+               double angle = TMath::ACos(v1.Dot(v2));
+               AngleBetweenTracks -> Fill(angle);
+               AngleBetweenTracks_stack -> Fill(Truth_topology, angle);
+
                if(mindist < 3) {
                   AngleBetweenTracks_Close -> Fill(angle);
                   AngleBetweenTracks_Close_stack -> Fill(Truth_topology, angle);
@@ -775,6 +928,23 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
                   // -----! hack in some cuts to see what they do to efficiency/purity
                   //if (angle > 3.05) SelectedEvent = false;
                }
+
+               // Check how many other tracks are nearby
+               if(mindist < 3 && angle > 3.04) {
+                  int multiplicity = 2;
+                  for (int track3 = 0; track3 < TPCObj_NPFPs; track3++) {
+                     if(track3==track1 || track3==track2) continue;
+
+                     TVector3 start3(TPCObj_PFP_track_start->at(track3).at(0),TPCObj_PFP_track_start->at(track3).at(1),TPCObj_PFP_track_start->at(track3).at(2));
+                     TVector3 end3(TPCObj_PFP_track_end->at(track3).at(0),TPCObj_PFP_track_end->at(track3).at(1),TPCObj_PFP_track_end->at(track3).at(2));
+
+                     if( ((start1-start3).Mag() < 3 && (start2-start3).Mag() < 3) || ((start1-end3).Mag() < 3 && (start2-end3).Mag() < 3) ) multiplicity++;
+                  }
+
+                  BrokenTrackMultiplicity_stack->Fill(Truth_topology, multiplicity);
+                  if(TPCObj_PFP_MCPid->at(track1)==TPCObj_PFP_MCPid->at(track2)) BrokenTrackMultiplicity_sameID_stack->Fill(Truth_topology, multiplicity);
+                  else BrokenTrackMultiplicity_diffID_stack->Fill(Truth_topology, multiplicity);
+               }
             }
          }
 
@@ -783,10 +953,10 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          if(!isSignal) {
             evdinfo << "Run/Subrun/Event: " << run_num << " " << subrun_num << " " << event_num << std::endl;
             evdinfo << "True topology: " << topologyenum2str(Truth_topology) << std::endl;
-            evdinfo << "Reco daughter tracks: " << track_daughters << std::endl;
+//            evdinfo << "Reco daughter tracks: " << track_daughters << std::endl;
             evdinfo << "Reco nu vertex position (x,y,z): " << TPCObj_reco_vtx->at(0) << " " << TPCObj_reco_vtx->at(1) << " " << TPCObj_reco_vtx->at(2) << std::endl;
-            evdinfo << "PFP hierarchy: " << std::endl;
-
+//            evdinfo << "PFP hierarchy: " << std::endl;
+/*
             for(int PFP = 0; PFP < TPCObj_NPFPs; PFP++) {
                evdinfo << TPCObj_PFP_id->at(PFP);
                if(TPCObj_PFP_track_length -> at(PFP) < 0) {
@@ -799,6 +969,7 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
                   evdinfo << "      " << TPCObj_PFP_daughterids->at(PFP).at(daughter) << std::endl;
                }
             }
+*/
             evdinfo << std::endl;
          }
 
@@ -827,6 +998,8 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
          }
       } //end if signal
    } //end loop over entries
+
+   std::cout << "Failed Events: " << failedevents << std::endl;
 
    evdinfo.close();
 
@@ -1086,6 +1259,102 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    gPad->Update();
    c1 -> SaveAs(TString::Format("%s_effpur_LH_p_exactly2MIP.eps",SaveString.c_str()));
 
+   eff_LH_MIP_P_atleast2MIP -> Draw("AP");
+   pur_LH_MIP_P_atleast2MIP -> Draw("P SAME");
+   effpur_LH_MIP_P_atleast2MIP -> Draw("P SAME");
+   gPad->Update();
+   eff_LH_MIP_P_atleast2MIP->SetMarkerColor(kRed);
+   eff_LH_MIP_P_atleast2MIP->SetMarkerStyle(21);
+   eff_LH_MIP_P_atleast2MIP->SetMarkerSize(1);
+   graph = eff_LH_MIP_P_atleast2MIP->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   pur_LH_MIP_P_atleast2MIP->SetMarkerColor(kBlue);
+   pur_LH_MIP_P_atleast2MIP->SetMarkerStyle(21);
+   pur_LH_MIP_P_atleast2MIP->SetMarkerSize(1);
+   graph = pur_LH_MIP_P_atleast2MIP->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   effpur_LH_MIP_P_atleast2MIP->SetMarkerColor(kBlack);
+   effpur_LH_MIP_P_atleast2MIP->SetMarkerStyle(21);
+   effpur_LH_MIP_P_atleast2MIP->SetMarkerSize(1);
+   effpur_LH_MIP_P_atleast2MIP->SetMinimum(0);
+   effpur_LH_MIP_P_atleast2MIP->SetMaximum(1);
+   gPad->Update();
+   c1 -> SaveAs(TString::Format("%s_effpur_LH_MIP_P_atleast2MIP.eps",SaveString.c_str()));
+
+   eff_LH_MIP_P_exactly2MIP -> Draw("AP");
+   pur_LH_MIP_P_exactly2MIP -> Draw("P SAME");
+   effpur_LH_MIP_P_exactly2MIP -> Draw("P SAME");
+   gPad->Update();
+   eff_LH_MIP_P_exactly2MIP->SetMarkerColor(kRed);
+   eff_LH_MIP_P_exactly2MIP->SetMarkerStyle(21);
+   eff_LH_MIP_P_exactly2MIP->SetMarkerSize(1);
+   graph = eff_LH_MIP_P_exactly2MIP->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   pur_LH_MIP_P_exactly2MIP->SetMarkerColor(kBlue);
+   pur_LH_MIP_P_exactly2MIP->SetMarkerStyle(21);
+   pur_LH_MIP_P_exactly2MIP->SetMarkerSize(1);
+   graph = pur_LH_MIP_P_exactly2MIP->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   effpur_LH_MIP_P_exactly2MIP->SetMarkerColor(kBlack);
+   effpur_LH_MIP_P_exactly2MIP->SetMarkerStyle(21);
+   effpur_LH_MIP_P_exactly2MIP->SetMarkerSize(1);
+   effpur_LH_MIP_P_exactly2MIP->SetMinimum(0);
+   effpur_LH_MIP_P_exactly2MIP->SetMaximum(1);
+   gPad->Update();
+   c1 -> SaveAs(TString::Format("%s_effpur_LH_MIP_P_exactly2MIP.eps",SaveString.c_str()));
+
+   eff_LH_MU_MIP_MU_MIP_P_atleast2MIP -> Draw("AP");
+   pur_LH_MU_MIP_MU_MIP_P_atleast2MIP -> Draw("P SAME");
+   effpur_LH_MU_MIP_MU_MIP_P_atleast2MIP -> Draw("P SAME");
+   gPad->Update();
+   eff_LH_MU_MIP_MU_MIP_P_atleast2MIP->SetMarkerColor(kRed);
+   eff_LH_MU_MIP_MU_MIP_P_atleast2MIP->SetMarkerStyle(21);
+   eff_LH_MU_MIP_MU_MIP_P_atleast2MIP->SetMarkerSize(1);
+   graph = eff_LH_MU_MIP_MU_MIP_P_atleast2MIP->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   pur_LH_MU_MIP_MU_MIP_P_atleast2MIP->SetMarkerColor(kBlue);
+   pur_LH_MU_MIP_MU_MIP_P_atleast2MIP->SetMarkerStyle(21);
+   pur_LH_MU_MIP_MU_MIP_P_atleast2MIP->SetMarkerSize(1);
+   graph = pur_LH_MU_MIP_MU_MIP_P_atleast2MIP->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   effpur_LH_MU_MIP_MU_MIP_P_atleast2MIP->SetMarkerColor(kBlack);
+   effpur_LH_MU_MIP_MU_MIP_P_atleast2MIP->SetMarkerStyle(21);
+   effpur_LH_MU_MIP_MU_MIP_P_atleast2MIP->SetMarkerSize(1);
+   effpur_LH_MU_MIP_MU_MIP_P_atleast2MIP->SetMinimum(0);
+   effpur_LH_MU_MIP_MU_MIP_P_atleast2MIP->SetMaximum(1);
+   gPad->Update();
+   c1 -> SaveAs(TString::Format("%s_effpur_LH_MU_MIP_MU_MIP_P_atleast2MIP.eps",SaveString.c_str()));
+
+   eff_LH_MU_MIP_MU_MIP_P_exactly2MIP -> Draw("AP");
+   pur_LH_MU_MIP_MU_MIP_P_exactly2MIP -> Draw("P SAME");
+   effpur_LH_MU_MIP_MU_MIP_P_exactly2MIP -> Draw("P SAME");
+   gPad->Update();
+   eff_LH_MU_MIP_MU_MIP_P_exactly2MIP->SetMarkerColor(kRed);
+   eff_LH_MU_MIP_MU_MIP_P_exactly2MIP->SetMarkerStyle(21);
+   eff_LH_MU_MIP_MU_MIP_P_exactly2MIP->SetMarkerSize(1);
+   graph = eff_LH_MU_MIP_MU_MIP_P_exactly2MIP->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   pur_LH_MU_MIP_MU_MIP_P_exactly2MIP->SetMarkerColor(kBlue);
+   pur_LH_MU_MIP_MU_MIP_P_exactly2MIP->SetMarkerStyle(21);
+   pur_LH_MU_MIP_MU_MIP_P_exactly2MIP->SetMarkerSize(1);
+   graph = pur_LH_MU_MIP_MU_MIP_P_exactly2MIP->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   effpur_LH_MU_MIP_MU_MIP_P_exactly2MIP->SetMarkerColor(kBlack);
+   effpur_LH_MU_MIP_MU_MIP_P_exactly2MIP->SetMarkerStyle(21);
+   effpur_LH_MU_MIP_MU_MIP_P_exactly2MIP->SetMarkerSize(1);
+   effpur_LH_MU_MIP_MU_MIP_P_exactly2MIP->SetMinimum(0);
+   effpur_LH_MU_MIP_MU_MIP_P_exactly2MIP->SetMaximum(1);
+   gPad->Update();
+   c1 -> SaveAs(TString::Format("%s_effpur_LH_MU_MIP_MU_MIP_P_exactly2MIP.eps",SaveString.c_str()));
+
    eff_depE_rangeE_mu_atleast2MIP -> Draw("AP");
    pur_depE_rangeE_mu_atleast2MIP -> Draw("P SAME");
    effpur_depE_rangeE_mu_atleast2MIP -> Draw("P SAME");
@@ -1220,6 +1489,33 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    gPad->Update();
    c1 -> SaveAs(TString::Format("%s_effpur_distcut.eps",SaveString.c_str()));
 
+   eff_daughterdistcut -> Draw("AP");
+   pur_daughterdistcut -> Draw("P SAME");
+   effpur_daughterdistcut -> Draw("P SAME");
+   gPad->Update();
+   eff_daughterdistcut->SetMarkerColor(kRed);
+   eff_daughterdistcut->SetMarkerStyle(21);
+   eff_daughterdistcut->SetMarkerSize(1);
+   graph = eff_daughterdistcut->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   pur_daughterdistcut->SetMarkerColor(kBlue);
+   pur_daughterdistcut->SetMarkerStyle(21);
+   pur_daughterdistcut->SetMarkerSize(1);
+   graph = pur_daughterdistcut->GetPaintedGraph();
+   graph->SetMinimum(0);
+   graph->SetMaximum(1);
+   effpur_daughterdistcut->SetMarkerColor(kBlack);
+   effpur_daughterdistcut->SetMarkerStyle(21);
+   effpur_daughterdistcut->SetMarkerSize(1);
+   effpur_daughterdistcut->SetMinimum(0);
+   effpur_daughterdistcut->SetMaximum(1);
+   gPad->Update();
+   c1 -> SaveAs(TString::Format("%s_effpur_daughterdistcut.eps",SaveString.c_str()));
+
+   std::cout << "Eff at 14: " << eff_daughterdistcut->GetEfficiency(14) << std::endl;
+   std::cout << "Pur at 14: " << pur_daughterdistcut->GetEfficiency(14) << std::endl;
+
    AngleBetweenTracks -> Draw();
    c1 -> SaveAs(TString::Format("%s_AngleBetweenTracks.eps",SaveString.c_str()));
    AngleBetweenTracks_stack -> DrawStack(1,c1);
@@ -1232,6 +1528,28 @@ void MakePlots(std::map<std::string,bool> SelectionCutflow, std::string SaveStri
    c1 -> SaveAs(TString::Format("%s_AngleBetweenTracks_Close_sameID_stack.eps",SaveString.c_str()));
    AngleBetweenTracks_Close_diffID_stack -> DrawStack(1,c1);
    c1 -> SaveAs(TString::Format("%s_AngleBetweenTracks_Close_diffID_stack.eps",SaveString.c_str()));
+   BrokenTrackMultiplicity_stack -> DrawStack(1,c1);
+   c1 -> SaveAs(TString::Format("%s_BrokenTrackMultiplicity_stack.eps",SaveString.c_str()));
+   BrokenTrackMultiplicity_sameID_stack -> DrawStack(1,c1);
+   c1 -> SaveAs(TString::Format("%s_BrokenTrackMultiplicity_sameID_stack.eps",SaveString.c_str()));
+   BrokenTrackMultiplicity_diffID_stack -> DrawStack(1,c1);
+   c1 -> SaveAs(TString::Format("%s_BrokenTrackMultiplicity_diffID_stack.eps",SaveString.c_str()));
+
+   perc_used_hits_stack_byPDG -> DrawStack(1, c1);
+   c1 -> SaveAs(TString::Format("%s_THStack_perc_used_hits.eps",SaveString.c_str()));
+   perc_used_hits_stack_byPDG -> DrawOverlayMuPi(0, c1);
+   c1 -> SaveAs(TString::Format("%s_THStack_perc_used_hits_overlay.eps",SaveString.c_str()));
+
+   residual_mean_stack_byPDG -> DrawStack(1, c1);
+   c1 -> SaveAs(TString::Format("%s_THStack_residual_mean.eps",SaveString.c_str()));
+   residual_mean_stack_byPDG -> DrawOverlayMuPi(0, c1);
+   c1 -> SaveAs(TString::Format("%s_THStack_residual_mean_overlay.eps",SaveString.c_str()));
+
+   residual_std_stack_byPDG -> DrawStack(1, c1);
+   c1 -> SaveAs(TString::Format("%s_THStack_residual_std.eps",SaveString.c_str()));
+   residual_std_stack_byPDG -> DrawOverlayMuPi(0, c1);
+   c1 -> SaveAs(TString::Format("%s_THStack_residual_std_overlay.eps",SaveString.c_str()));
+
 
    std::cout << "Total Efficiency: " << (1. * (eff_nuE -> GetPassedHistogram() -> GetEntries()))/(eff_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
    std::cout << "Total Purity: " << (1. * (pur_nuE -> GetPassedHistogram() -> GetEntries()))/(pur_nuE -> GetTotalHistogram() -> GetEntries()) << std::endl;
