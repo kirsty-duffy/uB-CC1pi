@@ -143,7 +143,7 @@ void StackedHistPDGCode::DrawOverlay(double norm, TCanvas *c1, TString option=""
 
     c1->cd();
     if (!drawn_first){
-      hists[i_hist]->GetYaxis()->SetRangeUser(0,1.);
+      if (norm == 0.) hists[i_hist]->GetYaxis()->SetRangeUser(0,1.);
       hists[i_hist]->Draw("hist"+option);
       drawn_first = true;
     }
@@ -212,7 +212,7 @@ void StackedHistPDGCode::DrawOverlayMuPi(double norm, TCanvas *c1, TString optio
 
     c1->cd();
     if (!drawn_first){
-      hist->GetYaxis()->SetRangeUser(0,1.);
+      if (norm == 0.) hist->GetYaxis()->SetRangeUser(0,1.);
       hist->Draw("hist"+option);
       drawn_first = true;
     }
