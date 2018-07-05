@@ -13,6 +13,7 @@ art_make( BASENAME_ONLY
           LIBRARY_NAME     uboonecode_uboone_CC1pi_Algorithms
           LIB_LIBRARIES
                    uboonecode_uboone_UBXSec_DataTypes
+                   uboonecode_uboone_UBXSec_Algorithms
 	  	   larcore_Geometry
 		   larcore_Geometry_Geometry_service
 		   uboone_AnalysisTree_MCTruth
@@ -50,6 +51,7 @@ art_make( BASENAME_ONLY
 
           MODULE_LIBRARIES
                    uboonecode_uboone_UBXSec_DataTypes
+                   uboonecode_uboone_UBXSec_Algorithms
 		   uboonecode_uboone_CC1pi_Algorithms
 		   larpandora_LArPandoraInterface
                    #                   larpandora_LArPandoraContent

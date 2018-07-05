@@ -51,6 +51,7 @@
 #include "uboone/CC1pi/Algorithms/FVCheck.h"
 #include "uboone/CC1pi/Algorithms/PDGEnums.h"
 #include "uboone/CC1pi/Algorithms/InputTags.h"
+#include "uboone/CC1pi/Algorithms/ShowerRejection.h"
 
 struct cc1pianavars{
 
@@ -82,6 +83,9 @@ struct cc1pianavars{
   std::vector<std::vector<double>> TPCObj_PFP_track_AngleBetweenTracks;
   std::vector<std::vector<std::vector<double>>> TPCObj_PFP_track_trajPoint_Position;
   std::vector<std::vector<std::vector<double>>> TPCObj_PFP_track_trajPoint_Direction;
+  std::vector<double> TPCObj_PFP_track_residual_mean;
+  std::vector<double> TPCObj_PFP_track_residual_std;
+  std::vector<double> TPCObj_PFP_track_perc_used_hits;
 
   // Shower variables
   std::vector<double> TPCObj_PFP_shower_length;

@@ -32,6 +32,7 @@
 #include "uboone/CC1pi/Algorithms/TwoTrackCheck.h"
 #include "uboone/CC1pi/Algorithms/FVCheck.h"
 #include "uboone/CC1pi/Algorithms/InputTags.h"
+#include "uboone/CC1pi/Algorithms/ShowerRejection.h"
 
 class CC1piSelection;
 
@@ -143,8 +144,11 @@ void CC1piSelection::produce(art::Event & evt)
    bool PassesMarcosSelec = selection_v.at(0)->GetSelectionStatus();
    _CC1picutflow = selection_v.at(0)->GetCutFlowStatus();
 
-   std::map<std::string,bool> TwoTrackcutflow = TwoTrackCheck(evt, CC1piInputTags);
-   _CC1picutflow.insert(TwoTrackcutflow.begin(), TwoTrackcutflow.end());
+   std::map<std::string,bool> TwoTrack_cutflow = TwoTrackCheck(evt, CC1piInputTags);
+   _CC1picutflow.insert(TwoTrack_cutflow.begin(), TwoTrack_cutflow.end());
+
+   std::map<std::string,bool> ShowerRejection_cutflow = ShowerRejection(evt, CC1piInputTags);
+   _CC1picutflow.insert(ShowerRejection_cutflow.begin(), ShowerRejection_cutflow.end());
 
    // Check if "passing" events still pass the full FV cut
    if (PassesMarcosSelec) {
@@ -157,8 +161,10 @@ void CC1piSelection::produce(art::Event & evt)
    if (PassesMarcosSelec) _CC1picutflow["MarcosSelec"] = true;
    else _CC1picutflow["MarcosSelec"] = false;
 
-   if(_CC1picutflow["MarcosSelec"] == true && _CC1picutflow["ExactlyTwoMIPCut"] == true) _CC1picutflow["CC1piSelec"] = true;
-   else _CC1picutflow["CC1piSelec"] = false;
+   _CC1picutflow["CC1piSelec"] = true;
+   for (std::map<std::string,bool>::iterator iter=_CC1picutflow.begin(); iter!=_CC1picutflow.end(); ++iter) {
+      if(iter->second == false) _CC1picutflow["CC1piSelec"] = false;
+   }
 
    // ----- Almost at the end: fill tree ------ //
 
