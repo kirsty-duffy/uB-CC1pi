@@ -5,7 +5,12 @@ std::vector<std::vector<double>> GetCutvarstoplot(treevars *vars){
    std::vector<std::vector<double>> varstoplot = {
       *(vars->TPCObj_PFP_Lmipoverp),
       *(vars->TPCObj_PFP_Lmumipovermumipp),
-      *(vars->TPCObj_PFP_BrokenTrackAngle)
+      *(vars->TPCObj_PFP_BrokenTrackAngle),
+      *(vars->TPCObj_PFP_track_residual_mean),
+      *(vars->TPCObj_PFP_track_residual_mean),
+      *(vars->TPCObj_PFP_track_residual_std),
+      *(vars->TPCObj_PFP_track_residual_std),
+      *(vars->TPCObj_PFP_track_perc_used_hits)
    };
    return varstoplot;
 };
@@ -13,30 +18,74 @@ std::vector<std::vector<double>> GetCutvarstoplot(treevars *vars){
 
 // Binning (nbins, binlow, binhigh) in the same order as the vector above
 std::vector<std::vector<double>> bins = {
-   {20,0.3,3},    // Lmipoverp
-   {20,0.5,0.9},  // Lmumipovermumipp
-   {20,1,3.15} // BrokenTrackAngle
+   {25,0.3,3},    // Lmipoverp
+   {25,0.5,0.9},  // Lmumipovermumipp
+   {25,2.8,3.15},   // BrokenTrackAngle
+   {25,0,2.8}, // residual_mean_up
+   {25,-2.8,0}, // residual_mean_down
+   {25,0,2},   // residual_std_up
+   {25,0,3},   // residual_std_down
+   {25,0,1}       // perc_used_hits
 };
 
 // Histogram titles in the same order as the vector above
 std::vector<std::string> histtitles = {
    ";(L_{MIP})/(L_{p});",
    ";(L_{#mu}+L_{MIP})/(L_{#mu}+L_{MIP}+L_{p});",
-   ";Angle [rad];"
+   ";Angle [rad];",
+   ";<r_{i}>;",
+   ";<r_{i}>;",
+   ";#sigma_{r_{i}};",
+   ";#sigma_{r_{i}};",
+   ";Fraction of used hits in cluster;"
 };
 
 // What to call saved plots in the same order as the vector above
 std::vector<std::string> histnames = {
    "effpur_Lmipoverp",
    "effpur_Lmumipovermumipp",
-   "effpur_BrokenTrackAngle"
+   "effpur_BrokenTrackAngle",
+   "effpur_residual_mean_up",
+   "effpur_residual_mean_down",
+   "effpur_residual_std_up",
+   "effpur_residual_std_down",
+   "effpur_perc_used_hits"
 };
 
-// For efficiency/purity we need to know whether we want to be higher or lower than the variable
-std::vector<bool> Cutlow = {
+// For efficiency/purity we need to know whether we want to be keep tracks that have values above or below the cut value
+std::vector<bool> KeepBelowCut = {
    false, // Lmipoverp
    false, // Lmumipovermumipp
-   true   // BrokenTrackAngle
+   true,  // BrokenTrackAngle
+   true,  // residual_mean_up
+   false, // residual_mean_down
+   true,  // residual_std_up
+   false, // residual_std_down
+   false  // perc_used_hits
+};
+
+// Do we want to consider just the direct daughters of the neutrino?
+std::vector<bool> OnlyDaughters = {
+   true,  // Lmipoverp
+   true,  // Lmumipovermumipp
+   false, // BrokenTrackAngle
+   true,  // residual_mean_up
+   true,  // residual_mean_down
+   true,  // residual_std_up
+   true,  // residual_std_down
+   true   // perc_used_hits
+};
+
+// How many tracks do we want to pass the cut? (Options are atleasttwo, exactlytwo, all)
+std::vector<std::string> TracksNeeded = {
+   "exactlytwo",  // Lmipoverp
+   "exactlytwo",  // Lmumipovermumipp
+   "all", // BrokenTrackAngle
+   "atleasttwo",  // residual_mean_up
+   "atleasttwo",  // residual_mean_down
+   "atleasttwo",  // residual_std_up
+   "atleasttwo",  // residual_std_down
+   "atleasttwo"   // perc_used_hits
 };
 
 // ---------------------------------------------------- //
@@ -64,7 +113,9 @@ void MakeCutEfficiencyPlots(std::string mcfile){
    std::cout << "bins.size() = " << bins.size() << std::endl;
    std::cout << "histtitles.size() = " << histtitles.size() << std::endl;
    std::cout << "histnames.size() = " << histnames.size() << std::endl;
-   std::cout << "Cutlow.size() = " << Cutlow.size() << std::endl;
+   std::cout << "KeepBelowCut.size() = " << KeepBelowCut.size() << std::endl;
+   std::cout << "OnlyDaughters.size() = " << OnlyDaughters.size() << std::endl;
+   std::cout << "TracksNeeded.size() = " << TracksNeeded.size() << std::endl;
 
    // ----------------- MC
 
@@ -82,12 +133,11 @@ void MakeCutEfficiencyPlots(std::string mcfile){
       std::vector<std::vector<double>> Cutvarstoplot = GetCutvarstoplot(&mc_vars);
 
       for (size_t i_h = 0; i_h < nplots; i_h++){
-         FillCC1piEffPurHist(mc_hists_cc1pieffpur[i_h],Cutvarstoplot.at(i_h),mc_vars.Truth_topology,Cutlow.at(i_h),mc_vars.Marco_selected,*mc_vars.TPCObj_PFP_isDaughter);
+         FillCC1piEffPurHist(mc_hists_cc1pieffpur[i_h],Cutvarstoplot.at(i_h),mc_vars.Truth_topology,KeepBelowCut.at(i_h),mc_vars.Marco_selected,*mc_vars.TPCObj_PFP_isDaughter, OnlyDaughters.at(i_h), TracksNeeded.at(i_h));
       }
 
 
    } // end loop over entries in tree
-
 
    // -------------------- Now make all the plots
 
@@ -97,14 +147,14 @@ void MakeCutEfficiencyPlots(std::string mcfile){
       DrawCC1piMCEffPur(c1, mc_hists_cc1pieffpur[i_h]);
       std::string printname = std::string(histnames[i_h]+".png");
       c1->Print(std::string(std::string("CC1pi_")+printname).c_str());
-
+/*
       mc_hists_cc1pieffpur[i_h]->h_cc1pi_sel->Draw();
       c1->Print(std::string(std::string("CC1pi_sel_")+printname).c_str());
       mc_hists_cc1pieffpur[i_h]->h_cc1pi_notsel->Draw();
       c1->Print(std::string(std::string("CC1pi_notsel_")+printname).c_str());
       mc_hists_cc1pieffpur[i_h]->h_bg_sel->Draw();
       c1->Print(std::string(std::string("Background_sel_")+printname).c_str());
-
+*/
       delete c1;
    }
 

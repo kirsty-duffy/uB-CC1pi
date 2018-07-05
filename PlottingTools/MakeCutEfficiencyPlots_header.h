@@ -7,6 +7,7 @@
 #include "THStack.h"
 #include "TStyle.h"
 #include "TFile.h"
+#include "TVector3.h"
 #include <vector>
 
 struct treevars{
@@ -25,6 +26,9 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_track_phi = nullptr;
    std::vector<std::vector<double>> *TPCObj_PFP_track_start = nullptr;
    std::vector<std::vector<double>> *TPCObj_PFP_track_end = nullptr;
+   std::vector<double> *TPCObj_PFP_track_residual_mean = nullptr;
+   std::vector<double> *TPCObj_PFP_track_residual_std = nullptr;
+   std::vector<double> *TPCObj_PFP_track_perc_used_hits = nullptr;
 
    // These are derived quantities - derived from the values above in Calcvars
    std::vector<double> *TPCObj_PFP_LH_p;
@@ -66,6 +70,12 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("TPCObj_PFP_track_start", &(varstoset->TPCObj_PFP_track_start));
    intree->SetBranchStatus("TPCObj_PFP_track_end",1);
    intree->SetBranchAddress("TPCObj_PFP_track_end", &(varstoset->TPCObj_PFP_track_end));
+   intree->SetBranchStatus("TPCObj_PFP_track_residual_mean",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_residual_mean", &(varstoset->TPCObj_PFP_track_residual_mean));
+   intree->SetBranchStatus("TPCObj_PFP_track_residual_std",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_residual_std", &(varstoset->TPCObj_PFP_track_residual_std));
+   intree->SetBranchStatus("TPCObj_PFP_track_perc_used_hits",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_perc_used_hits", &(varstoset->TPCObj_PFP_track_perc_used_hits));
 }
 
 void Calcvars(treevars *vars){
@@ -96,7 +106,11 @@ void Calcvars(treevars *vars){
 
       // Angle between tracks (using theta and phi)...
       int track1 = i_track;
+
+      // We want non-tracks to get bogus values (-9999)
+      // But we want tracks that just don't have other tracks close by to get 0
       double maxangle = 0;
+      if(vars->TPCObj_PFP_track_theta->at(track1) == -9999) maxangle = -9999;
 
       for (int track2 = track1+1; track2 < vecsize; track2++) {
          if(vars->TPCObj_PFP_track_theta->at(track1) == -9999) continue;
@@ -188,32 +202,49 @@ struct histCC1piselEffPur{
    }
 };
 
-void FillCC1piEffPurHist(histCC1piselEffPur *hists, std::vector<double> value_vec, NuIntTopology topology, bool Cutlow, bool Marco_selected, std::vector<bool> TPCObj_PFP_isDaughter){
+void FillCC1piEffPurHist(histCC1piselEffPur *hists, std::vector<double> value_vec, NuIntTopology topology, bool KeepBelowCut, bool Marco_selected, std::vector<bool> TPCObj_PFP_isDaughter, bool OnlyDaughters, std::string TracksNeeded){
    // Loop through all bins in the histograms, and evaluate a cut value at the centre of each bin
    for (int i_bin=1; i_bin < hists->h_cc1pi_sel->GetXaxis()->GetNbins()+1; i_bin++){
       double cutval = hists->h_cc1pi_sel->GetXaxis()->GetBinCenter(i_bin);
 
       // value_vec is a vector corresponding to the TPCObject. It has one entry per track in the TPCObject.
+
       int n_tracks = 0;
+      int n_failed = 0;
       for (size_t i_track=0; i_track<value_vec.size(); i_track++){
          double value = value_vec.at(i_track);
 
-         // Ignore PFPs that failed to reco as tracks
-         if (value == -9999 || value == -999) continue;
+         // Ignore PFPs that failed to reco as tracks. The neutrino PFP will also have a bogus value.
+         if (value == -9999 || value == -999) {
+            n_failed++;
+            continue;
+         }
 
-         // Only conisder direct daughters of the neutrino
-         if (!TPCObj_PFP_isDaughter.at(i_track)) continue;
+         // (Optionally) only conisder direct daughters of the neutrino
+         if (OnlyDaughters && !TPCObj_PFP_isDaughter.at(i_track)) continue;
 
-         if (Cutlow && value < cutval){
+         if (KeepBelowCut && value < cutval){
             n_tracks++;
          }
-         else if (!Cutlow && value > cutval){
+         else if (!KeepBelowCut && value > cutval){
             n_tracks++;
          }
       } // end loop over tracks in TPCObject
 
-      // If event still has at least 2 tracks and passes the CC inclusive selection, it is selected. Fill that into the relevant histograms
-      if (n_tracks >= 2 && Marco_selected){
+      // Throw away events that failed the CC inclusive selection or that have PFPs that failed to reco as tracks.
+      // Then check if the correct number of tracks pass the cut, given the chosen options
+      bool isSelected = false;
+      if(n_failed < 2 && Marco_selected) { // The neutrino PFP will look "failed", so we expect every event to have 1
+         if(TracksNeeded == "atleasttwo" && n_tracks >= 2) isSelected = true;
+         else if (TracksNeeded == "exactlytwo" && n_tracks == 2) isSelected = true;
+         else if (TracksNeeded == "all") {
+            if (OnlyDaughters && n_tracks == std::count(TPCObj_PFP_isDaughter.begin(),TPCObj_PFP_isDaughter.end(),true)) isSelected = true;
+            else if(!OnlyDaughters && n_tracks == value_vec.size()-1) isSelected = true; // Again, 1 less because of the neutrino
+         }
+      }
+
+      // Fill selection info into the relevant histograms
+      if (isSelected){
          if (topology == kCC1piplus0p || topology == kCC1piplus1p || topology == kCC1piplusNp){
             hists->h_cc1pi_sel->Fill(cutval);
          }
@@ -276,7 +307,7 @@ void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists){
 
    heff->GetYaxis()->SetRangeUser(0,1);
 
-   //gStyle->SetOptStat(0); // No stats box
+   gStyle->SetOptStat(0); // No stats box
 
    c->cd();
    heff->Draw("p");
