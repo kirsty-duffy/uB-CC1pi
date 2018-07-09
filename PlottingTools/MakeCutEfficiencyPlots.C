@@ -88,6 +88,18 @@ std::vector<std::string> TracksNeeded = {
    "atleasttwo"   // perc_used_hits
 };
 
+// Cut values for N-1 plot
+std::vector<double> CutValues = {
+   1.,  // Lmipoverp
+   1.,  // Lmumipovermumipp
+   1., // BrokenTrackAngle
+   1.,  // residual_mean_up
+   1.,  // residual_mean_down
+   1.,  // residual_std_up
+   1.,  // residual_std_down
+   1.   // perc_used_hits
+};
+
 // ---------------------------------------------------- //
 //  Now the function starts
 // ---------------------------------------------------- //
@@ -116,6 +128,7 @@ void MakeCutEfficiencyPlots(std::string mcfile){
    std::cout << "KeepBelowCut.size() = " << KeepBelowCut.size() << std::endl;
    std::cout << "OnlyDaughters.size() = " << OnlyDaughters.size() << std::endl;
    std::cout << "TracksNeeded.size() = " << TracksNeeded.size() << std::endl;
+   std::cout << "CutValues.size() = " << CutValues.size() << std::endl;
 
    // ----------------- MC
 
@@ -124,6 +137,10 @@ void MakeCutEfficiencyPlots(std::string mcfile){
    histCC1piselEffPur *mc_hists_cc1pieffpur[nplots];
    for (size_t i_h=0; i_h<nplots; i_h++){
       mc_hists_cc1pieffpur[i_h] = new histCC1piselEffPur(std::string("hCC1pieffpur_")+histnames.at(i_h),histtitles.at(i_h),bins.at(i_h).at(0),bins.at(i_h).at(1),bins.at(i_h).at(2));
+   }
+   histCC1piselEffPur *Nminus1plots = new histCC1piselEffPur("hCC1pi_nminus1","N-1 plot;;Efficiency, purity",nplots+1,0,nplots+1);
+   for (size_t i_bin=1; i_bin < nplots+1; i_bin++){
+      Nminus1plots->SetBinLabel(i_bin,histtitles.at(i_bin-1));
    }
 
    // Loop through MC tree and fill plots
@@ -135,6 +152,10 @@ void MakeCutEfficiencyPlots(std::string mcfile){
       for (size_t i_h = 0; i_h < nplots; i_h++){
          FillCC1piEffPurHist(mc_hists_cc1pieffpur[i_h],Cutvarstoplot.at(i_h),mc_vars.Truth_topology,KeepBelowCut.at(i_h),mc_vars.Marco_selected,*mc_vars.TPCObj_PFP_isDaughter, OnlyDaughters.at(i_h), TracksNeeded.at(i_h));
       }
+
+      // Now fill histograms for N-1 plots
+      FillNminus1EffPurHist(Nminus1plots,Cutvarstoplot,mc_vars.Truth_topology,KeepBelowCut,mc_vars.Marco_selected,*(mc_vars.TPCObj_PFP_isDaughter),OnlyDaughters,TracksNeeded,CutValues);
+
 
 
    } // end loop over entries in tree
@@ -157,5 +178,9 @@ void MakeCutEfficiencyPlots(std::string mcfile){
 */
       delete c1;
    }
+   TCanvas *c1 = new TCanvas("c1","c1");
+   DrawCC1piMCEffPur(c1, Nminus1plots);
+   c1->Print("Nminus1plots.png");
+   delete c1;
 
 }

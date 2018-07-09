@@ -200,48 +200,59 @@ struct histCC1piselEffPur{
       // l->AddEntry(h_p,"True cc1#pi^{+}","f");
       // l->AddEntry(h_mu,"True other","f");
    }
+
+   void SetBinLabel(int ibin, std::string label){
+      h_cc1pi_sel -> GetXaxis() -> SetBinLabel(ibin, label.c_str());
+      h_bg_sel -> GetXaxis() -> SetBinLabel(ibin, label.c_str());
+      h_cc1pi_notsel -> GetXaxis() -> SetBinLabel(ibin, label.c_str());
+   }
 };
+
+bool IsEventSelected(double cutval, std::vector<double> value_vec, bool KeepBelowCut, bool Marco_selected, std::vector<bool> TPCObj_PFP_isDaughter, bool OnlyDaughters, std::string TracksNeeded){
+   // value_vec is a vector corresponding to the TPCObject. It has one entry per track in the TPCObject.
+
+   int n_tracks = 0;
+   int n_failed = 0;
+   for (size_t i_track=0; i_track<value_vec.size(); i_track++){
+      double value = value_vec.at(i_track);
+
+      // Ignore PFPs that failed to reco as tracks. The neutrino PFP will also have a bogus value.
+      if (value == -9999 || value == -999) {
+         n_failed++;
+         continue;
+      }
+
+      // (Optionally) only conisder direct daughters of the neutrino
+      if (OnlyDaughters && !TPCObj_PFP_isDaughter.at(i_track)) continue;
+
+      if (KeepBelowCut && value < cutval){
+         n_tracks++;
+      }
+      else if (!KeepBelowCut && value > cutval){
+         n_tracks++;
+      }
+   } // end loop over tracks in TPCObject
+
+   // Throw away events that failed the CC inclusive selection or that have PFPs that failed to reco as tracks.
+   // Then check if the correct number of tracks pass the cut, given the chosen options
+   bool isSelected = false;
+   if(n_failed < 2 && Marco_selected) { // The neutrino PFP will look "failed", so we expect every event to have 1
+      if(TracksNeeded == "atleasttwo" && n_tracks >= 2) isSelected = true;
+      else if (TracksNeeded == "exactlytwo" && n_tracks == 2) isSelected = true;
+      else if (TracksNeeded == "all") {
+         if (OnlyDaughters && n_tracks == std::count(TPCObj_PFP_isDaughter.begin(),TPCObj_PFP_isDaughter.end(),true)) isSelected = true;
+         else if(!OnlyDaughters && n_tracks == value_vec.size()-1) isSelected = true; // Again, 1 less because of the neutrino
+      }
+   }
+   return isSelected;
+}
 
 void FillCC1piEffPurHist(histCC1piselEffPur *hists, std::vector<double> value_vec, NuIntTopology topology, bool KeepBelowCut, bool Marco_selected, std::vector<bool> TPCObj_PFP_isDaughter, bool OnlyDaughters, std::string TracksNeeded){
    // Loop through all bins in the histograms, and evaluate a cut value at the centre of each bin
    for (int i_bin=1; i_bin < hists->h_cc1pi_sel->GetXaxis()->GetNbins()+1; i_bin++){
       double cutval = hists->h_cc1pi_sel->GetXaxis()->GetBinCenter(i_bin);
 
-      // value_vec is a vector corresponding to the TPCObject. It has one entry per track in the TPCObject.
-
-      int n_tracks = 0;
-      int n_failed = 0;
-      for (size_t i_track=0; i_track<value_vec.size(); i_track++){
-         double value = value_vec.at(i_track);
-
-         // Ignore PFPs that failed to reco as tracks. The neutrino PFP will also have a bogus value.
-         if (value == -9999 || value == -999) {
-            n_failed++;
-            continue;
-         }
-
-         // (Optionally) only conisder direct daughters of the neutrino
-         if (OnlyDaughters && !TPCObj_PFP_isDaughter.at(i_track)) continue;
-
-         if (KeepBelowCut && value < cutval){
-            n_tracks++;
-         }
-         else if (!KeepBelowCut && value > cutval){
-            n_tracks++;
-         }
-      } // end loop over tracks in TPCObject
-
-      // Throw away events that failed the CC inclusive selection or that have PFPs that failed to reco as tracks.
-      // Then check if the correct number of tracks pass the cut, given the chosen options
-      bool isSelected = false;
-      if(n_failed < 2 && Marco_selected) { // The neutrino PFP will look "failed", so we expect every event to have 1
-         if(TracksNeeded == "atleasttwo" && n_tracks >= 2) isSelected = true;
-         else if (TracksNeeded == "exactlytwo" && n_tracks == 2) isSelected = true;
-         else if (TracksNeeded == "all") {
-            if (OnlyDaughters && n_tracks == std::count(TPCObj_PFP_isDaughter.begin(),TPCObj_PFP_isDaughter.end(),true)) isSelected = true;
-            else if(!OnlyDaughters && n_tracks == value_vec.size()-1) isSelected = true; // Again, 1 less because of the neutrino
-         }
-      }
+      bool isSelected = IsEventSelected(cutval, value_vec, KeepBelowCut, Marco_selected, TPCObj_PFP_isDaughter, OnlyDaughters, TracksNeeded);
 
       // Fill selection info into the relevant histograms
       if (isSelected){
@@ -261,6 +272,50 @@ void FillCC1piEffPurHist(histCC1piselEffPur *hists, std::vector<double> value_ve
          // }
       }
    } // End loop over bins in the histograms
+}
+
+void FillNminus1EffPurHist(histCC1piselEffPur *hists, std::vector<std::vector<double>> value_vec, NuIntTopology topology, std::vector<bool> KeepBelowCut, bool Marco_selected, std::vector<bool> TPCObj_PFP_isDaughter, std::vector<bool> OnlyDaughters, std::vector<std::string> TracksNeeded, std::vector<double> cutvalues){
+   // Loop through all bins in the histogram and evaluate the cuts
+   // Each bin represents one cut (note: that means that for a given bin, we apply all cuts EXCEPT that one), with the final bin showing what we get when we apply all cuts.
+   // "Applying" cuts means using the cut values given in the vector
+   for (int i_bin=1; i_bin < hists->h_cc1pi_sel->GetXaxis()->GetNbins()+1; i_bin++){
+      // Now loop over cuts and apply them
+      bool isSelected = true;
+      for (int i_cut=0; i_cut < cutvalues.size(); i_cut++){
+         // Skip cut associated to current bin
+         // For final bin, it will not be equal to i_cut for any cut, so it should just evaluate all of them
+         if (i_cut+1 == i_bin) {
+            std::cout << "skipping cut" << std::endl;
+            continue;
+         }
+         // Evaluate whether event passes this cut. If it doesn't, set isSelected to false for the event
+         bool isSelected_i = IsEventSelected(cutvalues.at(i_cut), value_vec.at(i_cut), KeepBelowCut.at(i_cut), Marco_selected, TPCObj_PFP_isDaughter, OnlyDaughters.at(i_cut), TracksNeeded.at(i_cut));
+         if (isSelected_i == false) isSelected = false;
+
+         std::cout << "bin: " << i_bin << ", cut: " << i_cut << "isSelected = " << isSelected << std::endl;
+      } // end loop over cuts
+
+      // Now fill selection info into the relevant histograms
+      double fillval = hists->h_cc1pi_sel->GetBinCenter(i_bin);
+      if (isSelected){
+         if (topology == kCC1piplus0p || topology == kCC1piplus1p || topology == kCC1piplusNp){
+            hists->h_cc1pi_sel->Fill(fillval);
+         }
+         else {
+            hists->h_bg_sel->Fill(fillval);
+         }
+      }
+      else { // if not selected
+         if (topology == kCC1piplus0p || topology == kCC1piplus1p || topology == kCC1piplusNp){
+            hists->h_cc1pi_notsel->Fill(fillval);
+         }
+         // else {
+         //   hists->h_bg_notsel->Fill(fillval);
+         // }
+      }
+
+   } // end loop over bins (i.e. cuts)
+
 }
 
 void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists){
