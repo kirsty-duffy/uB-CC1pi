@@ -29,6 +29,7 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_track_residual_mean = nullptr;
    std::vector<double> *TPCObj_PFP_track_residual_std = nullptr;
    std::vector<double> *TPCObj_PFP_track_perc_used_hits = nullptr;
+   std::vector<double> *TPCObj_reco_vtx = nullptr;
 
    // These are derived quantities - derived from the values above in Calcvars
    std::vector<double> *TPCObj_PFP_LH_p;
@@ -38,6 +39,7 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_Lmipoverp;
    std::vector<double> *TPCObj_PFP_Lmumipovermumipp;
    std::vector<double> *TPCObj_PFP_BrokenTrackAngle;
+   std::vector<double> *TPCObj_PFP_VtxTrackDist;
 };
 
 void settreevars(TTree *intree, treevars *varstoset){
@@ -76,6 +78,8 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("TPCObj_PFP_track_residual_std", &(varstoset->TPCObj_PFP_track_residual_std));
    intree->SetBranchStatus("TPCObj_PFP_track_perc_used_hits",1);
    intree->SetBranchAddress("TPCObj_PFP_track_perc_used_hits", &(varstoset->TPCObj_PFP_track_perc_used_hits));
+   intree->SetBranchStatus("TPCObj_reco_vtx",1);
+   intree->SetBranchAddress("TPCObj_reco_vtx", &(varstoset->TPCObj_reco_vtx));
 }
 
 void Calcvars(treevars *vars){
@@ -90,6 +94,7 @@ void Calcvars(treevars *vars){
    vars->TPCObj_PFP_Lmipoverp = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_Lmumipovermumipp = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_BrokenTrackAngle = new std::vector<double>(vecsize);
+   vars->TPCObj_PFP_VtxTrackDist = new std::vector<double>(vecsize);
 
    // Just use collection plane for now
    int i_pl = 2;
@@ -97,12 +102,29 @@ void Calcvars(treevars *vars){
    // Now calculate the values for all variables
    for (int i_track=0; i_track < vecsize; i_track++){
 
+      // The neutrino and any other PFPs that didn't get reco'd as tracks should get bogus values
+      if(vars->TPCObj_PFP_track_theta->at(i_track) == -9999) {
+
+         vars->TPCObj_PFP_LH_p->at(i_track) = -9999;
+         vars->TPCObj_PFP_LH_mu->at(i_track) = -9999;
+         vars->TPCObj_PFP_LH_pi->at(i_track) = -9999;
+         vars->TPCObj_PFP_LH_mip->at(i_track) = -9999;
+         vars->TPCObj_PFP_Lmipoverp->at(i_track) = -9999;
+         vars->TPCObj_PFP_Lmumipovermumipp->at(i_track) = -9999;
+         vars->TPCObj_PFP_VtxTrackDist->at(i_track) = -9999;
+         vars->TPCObj_PFP_BrokenTrackAngle->at(i_track) = -9999;
+
+         continue;
+      }
+
+
       vars->TPCObj_PFP_LH_p->at(i_track) = std::max(vars->TPCObj_PFP_LH_fwd_p->at(i_track).at(i_pl), vars->TPCObj_PFP_LH_bwd_p->at(i_track).at(i_pl));
       vars->TPCObj_PFP_LH_mu->at(i_track) = std::max(vars->TPCObj_PFP_LH_fwd_mu->at(i_track).at(i_pl), vars->TPCObj_PFP_LH_bwd_mu->at(i_track).at(i_pl));
       vars->TPCObj_PFP_LH_pi->at(i_track) = std::max(vars->TPCObj_PFP_LH_fwd_pi->at(i_track).at(i_pl), vars->TPCObj_PFP_LH_bwd_pi->at(i_track).at(i_pl));
       vars->TPCObj_PFP_LH_mip->at(i_track) = vars->TPCObj_PFP_LH_MIP->at(i_track).at(i_pl);
       vars->TPCObj_PFP_Lmipoverp->at(i_track) = vars->TPCObj_PFP_LH_mip->at(i_track) / vars->TPCObj_PFP_LH_p->at(i_track);
       vars->TPCObj_PFP_Lmumipovermumipp->at(i_track) = (vars->TPCObj_PFP_LH_mu->at(i_track)+vars->TPCObj_PFP_LH_mip->at(i_track))/(vars->TPCObj_PFP_LH_mu->at(i_track)+vars->TPCObj_PFP_LH_mip->at(i_track)+vars->TPCObj_PFP_LH_p->at(i_track));
+      vars->TPCObj_PFP_VtxTrackDist->at(i_track) = std::hypot(std::hypot(vars->TPCObj_reco_vtx->at(0) - vars->TPCObj_PFP_track_start->at(i_track).at(0), vars->TPCObj_reco_vtx->at(1) - vars->TPCObj_PFP_track_start->at(i_track).at(1)), vars->TPCObj_reco_vtx->at(2) - vars->TPCObj_PFP_track_start->at(i_track).at(2));
 
       // Angle between tracks (using theta and phi)...
       int track1 = i_track;
@@ -110,7 +132,6 @@ void Calcvars(treevars *vars){
       // We want non-tracks to get bogus values (-9999)
       // But we want tracks that just don't have other tracks close by to get 0
       double maxangle = 0;
-      if(vars->TPCObj_PFP_track_theta->at(track1) == -9999) maxangle = -9999;
 
       for (int track2 = track1+1; track2 < vecsize; track2++) {
          if(vars->TPCObj_PFP_track_theta->at(track1) == -9999) continue;
@@ -152,6 +173,7 @@ void Calcvars(treevars *vars){
       }
 
       vars->TPCObj_PFP_BrokenTrackAngle->at(i_track) = maxangle;
+
    }
 }
 
@@ -169,6 +191,8 @@ void Clearvars(treevars *vars){
    delete vars->TPCObj_PFP_Lmipoverp;
    delete vars->TPCObj_PFP_Lmumipovermumipp;
    delete vars->TPCObj_PFP_BrokenTrackAngle;
+   delete vars->TPCObj_PFP_VtxTrackDist;
+
 }
 
 

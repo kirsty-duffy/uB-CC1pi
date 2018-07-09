@@ -36,3 +36,7 @@
 
 #Miscellaneous directory
 ignore/
+
+#plots
+*.png
+*.eps

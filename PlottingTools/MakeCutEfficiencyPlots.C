@@ -10,7 +10,8 @@ std::vector<std::vector<double>> GetCutvarstoplot(treevars *vars){
       *(vars->TPCObj_PFP_track_residual_mean),
       *(vars->TPCObj_PFP_track_residual_std),
       *(vars->TPCObj_PFP_track_residual_std),
-      *(vars->TPCObj_PFP_track_perc_used_hits)
+      *(vars->TPCObj_PFP_track_perc_used_hits),
+      *(vars->TPCObj_PFP_VtxTrackDist)
    };
    return varstoplot;
 };
@@ -20,12 +21,13 @@ std::vector<std::vector<double>> GetCutvarstoplot(treevars *vars){
 std::vector<std::vector<double>> bins = {
    {25,0.3,3},    // Lmipoverp
    {25,0.5,0.9},  // Lmumipovermumipp
-   {25,2.8,3.15},   // BrokenTrackAngle
-   {25,0,2.8}, // residual_mean_up
-   {25,-2.8,0}, // residual_mean_down
-   {25,0,2},   // residual_std_up
-   {25,0,3},   // residual_std_down
-   {25,0,1}       // perc_used_hits
+   {25,2.8,3.15}, // BrokenTrackAngle
+   {25,0,2.8},    // residual_mean_up
+   {25,-2.8,0},   // residual_mean_down
+   {25,0,2},      // residual_std_up
+   {25,0,3},      // residual_std_down
+   {25,0,1},      // perc_used_hits
+   {25,0,20}      // VtxTrackDist
 };
 
 // Histogram titles in the same order as the vector above
@@ -37,7 +39,8 @@ std::vector<std::string> histtitles = {
    ";<r_{i}>;",
    ";#sigma_{r_{i}};",
    ";#sigma_{r_{i}};",
-   ";Fraction of used hits in cluster;"
+   ";Fraction of used hits in cluster;",
+   ";Distance from reconstructed vertex;"
 };
 
 // What to call saved plots in the same order as the vector above
@@ -49,7 +52,8 @@ std::vector<std::string> histnames = {
    "effpur_residual_mean_down",
    "effpur_residual_std_up",
    "effpur_residual_std_down",
-   "effpur_perc_used_hits"
+   "effpur_perc_used_hits",
+   "effpur_VtxTrackDist"
 };
 
 // For efficiency/purity we need to know whether we want to be keep tracks that have values above or below the cut value
@@ -61,7 +65,8 @@ std::vector<bool> KeepBelowCut = {
    false, // residual_mean_down
    true,  // residual_std_up
    false, // residual_std_down
-   false  // perc_used_hits
+   false, // perc_used_hits
+   true   // VtxTrackDist
 };
 
 // Do we want to consider just the direct daughters of the neutrino?
@@ -73,19 +78,22 @@ std::vector<bool> OnlyDaughters = {
    true,  // residual_mean_down
    true,  // residual_std_up
    true,  // residual_std_down
-   true   // perc_used_hits
+   true,  // perc_used_hits
+   false  // VtxTrackDist
 };
 
 // How many tracks do we want to pass the cut? (Options are atleasttwo, exactlytwo, all)
 std::vector<std::string> TracksNeeded = {
    "exactlytwo",  // Lmipoverp
    "exactlytwo",  // Lmumipovermumipp
-   "all", // BrokenTrackAngle
+   "all",         // BrokenTrackAngle
    "atleasttwo",  // residual_mean_up
    "atleasttwo",  // residual_mean_down
    "atleasttwo",  // residual_std_up
    "atleasttwo",  // residual_std_down
-   "atleasttwo"   // perc_used_hits
+   "atleasttwo",  // perc_used_hits
+   "atleasttwo"   // VtxTrackDist
+
 };
 
 // Cut values for N-1 plot
