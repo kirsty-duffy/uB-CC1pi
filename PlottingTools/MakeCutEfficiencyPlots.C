@@ -11,7 +11,8 @@ std::vector<std::vector<double>> GetCutvarstoplot(treevars *vars){
       *(vars->TPCObj_PFP_track_residual_std),
       *(vars->TPCObj_PFP_track_residual_std),
       *(vars->TPCObj_PFP_track_perc_used_hits),
-      *(vars->TPCObj_PFP_VtxTrackDist)
+      *(vars->TPCObj_PFP_VtxTrackDist),
+      *(vars->TPCObj_PFP_isContained_double)
    };
    return varstoplot;
 };
@@ -24,10 +25,11 @@ std::vector<std::vector<double>> bins = {
    {100,0,3.5}, // BrokenTrackAngle
    {25,0,2.8},    // residual_mean_up
    {25,-2.8,0},   // residual_mean_down
-   {25,0,2},      // residual_std_up
-   {25,0,3},      // residual_std_down
+   {25,0,4},      // residual_std_up
+   {25,0,2},      // residual_std_down
    {25,0,1},      // perc_used_hits
-   {25,0,20}      // VtxTrackDist
+   {25,0,20},     // VtxTrackDist
+   {1,0,1}        // isContained
 };
 
 // Histogram titles in the same order as the vector above
@@ -40,7 +42,8 @@ std::vector<std::string> histtitles = {
    ";#sigma_{r_{i}};",
    ";#sigma_{r_{i}};",
    ";Fraction of used hits in cluster;",
-   ";Distance from reconstructed vertex;"
+   ";Distance from reconstructed vertex;",
+   ";isContained;"
 };
 
 // What to call saved plots in the same order as the vector above
@@ -53,7 +56,8 @@ std::vector<std::string> histnames = {
    "effpur_residual_std_up",
    "effpur_residual_std_down",
    "effpur_perc_used_hits",
-   "effpur_VtxTrackDist"
+   "effpur_VtxTrackDist",
+   "effpur_isContained"
 };
 
 // For efficiency/purity we need to know whether we want to be keep tracks that have values above or below the cut value
@@ -66,7 +70,8 @@ std::vector<bool> KeepBelowCut = {
    true,  // residual_std_up
    false, // residual_std_down
    false, // perc_used_hits
-   true   // VtxTrackDist
+   true,  // VtxTrackDist
+   false  // isContained
 };
 
 // Do we want to consider just the direct daughters of the neutrino?
@@ -79,7 +84,8 @@ std::vector<bool> OnlyDaughters = {
    true,  // residual_std_up
    true,  // residual_std_down
    true,  // perc_used_hits
-   false  // VtxTrackDist
+   false, // VtxTrackDist
+   false  // isContained
 };
 
 // How many tracks do we want to pass the cut? (Options are atleasttwo, exactlytwo, all)
@@ -92,21 +98,22 @@ std::vector<std::string> TracksNeeded = {
    "atleasttwo",  // residual_std_up
    "atleasttwo",  // residual_std_down
    "atleasttwo",  // perc_used_hits
-   "atleasttwo"   // VtxTrackDist
-
+   "atleasttwo",  // VtxTrackDist
+   "all"          // isConainted
 };
 
 // Cut values for N-1 plot
 std::vector<double> CutValues = {
-   1.,  // Lmipoverp
-   0.67,  // Lmumipovermumipp
+   1.,   // Lmipoverp
+   0.67, // Lmumipovermumipp
    3.05, // BrokenTrackAngle
    0.7,  // residual_mean_up
-   -0.7,  // residual_mean_down
+   -0.7, // residual_mean_down
    2.5,  // residual_std_up
-   0.,  // residual_std_down
-   0.7,   // perc_used_hits
-   15.  // VtxTrackDist
+   0.,   // residual_std_down
+   0.7,  // perc_used_hits
+   15.,  // VtxTrackDist
+   0.5   // isContained
 };
 
 // ---------------------------------------------------- //
@@ -162,6 +169,9 @@ void MakeCutEfficiencyPlots(std::string mcfile){
    }
    std::cout << "------" << std::endl;
 
+   histCC1piselEffPur2D *hCC1pieffpur_residual_mean = new histCC1piselEffPur2D("hCC1pieffpur_residual_mean",";residual_mean_up;residual_mean_down",std::floor(bins.at(3).at(0)/2),bins.at(3).at(1),bins.at(3).at(2),std::floor(bins.at(4).at(0)/2),bins.at(4).at(1),bins.at(4).at(2));
+   histCC1piselEffPur2D *hCC1pieffpur_residual_std = new histCC1piselEffPur2D("hCC1pieffpur_residual_std",";residual_std_up;residual_std_down",std::floor(bins.at(5).at(0)/2),bins.at(5).at(1),bins.at(5).at(2),std::floor(bins.at(6).at(0)/2),bins.at(6).at(1),bins.at(6).at(2));
+
    // Loop through MC tree and fill plots
    for (int i = 0; i < t_bnbcos->GetEntries(); i++){
       t_bnbcos->GetEntry(i);
@@ -175,7 +185,20 @@ void MakeCutEfficiencyPlots(std::string mcfile){
       // Now fill histograms for N-1 plots
       FillNminus1EffPurHist(Nminus1plots,Cutvarstoplot,mc_vars.Truth_topology,KeepBelowCut,mc_vars.Marco_selected,*(mc_vars.TPCObj_PFP_isDaughter),OnlyDaughters,TracksNeeded,CutValues);
 
+      // Fill 2D histograms
+      // Make sure the indices actually point to the correct points in the other vectors. For instance, here we have "3" and "4" corresponding to residual_mean_up and residual_mean_down.
+      // Also do the same in the histCC1piselEffPur2D delcaration above.
+      std::vector<std::vector<double>> value_vec_residual_mean = {Cutvarstoplot.at(3),Cutvarstoplot.at(4)};
+      std::vector<bool> KeepBelowCut_residual_mean = {KeepBelowCut.at(3),KeepBelowCut.at(4)};
+      std::vector<bool> OnlyDaughters_residual_mean = {OnlyDaughters.at(3),OnlyDaughters.at(4)};
+      std::vector<std::string> TracksNeeded_residual_mean = {TracksNeeded.at(3),TracksNeeded.at(4)};
+      FillCC1piEffPurHist2D(hCC1pieffpur_residual_mean,value_vec_residual_mean,mc_vars.Truth_topology,KeepBelowCut_residual_mean,mc_vars.Marco_selected,*(mc_vars.TPCObj_PFP_isDaughter),OnlyDaughters_residual_mean,TracksNeeded_residual_mean);
 
+      std::vector<std::vector<double>> value_vec_residual_std = {Cutvarstoplot.at(5),Cutvarstoplot.at(6)};
+      std::vector<bool> KeepBelowCut_residual_std = {KeepBelowCut.at(5),KeepBelowCut.at(6)};
+      std::vector<bool> OnlyDaughters_residual_std = {OnlyDaughters.at(5),OnlyDaughters.at(6)};
+      std::vector<std::string> TracksNeeded_residual_std = {TracksNeeded.at(5),TracksNeeded.at(6)};
+      FillCC1piEffPurHist2D(hCC1pieffpur_residual_std,value_vec_residual_std,mc_vars.Truth_topology,KeepBelowCut_residual_std,mc_vars.Marco_selected,*(mc_vars.TPCObj_PFP_isDaughter),OnlyDaughters_residual_std,TracksNeeded_residual_std);
 
    } // end loop over entries in tree
 
@@ -200,6 +223,12 @@ void MakeCutEfficiencyPlots(std::string mcfile){
    TCanvas *c1 = new TCanvas("c1","c1");
    DrawCC1piMCEffPur(c1, Nminus1plots,"hist",true);
    c1->Print("Nminus1plots.png");
-   delete c1;
 
+   DrawCC1piMCEffPur2D(c1, hCC1pieffpur_residual_mean);
+   c1->Print("hCC1pieffpur_residual_mean.png");
+
+   DrawCC1piMCEffPur2D(c1, hCC1pieffpur_residual_std);
+   c1->Print("hCC1pieffpur_residual_std.png");
+
+   delete c1;
 }
