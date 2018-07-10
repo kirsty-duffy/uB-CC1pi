@@ -99,14 +99,14 @@ std::vector<std::string> TracksNeeded = {
 // Cut values for N-1 plot
 std::vector<double> CutValues = {
    1.,  // Lmipoverp
-   1.,  // Lmumipovermumipp
-   1., // BrokenTrackAngle
-   1.,  // residual_mean_up
-   1.,  // residual_mean_down
-   1.,  // residual_std_up
-   1.,  // residual_std_down
-   1.,   // perc_used_hits
-   1.
+   0.67,  // Lmumipovermumipp
+   3.05, // BrokenTrackAngle
+   0.7,  // residual_mean_up
+   -0.7,  // residual_mean_down
+   2.5,  // residual_std_up
+   0.,  // residual_std_down
+   0.7,   // perc_used_hits
+   15.  // VtxTrackDist
 };
 
 // ---------------------------------------------------- //
@@ -147,10 +147,19 @@ void MakeCutEfficiencyPlots(std::string mcfile){
    for (size_t i_h=0; i_h<nplots; i_h++){
       mc_hists_cc1pieffpur[i_h] = new histCC1piselEffPur(std::string("hCC1pieffpur_")+histnames.at(i_h),histtitles.at(i_h),bins.at(i_h).at(0),bins.at(i_h).at(1),bins.at(i_h).at(2));
    }
-   histCC1piselEffPur *Nminus1plots = new histCC1piselEffPur("hCC1pi_nminus1","N-1 plot;;Efficiency, purity",nplots+1,0,nplots+1);
-   for (size_t i_bin=1; i_bin < nplots+1; i_bin++){
-      Nminus1plots->SetBinLabel(i_bin,histtitles.at(i_bin-1));
+
+   histCC1piselEffPur *Nminus1plots = new histCC1piselEffPur("hCC1pi_nminus1","N-1 plot;;Efficiency, purity",nplots+2,0,nplots+2);
+
+   std::cout << "Considering the following cuts --- " << std::endl;
+   for (size_t i_bin=1; i_bin < nplots+3; i_bin++){
+      if (i_bin==1) Nminus1plots->SetBinLabel(i_bin, "CC incl. 2 tracks");
+      else if (i_bin==2) Nminus1plots->SetBinLabel(i_bin,"All cuts");
+      else{
+         std::string tmpname = histtitles.at(i_bin-3).substr(1,histtitles.at(i_bin-3).size()-2);
+         std::cout << tmpname << std::endl; Nminus1plots->SetBinLabel(i_bin,tmpname);
+      }
    }
+   std::cout << "---" << std::endl;
 
    histCC1piselEffPur2D *hCC1pieffpur_residual_mean = new histCC1piselEffPur2D("hCC1pieffpur_residual_mean",";residual_mean_up;residual_mean_down",bins.at(3).at(0),bins.at(3).at(1),bins.at(3).at(2),bins.at(4).at(0),bins.at(4).at(1),bins.at(4).at(2));
 
@@ -197,7 +206,7 @@ void MakeCutEfficiencyPlots(std::string mcfile){
       delete c1;
    }
    TCanvas *c1 = new TCanvas("c1","c1");
-   DrawCC1piMCEffPur(c1, Nminus1plots);
+   DrawCC1piMCEffPur(c1, Nminus1plots,"hist",true);
    c1->Print("Nminus1plots.png");
 
    DrawCC1piMCEffPur2D(c1, hCC1pieffpur_residual_mean);

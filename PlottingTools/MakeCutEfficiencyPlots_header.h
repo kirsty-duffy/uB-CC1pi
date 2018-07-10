@@ -268,6 +268,7 @@ bool IsEventSelected(double cutval, std::vector<double> value_vec, bool KeepBelo
          else if(!OnlyDaughters && n_tracks == value_vec.size()-1) isSelected = true; // Again, 1 less because of the neutrino
       }
    }
+   // if (isSelected) std::cout << "isSelected = " << isSelected << std::endl;
    return isSelected;
 }
 
@@ -305,22 +306,35 @@ void FillNminus1EffPurHist(histCC1piselEffPur *hists, std::vector<std::vector<do
    for (int i_bin=1; i_bin < hists->h_cc1pi_sel->GetXaxis()->GetNbins()+1; i_bin++){
       // Now loop over cuts and apply them
       bool isSelected = true;
-      for (int i_cut=0; i_cut < cutvalues.size(); i_cut++){
-         // Skip cut associated to current bin
-         // For final bin, it will not be equal to i_cut for any cut, so it should just evaluate all of them
-         if (i_cut+1 == i_bin) {
-            //std::cout << "skipping cut" << std::endl;
-            continue;
+      // First bin: only evaluate whether the event passed Marco's selection and has 2 tracks
+      if (i_bin==1){
+         if (value_vec.at(0).size()>=2 && Marco_selected){
+            isSelected = true;
          }
-         // Evaluate whether event passes this cut. If it doesn't, set isSelected to false for the event
-         bool isSelected_i = IsEventSelected(cutvalues.at(i_cut), value_vec.at(i_cut), KeepBelowCut.at(i_cut), Marco_selected, TPCObj_PFP_isDaughter, OnlyDaughters.at(i_cut), TracksNeeded.at(i_cut));
-         if (isSelected_i == false) isSelected = false;
+         else{
+            isSelected = false;
+         }
+      }
+      // Other bins: look at other cuts
+      else{
+         for (int i_cut=0; i_cut < cutvalues.size(); i_cut++){
+            // Skip cut associated to current bin
+            // For final bin, it will not be equal to i_cut for any cut, so it should just evaluate all of them
+            if (i_cut+3 == i_bin) {
+               // std::cout << "skipping cut" << std::endl;
+               continue;
+            }
+            // Evaluate whether event passes this cut. If it doesn't, set isSelected to false for the event
+            bool isSelected_i = IsEventSelected(cutvalues.at(i_cut), value_vec.at(i_cut), KeepBelowCut.at(i_cut), Marco_selected, TPCObj_PFP_isDaughter, OnlyDaughters.at(i_cut), TracksNeeded.at(i_cut));
+            if (isSelected_i == false) isSelected = false;
 
-         //std::cout << "bin: " << i_bin << ", cut: " << i_cut << "isSelected = " << isSelected << std::endl;
-      } // end loop over cuts
+            // if (isSelected) std::cout << "bin: " << i_bin << ", cut: " << i_cut << "isSelected = " << isSelected << std::endl;
+         } // end loop over cuts
+      }
 
       // Now fill selection info into the relevant histograms
       double fillval = hists->h_cc1pi_sel->GetBinCenter(i_bin);
+      //if (isSelected) std::cout << "Bin " << i_bin << ", isSelected = " << isSelected << ", fillval = " << fillval << std::endl;
       if (isSelected){
          if (topology == kCC1piplus0p || topology == kCC1piplus1p || topology == kCC1piplusNp){
             hists->h_cc1pi_sel->Fill(fillval);
@@ -342,7 +356,7 @@ void FillNminus1EffPurHist(histCC1piselEffPur *hists, std::vector<std::vector<do
 
 }
 
-void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists){
+void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists, std::string drawopt="p",bool isNminus1=false){
    TH1D *heff = (TH1D*)hists->h_cc1pi_sel->Clone("heff");
    TH1D *hpur = (TH1D*)hists->h_cc1pi_sel->Clone("hpur");
    TH1D *heffpur = (TH1D*)hists->h_cc1pi_sel->Clone("heffpur");
@@ -363,6 +377,9 @@ void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists){
 
       double eff = selected_cc1pi/total_cc1pi;
       double pur = selected_cc1pi/selected_all;
+      //
+      // std::cout << "eff = " << eff << std::endl;
+      // std::cout << "pur = " << pur << std::endl;
 
       heff->SetBinContent(i_bin,eff);
       hpur->SetBinContent(i_bin,pur);
@@ -389,14 +406,38 @@ void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists){
    gStyle->SetOptStat(0); // No stats box
 
    c->cd();
-   heff->Draw("p");
-   hpur->Draw("same p");
-   heffpur->Draw("same p");
+   heff->Draw(drawopt.c_str());
+   hpur->Draw((std::string("same")+drawopt).c_str());
+   heffpur->Draw((std::string("same")+drawopt).c_str());
 
    l->AddEntry(heff,"Efficiency","p");
    l->AddEntry(hpur,"Purity","p");
    l->AddEntry(heffpur,"Efficiency #times Purity","p");
    l->Draw();
+
+   // For N-1 plots only, we want to overlay a histogram that has the "all cuts" values in all bins, for easy comparison. Hardcode that "all cuts" will be in bin 2.
+   if (isNminus1){
+      TH1D *heff_allcuts = (TH1D*)heff->Clone("heff_allcuts");
+      TH1D *hpur_allcuts = (TH1D*)hpur->Clone("hpur_allcuts");
+      TH1D *heffpur_allcuts = (TH1D*)heffpur->Clone("heffpur_allcuts");
+
+      heff_allcuts->SetLineStyle(2);
+      hpur_allcuts->SetLineStyle(2);
+      heffpur_allcuts->SetLineStyle(2);
+
+      for (int i_bin=1; i_bin<heff_allcuts->GetXaxis()->GetNbins()+1; i_bin++){
+         heff_allcuts->SetBinContent(i_bin,heff->GetBinContent(2));
+         hpur_allcuts->SetBinContent(i_bin,hpur->GetBinContent(2));
+         heffpur_allcuts->SetBinContent(i_bin,heffpur->GetBinContent(2));
+      }
+
+      heff_allcuts->Draw((std::string("same")+drawopt).c_str());
+      hpur_allcuts->Draw((std::string("same")+drawopt).c_str());
+      heffpur_allcuts->Draw((std::string("same")+drawopt).c_str());
+
+      c->SetBottomMargin(0.13);
+      c->SetRightMargin(0.15);
+   }
 
    c->Draw();
    c->Modified();
