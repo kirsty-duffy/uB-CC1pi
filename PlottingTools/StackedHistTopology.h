@@ -16,7 +16,7 @@ class StackedHistTopology{
   StackedHistTopology(std::string histname, std::string title, int nbins, double lowlimit, double highlimit);// Constructor
   void Fill(NuIntTopology topology, double value);
   void Fill(NuIntTopology topology, double value, double weight);
-  void DrawStack(double norm, TCanvas *c1, bool coarse=false);
+  void DrawStack(double norm, TCanvas *c1, bool coarse=true);
 
  protected:
   int nHists;
