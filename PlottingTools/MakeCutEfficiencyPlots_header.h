@@ -1,4 +1,6 @@
 #include "../Algorithms/TopologyEnums.h"
+#include "StackedHistPDGCode.h"
+#include "StackedHistTopology.h"
 #include "TTree.h"
 #include "TH1.h"
 #include "TColor.h"
@@ -31,6 +33,7 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_track_perc_used_hits = nullptr;
    std::vector<double> *TPCObj_reco_vtx = nullptr;
    std::vector<bool> *TPCObj_PFP_track_isContained = nullptr;
+   std::vector<int> *TPCObj_PFP_truePDG = nullptr;
 
    // These are derived quantities - derived from the values above in Calcvars
    std::vector<double> *TPCObj_PFP_LH_p;
@@ -84,6 +87,8 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("TPCObj_reco_vtx", &(varstoset->TPCObj_reco_vtx));
    intree->SetBranchStatus("TPCObj_PFP_track_isContained",1);
    intree->SetBranchAddress("TPCObj_PFP_track_isContained", &(varstoset->TPCObj_PFP_track_isContained));
+   intree->SetBranchStatus("TPCObj_PFP_truePDG",1);
+   intree->SetBranchAddress("TPCObj_PFP_truePDG", &(varstoset->TPCObj_PFP_truePDG));
 }
 
 void Calcvars(treevars *vars){
@@ -466,8 +471,17 @@ void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists, std::string drawop
       hpur_allcuts->Draw((std::string("same")+drawopt).c_str());
       heffpur_allcuts->Draw((std::string("same")+drawopt).c_str());
 
+      double xlow = heff_allcuts->GetBinLowEdge(allcuts_bin);
+      TLine *line = new TLine(xlow,0,xlow,1); // Hack: this is just to give a vertical line separating the true N-1 bins from the other type of bins we have in the plot
+      line->SetLineColor(kBlack);
+      line->SetLineWidth(2);
+      line->Draw("same");
+
       c->SetBottomMargin(0.13);
-      c->SetRightMargin(0.15);
+      //c->SetRightMargin(0.15);
+
+      l->SetX1(0.15);
+      l->SetX2(0.37);
    }
 
    c->Draw();
