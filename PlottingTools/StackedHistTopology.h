@@ -17,13 +17,14 @@ class StackedHistTopology{
   void Fill(NuIntTopology topology, double value);
   void Fill(NuIntTopology topology, double value, double weight);
   void DrawStack(double norm, TCanvas *c1, bool coarse=true);
-  void GetHistIntegrals();
+  void GetHistIntegrals(bool coarse=true);
 
  protected:
   int nHists;
   int nHists_coarse;
   std::vector<NuIntTopology> hist_order; // For keeping track of which hist goes with which topology
-  std::vector<NuIntTopology> hist_order_coarse; // For keeping track of which hist goes with which topology
+
+  std::map<std::string, TH1F *> coarse_histos; // For keeping track of "coarse" topology histograms (e.g. CC1pi instead of CC1pi1p)
 
   THStack *stack;
   TH1F *hists[25];
@@ -31,6 +32,7 @@ class StackedHistTopology{
   void StyleHists();
   unsigned int GetHistN(NuIntTopology topology);
   NuIntTopology GetTopologyFromHistN(unsigned int hist_n);
+  void GenerateCoarseHistos();
 };
 
 // Define functions here instead of a .C file so we don't need too many includes
@@ -65,37 +67,14 @@ StackedHistTopology::StackedHistTopology(std::string histname, std::string title
 
   nHists = hist_order.size();
 
-  // Topology categories for the histograms
-  hist_order_coarse.push_back(kCC0pi0p);
-  hist_order_coarse.push_back(kCC0pi1p);
-  hist_order_coarse.push_back(kCC0piNp);
-  hist_order_coarse.push_back(kCC1piplus0p);
-  hist_order_coarse.push_back(kCC1piplus1p);
-  hist_order_coarse.push_back(kCC1piplusNp);
-  hist_order_coarse.push_back(kCC1piminus0p);
-  hist_order_coarse.push_back(kCC1piminus1p);
-  hist_order_coarse.push_back(kCC1piminusNp);
-  hist_order_coarse.push_back(kCC1pizero0p);
-  hist_order_coarse.push_back(kCC1pizero1p);
-  hist_order_coarse.push_back(kCC1pizeroNp);
-  hist_order_coarse.push_back(kCCmultipi0p);
-  hist_order_coarse.push_back(kCCmultipi1p);
-  hist_order_coarse.push_back(kCCmultipiNp);
-  hist_order_coarse.push_back(kCCother);
-  hist_order_coarse.push_back(kCCNue);
-  hist_order_coarse.push_back(kNC);
-  hist_order_coarse.push_back(kOutFV);
-  hist_order_coarse.push_back(kCosmic);
-  hist_order_coarse.push_back(kMixed);
-  hist_order_coarse.push_back(kUnknown);
-
-  nHists = hist_order_coarse.size();
-
   stack = new THStack(histname.c_str(),title.c_str());
   for (int i_hist=0; i_hist < nHists; i_hist++){
     std::string histname_i = std::string(histname)+std::string("_")+std::to_string(i_hist);
     hists[i_hist] = new TH1F(histname_i.c_str(),"",nbins,lowlimit,highlimit);
   }
+
+  // Style the histograms
+  StackedHistTopology::StyleHists();
 }
 
 // -------------------------- Function to fill the correct histogram -------------------------- //
@@ -113,25 +92,10 @@ void StackedHistTopology::Fill(NuIntTopology topology, double value, double weig
   hists[n_hist]->Fill(value, weight);
 }
 
-// -------------------------- Function to draw the histograms -------------------------- //
-void StackedHistTopology::DrawStack(double norm, TCanvas *c1, bool coarse)
+// -------------------------- Function to collapse fine topo enums onto coarse topo names -------------------------- //
+void StackedHistTopology::GenerateCoarseHistos()
 {
-  // First: style the histograms
-  StackedHistTopology::StyleHists();
-
-  // Next: add histogramst to the stack and make TLegend
-  // Only do this for histograms that have entries
-  TLegend *leg = new TLegend(0.55,0.7,0.95,0.95);
-
-  leg -> SetNColumns(2);
-
-  if (coarse) {
-  std::map<std::string, TH1F *> coarse_histos;
-
-  // Collapse fine topo enums onto coarse topo names by using
-  // topologyenum2str_coarse
   for (int i_hist = nHists-1; i_hist >=0; i_hist--) {
-    hists[i_hist]->Scale(norm);
     NuIntTopology topology_for_legend =
         StackedHistTopology::GetTopologyFromHistN((unsigned int)i_hist);
     std::string coarse_topo_legend_title =
@@ -145,26 +109,43 @@ void StackedHistTopology::DrawStack(double norm, TCanvas *c1, bool coarse)
       coarse_histos[coarse_topo_legend_title]->Add(hists[i_hist]);
     }
   }
+};
+
+// -------------------------- Function to draw the histograms -------------------------- //
+void StackedHistTopology::DrawStack(double norm, TCanvas *c1, bool coarse)
+{
+
+  // Next: add histogramst to the stack and make TLegend
+  // Only do this for histograms that have entries
+  TLegend *leg = new TLegend(0.55,0.7,0.95,0.95);
+
+  leg -> SetNColumns(2);
+
+  for (int i_hist = 0; i_hist < nHists; i_hist++){
+    hists[i_hist]->Scale(norm);
+  }
+
+  if (coarse) {
+
+  StackedHistTopology::GenerateCoarseHistos();
 
   for (std::pair<std::string, TH1F *> ch : coarse_histos) {
     stack->Add(ch.second);
     leg->AddEntry(ch.second, ch.first.c_str(), "f");
-    std::cout << "Integral for topology " << ch.first.c_str() << ": " << ch.second->Integral() << std::endl;
+    //std::cout << "Integral for topology " << ch.first.c_str() << ": " << ch.second->Integral() << std::endl;
   }
-
 }
 else { // fine
   for (int i_hist = 0; i_hist < nHists; i_hist++) {
     if (hists[i_hist]->GetEntries() == 0)
       continue;
 
-    hists[i_hist]->Scale(norm);
     stack->Add(hists[i_hist]);
     NuIntTopology topology_for_legend =
         StackedHistTopology::GetTopologyFromHistN((unsigned int)i_hist);
     leg->AddEntry(hists[i_hist],
                   topologyenum2str(topology_for_legend).c_str(), "f");
-    std::cout << "Integral for topology " << topologyenum2str(topology_for_legend).c_str() << ": " << hists[i_hist]->Integral() << std::endl;
+    //std::cout << "Integral for topology " << topologyenum2str(topology_for_legend).c_str() << ": " << hists[i_hist]->Integral() << std::endl;
   }
 }
 
@@ -172,18 +153,18 @@ else { // fine
   stack->Draw("hist");
   leg->Draw();
 
-  TList * histKeys = stack->GetHists();
-  TIter next(histKeys);
-  TObject* object = 0;
-  double total_integral = 0.;
-
-  while ((object = next()))
-  {
-    total_integral += ((TH1*)object)->Integral();
-  }
-  std::cout << "------------------------------------------" << std::endl;
-  std::cout << "Total Integral over all topologies: " << total_integral << std::endl;
-  std::cout << "------------------------------------------" << std::endl;
+  // TList * histKeys = stack->GetHists();
+  // TIter next(histKeys);
+  // TObject* object = 0;
+  // double total_integral = 0.;
+  //
+  // while ((object = next()))
+  // {
+  //   total_integral += ((TH1*)object)->Integral();
+  // }
+  // std::cout << "------------------------------------------" << std::endl;
+  // std::cout << "Total Integral over all topologies: " << total_integral << std::endl;
+  // std::cout << "------------------------------------------" << std::endl;
 }
 
 // -------------------------- Function to style the histograms -------------------------- //
@@ -248,8 +229,22 @@ NuIntTopology StackedHistTopology::GetTopologyFromHistN(unsigned int hist_n)
 }
 
 // ---------------------- Function to get histogram integrals ---------------------- //
-void StackedHistTopology::GetHistIntegrals()
+void StackedHistTopology::GetHistIntegrals(bool coarse)
 {
+  // Calculate and print out relative integrals (percentage of events that are each topology)
+   if (coarse) {
+     StackedHistTopology::GenerateCoarseHistos();
+
+    double total_integral = 0.;
+   for (std::pair<std::string, TH1F *> ch : coarse_histos) {
+     total_integral += ch.second->Integral();
+   }
+
+   for (std::pair<std::string, TH1F *> ch : coarse_histos) {
+     std::cout << "Integral for topology " << ch.first.c_str() << ": " << ch.second->Integral()/total_integral << std::endl;
+   }
+ }
+ else{
    // Compute total integral
    double total_integral = 0;
    for (int i_hist=0; i_hist < nHists; i_hist++){
@@ -258,8 +253,6 @@ void StackedHistTopology::GetHistIntegrals()
       double integral = hists[i_hist]->Integral();
       total_integral += integral;
    }
-
-   // Calculate and print out relative integrals (percentage of events that are each topology)
    for (int i_hist=0; i_hist < nHists; i_hist++){
       if (hists[i_hist]->GetEntries() == 0) continue;
 
@@ -270,6 +263,7 @@ void StackedHistTopology::GetHistIntegrals()
       std::cout << "Integral for toplogy " << topologyenum2str(topology) << ": " << integral/total_integral << std::endl;
 
    }
+ }
 }
 
 #endif
