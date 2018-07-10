@@ -148,6 +148,7 @@ void StackedHistTopology::DrawStack(double norm, TCanvas *c1, bool coarse)
   for (std::pair<std::string, TH1F *> ch : coarse_histos) {
     stack->Add(ch.second);
     leg->AddEntry(ch.second, ch.first.c_str(), "f");
+    std::cout << "Integral for topology " << ch.first.c_str() << ": " << ch.second->Integral() << std::endl;
   }
 
 }
@@ -162,12 +163,26 @@ else { // fine
         StackedHistTopology::GetTopologyFromHistN((unsigned int)i_hist);
     leg->AddEntry(hists[i_hist],
                   topologyenum2str(topology_for_legend).c_str(), "f");
+    std::cout << "Integral for topology " << topologyenum2str(topology_for_legend).c_str() << ": " << hists[i_hist]->Integral() << std::endl;
   }
 }
 
   c1->cd();
   stack->Draw("hist");
   leg->Draw();
+
+  TList * histKeys = stack->GetHists();
+  TIter next(histKeys);
+  TObject* object = 0;
+  double total_integral = 0.;
+
+  while ((object = next()))
+  {
+    total_integral += ((TH1*)object)->Integral();
+  }
+  std::cout << "------------------------------------------" << std::endl;
+  std::cout << "Total Integral over all topologies: " << total_integral << std::endl;
+  std::cout << "------------------------------------------" << std::endl;
 }
 
 // -------------------------- Function to style the histograms -------------------------- //
