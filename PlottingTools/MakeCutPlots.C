@@ -189,7 +189,7 @@ void MakeCutPlots(std::string mcfile){
       c1->Print(std::string(std::string("CC1pi_pdg_")+printname).c_str());
       c1->Clear();
 
-      mc_hists_cc1pi_top[i_h]->DrawStack(1.,c1);
+      mc_hists_cc1pi_top[i_h]->DrawStack(1.,c1,true);
       c1->Print(std::string(std::string("CC1pi_top_")+printname).c_str());
 
       delete c1;

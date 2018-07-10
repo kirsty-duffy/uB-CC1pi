@@ -16,11 +16,13 @@ class StackedHistTopology{
   StackedHistTopology(std::string histname, std::string title, int nbins, double lowlimit, double highlimit);// Constructor
   void Fill(NuIntTopology topology, double value);
   void Fill(NuIntTopology topology, double value, double weight);
-  void DrawStack(double norm, TCanvas *c1);
+  void DrawStack(double norm, TCanvas *c1, bool coarse=false);
 
  protected:
   int nHists;
+  int nHists_coarse;
   std::vector<NuIntTopology> hist_order; // For keeping track of which hist goes with which topology
+  std::vector<NuIntTopology> hist_order_coarse; // For keeping track of which hist goes with which topology
 
   THStack *stack;
   TH1F *hists[25];
@@ -62,6 +64,32 @@ StackedHistTopology::StackedHistTopology(std::string histname, std::string title
 
   nHists = hist_order.size();
 
+  // Topology categories for the histograms
+  hist_order_coarse.push_back(kCC0pi0p);
+  hist_order_coarse.push_back(kCC0pi1p);
+  hist_order_coarse.push_back(kCC0piNp);
+  hist_order_coarse.push_back(kCC1piplus0p);
+  hist_order_coarse.push_back(kCC1piplus1p);
+  hist_order_coarse.push_back(kCC1piplusNp);
+  hist_order_coarse.push_back(kCC1piminus0p);
+  hist_order_coarse.push_back(kCC1piminus1p);
+  hist_order_coarse.push_back(kCC1piminusNp);
+  hist_order_coarse.push_back(kCC1pizero0p);
+  hist_order_coarse.push_back(kCC1pizero1p);
+  hist_order_coarse.push_back(kCC1pizeroNp);
+  hist_order_coarse.push_back(kCCmultipi0p);
+  hist_order_coarse.push_back(kCCmultipi1p);
+  hist_order_coarse.push_back(kCCmultipiNp);
+  hist_order_coarse.push_back(kCCother);
+  hist_order_coarse.push_back(kCCNue);
+  hist_order_coarse.push_back(kNC);
+  hist_order_coarse.push_back(kOutFV);
+  hist_order_coarse.push_back(kCosmic);
+  hist_order_coarse.push_back(kMixed);
+  hist_order_coarse.push_back(kUnknown);
+
+  nHists = hist_order_coarse.size();
+
   stack = new THStack(histname.c_str(),title.c_str());
   for (int i_hist=0; i_hist < nHists; i_hist++){
     std::string histname_i = std::string(histname)+std::string("_")+std::to_string(i_hist);
@@ -85,7 +113,7 @@ void StackedHistTopology::Fill(NuIntTopology topology, double value, double weig
 }
 
 // -------------------------- Function to draw the histograms -------------------------- //
-void StackedHistTopology::DrawStack(double norm, TCanvas *c1)
+void StackedHistTopology::DrawStack(double norm, TCanvas *c1, bool coarse)
 {
   // First: style the histograms
   StackedHistTopology::StyleHists();
@@ -96,15 +124,46 @@ void StackedHistTopology::DrawStack(double norm, TCanvas *c1)
 
   leg -> SetNColumns(2);
 
-  for (int i_hist=0; i_hist < nHists; i_hist++){
-    if (hists[i_hist]->GetEntries() == 0) continue;
+  if (coarse) {
+  std::map<std::string, TH1F *> coarse_histos;
+
+  // Collapse fine topo enums onto coarse topo names by using
+  // topologyenum2str_coarse
+  for (int i_hist = nHists-1; i_hist >=0; i_hist--) {
+    hists[i_hist]->Scale(norm);
+    NuIntTopology topology_for_legend =
+        StackedHistTopology::GetTopologyFromHistN((unsigned int)i_hist);
+    std::string coarse_topo_legend_title =
+        topologyenum2str_coarse(topology_for_legend);
+
+    if (coarse_histos.find(coarse_topo_legend_title) ==
+        coarse_histos.end()) { // Haven't already got one in this coarse topo
+      coarse_histos[coarse_topo_legend_title] =
+          static_cast<TH1F *>(hists[i_hist]->Clone());
+    } else { // Already have one of this topo, so just add it
+      coarse_histos[coarse_topo_legend_title]->Add(hists[i_hist]);
+    }
+  }
+
+  for (std::pair<std::string, TH1F *> ch : coarse_histos) {
+    stack->Add(ch.second);
+    leg->AddEntry(ch.second, ch.first.c_str(), "f");
+  }
+
+}
+else { // fine
+  for (int i_hist = 0; i_hist < nHists; i_hist++) {
+    if (hists[i_hist]->GetEntries() == 0)
+      continue;
 
     hists[i_hist]->Scale(norm);
     stack->Add(hists[i_hist]);
-    NuIntTopology topology_for_legend = StackedHistTopology::GetTopologyFromHistN((unsigned int)i_hist);
-    leg->AddEntry(hists[i_hist],topologyenum2str(topology_for_legend).c_str(),"f");
-
+    NuIntTopology topology_for_legend =
+        StackedHistTopology::GetTopologyFromHistN((unsigned int)i_hist);
+    leg->AddEntry(hists[i_hist],
+                  topologyenum2str(topology_for_legend).c_str(), "f");
   }
+}
 
   c1->cd();
   stack->Draw("hist");

@@ -160,8 +160,11 @@ inline std::string topologyenum2str_coarse(NuIntTopology topology)
   case kOutFV:
     returnString = "Out of FV";
     break;
+  case kUnknown:
+    returnString = "Unknown";
+    break;
   default:
-    std::cout << "[ERROR: TopologyEnums.h] Could not find string conversion for " << topology << std::endl;
+    std::cout << "[ERROR: TopologyEnums.h] Could not find coarse string conversion for " << topology << std::endl;
     returnString = "Unknown";
     break;
   }
