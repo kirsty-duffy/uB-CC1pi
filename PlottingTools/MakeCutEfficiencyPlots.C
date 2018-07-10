@@ -21,7 +21,7 @@ std::vector<std::vector<double>> GetCutvarstoplot(treevars *vars){
 std::vector<std::vector<double>> bins = {
    {25,0.3,3},    // Lmipoverp
    {25,0.5,0.9},  // Lmumipovermumipp
-   {25,2.8,3.15}, // BrokenTrackAngle
+   {100,0,3.5}, // BrokenTrackAngle
    {25,0,2.8},    // residual_mean_up
    {25,-2.8,0},   // residual_mean_down
    {25,0,2},      // residual_std_up
@@ -148,18 +148,19 @@ void MakeCutEfficiencyPlots(std::string mcfile){
       mc_hists_cc1pieffpur[i_h] = new histCC1piselEffPur(std::string("hCC1pieffpur_")+histnames.at(i_h),histtitles.at(i_h),bins.at(i_h).at(0),bins.at(i_h).at(1),bins.at(i_h).at(2));
    }
 
-   histCC1piselEffPur *Nminus1plots = new histCC1piselEffPur("hCC1pi_nminus1","N-1 plot;;Efficiency, purity",nplots+2,0,nplots+2);
+   histCC1piselEffPur *Nminus1plots = new histCC1piselEffPur("hCC1pi_nminus1","N-1 plot;;Efficiency, purity",nplots+3,0,nplots+3);
 
-   std::cout << "Considering the following cuts --- " << std::endl;
-   for (size_t i_bin=1; i_bin < nplots+3; i_bin++){
-      if (i_bin==1) Nminus1plots->SetBinLabel(i_bin, "CC incl. 2 tracks");
-      else if (i_bin==2) Nminus1plots->SetBinLabel(i_bin,"All cuts");
-      else{
-         std::string tmpname = histtitles.at(i_bin-3).substr(1,histtitles.at(i_bin-3).size()-2);
+   std::cout << "--- Considering the following cuts --- " << std::endl;
+   for (size_t i_bin=1; i_bin < nplots+4; i_bin++){
+      if (i_bin<nplots+1){
+         std::string tmpname = histtitles.at(i_bin-1).substr(1,histtitles.at(i_bin-1).size()-2);
          std::cout << tmpname << std::endl; Nminus1plots->SetBinLabel(i_bin,tmpname);
       }
+      if (i_bin==nplots+1) Nminus1plots->SetBinLabel(i_bin,"All cuts");
+      if (i_bin==nplots+2) Nminus1plots->SetBinLabel(i_bin, "CC incl. 2 tracks");
+      if (i_bin==nplots+3) Nminus1plots->SetBinLabel(i_bin, "CC incl.");
    }
-   std::cout << "---" << std::endl;
+   std::cout << "------" << std::endl;
 
    // Loop through MC tree and fill plots
    for (int i = 0; i < t_bnbcos->GetEntries(); i++){

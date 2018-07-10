@@ -301,27 +301,18 @@ void FillCC1piEffPurHist(histCC1piselEffPur *hists, std::vector<double> value_ve
 }
 
 void FillNminus1EffPurHist(histCC1piselEffPur *hists, std::vector<std::vector<double>> value_vec, NuIntTopology topology, std::vector<bool> KeepBelowCut, bool Marco_selected, std::vector<bool> TPCObj_PFP_isDaughter, std::vector<bool> OnlyDaughters, std::vector<std::string> TracksNeeded, std::vector<double> cutvalues){
+   int ncuts = value_vec.size();
    // Loop through all bins in the histogram and evaluate the cuts
    // Each bin represents one cut (note: that means that for a given bin, we apply all cuts EXCEPT that one), with the final bin showing what we get when we apply all cuts.
    // "Applying" cuts means using the cut values given in the vector
    for (int i_bin=1; i_bin < hists->h_cc1pi_sel->GetXaxis()->GetNbins()+1; i_bin++){
       // Now loop over cuts and apply them
       bool isSelected = true;
-      // First bin: only evaluate whether the event passed Marco's selection and has 2 tracks
-      if (i_bin==1){
-         if (value_vec.at(0).size()>=2 && Marco_selected){
-            isSelected = true;
-         }
-         else{
-            isSelected = false;
-         }
-      }
-      // Other bins: look at other cuts
-      else{
+      if (i_bin<ncuts+2){
          for (int i_cut=0; i_cut < cutvalues.size(); i_cut++){
             // Skip cut associated to current bin
-            // For final bin, it will not be equal to i_cut for any cut, so it should just evaluate all of them
-            if (i_cut+3 == i_bin) {
+            // For bin with i_bin=ncuts+2, it will not be equal to i_cut+1 for any cut, so it should just evaluate all of them
+            if (i_cut+1 == i_bin) {
                // std::cout << "skipping cut" << std::endl;
                continue;
             }
@@ -331,6 +322,35 @@ void FillNminus1EffPurHist(histCC1piselEffPur *hists, std::vector<std::vector<do
 
             // if (isSelected) std::cout << "bin: " << i_bin << ", cut: " << i_cut << "isSelected = " << isSelected << std::endl;
          } // end loop over cuts
+      }
+      // Bin ncuts+2: only evaluate whether the event passed Marco's selection and has 2 tracks
+      else if (i_bin==ncuts+2){
+         int n_tracks = 0;
+         for (size_t i_track=0; i_track<value_vec.at(0).size(); i_track++){
+            double value = value_vec.at(0).at(i_track);
+
+            // Ignore PFPs that failed to reco as tracks. The neutrino PFP will also have a bogus value.
+            if (value == -9999 || value == -999) {
+               continue;
+            }
+
+            n_tracks++;
+         } // end loop over tracks in TPCObject
+         if (n_tracks>=2 && Marco_selected){
+            isSelected = true;
+         }
+         else{
+            isSelected = false;
+         }
+      }
+      // Bin ncuts+3: only evaluate whether the event passed Marco's selection
+      if (i_bin==ncuts+3){
+         if (Marco_selected){
+            isSelected=true;
+         }
+         else{
+            isSelected=false;
+         }
       }
 
       // Now fill selection info into the relevant histograms
@@ -426,10 +446,12 @@ void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists, std::string drawop
       hpur_allcuts->SetLineStyle(2);
       heffpur_allcuts->SetLineStyle(2);
 
+      int allcuts_bin = heff_allcuts->GetXaxis()->GetNbins()-2;
+
       for (int i_bin=1; i_bin<heff_allcuts->GetXaxis()->GetNbins()+1; i_bin++){
-         heff_allcuts->SetBinContent(i_bin,heff->GetBinContent(2));
-         hpur_allcuts->SetBinContent(i_bin,hpur->GetBinContent(2));
-         heffpur_allcuts->SetBinContent(i_bin,heffpur->GetBinContent(2));
+         heff_allcuts->SetBinContent(i_bin,heff->GetBinContent(allcuts_bin));
+         hpur_allcuts->SetBinContent(i_bin,hpur->GetBinContent(allcuts_bin));
+         heffpur_allcuts->SetBinContent(i_bin,heffpur->GetBinContent(allcuts_bin));
       }
 
       heff_allcuts->Draw((std::string("same")+drawopt).c_str());
