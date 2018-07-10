@@ -30,6 +30,7 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_track_residual_std = nullptr;
    std::vector<double> *TPCObj_PFP_track_perc_used_hits = nullptr;
    std::vector<double> *TPCObj_reco_vtx = nullptr;
+   std::vector<bool> *TPCObj_PFP_track_isContained = nullptr;
 
    // These are derived quantities - derived from the values above in Calcvars
    std::vector<double> *TPCObj_PFP_LH_p;
@@ -40,6 +41,7 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_Lmumipovermumipp;
    std::vector<double> *TPCObj_PFP_BrokenTrackAngle;
    std::vector<double> *TPCObj_PFP_VtxTrackDist;
+   std::vector<double> *TPCObj_PFP_isContained_double;
 };
 
 void settreevars(TTree *intree, treevars *varstoset){
@@ -80,6 +82,8 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("TPCObj_PFP_track_perc_used_hits", &(varstoset->TPCObj_PFP_track_perc_used_hits));
    intree->SetBranchStatus("TPCObj_reco_vtx",1);
    intree->SetBranchAddress("TPCObj_reco_vtx", &(varstoset->TPCObj_reco_vtx));
+   intree->SetBranchStatus("TPCObj_PFP_track_isContained",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_isContained", &(varstoset->TPCObj_PFP_track_isContained));
 }
 
 void Calcvars(treevars *vars){
@@ -95,6 +99,7 @@ void Calcvars(treevars *vars){
    vars->TPCObj_PFP_Lmumipovermumipp = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_BrokenTrackAngle = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_VtxTrackDist = new std::vector<double>(vecsize);
+   vars->TPCObj_PFP_isContained_double = new std::vector<double>(vecsize);
 
    // Just use collection plane for now
    int i_pl = 2;
@@ -113,6 +118,7 @@ void Calcvars(treevars *vars){
          vars->TPCObj_PFP_Lmumipovermumipp->at(i_track) = -9999;
          vars->TPCObj_PFP_VtxTrackDist->at(i_track) = -9999;
          vars->TPCObj_PFP_BrokenTrackAngle->at(i_track) = -9999;
+         vars->TPCObj_PFP_isContained_double->at(i_track) = -9999;
 
          continue;
       }
@@ -125,6 +131,7 @@ void Calcvars(treevars *vars){
       vars->TPCObj_PFP_Lmipoverp->at(i_track) = vars->TPCObj_PFP_LH_mip->at(i_track) / vars->TPCObj_PFP_LH_p->at(i_track);
       vars->TPCObj_PFP_Lmumipovermumipp->at(i_track) = (vars->TPCObj_PFP_LH_mu->at(i_track)+vars->TPCObj_PFP_LH_mip->at(i_track))/(vars->TPCObj_PFP_LH_mu->at(i_track)+vars->TPCObj_PFP_LH_mip->at(i_track)+vars->TPCObj_PFP_LH_p->at(i_track));
       vars->TPCObj_PFP_VtxTrackDist->at(i_track) = std::hypot(std::hypot(vars->TPCObj_reco_vtx->at(0) - vars->TPCObj_PFP_track_start->at(i_track).at(0), vars->TPCObj_reco_vtx->at(1) - vars->TPCObj_PFP_track_start->at(i_track).at(1)), vars->TPCObj_reco_vtx->at(2) - vars->TPCObj_PFP_track_start->at(i_track).at(2));
+      vars->TPCObj_PFP_isContained_double->at(i_track) = (double)(vars->TPCObj_PFP_track_isContained->at(i_track));
 
       // Angle between tracks (using theta and phi)...
       int track1 = i_track;
@@ -192,6 +199,7 @@ void Clearvars(treevars *vars){
    delete vars->TPCObj_PFP_Lmumipovermumipp;
    delete vars->TPCObj_PFP_BrokenTrackAngle;
    delete vars->TPCObj_PFP_VtxTrackDist;
+   delete vars->TPCObj_PFP_isContained_double;
 
 }
 
@@ -547,6 +555,7 @@ void DrawCC1piMCEffPur2D(TCanvas *c, histCC1piselEffPur2D *hists){
 
    gStyle->SetOptStat(0); // No stats box
 
+   c->Clear();
    c->Divide(2,2,0.0005,0.0005);
 
    std::vector<TH2D*> histstoeval = {
