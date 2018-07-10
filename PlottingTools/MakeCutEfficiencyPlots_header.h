@@ -131,7 +131,7 @@ void Calcvars(treevars *vars){
 
       // We want non-tracks to get bogus values (-9999)
       // But we want tracks that just don't have other tracks close by to get 0
-      double maxangle = 0;
+      double maxangle = -1;
 
       for (int track2 = track1+1; track2 < vecsize; track2++) {
          if(vars->TPCObj_PFP_track_theta->at(track1) == -9999) continue;
@@ -154,18 +154,19 @@ void Calcvars(treevars *vars){
          double mindist = *std::min_element(distances.begin(),distances.end());
 
          // Flip tracks if the closest point isn't start-start
-         if(mindist==distances.at(1) || mindist==distances.at(3)) {
-            v2=-1*v2;
-            TVector3 oldstart2=start2;
-            start2=end2;
-            end2=oldstart2;
-         }
-         if(mindist==distances.at(2) || mindist==distances.at(3)) {
-            v1=-1*v1;
-            TVector3 oldstart1=start1;
-            start1=end1;
-            end1=oldstart1;
-         }
+         // Not needed: cos is symmetric
+         // if(mindist==distances.at(1) || mindist==distances.at(3)) {
+         //    v2=-1*v2;
+         //    TVector3 oldstart2=start2;
+         //    start2=end2;
+         //    end2=oldstart2;
+         // }
+         // if(mindist==distances.at(2) || mindist==distances.at(3)) {
+         //    v1=-1*v1;
+         //    TVector3 oldstart1=start1;
+         //    start1=end1;
+         //    end1=oldstart1;
+         // }
 
          double angle = TMath::ACos(v1.Dot(v2));
 
