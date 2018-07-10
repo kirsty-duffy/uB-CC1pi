@@ -105,7 +105,8 @@ std::vector<double> CutValues = {
    1.,  // residual_mean_down
    1.,  // residual_std_up
    1.,  // residual_std_down
-   1.   // perc_used_hits
+   1.,   // perc_used_hits
+   1.
 };
 
 // ---------------------------------------------------- //
@@ -151,6 +152,8 @@ void MakeCutEfficiencyPlots(std::string mcfile){
       Nminus1plots->SetBinLabel(i_bin,histtitles.at(i_bin-1));
    }
 
+   histCC1piselEffPur2D *hCC1pieffpur_residual_mean = new histCC1piselEffPur2D("hCC1pieffpur_residual_mean",";residual_mean_up;residual_mean_down",bins.at(3).at(0),bins.at(3).at(1),bins.at(3).at(2),bins.at(4).at(0),bins.at(4).at(1),bins.at(4).at(2));
+
    // Loop through MC tree and fill plots
    for (int i = 0; i < t_bnbcos->GetEntries(); i++){
       t_bnbcos->GetEntry(i);
@@ -164,7 +167,14 @@ void MakeCutEfficiencyPlots(std::string mcfile){
       // Now fill histograms for N-1 plots
       FillNminus1EffPurHist(Nminus1plots,Cutvarstoplot,mc_vars.Truth_topology,KeepBelowCut,mc_vars.Marco_selected,*(mc_vars.TPCObj_PFP_isDaughter),OnlyDaughters,TracksNeeded,CutValues);
 
-
+      // Fill 2D histograms
+      // Make sure the indices actually point to the correct points in the other vectors. For instance, here we have "3" and "4" corresponding to residual_mean_up and residual_mean_down.
+      // Also do the same in the histCC1piselEffPur2D delcaration above.
+      std::vector<std::vector<double>> value_vec_residual_mean = {Cutvarstoplot.at(3),Cutvarstoplot.at(4)};
+      std::vector<bool> KeepBelowCut_residual_mean = {KeepBelowCut.at(3),KeepBelowCut.at(4)};
+      std::vector<bool> OnlyDaughters_residual_mean = {OnlyDaughters.at(3),OnlyDaughters.at(4)};
+      std::vector<std::string> TracksNeeded_residual_mean = {TracksNeeded.at(3),TracksNeeded.at(4)};
+      FillCC1piEffPurHist2D(hCC1pieffpur_residual_mean,value_vec_residual_mean,mc_vars.Truth_topology,KeepBelowCut_residual_mean,mc_vars.Marco_selected,*(mc_vars.TPCObj_PFP_isDaughter),OnlyDaughters_residual_mean,TracksNeeded_residual_mean);
 
    } // end loop over entries in tree
 
@@ -189,6 +199,8 @@ void MakeCutEfficiencyPlots(std::string mcfile){
    TCanvas *c1 = new TCanvas("c1","c1");
    DrawCC1piMCEffPur(c1, Nminus1plots);
    c1->Print("Nminus1plots.png");
-   delete c1;
 
+   DrawCC1piMCEffPur2D(c1, hCC1pieffpur_residual_mean);
+   c1->Print("hCC1pieffpur_residual_mean.png");
+   delete c1;
 }
