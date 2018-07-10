@@ -209,6 +209,78 @@ void Clearvars(treevars *vars){
 
 }
 
+// What variables do we want the plots as a function of?
+std::vector<std::vector<double>> GetCutvarstoplot(treevars *vars){
+   std::vector<std::vector<double>> varstoplot = {
+      *(vars->TPCObj_PFP_Lmipoverp),
+      *(vars->TPCObj_PFP_Lmumipovermumipp),
+      *(vars->TPCObj_PFP_BrokenTrackAngle),
+      *(vars->TPCObj_PFP_track_residual_mean),
+      *(vars->TPCObj_PFP_track_residual_mean),
+      *(vars->TPCObj_PFP_track_residual_std),
+      *(vars->TPCObj_PFP_track_residual_std),
+      *(vars->TPCObj_PFP_track_perc_used_hits),
+      *(vars->TPCObj_PFP_VtxTrackDist),
+      *(vars->TPCObj_PFP_isContained_double)
+   };
+   return varstoplot;
+};
+
+// For efficiency/purity we need to know whether we want to be keep tracks that have values above or below the cut value
+std::vector<bool> KeepBelowCut = {
+   false, // Lmipoverp
+   false, // Lmumipovermumipp
+   true,  // BrokenTrackAngle
+   true,  // residual_mean_up
+   false, // residual_mean_down
+   true,  // residual_std_up
+   false, // residual_std_down
+   false, // perc_used_hits
+   true,  // VtxTrackDist
+   false  // isContained
+};
+
+// Do we want to consider just the direct daughters of the neutrino?
+std::vector<bool> OnlyDaughters = {
+   true,  // Lmipoverp
+   true,  // Lmumipovermumipp
+   false, // BrokenTrackAngle
+   true,  // residual_mean_up
+   true,  // residual_mean_down
+   true,  // residual_std_up
+   true,  // residual_std_down
+   true,  // perc_used_hits
+   false, // VtxTrackDist
+   false  // isContained
+};
+
+// How many tracks do we want to pass the cut? (Options are atleasttwo, exactlytwo, all)
+std::vector<std::string> TracksNeeded = {
+   "exactlytwo",  // Lmipoverp
+   "exactlytwo",  // Lmumipovermumipp
+   "all",         // BrokenTrackAngle
+   "atleasttwo",  // residual_mean_up
+   "atleasttwo",  // residual_mean_down
+   "atleasttwo",  // residual_std_up
+   "atleasttwo",  // residual_std_down
+   "atleasttwo",  // perc_used_hits
+   "atleasttwo",  // VtxTrackDist
+   "all"          // isConainted
+};
+
+// Cut values for N-1 plot
+std::vector<double> CutValues = {
+   1.,   // Lmipoverp
+   0.66, // Lmumipovermumipp
+   3.05, // BrokenTrackAngle
+   0.7,  // residual_mean_up
+   -0.7, // residual_mean_down
+   2.5,  // residual_std_up
+   0.,   // residual_std_down
+   0.7,  // perc_used_hits
+   15.,  // VtxTrackDist
+   0.5   // isContained
+};
 
 // --------------------------------------------------- //
 // This struct contains signal vs background histograms and all functions related to them

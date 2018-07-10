@@ -60,62 +60,6 @@ std::vector<std::string> histnames = {
    "effpur_isContained"
 };
 
-// For efficiency/purity we need to know whether we want to be keep tracks that have values above or below the cut value
-std::vector<bool> KeepBelowCut = {
-   false, // Lmipoverp
-   false, // Lmumipovermumipp
-   true,  // BrokenTrackAngle
-   true,  // residual_mean_up
-   false, // residual_mean_down
-   true,  // residual_std_up
-   false, // residual_std_down
-   false, // perc_used_hits
-   true,  // VtxTrackDist
-   false  // isContained
-};
-
-// Do we want to consider just the direct daughters of the neutrino?
-std::vector<bool> OnlyDaughters = {
-   true,  // Lmipoverp
-   true,  // Lmumipovermumipp
-   false, // BrokenTrackAngle
-   true,  // residual_mean_up
-   true,  // residual_mean_down
-   true,  // residual_std_up
-   true,  // residual_std_down
-   true,  // perc_used_hits
-   false, // VtxTrackDist
-   false  // isContained
-};
-
-// How many tracks do we want to pass the cut? (Options are atleasttwo, exactlytwo, all)
-std::vector<std::string> TracksNeeded = {
-   "exactlytwo",  // Lmipoverp
-   "exactlytwo",  // Lmumipovermumipp
-   "all",         // BrokenTrackAngle
-   "atleasttwo",  // residual_mean_up
-   "atleasttwo",  // residual_mean_down
-   "atleasttwo",  // residual_std_up
-   "atleasttwo",  // residual_std_down
-   "atleasttwo",  // perc_used_hits
-   "atleasttwo",  // VtxTrackDist
-   "all"          // isConainted
-};
-
-// Cut values for N-1 plot
-std::vector<double> CutValues = {
-   1.,   // Lmipoverp
-   0.66, // Lmumipovermumipp
-   3.05, // BrokenTrackAngle
-   0.7,  // residual_mean_up
-   -0.7, // residual_mean_down
-   2.5,  // residual_std_up
-   0.,   // residual_std_down
-   0.7,  // perc_used_hits
-   15.,  // VtxTrackDist
-   0.5   // isContained
-};
-
 // ---------------------------------------------------- //
 //  Now the function starts
 // ---------------------------------------------------- //
@@ -162,11 +106,16 @@ void MakeCutPlots(std::string mcfile){
    }
    std::cout << "------" << std::endl;
 
+   // Dummy plot in order to get percentage of different topologies that are selected
+   StackedHistTopology *SelectedEvents = new StackedHistTopology("SelectedEvents",";;",1,0,1);
+
    // Loop through MC tree and fill plots
    for (int i = 0; i < t_bnbcos->GetEntries(); i++){
       t_bnbcos->GetEntry(i);
       Calcvars(&mc_vars);
       std::vector<std::vector<double>> Varstoplot = GetVarstoplot(&mc_vars);
+
+      bool isSelected = true;
 
       for (size_t i_h = 0; i_h < nplots; i_h++){
 
@@ -175,7 +124,12 @@ void MakeCutPlots(std::string mcfile){
             mc_hists_cc1pi_pdg[i_h]->Fill((PDGCode)mc_vars.TPCObj_PFP_truePDG->at(i_tr),Varstoplot.at(i_h).at(i_tr));
             mc_hists_cc1pi_top[i_h]->Fill((NuIntTopology)mc_vars.Truth_topology,Varstoplot.at(i_h).at(i_tr),1.0/Varstoplot.at(0).size());
          }
+
+         if(!IsEventSelected(CutValues.at(i_h), Varstoplot.at(i_h), KeepBelowCut.at(i_h), mc_vars.Truth_topology, *(mc_vars.TPCObj_PFP_isDaughter), OnlyDaughters.at(i_h), TracksNeeded.at(i_h))) isSelected = false;
+
       }
+
+      if(isSelected) SelectedEvents->Fill((NuIntTopology)mc_vars.Truth_topology,0);
 
    } // end loop over entries in tree
 
@@ -194,4 +148,7 @@ void MakeCutPlots(std::string mcfile){
 
       delete c1;
    }
+
+   // Print out integrals
+   SelectedEvents->GetHistIntegrals();
 }

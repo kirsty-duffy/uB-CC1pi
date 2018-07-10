@@ -17,6 +17,7 @@ class StackedHistTopology{
   void Fill(NuIntTopology topology, double value);
   void Fill(NuIntTopology topology, double value, double weight);
   void DrawStack(double norm, TCanvas *c1, bool coarse=true);
+  void GetHistIntegrals();
 
  protected:
   int nHists;
@@ -246,5 +247,29 @@ NuIntTopology StackedHistTopology::GetTopologyFromHistN(unsigned int hist_n)
   return hist_order.at(hist_n);
 }
 
+// ---------------------- Function to get histogram integrals ---------------------- //
+void StackedHistTopology::GetHistIntegrals()
+{
+   // Compute total integral
+   double total_integral = 0;
+   for (int i_hist=0; i_hist < nHists; i_hist++){
+      if (hists[i_hist]->GetEntries() == 0) continue;
+
+      double integral = hists[i_hist]->Integral();
+      total_integral += integral;
+   }
+
+   // Calculate and print out relative integrals (percentage of events that are each topology)
+   for (int i_hist=0; i_hist < nHists; i_hist++){
+      if (hists[i_hist]->GetEntries() == 0) continue;
+
+      NuIntTopology topology = StackedHistTopology::GetTopologyFromHistN((unsigned int)i_hist);
+
+      double integral = hists[i_hist]->Integral();
+
+      std::cout << "Integral for toplogy " << topologyenum2str(topology) << ": " << integral/total_integral << std::endl;
+
+   }
+}
 
 #endif
