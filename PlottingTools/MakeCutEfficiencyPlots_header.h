@@ -539,6 +539,10 @@ void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists, std::string drawop
          heffpur_allcuts->SetBinContent(i_bin,heffpur->GetBinContent(allcuts_bin));
       }
 
+      std::cout << "Efficiency (all cuts): " << heff->GetBinContent(allcuts_bin) << std::endl;
+      std::cout << "Purity (all cuts): " << hpur->GetBinContent(allcuts_bin) << std::endl;
+      std::cout << "Efficiency x Purity (all cuts): " << heffpur->GetBinContent(allcuts_bin) << std::endl;
+
       heff_allcuts->Draw((std::string("same")+drawopt).c_str());
       hpur_allcuts->Draw((std::string("same")+drawopt).c_str());
       heffpur_allcuts->Draw((std::string("same")+drawopt).c_str());
