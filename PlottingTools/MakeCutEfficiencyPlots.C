@@ -22,7 +22,7 @@ std::vector<std::vector<double>> GetCutvarstoplot(treevars *vars){
 std::vector<std::vector<double>> bins = {
    {25,0.3,3},    // Lmipoverp
    {25,0.5,0.9},  // Lmumipovermumipp
-   {100,0,3.5}, // BrokenTrackAngle
+   {100,2.8,3.15}, // BrokenTrackAngle
    {25,0,2.8},    // residual_mean_up
    {25,-2.8,0},   // residual_mean_down
    {25,0,4},      // residual_std_up
@@ -105,7 +105,7 @@ std::vector<std::string> TracksNeeded = {
 // Cut values for N-1 plot
 std::vector<double> CutValues = {
    1.,   // Lmipoverp
-   0.67, // Lmumipovermumipp
+   0.66, // Lmumipovermumipp
    3.05, // BrokenTrackAngle
    0.7,  // residual_mean_up
    -0.7, // residual_mean_down
