@@ -34,6 +34,9 @@ struct treevars{
    std::vector<double> *TPCObj_reco_vtx = nullptr;
    std::vector<bool> *TPCObj_PFP_track_isContained = nullptr;
    std::vector<int> *TPCObj_PFP_truePDG = nullptr;
+   std::vector<std::string> *MCP_endprocess = nullptr;
+   std::vector<bool> *MCP_isContained = nullptr;
+   std::vector<int> *MCP_PDG = nullptr;
 
    // These are derived quantities - derived from the values above in Calcvars
    std::vector<double> *TPCObj_PFP_LH_p;
@@ -89,6 +92,12 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("TPCObj_PFP_track_isContained", &(varstoset->TPCObj_PFP_track_isContained));
    intree->SetBranchStatus("TPCObj_PFP_truePDG",1);
    intree->SetBranchAddress("TPCObj_PFP_truePDG", &(varstoset->TPCObj_PFP_truePDG));
+   intree->SetBranchStatus("MCP_endprocess",1);
+   intree->SetBranchAddress("MCP_endprocess", &(varstoset->MCP_endprocess));
+   intree->SetBranchStatus("MCP_isContained",1);
+   intree->SetBranchAddress("MCP_isContained", &(varstoset->MCP_isContained));
+   intree->SetBranchStatus("MCP_PDG",1);
+   intree->SetBranchAddress("MCP_PDG", &(varstoset->MCP_PDG));
 }
 
 void Calcvars(treevars *vars){

@@ -117,6 +117,22 @@ void MakeCutPlots(std::string mcfile){
    // Dummy plot in order to get percentage of different topologies that are selected
    StackedHistTopology *SelectedEvents = new StackedHistTopology("SelectedEvents",";;",1,0,1);
 
+   // EndProcess Truth Study
+   StackedHistPDGCode *EndProcess_selected = new StackedHistPDGCode("EndProcess_selected",";;",32,0,32);
+   StackedHistPDGCode *EndProcess_CCincl = new StackedHistPDGCode("EndProcess_CCincl",";;",32,0,32);
+   std::vector<std::string> EndProcess_vect;
+   TH2D *EndProcess_selected_2D = new TH2D("EndProcess_selected_2D",";Muons;Pions",4,0,4,4,0,4);
+   TH2D *EndProcess_CCincl_2D = new TH2D("EndProcess_CCincl_2D",";Muons;Pions",4,0,4,4,0,4);
+   // Set bins to be in a sensible order
+   EndProcess_selected_2D->Fill("Exiting","Exiting",0);
+   EndProcess_selected_2D->Fill("FastScintillation","FastScintillation",0);
+   EndProcess_selected_2D->Fill("Decay","Decay",0);
+   EndProcess_selected_2D->Fill("Other","Other",0);
+   EndProcess_CCincl_2D->Fill("Exiting","Exiting",0);
+   EndProcess_CCincl_2D->Fill("FastScintillation","FastScintillation",0);
+   EndProcess_CCincl_2D->Fill("Decay","Decay",0);
+   EndProcess_CCincl_2D->Fill("Other","Other",0);
+
    // Loop through MC tree and fill plots
    for (int i = 0; i < t_bnbcos->GetEntries(); i++){
       t_bnbcos->GetEntry(i);
@@ -128,7 +144,7 @@ void MakeCutPlots(std::string mcfile){
       // Determine if event is selected
       bool isSelected = true;
       for (size_t i_cut = 0; i_cut < Cutvarstoplot.size(); i_cut++){
-         if(!IsEventSelected(CutValues.at(i_cut), Cutvarstoplot.at(i_cut), KeepBelowCut.at(i_cut), mc_vars.Truth_topology, *(mc_vars.TPCObj_PFP_isDaughter), OnlyDaughters.at(i_cut), TracksNeeded.at(i_cut))) {
+         if(!IsEventSelected(CutValues.at(i_cut), Cutvarstoplot.at(i_cut), KeepBelowCut.at(i_cut), mc_vars.Marco_selected, *(mc_vars.TPCObj_PFP_isDaughter), OnlyDaughters.at(i_cut), TracksNeeded.at(i_cut))) {
             isSelected = false;
             break;
          }
@@ -147,16 +163,59 @@ void MakeCutPlots(std::string mcfile){
             if(isSelected) {
                mc_hists_cc1pi_pdg_aftercuts[i_h]->Fill((PDGCode)mc_vars.TPCObj_PFP_truePDG->at(i_tr),Varstoplot.at(i_h).at(i_tr));
                mc_hists_cc1pi_top_aftercuts[i_h]->Fill((NuIntTopology)mc_vars.Truth_topology,Varstoplot.at(i_h).at(i_tr),1.0/Varstoplot.at(0).size());
-              
+
             } // end if(isSelected)
 
          } // end loop over tracks
 
       } // end loop over Varstoplot
 
+      // EndProcess Truth Study
+      std::string EndProcess_string;
+      double EndProcess_double;
+      std::string EndProcess_muon;
+      std::string EndProcess_pion;
+      for (size_t i_mcp = 0; i_mcp < mc_vars.MCP_endprocess->size(); i_mcp++) {
+         if(!mc_vars.MCP_isContained->at(i_mcp)) EndProcess_string = "Exiting";
+         else EndProcess_string = mc_vars.MCP_endprocess->at(i_mcp);
+
+         auto EndProcess_iter = std::find(EndProcess_vect.begin(),EndProcess_vect.end(),EndProcess_string);
+         if (EndProcess_iter == EndProcess_vect.end()) {
+            EndProcess_vect.emplace_back(EndProcess_string);
+            EndProcess_double = (double)(EndProcess_vect.size()-1);
+         }
+         else EndProcess_double = 2*(double)(EndProcess_iter - EndProcess_vect.begin());
+
+         if(isSelected) EndProcess_selected -> Fill((PDGCode)mc_vars.MCP_PDG->at(i_mcp), EndProcess_double);
+         if(mc_vars.Marco_selected) EndProcess_CCincl -> Fill((PDGCode)mc_vars.MCP_PDG->at(i_mcp), EndProcess_double);
+
+         if (mc_vars.Truth_topology == kCC1piplus0p || mc_vars.Truth_topology == kCC1piplus1p || mc_vars.Truth_topology == kCC1piplusNp){
+            if(mc_vars.MCP_PDG->at(i_mcp) == kMuMinus) {
+               if(EndProcess_muon.empty()) EndProcess_muon = EndProcess_string;
+               else std::cout << "More than one muon in true CC1pi+ event" << std::endl;
+            }
+            else if(mc_vars.MCP_PDG->at(i_mcp) == kPiPlus) {
+               if(EndProcess_pion.empty()) EndProcess_pion = EndProcess_string;
+               else std::cout << "More than one pion in true CC1pi+ event" << std::endl;
+            }
+         }
+
+      }
+
+      if (!EndProcess_muon.empty() && !EndProcess_pion.empty()) {
+         if(!(EndProcess_muon=="Exiting" || EndProcess_muon=="FastScintillation" || EndProcess_muon=="Decay")) EndProcess_muon = "Other";
+         if(!(EndProcess_pion=="Exiting" || EndProcess_pion=="FastScintillation" || EndProcess_pion=="Decay")) EndProcess_pion = "Other";
+
+         if(isSelected) EndProcess_selected_2D->Fill(EndProcess_muon.c_str(),EndProcess_pion.c_str(),1);
+         if(mc_vars.Marco_selected) EndProcess_CCincl_2D->Fill(EndProcess_muon.c_str(),EndProcess_pion.c_str(),1);
+      }
+
+
    } // end loop over entries in tree
 
    // -------------------- Now make all the plots
+
+   gStyle->SetOptStat(0);
 
    for (size_t i_h=0; i_h < nplots; i_h++){
       TCanvas *c1 = new TCanvas("c1","c1");
@@ -176,10 +235,35 @@ void MakeCutPlots(std::string mcfile){
 
       mc_hists_cc1pi_top_aftercuts[i_h]->DrawStack(1.,c1,true);
       c1->Print(std::string(std::string("CC1pi_top_aftercuts")+printname).c_str());
+      c1->Clear();
 
       delete c1;
    }
+   
+   TCanvas *c1 = new TCanvas("c1","c1");
+   EndProcess_selected->DrawOverlayMuPi(0.,c1);
+   c1->Print(std::string("EndProcess_selected.png").c_str());
+   c1->Clear();
+
+   EndProcess_CCincl->DrawOverlayMuPi(0.,c1);
+   c1->Print(std::string("EndProcess_CCincl.png").c_str());
+   c1->Clear();
+
+   EndProcess_selected_2D->Draw("TEXT COLZ");
+   c1->Print(std::string("EndProcess_selected_2D.png").c_str());
+   c1->Clear();
+
+   EndProcess_CCincl_2D->Draw("TEXT COLZ");
+   c1->Print(std::string("EndProcess_CCincl_2D.png").c_str());
+   c1->Clear();
+
+   delete c1;
 
    // Print out integrals
    SelectedEvents->GetHistIntegrals();
+
+   // Print out the "map" of doubles to EndProcesses
+   for(size_t i_end = 0; i_end < EndProcess_vect.size(); i_end++) {
+      std::cout << 2*i_end << " is EndProcess " << EndProcess_vect.at(i_end) << std::endl;
+   }
 }
