@@ -128,7 +128,7 @@ void MakeCutPlots(std::string mcfile){
       std::vector<std::vector<double>> Varstoplot = GetVarstoplot(&mc_vars);
       std::vector<std::vector<double>> Cutvarstoplot = GetCutvarstoplot(&mc_vars);
 
-      
+
       // Determine if event is selected
       bool isSelected = true;
       for (size_t i_cut = 0; i_cut < Cutvarstoplot.size(); i_cut++){
@@ -151,7 +151,7 @@ void MakeCutPlots(std::string mcfile){
             if(isSelected) {
                mc_hists_cc1pi_pdg_aftercuts[i_h]->Fill((PDGCode)mc_vars.TPCObj_PFP_truePDG->at(i_tr),Varstoplot.at(i_h).at(i_tr));
                mc_hists_cc1pi_top_aftercuts[i_h]->Fill((NuIntTopology)mc_vars.Truth_topology,Varstoplot.at(i_h).at(i_tr),1.0/Varstoplot.at(0).size());
-              
+
             } // end if(isSelected)
 
          } // end loop over tracks
