@@ -38,8 +38,8 @@ struct treevars{
 
    std::vector<std::vector<double>> *TPCObj_PFP_track_trajPoint_Position=nullptr;
    std::vector<std::vector<double>> *TPCObj_PFP_track_trajPoint_Direction=nullptr;
-   std::vector<std::vector<double>> *TPCObj_PFP_track_dedx_perhit=nullptr;
-   std::vector<std::vector<double>> *TPCObj_PFP_track_resrange_perhit=nullptr;
+   std::vector<std::vector<std::vector<double>>> *TPCObj_PFP_track_dedx_perhit=nullptr;
+   std::vector<std::vector<std::vector<double>>> *TPCObj_PFP_track_resrange_perhit=nullptr;
 
    // These are derived quantities - derived from the values above in Calcvars
    std::vector<double> *TPCObj_PFP_LH_p;
@@ -104,6 +104,7 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("TPCObj_PFP_track_dedx_perhit", &(varstoset->TPCObj_PFP_track_dedx_perhit));
    intree->SetBranchStatus("TPCObj_PFP_track_resrange_perhit",1);
    intree->SetBranchAddress("TPCObj_PFP_track_resrange_perhit", &(varstoset->TPCObj_PFP_track_resrange_perhit));
+
 }
 
 void Calcvars(treevars *vars){
@@ -140,6 +141,7 @@ void Calcvars(treevars *vars){
          vars->TPCObj_PFP_VtxTrackDist->at(i_track) = -9999;
          vars->TPCObj_PFP_BrokenTrackAngle->at(i_track) = -9999;
          vars->TPCObj_PFP_isContained_double->at(i_track) = -9999;
+         vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) = -9999;
 
          continue;
       }
@@ -208,21 +210,24 @@ void Calcvars(treevars *vars){
       double dEdx_start_mean = 0.;
       std::vector<float> dEdx_float;
       //std::cout << "---" << std::endl;
-      std::cout << vars->TPCObj_PFP_track_dedx_perhit->size() << std::endl;
+      // Vector order is track/plane/hit
       for (int i=1; i<nhits_start; i++){
           // Skip first hit (start from i=1) and last hit
-          size_t perhit_size = vars->TPCObj_PFP_track_dedx_perhit->at(i_pl).size();
+          size_t perhit_size = vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl).size();
+          // std::cout << "perhit_size = " << perhit_size << std::endl;
           if (i>=perhit_size) continue;
           int index = i;
-          if (vars->TPCObj_PFP_track_resrange_perhit->at(i_pl).at(0)<vars->TPCObj_PFP_track_resrange_perhit->at(i_pl).at(perhit_size-1)){ // start of vector is end of track
+          if (vars->TPCObj_PFP_track_resrange_perhit->at(i_track).at(i_pl).at(0)<vars->TPCObj_PFP_track_resrange_perhit->at(i_track).at(i_pl).at(perhit_size-1)){ // start of vector is end of track
            index = perhit_size-i;
-           std::cout << "Pushing back residual range " << vars->TPCObj_PFP_track_resrange_perhit->at(i_pl).at(index) << " instead of " << vars->TPCObj_PFP_track_resrange_perhit->at(i_pl).at(i) << std::endl;
+           // std::cout << "Pushing back residual range " << vars->TPCObj_PFP_track_resrange_perhit->at(i_track).at(i_pl).at(index) << " instead of " << vars->TPCObj_PFP_track_resrange_perhit->at(i_track).at(i_pl).at(i) << std::endl;
           }
-          dEdx_float.push_back((float)(vars->TPCObj_PFP_track_dedx_perhit->at(i_pl).at(index)));
-          std::cout << "Pushing back residual range " << vars->TPCObj_PFP_track_resrange_perhit->at(i_pl).at(index) << " instead of " << vars->TPCObj_PFP_track_resrange_perhit->at(i_pl).at(perhit_size-i) << std::endl;
+          else{
+           // std::cout << "Pushing back residual range " << vars->TPCObj_PFP_track_resrange_perhit->at(i_track).at(i_pl).at(index) << " instead of " << vars->TPCObj_PFP_track_resrange_perhit->at(i_track).at(i_pl).at(perhit_size-i) << std::endl;
+          }
+          dEdx_float.push_back((float)(vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl).at(index)));
       }
       TruncMean trm;
-      if (dEdx_float.size()>0) vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_pl) = (double)trm.CalcIterativeTruncMean(dEdx_float, 1, 1, 0, 1, 0.1, 1.0);
+      if (dEdx_float.size()>0) vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) = (double)trm.CalcIterativeTruncMean(dEdx_float, 1, 1, 0, 1, 0.1, 1.0);
 
    } // end loop over tracks in TPCObj (i_track)
 }
@@ -251,15 +256,15 @@ void Clearvars(treevars *vars){
 std::vector<std::vector<double>> GetCutvarstoplot(treevars *vars){
    std::vector<std::vector<double>> varstoplot = {
       *(vars->TPCObj_PFP_Lmipoverp),
-//      *(vars->TPCObj_PFP_Lmumipovermumipp),
+      *(vars->TPCObj_PFP_Lmumipovermumipp),
       *(vars->TPCObj_PFP_BrokenTrackAngle),
-//      *(vars->TPCObj_PFP_track_residual_mean),
-//      *(vars->TPCObj_PFP_track_residual_mean),
-//      *(vars->TPCObj_PFP_track_residual_std),
-//      *(vars->TPCObj_PFP_track_residual_std),
+      *(vars->TPCObj_PFP_track_residual_mean),
+      *(vars->TPCObj_PFP_track_residual_mean),
+      *(vars->TPCObj_PFP_track_residual_std),
+      *(vars->TPCObj_PFP_track_residual_std),
       *(vars->TPCObj_PFP_track_perc_used_hits),
-      *(vars->TPCObj_PFP_VtxTrackDist)
-//      *(vars->TPCObj_PFP_isContained_double)
+      *(vars->TPCObj_PFP_VtxTrackDist),
+      *(vars->TPCObj_PFP_isContained_double)
    };
    return varstoplot;
 };
@@ -267,57 +272,57 @@ std::vector<std::vector<double>> GetCutvarstoplot(treevars *vars){
 // For efficiency/purity we need to know whether we want to be keep tracks that have values above or below the cut value
 std::vector<bool> KeepBelowCut = {
    false, // Lmipoverp
-//   false, // Lmumipovermumipp
+   false, // Lmumipovermumipp
    true,  // BrokenTrackAngle
-//   true,  // residual_mean_up
-//   false, // residual_mean_down
-//   true,  // residual_std_up
-//   false, // residual_std_down
+   true,  // residual_mean_up
+   false, // residual_mean_down
+   true,  // residual_std_up
+   false, // residual_std_down
    false, // perc_used_hits
-   true  // VtxTrackDist
-//   false  // isContained
+   true,  // VtxTrackDist
+   false  // isContained
 };
 
 // Do we want to consider just the direct daughters of the neutrino?
 std::vector<bool> OnlyDaughters = {
    true,  // Lmipoverp
-//   true,  // Lmumipovermumipp
+   true,  // Lmumipovermumipp
    false, // BrokenTrackAngle
-//   true,  // residual_mean_up
-//   true,  // residual_mean_down
-//   true,  // residual_std_up
-//   true,  // residual_std_down
+   true,  // residual_mean_up
+   true,  // residual_mean_down
+   true,  // residual_std_up
+   true,  // residual_std_down
    true,  // perc_used_hits
-   false // VtxTrackDist
-//   false  // isContained
+   false, // VtxTrackDist
+   false  // isContained
 };
 
 // How many tracks do we want to pass the cut? (Options are atleasttwo, exactlytwo, all)
 std::vector<std::string> TracksNeeded = {
    "exactlytwo",  // Lmipoverp
-//   "exactlytwo",  // Lmumipovermumipp
+   "exactlytwo",  // Lmumipovermumipp
    "all",         // BrokenTrackAngle
-//   "atleasttwo",  // residual_mean_up
-//   "atleasttwo",  // residual_mean_down
-//   "atleasttwo",  // residual_std_up
-//   "atleasttwo",  // residual_std_down
+   "atleasttwo",  // residual_mean_up
+   "atleasttwo",  // residual_mean_down
+   "atleasttwo",  // residual_std_up
+   "atleasttwo",  // residual_std_down
    "atleasttwo",  // perc_used_hits
-   "atleasttwo"  // VtxTrackDist
-//   "all"          // isConainted
+   "atleasttwo",  // VtxTrackDist
+   "all"          // isConainted
 };
 
 // Cut values for N-1 plot
 std::vector<double> CutValues = {
    1.,   // Lmipoverp
-//   0.66, // Lmumipovermumipp
+   0.66, // Lmumipovermumipp
    3.05, // BrokenTrackAngle
-//   0.7,  // residual_mean_up
-//   -0.7, // residual_mean_down
-//   2.5,  // residual_std_up
-//   0.,   // residual_std_down
+   0.7,  // residual_mean_up
+   -0.7, // residual_mean_down
+   2.5,  // residual_std_up
+   0.,   // residual_std_down
    0.7,  // perc_used_hits
-   15.  // VtxTrackDist
-//   0.5   // isContained
+   15.,  // VtxTrackDist
+   0.5   // isContained
 };
 
 // --------------------------------------------------- //
