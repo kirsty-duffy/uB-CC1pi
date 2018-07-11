@@ -12,7 +12,8 @@ std::vector<std::vector<double>> GetVarstoplot(treevars *vars){
       *(vars->TPCObj_PFP_track_residual_std),
       *(vars->TPCObj_PFP_track_perc_used_hits),
       *(vars->TPCObj_PFP_VtxTrackDist),
-      *(vars->TPCObj_PFP_isContained_double)
+      *(vars->TPCObj_PFP_isContained_double),
+      *(vars->TPCObj_PFP_track_dEdx_truncmean_start)
    };
    return varstoplot;
 };
@@ -29,7 +30,8 @@ std::vector<std::vector<double>> bins = {
    {25,0,2},      // residual_std_down
    {25,0,1},      // perc_used_hits
    {25,0,20},     // VtxTrackDist
-   {2,0,2}        // isContained
+   {2,0,2},        // isContained
+   {50,0,10}      // dEdx truncmean at start
 };
 
 // Histogram titles in the same order as the vector above
@@ -43,21 +45,23 @@ std::vector<std::string> histtitles = {
    ";#sigma_{r_{i}};",
    ";Fraction of used hits in cluster;",
    ";Distance from reconstructed vertex;",
-   ";isContained;"
+   ";isContained;",
+   ";Truncated Mean dE/dx at start of track;"
 };
 
 // What to call saved plots in the same order as the vector above
 std::vector<std::string> histnames = {
-   "effpur_Lmipoverp",
-   "effpur_Lmumipovermumipp",
-   "effpur_BrokenTrackAngle",
-   "effpur_residual_mean_up",
-   "effpur_residual_mean_down",
-   "effpur_residual_std_up",
-   "effpur_residual_std_down",
-   "effpur_perc_used_hits",
-   "effpur_VtxTrackDist",
-   "effpur_isContained"
+   "Lmipoverp",
+   "Lmumipovermumipp",
+   "BrokenTrackAngle",
+   "residual_mean_up",
+   "residual_mean_down",
+   "residual_std_up",
+   "residual_std_down",
+   "perc_used_hits",
+   "VtxTrackDist",
+   "isContained",
+   "dEdx_truncmean_atstart"
 };
 
 // ---------------------------------------------------- //

@@ -1,3 +1,4 @@
+#include "../../../../larana/larana/TruncatedMean/Algorithm/TruncMean.cxx"
 #include "../Algorithms/TopologyEnums.h"
 #include "StackedHistPDGCode.h"
 #include "StackedHistTopology.h"
@@ -35,6 +36,11 @@ struct treevars{
    std::vector<bool> *TPCObj_PFP_track_isContained = nullptr;
    std::vector<int> *TPCObj_PFP_truePDG = nullptr;
 
+   std::vector<std::vector<double>> *TPCObj_PFP_track_trajPoint_Position=nullptr;
+   std::vector<std::vector<double>> *TPCObj_PFP_track_trajPoint_Direction=nullptr;
+   std::vector<std::vector<double>> *TPCObj_PFP_track_dedx_perhit=nullptr;
+   std::vector<std::vector<double>> *TPCObj_PFP_track_resrange_perhit=nullptr;
+
    // These are derived quantities - derived from the values above in Calcvars
    std::vector<double> *TPCObj_PFP_LH_p;
    std::vector<double> *TPCObj_PFP_LH_mu;
@@ -45,6 +51,7 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_BrokenTrackAngle;
    std::vector<double> *TPCObj_PFP_VtxTrackDist;
    std::vector<double> *TPCObj_PFP_isContained_double;
+   std::vector<double> *TPCObj_PFP_track_dEdx_truncmean_start;
 };
 
 void settreevars(TTree *intree, treevars *varstoset){
@@ -89,6 +96,14 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("TPCObj_PFP_track_isContained", &(varstoset->TPCObj_PFP_track_isContained));
    intree->SetBranchStatus("TPCObj_PFP_truePDG",1);
    intree->SetBranchAddress("TPCObj_PFP_truePDG", &(varstoset->TPCObj_PFP_truePDG));
+   intree->SetBranchStatus("TPCObj_PFP_track_trajPoint_Position",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_trajPoint_Position", &(varstoset->TPCObj_PFP_track_trajPoint_Position));
+   intree->SetBranchStatus("TPCObj_PFP_track_trajPoint_Direction",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_trajPoint_Direction", &(varstoset->TPCObj_PFP_track_trajPoint_Direction));
+   intree->SetBranchStatus("TPCObj_PFP_track_dedx_perhit",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_dedx_perhit", &(varstoset->TPCObj_PFP_track_dedx_perhit));
+   intree->SetBranchStatus("TPCObj_PFP_track_resrange_perhit",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_resrange_perhit", &(varstoset->TPCObj_PFP_track_resrange_perhit));
 }
 
 void Calcvars(treevars *vars){
@@ -105,6 +120,7 @@ void Calcvars(treevars *vars){
    vars->TPCObj_PFP_BrokenTrackAngle = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_VtxTrackDist = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_isContained_double = new std::vector<double>(vecsize);
+   vars->TPCObj_PFP_track_dEdx_truncmean_start = new std::vector<double>(vecsize);
 
    // Just use collection plane for now
    int i_pl = 2;
@@ -187,7 +203,28 @@ void Calcvars(treevars *vars){
 
       vars->TPCObj_PFP_BrokenTrackAngle->at(i_track) = maxangle;
 
-   }
+      // Calculate truncated mean dE/dx at the start of the track
+      int nhits_start = 10;
+      double dEdx_start_mean = 0.;
+      std::vector<float> dEdx_float;
+      //std::cout << "---" << std::endl;
+      std::cout << vars->TPCObj_PFP_track_dedx_perhit->size() << std::endl;
+      for (int i=1; i<nhits_start; i++){
+          // Skip first hit (start from i=1) and last hit
+          size_t perhit_size = vars->TPCObj_PFP_track_dedx_perhit->at(i_pl).size();
+          if (i>=perhit_size) continue;
+          int index = i;
+          if (vars->TPCObj_PFP_track_resrange_perhit->at(i_pl).at(0)<vars->TPCObj_PFP_track_resrange_perhit->at(i_pl).at(perhit_size-1)){ // start of vector is end of track
+           index = perhit_size-i;
+           std::cout << "Pushing back residual range " << vars->TPCObj_PFP_track_resrange_perhit->at(i_pl).at(index) << " instead of " << vars->TPCObj_PFP_track_resrange_perhit->at(i_pl).at(i) << std::endl;
+          }
+          dEdx_float.push_back((float)(vars->TPCObj_PFP_track_dedx_perhit->at(i_pl).at(index)));
+          std::cout << "Pushing back residual range " << vars->TPCObj_PFP_track_resrange_perhit->at(i_pl).at(index) << " instead of " << vars->TPCObj_PFP_track_resrange_perhit->at(i_pl).at(perhit_size-i) << std::endl;
+      }
+      TruncMean trm;
+      if (dEdx_float.size()>0) vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_pl) = (double)trm.CalcIterativeTruncMean(dEdx_float, 1, 1, 0, 1, 0.1, 1.0);
+
+   } // end loop over tracks in TPCObj (i_track)
 }
 
 
@@ -206,6 +243,7 @@ void Clearvars(treevars *vars){
    delete vars->TPCObj_PFP_BrokenTrackAngle;
    delete vars->TPCObj_PFP_VtxTrackDist;
    delete vars->TPCObj_PFP_isContained_double;
+   delete vars->TPCObj_PFP_track_dEdx_truncmean_start;
 
 }
 
