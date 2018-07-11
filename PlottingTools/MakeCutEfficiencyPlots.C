@@ -3,43 +3,43 @@
 // Binning (nbins, binlow, binhigh) in the same order as the vector above
 std::vector<std::vector<double>> bins = {
    {25,0.3,3},    // Lmipoverp
-   {25,0.5,0.9},  // Lmumipovermumipp
+//   {25,0.5,0.9},  // Lmumipovermumipp
    {100,2.8,3.15}, // BrokenTrackAngle
-   {25,0,2.8},    // residual_mean_up
-   {25,-2.8,0},   // residual_mean_down
-   {25,0,4},      // residual_std_up
-   {25,0,2},      // residual_std_down
+//   {25,0,2.8},    // residual_mean_up
+//   {25,-2.8,0},   // residual_mean_down
+//   {25,0,4},      // residual_std_up
+//   {25,0,2},      // residual_std_down
    {25,0,1},      // perc_used_hits
-   {25,0,20},     // VtxTrackDist
-   {1,0,1}        // isContained
+   {25,0,20}     // VtxTrackDist
+//   {1,0,1}        // isContained
 };
 
 // Histogram titles in the same order as the vector above
 std::vector<std::string> histtitles = {
    ";(L_{MIP})/(L_{p});",
-   ";(L_{#mu}+L_{MIP})/(L_{#mu}+L_{MIP}+L_{p});",
+//   ";(L_{#mu}+L_{MIP})/(L_{#mu}+L_{MIP}+L_{p});",
    ";Angle [rad];",
-   ";<r_{i}>;",
-   ";<r_{i}>;",
-   ";#sigma_{r_{i}};",
-   ";#sigma_{r_{i}};",
+//   ";<r_{i}>;",
+//   ";<r_{i}>;",
+//   ";#sigma_{r_{i}};",
+//   ";#sigma_{r_{i}};",
    ";Fraction of used hits in cluster;",
-   ";Distance from reconstructed vertex;",
-   ";isContained;"
+   ";Distance from reconstructed vertex;"
+//   ";isContained;"
 };
 
 // What to call saved plots in the same order as the vector above
 std::vector<std::string> histnames = {
    "effpur_Lmipoverp",
-   "effpur_Lmumipovermumipp",
+//   "effpur_Lmumipovermumipp",
    "effpur_BrokenTrackAngle",
-   "effpur_residual_mean_up",
-   "effpur_residual_mean_down",
-   "effpur_residual_std_up",
-   "effpur_residual_std_down",
+//   "effpur_residual_mean_up",
+//   "effpur_residual_mean_down",
+//   "effpur_residual_std_up",
+//   "effpur_residual_std_down",
    "effpur_perc_used_hits",
-   "effpur_VtxTrackDist",
-   "effpur_isContained"
+   "effpur_VtxTrackDist"
+//   "effpur_isContained"
 };
 
 // ---------------------------------------------------- //
