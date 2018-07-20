@@ -298,7 +298,7 @@ unsigned int StackedHistPDGCode::GetHistN(PDGCode particle_pdg)
   }
 
   if (!found_hist){
-    std::cout << "[ERROR: StackedHistPDGCode.h] Could not find histogram for PDG code " << particle_pdg << std::endl;
+    //std::cout << "[ERROR: StackedHistPDGCode.h] Could not find histogram for PDG code " << particle_pdg << std::endl;
     HistN = nHists-1;
   }
 
