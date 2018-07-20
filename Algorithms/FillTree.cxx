@@ -10,6 +10,13 @@ cc1pianavars::cc1pianavars(fhicl::ParameterSet const &p){
    pset = p;
 
    CC1piInputTags = new InputTags(p);
+
+  fhicl::ParameterSet p_bragg = p.get<fhicl::ParameterSet>("BraggAlgoConfig");
+
+  braggcalc.configure(p_bragg);
+  braggcalc.checkRange=false;
+  braggcalc.nHitsToDrop = 0;
+  braggcalc.printConfiguration();
 }
 
 
@@ -88,6 +95,7 @@ void cc1pianavars::Clear(){
    TPCObj_PFP_track_Chi2Pion.clear();
    TPCObj_PFP_track_rangeE_mu.clear();
    TPCObj_PFP_track_rangeE_p.clear();
+   TPCObj_PFP_track_Lmip_perhit.clear();
 
    // MCParticle variables
    MCP_PDG.clear();
@@ -268,6 +276,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          bool isMIP = false;
          std::vector<std::vector<double>> track_trajpoint_position;
          std::vector<std::vector<double>> track_trajpoint_direction;
+         std::vector<std::vector<double>> noBragg_MIP_perhit(3);
          std::vector<double> Bragg_fwd_mu(3,-999.);
          std::vector<double> Bragg_fwd_p(3,-999.);
          std::vector<double> Bragg_fwd_pi(3,-999.);
@@ -348,9 +357,19 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
                   track_resrange_perhit.at(planenum) = c->ResidualRange();
 
                   std::vector<double> trkpitchvec = c->TrkPitchVec();
+
                   double track_depE_tmp = 0;
+                  std::vector<double> dEdx_dummy = {0.};
+                  std::vector<double> rr_dummy = {0.};
+
                   for (size_t i_hit=0; i_hit < c->dEdx().size(); i_hit++){
                      track_depE_tmp += c->dEdx().at(i_hit)*trkpitchvec.at(i_hit);
+
+                     double Lmip = -9999;
+                     dEdx_dummy.at(0) = c->dEdx().at(i_hit);
+                     rr_dummy.at(0) = c->ResidualRange().at(i_hit);
+                     Lmip = braggcalc.getLikelihood(dEdx_dummy,rr_dummy,0,1,planenum);
+                     noBragg_MIP_perhit.at(planenum).emplace_back(Lmip);
                   }
                   track_depE.at(planenum) = track_depE_tmp;
                }
@@ -374,7 +393,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
                   for (size_t i_algscore=0; i_algscore<AlgScoresVec.size(); i_algscore++){
 
                      anab::sParticleIDAlgScores AlgScore = AlgScoresVec.at(i_algscore);
-                     int planeid = AlgScore.fPlaneID.Plane;
+                     int planeid = UBPID::uB_getSinglePlane(AlgScore.fPlaneID);
 
                      if (planeid < 0 || planeid > 2){
                        std::cout << "[CC1pi::FillTree] No ParticleID information for planeid " << planeid << std::endl;
@@ -382,19 +401,19 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
                      }
 
 
-                     if (AlgScore.fAlgName == "BraggPeakLLH"){
-                        if (anab::kVariableType(AlgScore.fVariableType) == anab::kLikelihood_fwd){
+                     if (AlgScore.fAlgName == "BraggPeakLLH" && anab::kVariableType(AlgScore.fVariableType) == anab::kLikelihood){
+                       if (AlgScore.fAssumedPdg == 0) noBragg_MIP.at(planeid) = AlgScore.fValue;
+                        if (anab::kTrackDir(AlgScore.fTrackDir) == anab::kForward){
                            if (AlgScore.fAssumedPdg == 13)   Bragg_fwd_mu.at(planeid) = AlgScore.fValue;
                            if (AlgScore.fAssumedPdg == 2212) Bragg_fwd_p.at(planeid) =  AlgScore.fValue;
                            if (AlgScore.fAssumedPdg == 211) Bragg_fwd_pi.at(planeid) =  AlgScore.fValue;
-                           if (AlgScore.fAssumedPdg == 0) noBragg_MIP.at(planeid) = AlgScore.fValue;
-                        }// if fVariableType == anab::kLikelihood_fwd
-                        else if (anab::kVariableType(AlgScore.fVariableType) == anab::kLikelihood_bwd){
+                        }// if fTrackDir == anab::kForward
+                        else if (anab::kTrackDir(AlgScore.fTrackDir) == anab::kBackward){
                            if (AlgScore.fAssumedPdg == 13)   Bragg_bwd_mu.at(planeid) = AlgScore.fValue;
                            if (AlgScore.fAssumedPdg == 2212) Bragg_bwd_p.at(planeid) =  AlgScore.fValue;
                            if (AlgScore.fAssumedPdg == 211) Bragg_bwd_pi.at(planeid) =  AlgScore.fValue;
-                        } // if fVariableType == anab::kLikelihood_bwd
-                     } // if fAlName = BraggPeakLLH
+                        } // if fTrackDir == anab::kBackward
+                     } // if fAlName = BraggPeakLLH && fVariableType == anab::kLikelihood
 
                      if (AlgScore.fAlgName == "PIDA_median" && anab::kVariableType(AlgScore.fVariableType) == anab::kPIDA){
                         PIDAval.at(planeid) = AlgScore.fValue;
@@ -509,6 +528,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          TPCObj_PFP_track_Chi2Pion.emplace_back(track_Chi2Pion);
          TPCObj_PFP_track_rangeE_mu.emplace_back(track_rangeE_mu);
          TPCObj_PFP_track_rangeE_p.emplace_back(track_rangeE_p);
+         TPCObj_PFP_track_Lmip_perhit.emplace_back(noBragg_MIP_perhit);
 
 
          // Fill non-specific variables
@@ -724,6 +744,7 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("TPCObj_PFP_track_Chi2Pion", &(vars->TPCObj_PFP_track_Chi2Pion));
    t -> Branch("TPCObj_PFP_track_rangeE_mu", &(vars->TPCObj_PFP_track_rangeE_mu));
    t -> Branch("TPCObj_PFP_track_rangeE_p", &(vars->TPCObj_PFP_track_rangeE_p));
+   t -> Branch("TPCObj_PFP_track_Lmip_perhit",&(vars->TPCObj_PFP_track_Lmip_perhit));
 
    t -> Branch("MCP_PDG", &(vars->MCP_PDG));
    t -> Branch("MCP_length", &(vars->MCP_length));

@@ -3,6 +3,7 @@
 #include "caldata_microboone.fcl"
 #include "config_particle_identification_fiducialvolume.fcl"
 #include "config_particle_identification_braggalgo.fcl"
+#include "config_dedx_calibration.fcl"
 
 # This line should be different for MC/BNB data/EXT data
 #include "run_ubxsec_mc_bnbcosmic.fcl"
