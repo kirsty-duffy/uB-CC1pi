@@ -4,6 +4,7 @@
 std::vector<std::vector<double>> GetVarstoplot(treevars *vars){
    std::vector<std::vector<double>> varstoplot = {
       *(vars->TPCObj_PFP_Lmipoverp),
+      *(vars->TPCObj_PFP_lnLmipoverp),
       *(vars->TPCObj_PFP_Lmumipovermumipp),
       *(vars->TPCObj_PFP_BrokenTrackAngle),
       *(vars->TPCObj_PFP_track_residual_mean),
@@ -13,7 +14,10 @@ std::vector<std::vector<double>> GetVarstoplot(treevars *vars){
       *(vars->TPCObj_PFP_track_perc_used_hits),
       *(vars->TPCObj_PFP_VtxTrackDist),
       *(vars->TPCObj_PFP_isContained_double),
-      *(vars->TPCObj_PFP_track_dEdx_truncmean_start)
+      *(vars->TPCObj_PFP_track_dEdx_truncmean_start),
+      *(vars->TPCObj_DaughterTracks_Order_dEdxtr),
+      *(vars->TPCObj_DaughterTracks_Order_dEdxtr_selMIPs),
+      *(vars->TPCObj_DaughterTracks_Order_trklen_selMIPs)
    };
    return varstoplot;
 };
@@ -22,6 +26,7 @@ std::vector<std::vector<double>> GetVarstoplot(treevars *vars){
 // Binning (nbins, binlow, binhigh) in the same order as the vector above
 std::vector<std::vector<double>> bins = {
    {25,0.3,3},    // Lmipoverp
+   {60,-10,10},   // lnLmipoverp
    {25,0.5,0.9},  // Lmumipovermumipp
    {25,2.8,3.15}, // BrokenTrackAngle
    {25,0,2.8},    // residual_mean_up
@@ -31,12 +36,16 @@ std::vector<std::vector<double>> bins = {
    {25,0,1},      // perc_used_hits
    {25,0,20},     // VtxTrackDist
    {2,0,2},        // isContained
-   {50,0,10}      // dEdx truncmean at start
+   {50,0,10},      // dEdx truncmean at start
+   {10,0,10},       // Daughter tracks ordered by dEdx truncmean
+   {10,0,10},       // Daughter MIP-like tracks ordered by dEdx truncmean
+   {10,0,10}       // Daughter MIP-like tracks ordered by track length
 };
 
 // Histogram titles in the same order as the vector above
 std::vector<std::string> histtitles = {
    ";(L_{MIP})/(L_{p});",
+   ";ln(L_{MIP})/(L_{p});",
    ";(L_{#mu}+L_{MIP})/(L_{#mu}+L_{MIP}+L_{p});",
    ";Angle [rad];",
    ";<r_{i}>;",
@@ -46,12 +55,16 @@ std::vector<std::string> histtitles = {
    ";Fraction of used hits in cluster;",
    ";Distance from reconstructed vertex;",
    ";isContained;",
-   ";Truncated Mean dE/dx at start of track;"
+   ";Truncated Mean dE/dx at start of track;",
+   ";Daughter PFPs (ordered lowest to highest <dE/dx>_{tr});",
+   ";Daughter PFPs classed as MIPs (ordered lowest to highest <dE/dx>_{tr});",
+   ";Daughter PFPs classed as MIPs (ordered lowest to highest track length);"
 };
 
 // What to call saved plots in the same order as the vector above
 std::vector<std::string> histnames = {
    "Lmipoverp",
+   "lnLmipoverp",
    "Lmumipovermumipp",
    "BrokenTrackAngle",
    "residual_mean_up",
@@ -61,7 +74,10 @@ std::vector<std::string> histnames = {
    "perc_used_hits",
    "VtxTrackDist",
    "isContained",
-   "dEdx_truncmean_atstart"
+   "dEdx_truncmean_atstart",
+   "daughterPFPs_bydEdxstart",
+   "daughterPFPs_bydEdxstart_MIPs",
+   "daughterPFPs_bytrklen_MIPs"
 };
 
 // ---------------------------------------------------- //
@@ -132,11 +148,12 @@ void MakeCutPlots(std::string mcfile){
       // Determine if event is selected
       bool isSelected = true;
       for (size_t i_cut = 0; i_cut < Cutvarstoplot.size(); i_cut++){
-         if(!IsEventSelected(CutValues.at(i_cut), Cutvarstoplot.at(i_cut), KeepBelowCut.at(i_cut), mc_vars.Truth_topology, *(mc_vars.TPCObj_PFP_isDaughter), OnlyDaughters.at(i_cut), TracksNeeded.at(i_cut))) {
+         if(!IsEventSelected(CutValues.at(i_cut), Cutvarstoplot.at(i_cut), KeepBelowCut.at(i_cut), mc_vars.Marco_selected, *(mc_vars.TPCObj_PFP_isDaughter), OnlyDaughters.at(i_cut), TracksNeeded.at(i_cut), isMIPCut.at(i_cut))) {
             isSelected = false;
-            break;
+            // break;
          }
       }
+
 
       if(isSelected) SelectedEvents->Fill((NuIntTopology)mc_vars.Truth_topology,0);
 
@@ -145,6 +162,8 @@ void MakeCutPlots(std::string mcfile){
 
          // Loop over tracks
          for (size_t i_tr = 0; i_tr < Varstoplot.at(0).size(); i_tr++){
+            if (!(mc_vars.TPCObj_PFP_isDaughter->at(i_tr) && bool(mc_vars.TPCObj_PFP_track_passesMIPcut->at(i_tr)))) continue;
+
             mc_hists_cc1pi_pdg_beforecuts[i_h]->Fill((PDGCode)mc_vars.TPCObj_PFP_truePDG->at(i_tr),Varstoplot.at(i_h).at(i_tr));
             mc_hists_cc1pi_top_beforecuts[i_h]->Fill((NuIntTopology)mc_vars.Truth_topology,Varstoplot.at(i_h).at(i_tr),1.0/Varstoplot.at(0).size());
 

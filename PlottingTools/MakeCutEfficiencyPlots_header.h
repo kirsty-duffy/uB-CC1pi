@@ -11,319 +11,12 @@
 #include "TStyle.h"
 #include "TFile.h"
 #include "TVector3.h"
-#include <vector>
+// #include <vector>
 
-struct treevars{
-   // These are the variables that are filled directly from the tree
-   std::vector<std::vector<double>> *TPCObj_PFP_LH_fwd_mu = nullptr;
-   std::vector<std::vector<double>> *TPCObj_PFP_LH_fwd_p = nullptr;
-   std::vector<std::vector<double>> *TPCObj_PFP_LH_fwd_pi = nullptr;
-   std::vector<std::vector<double>> *TPCObj_PFP_LH_bwd_mu = nullptr;
-   std::vector<std::vector<double>> *TPCObj_PFP_LH_bwd_p = nullptr;
-   std::vector<std::vector<double>> *TPCObj_PFP_LH_bwd_pi = nullptr;
-   std::vector<std::vector<double>> *TPCObj_PFP_LH_MIP = nullptr;
-   NuIntTopology Truth_topology = kUnknown;
-   bool Marco_selected = false;
-   std::vector<bool> *TPCObj_PFP_isDaughter = nullptr;
-   std::vector<double> *TPCObj_PFP_track_theta = nullptr;
-   std::vector<double> *TPCObj_PFP_track_phi = nullptr;
-   std::vector<std::vector<double>> *TPCObj_PFP_track_start = nullptr;
-   std::vector<std::vector<double>> *TPCObj_PFP_track_end = nullptr;
-   std::vector<double> *TPCObj_PFP_track_residual_mean = nullptr;
-   std::vector<double> *TPCObj_PFP_track_residual_std = nullptr;
-   std::vector<double> *TPCObj_PFP_track_perc_used_hits = nullptr;
-   std::vector<double> *TPCObj_reco_vtx = nullptr;
-   std::vector<bool> *TPCObj_PFP_track_isContained = nullptr;
-   std::vector<int> *TPCObj_PFP_truePDG = nullptr;
+#include "treevars_header_structdef.h"
+#include "CutValues_header.h"
+#include "treevars_header.h"
 
-   std::vector<std::vector<double>> *TPCObj_PFP_track_trajPoint_Position=nullptr;
-   std::vector<std::vector<double>> *TPCObj_PFP_track_trajPoint_Direction=nullptr;
-   std::vector<std::vector<std::vector<double>>> *TPCObj_PFP_track_dedx_perhit=nullptr;
-   std::vector<std::vector<std::vector<double>>> *TPCObj_PFP_track_resrange_perhit=nullptr;
-
-   // These are derived quantities - derived from the values above in Calcvars
-   std::vector<double> *TPCObj_PFP_LH_p;
-   std::vector<double> *TPCObj_PFP_LH_mu;
-   std::vector<double> *TPCObj_PFP_LH_pi;
-   std::vector<double> *TPCObj_PFP_LH_mip;
-   std::vector<double> *TPCObj_PFP_Lmipoverp;
-   std::vector<double> *TPCObj_PFP_Lmumipovermumipp;
-   std::vector<double> *TPCObj_PFP_BrokenTrackAngle;
-   std::vector<double> *TPCObj_PFP_VtxTrackDist;
-   std::vector<double> *TPCObj_PFP_isContained_double;
-   std::vector<double> *TPCObj_PFP_track_dEdx_truncmean_start;
-};
-
-void settreevars(TTree *intree, treevars *varstoset){
-   intree->SetBranchStatus("*",0);
-   intree->SetBranchStatus("TPCObj_PFP_LH_fwd_mu",1);
-   intree->SetBranchAddress("TPCObj_PFP_LH_fwd_mu", &(varstoset->TPCObj_PFP_LH_fwd_mu));
-   intree->SetBranchStatus("TPCObj_PFP_LH_fwd_p",1);
-   intree->SetBranchAddress("TPCObj_PFP_LH_fwd_p", &(varstoset->TPCObj_PFP_LH_fwd_p));
-   intree->SetBranchStatus("TPCObj_PFP_LH_fwd_pi",1);
-   intree->SetBranchAddress("TPCObj_PFP_LH_fwd_pi", &(varstoset->TPCObj_PFP_LH_fwd_pi));
-   intree->SetBranchStatus("TPCObj_PFP_LH_bwd_mu",1);
-   intree->SetBranchAddress("TPCObj_PFP_LH_bwd_mu", &(varstoset->TPCObj_PFP_LH_bwd_mu));
-   intree->SetBranchStatus("TPCObj_PFP_LH_bwd_p",1);
-   intree->SetBranchAddress("TPCObj_PFP_LH_bwd_p", &(varstoset->TPCObj_PFP_LH_bwd_p));
-   intree->SetBranchStatus("TPCObj_PFP_LH_bwd_pi",1);
-   intree->SetBranchAddress("TPCObj_PFP_LH_bwd_pi", &(varstoset->TPCObj_PFP_LH_bwd_pi));
-   intree->SetBranchStatus("TPCObj_PFP_LH_MIP",1);
-   intree->SetBranchAddress("TPCObj_PFP_LH_MIP", &(varstoset->TPCObj_PFP_LH_MIP));
-   intree->SetBranchStatus("Truth_topology",1);
-   intree->SetBranchAddress("Truth_topology", &(varstoset->Truth_topology));
-   intree->SetBranchStatus("Marco_selected",1);
-   intree->SetBranchAddress("Marco_selected", &(varstoset->Marco_selected));
-   intree->SetBranchStatus("TPCObj_PFP_isDaughter",1);
-   intree->SetBranchAddress("TPCObj_PFP_isDaughter", &(varstoset->TPCObj_PFP_isDaughter));
-   intree->SetBranchStatus("TPCObj_PFP_track_theta",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_theta", &(varstoset->TPCObj_PFP_track_theta));
-   intree->SetBranchStatus("TPCObj_PFP_track_phi",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_phi", &(varstoset->TPCObj_PFP_track_phi));
-   intree->SetBranchStatus("TPCObj_PFP_track_start",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_start", &(varstoset->TPCObj_PFP_track_start));
-   intree->SetBranchStatus("TPCObj_PFP_track_end",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_end", &(varstoset->TPCObj_PFP_track_end));
-   intree->SetBranchStatus("TPCObj_PFP_track_residual_mean",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_residual_mean", &(varstoset->TPCObj_PFP_track_residual_mean));
-   intree->SetBranchStatus("TPCObj_PFP_track_residual_std",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_residual_std", &(varstoset->TPCObj_PFP_track_residual_std));
-   intree->SetBranchStatus("TPCObj_PFP_track_perc_used_hits",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_perc_used_hits", &(varstoset->TPCObj_PFP_track_perc_used_hits));
-   intree->SetBranchStatus("TPCObj_reco_vtx",1);
-   intree->SetBranchAddress("TPCObj_reco_vtx", &(varstoset->TPCObj_reco_vtx));
-   intree->SetBranchStatus("TPCObj_PFP_track_isContained",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_isContained", &(varstoset->TPCObj_PFP_track_isContained));
-   intree->SetBranchStatus("TPCObj_PFP_truePDG",1);
-   intree->SetBranchAddress("TPCObj_PFP_truePDG", &(varstoset->TPCObj_PFP_truePDG));
-   intree->SetBranchStatus("TPCObj_PFP_track_trajPoint_Position",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_trajPoint_Position", &(varstoset->TPCObj_PFP_track_trajPoint_Position));
-   intree->SetBranchStatus("TPCObj_PFP_track_trajPoint_Direction",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_trajPoint_Direction", &(varstoset->TPCObj_PFP_track_trajPoint_Direction));
-   intree->SetBranchStatus("TPCObj_PFP_track_dedx_perhit",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_dedx_perhit", &(varstoset->TPCObj_PFP_track_dedx_perhit));
-   intree->SetBranchStatus("TPCObj_PFP_track_resrange_perhit",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_resrange_perhit", &(varstoset->TPCObj_PFP_track_resrange_perhit));
-
-}
-
-void Calcvars(treevars *vars){
-
-   // Initialise vectors that we are going to fill with calculated values
-   int vecsize = vars->TPCObj_PFP_LH_fwd_p->size();
-
-   vars->TPCObj_PFP_LH_p = new std::vector<double>(vecsize);
-   vars->TPCObj_PFP_LH_mu = new std::vector<double>(vecsize);
-   vars->TPCObj_PFP_LH_pi = new std::vector<double>(vecsize);
-   vars->TPCObj_PFP_LH_mip = new std::vector<double>(vecsize);
-   vars->TPCObj_PFP_Lmipoverp = new std::vector<double>(vecsize);
-   vars->TPCObj_PFP_Lmumipovermumipp = new std::vector<double>(vecsize);
-   vars->TPCObj_PFP_BrokenTrackAngle = new std::vector<double>(vecsize);
-   vars->TPCObj_PFP_VtxTrackDist = new std::vector<double>(vecsize);
-   vars->TPCObj_PFP_isContained_double = new std::vector<double>(vecsize);
-   vars->TPCObj_PFP_track_dEdx_truncmean_start = new std::vector<double>(vecsize);
-
-   // Just use collection plane for now
-   int i_pl = 2;
-
-   // Now calculate the values for all variables
-   for (int i_track=0; i_track < vecsize; i_track++){
-
-      // The neutrino and any other PFPs that didn't get reco'd as tracks should get bogus values
-      if(vars->TPCObj_PFP_track_theta->at(i_track) == -9999) {
-
-         vars->TPCObj_PFP_LH_p->at(i_track) = -9999;
-         vars->TPCObj_PFP_LH_mu->at(i_track) = -9999;
-         vars->TPCObj_PFP_LH_pi->at(i_track) = -9999;
-         vars->TPCObj_PFP_LH_mip->at(i_track) = -9999;
-         vars->TPCObj_PFP_Lmipoverp->at(i_track) = -9999;
-         vars->TPCObj_PFP_Lmumipovermumipp->at(i_track) = -9999;
-         vars->TPCObj_PFP_VtxTrackDist->at(i_track) = -9999;
-         vars->TPCObj_PFP_BrokenTrackAngle->at(i_track) = -9999;
-         vars->TPCObj_PFP_isContained_double->at(i_track) = -9999;
-         vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) = -9999;
-
-         continue;
-      }
-
-
-      vars->TPCObj_PFP_LH_p->at(i_track) = std::max(vars->TPCObj_PFP_LH_fwd_p->at(i_track).at(i_pl), vars->TPCObj_PFP_LH_bwd_p->at(i_track).at(i_pl));
-      vars->TPCObj_PFP_LH_mu->at(i_track) = std::max(vars->TPCObj_PFP_LH_fwd_mu->at(i_track).at(i_pl), vars->TPCObj_PFP_LH_bwd_mu->at(i_track).at(i_pl));
-      vars->TPCObj_PFP_LH_pi->at(i_track) = std::max(vars->TPCObj_PFP_LH_fwd_pi->at(i_track).at(i_pl), vars->TPCObj_PFP_LH_bwd_pi->at(i_track).at(i_pl));
-      vars->TPCObj_PFP_LH_mip->at(i_track) = vars->TPCObj_PFP_LH_MIP->at(i_track).at(i_pl);
-      vars->TPCObj_PFP_Lmipoverp->at(i_track) = vars->TPCObj_PFP_LH_mip->at(i_track) / vars->TPCObj_PFP_LH_p->at(i_track);
-      vars->TPCObj_PFP_Lmumipovermumipp->at(i_track) = (vars->TPCObj_PFP_LH_mu->at(i_track)+vars->TPCObj_PFP_LH_mip->at(i_track))/(vars->TPCObj_PFP_LH_mu->at(i_track)+vars->TPCObj_PFP_LH_mip->at(i_track)+vars->TPCObj_PFP_LH_p->at(i_track));
-      vars->TPCObj_PFP_VtxTrackDist->at(i_track) = std::hypot(std::hypot(vars->TPCObj_reco_vtx->at(0) - vars->TPCObj_PFP_track_start->at(i_track).at(0), vars->TPCObj_reco_vtx->at(1) - vars->TPCObj_PFP_track_start->at(i_track).at(1)), vars->TPCObj_reco_vtx->at(2) - vars->TPCObj_PFP_track_start->at(i_track).at(2));
-      vars->TPCObj_PFP_isContained_double->at(i_track) = (double)(vars->TPCObj_PFP_track_isContained->at(i_track));
-
-      // Angle between tracks (using theta and phi)...
-      int track1 = i_track;
-
-      // We want non-tracks to get bogus values (-9999)
-      // But we want tracks that just don't have other tracks close by to get 0
-      double maxangle = -1;
-
-      for (int track2 = track1+1; track2 < vecsize; track2++) {
-         if(vars->TPCObj_PFP_track_theta->at(track1) == -9999) continue;
-         if(vars->TPCObj_PFP_track_theta->at(track2) == -9999) continue;
-
-         TVector3 v1(1,1,1);
-         TVector3 v2(1,1,1);
-         v1.SetMag(1);
-         v2.SetMag(1);
-         v1.SetTheta(vars->TPCObj_PFP_track_theta->at(track1));
-         v2.SetTheta(vars->TPCObj_PFP_track_theta->at(track2));
-         v1.SetPhi(vars->TPCObj_PFP_track_phi->at(track1));
-         v2.SetPhi(vars->TPCObj_PFP_track_phi->at(track2));
-
-         TVector3 start1(vars->TPCObj_PFP_track_start->at(track1).at(0),vars->TPCObj_PFP_track_start->at(track1).at(1),vars->TPCObj_PFP_track_start->at(track1).at(2));
-         TVector3 end1(vars->TPCObj_PFP_track_end->at(track1).at(0),vars->TPCObj_PFP_track_end->at(track1).at(1),vars->TPCObj_PFP_track_end->at(track1).at(2));
-         TVector3 start2(vars->TPCObj_PFP_track_start->at(track2).at(0),vars->TPCObj_PFP_track_start->at(track2).at(1),vars->TPCObj_PFP_track_start->at(track2).at(2));
-         TVector3 end2(vars->TPCObj_PFP_track_end->at(track2).at(0),vars->TPCObj_PFP_track_end->at(track2).at(1),vars->TPCObj_PFP_track_end->at(track2).at(2));
-         std::vector<double> distances = { (start1-start2).Mag(),(start1-end2).Mag(), (end1-start2).Mag(), (end1-end2).Mag() };
-         double mindist = *std::min_element(distances.begin(),distances.end());
-
-         // Flip tracks if the closest point isn't start-start
-         // Not needed: cos is symmetric
-         // if(mindist==distances.at(1) || mindist==distances.at(3)) {
-         //    v2=-1*v2;
-         //    TVector3 oldstart2=start2;
-         //    start2=end2;
-         //    end2=oldstart2;
-         // }
-         // if(mindist==distances.at(2) || mindist==distances.at(3)) {
-         //    v1=-1*v1;
-         //    TVector3 oldstart1=start1;
-         //    start1=end1;
-         //    end1=oldstart1;
-         // }
-
-         double angle = TMath::ACos(v1.Dot(v2));
-
-         if(mindist < 3 && angle > maxangle) maxangle = angle;
-      }
-
-      vars->TPCObj_PFP_BrokenTrackAngle->at(i_track) = maxangle;
-
-      // Calculate truncated mean dE/dx at the start of the track
-      int nhits_start = 10;
-      double dEdx_start_mean = 0.;
-      std::vector<float> dEdx_float;
-      //std::cout << "---" << std::endl;
-      // Vector order is track/plane/hit
-      for (int i=1; i<nhits_start; i++){
-          // Skip first hit (start from i=1) and last hit
-          size_t perhit_size = vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl).size();
-          // std::cout << "perhit_size = " << perhit_size << std::endl;
-          if (i>=perhit_size) continue;
-          int index = i;
-          if (vars->TPCObj_PFP_track_resrange_perhit->at(i_track).at(i_pl).at(0)<vars->TPCObj_PFP_track_resrange_perhit->at(i_track).at(i_pl).at(perhit_size-1)){ // start of vector is end of track
-           index = perhit_size-i;
-           // std::cout << "Pushing back residual range " << vars->TPCObj_PFP_track_resrange_perhit->at(i_track).at(i_pl).at(index) << " instead of " << vars->TPCObj_PFP_track_resrange_perhit->at(i_track).at(i_pl).at(i) << std::endl;
-          }
-          else{
-           // std::cout << "Pushing back residual range " << vars->TPCObj_PFP_track_resrange_perhit->at(i_track).at(i_pl).at(index) << " instead of " << vars->TPCObj_PFP_track_resrange_perhit->at(i_track).at(i_pl).at(perhit_size-i) << std::endl;
-          }
-          dEdx_float.push_back((float)(vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl).at(index)));
-      }
-      TruncMean trm;
-      if (dEdx_float.size()>0) vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) = (double)trm.CalcIterativeTruncMean(dEdx_float, 1, 1, 0, 1, 0.1, 1.0);
-
-   } // end loop over tracks in TPCObj (i_track)
-}
-
-
-// --------------------------------------------------- //
-// Function to clear memory from calculated variables
-
-
-void Clearvars(treevars *vars){
-
-   delete vars->TPCObj_PFP_LH_p;
-   delete vars->TPCObj_PFP_LH_mu;
-   delete vars->TPCObj_PFP_LH_pi;
-   delete vars->TPCObj_PFP_LH_mip;
-   delete vars->TPCObj_PFP_Lmipoverp;
-   delete vars->TPCObj_PFP_Lmumipovermumipp;
-   delete vars->TPCObj_PFP_BrokenTrackAngle;
-   delete vars->TPCObj_PFP_VtxTrackDist;
-   delete vars->TPCObj_PFP_isContained_double;
-   delete vars->TPCObj_PFP_track_dEdx_truncmean_start;
-
-}
-
-// What variables do we want the plots as a function of?
-std::vector<std::vector<double>> GetCutvarstoplot(treevars *vars){
-   std::vector<std::vector<double>> varstoplot = {
-      *(vars->TPCObj_PFP_Lmipoverp),
-      *(vars->TPCObj_PFP_Lmumipovermumipp),
-      *(vars->TPCObj_PFP_BrokenTrackAngle),
-      *(vars->TPCObj_PFP_track_residual_mean),
-      *(vars->TPCObj_PFP_track_residual_mean),
-      *(vars->TPCObj_PFP_track_residual_std),
-      *(vars->TPCObj_PFP_track_residual_std),
-      *(vars->TPCObj_PFP_track_perc_used_hits),
-      *(vars->TPCObj_PFP_VtxTrackDist),
-      *(vars->TPCObj_PFP_isContained_double)
-   };
-   return varstoplot;
-};
-
-// For efficiency/purity we need to know whether we want to be keep tracks that have values above or below the cut value
-std::vector<bool> KeepBelowCut = {
-   false, // Lmipoverp
-   false, // Lmumipovermumipp
-   true,  // BrokenTrackAngle
-   true,  // residual_mean_up
-   false, // residual_mean_down
-   true,  // residual_std_up
-   false, // residual_std_down
-   false, // perc_used_hits
-   true,  // VtxTrackDist
-   false  // isContained
-};
-
-// Do we want to consider just the direct daughters of the neutrino?
-std::vector<bool> OnlyDaughters = {
-   true,  // Lmipoverp
-   true,  // Lmumipovermumipp
-   false, // BrokenTrackAngle
-   true,  // residual_mean_up
-   true,  // residual_mean_down
-   true,  // residual_std_up
-   true,  // residual_std_down
-   true,  // perc_used_hits
-   false, // VtxTrackDist
-   false  // isContained
-};
-
-// How many tracks do we want to pass the cut? (Options are atleasttwo, exactlytwo, all)
-std::vector<std::string> TracksNeeded = {
-   "exactlytwo",  // Lmipoverp
-   "exactlytwo",  // Lmumipovermumipp
-   "all",         // BrokenTrackAngle
-   "atleasttwo",  // residual_mean_up
-   "atleasttwo",  // residual_mean_down
-   "atleasttwo",  // residual_std_up
-   "atleasttwo",  // residual_std_down
-   "atleasttwo",  // perc_used_hits
-   "atleasttwo",  // VtxTrackDist
-   "all"          // isConainted
-};
-
-// Cut values for N-1 plot
-std::vector<double> CutValues = {
-   1.,   // Lmipoverp
-   0.66, // Lmumipovermumipp
-   3.05, // BrokenTrackAngle
-   0.7,  // residual_mean_up
-   -0.7, // residual_mean_down
-   2.5,  // residual_std_up
-   0.,   // residual_std_down
-   0.7,  // perc_used_hits
-   15.,  // VtxTrackDist
-   0.5   // isContained
-};
 
 // --------------------------------------------------- //
 // This struct contains signal vs background histograms and all functions related to them
@@ -361,7 +54,7 @@ struct histCC1piselEffPur{
    }
 };
 
-bool IsEventSelected(double cutval, std::vector<double> value_vec, bool KeepBelowCut, bool Marco_selected, std::vector<bool> TPCObj_PFP_isDaughter, bool OnlyDaughters, std::string TracksNeeded){
+bool IsEventSelected(double cutval, std::vector<double> value_vec, bool KeepBelowCut, bool Marco_selected, std::vector<bool> TPCObj_PFP_isDaughter, bool OnlyDaughters, std::string TracksNeeded, bool isMIPCut){
    // value_vec is a vector corresponding to the TPCObject. It has one entry per track in the TPCObject.
 
    int n_tracks = 0;
@@ -375,13 +68,21 @@ bool IsEventSelected(double cutval, std::vector<double> value_vec, bool KeepBelo
          continue;
       }
 
+      bool track_passes_cut=false;
       // (Optionally) only conisder direct daughters of the neutrino
-      if (OnlyDaughters && !TPCObj_PFP_isDaughter.at(i_track)) continue;
+      if (OnlyDaughters && !TPCObj_PFP_isDaughter.at(i_track)){
+         track_passes_cut=false;
+         continue;
+      }
 
       if (KeepBelowCut && value < cutval){
-         n_tracks++;
+         track_passes_cut=true;
       }
       else if (!KeepBelowCut && value > cutval){
+         track_passes_cut=true;
+      }
+
+      if (track_passes_cut){
          n_tracks++;
       }
    } // end loop over tracks in TPCObject
@@ -397,16 +98,15 @@ bool IsEventSelected(double cutval, std::vector<double> value_vec, bool KeepBelo
          else if(!OnlyDaughters && n_tracks == value_vec.size()-1) isSelected = true; // Again, 1 less because of the neutrino
       }
    }
-   // if (isSelected) std::cout << "isSelected = " << isSelected << std::endl;
    return isSelected;
 }
 
-void FillCC1piEffPurHist(histCC1piselEffPur *hists, std::vector<double> value_vec, NuIntTopology topology, bool KeepBelowCut, bool Marco_selected, std::vector<bool> TPCObj_PFP_isDaughter, bool OnlyDaughters, std::string TracksNeeded){
+void FillCC1piEffPurHist(histCC1piselEffPur *hists, std::vector<double> value_vec, NuIntTopology topology, bool KeepBelowCut, bool Marco_selected, std::vector<bool> TPCObj_PFP_isDaughter, bool OnlyDaughters, std::string TracksNeeded, bool isMIPCut){
    // Loop through all bins in the histograms, and evaluate a cut value at the centre of each bin
    for (int i_bin=1; i_bin < hists->h_cc1pi_sel->GetXaxis()->GetNbins()+1; i_bin++){
       double cutval = hists->h_cc1pi_sel->GetXaxis()->GetBinCenter(i_bin);
 
-      bool isSelected = IsEventSelected(cutval, value_vec, KeepBelowCut, Marco_selected, TPCObj_PFP_isDaughter, OnlyDaughters, TracksNeeded);
+      bool isSelected = IsEventSelected(cutval, value_vec, KeepBelowCut, Marco_selected, TPCObj_PFP_isDaughter, OnlyDaughters, TracksNeeded, isMIPCut);
 
       // Fill selection info into the relevant histograms
       if (isSelected){
@@ -445,7 +145,7 @@ void FillNminus1EffPurHist(histCC1piselEffPur *hists, std::vector<std::vector<do
                continue;
             }
             // Evaluate whether event passes this cut. If it doesn't, set isSelected to false for the event
-            bool isSelected_i = IsEventSelected(cutvalues.at(i_cut), value_vec.at(i_cut), KeepBelowCut.at(i_cut), Marco_selected, TPCObj_PFP_isDaughter, OnlyDaughters.at(i_cut), TracksNeeded.at(i_cut));
+            bool isSelected_i = IsEventSelected(cutvalues.at(i_cut), value_vec.at(i_cut), KeepBelowCut.at(i_cut), Marco_selected, TPCObj_PFP_isDaughter, OnlyDaughters.at(i_cut), TracksNeeded.at(i_cut), false);
             if (isSelected_i == false) isSelected = false;
 
             // if (isSelected) std::cout << "bin: " << i_bin << ", cut: " << i_cut << "isSelected = " << isSelected << std::endl;
@@ -526,6 +226,7 @@ void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists, std::string drawop
 
       double eff = selected_cc1pi/total_cc1pi;
       double pur = selected_cc1pi/selected_all;
+      if (selected_all==0) pur=0;
       //
       // std::cout << "eff = " << eff << std::endl;
       // std::cout << "pur = " << pur << std::endl;
@@ -637,7 +338,7 @@ struct histCC1piselEffPur2D{
 
 };
 
-void FillCC1piEffPurHist2D(histCC1piselEffPur2D *hists, std::vector<std::vector<double>> value_vec, NuIntTopology topology, std::vector<bool> KeepBelowCut, bool Marco_selected, std::vector<bool> TPCObj_PFP_isDaughter, std::vector<bool> OnlyDaughters, std::vector<std::string> TracksNeeded){
+void FillCC1piEffPurHist2D(histCC1piselEffPur2D *hists, std::vector<std::vector<double>> value_vec, NuIntTopology topology, std::vector<bool> KeepBelowCut, bool Marco_selected, std::vector<bool> TPCObj_PFP_isDaughter, std::vector<bool> OnlyDaughters, std::vector<std::string> TracksNeeded, std::vector<bool> isMIPCut){
 
    // Loop through all bins in the histograms, and evaluate a cut value at the centre of each bin
    for (int i_binx=1; i_binx < hists->h_cc1pi_sel->GetXaxis()->GetNbins()+1; i_binx++){
@@ -651,7 +352,7 @@ void FillCC1piEffPurHist2D(histCC1piselEffPur2D *hists, std::vector<std::vector<
          bool isSelected = true;
          for (int i_cut=0; i_cut < cutvalues.size(); i_cut++){
             // Evaluate whether event passes this cut. If it doesn't, set isSelected to false for the event
-            bool isSelected_i = IsEventSelected(cutvalues.at(i_cut), value_vec.at(i_cut), KeepBelowCut.at(i_cut), Marco_selected, TPCObj_PFP_isDaughter, OnlyDaughters.at(i_cut), TracksNeeded.at(i_cut));
+            bool isSelected_i = IsEventSelected(cutvalues.at(i_cut), value_vec.at(i_cut), KeepBelowCut.at(i_cut), Marco_selected, TPCObj_PFP_isDaughter, OnlyDaughters.at(i_cut), TracksNeeded.at(i_cut), isMIPCut.at(i_cut));
             if (isSelected_i == false) {
                isSelected = false;
                continue;
