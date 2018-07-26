@@ -148,6 +148,12 @@ struct cc1pianavars{
   std::vector<double> MCP_E;
   std::vector<double> MCP_KE;
   std::vector<bool> MCP_isContained;
+  std::vector<int> MCP_ID;
+  std::vector<std::vector<int>> MCP_DaughterIDs;
+  std::vector<int> MCP_StatusCode;
+  std::vector<int> MCP_MotherID;
+  std::vector<std::vector<double>> MCP_StartPosition;
+  std::vector<std::vector<double>> MCP_EndPosition;
 
   // True neutrino variables
   std::vector<double> nu_vtx;

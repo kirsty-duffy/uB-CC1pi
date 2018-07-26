@@ -110,6 +110,12 @@ void cc1pianavars::Clear(){
    MCP_E.clear();
    MCP_KE.clear();
    MCP_isContained.clear();
+   MCP_ID.clear();
+   MCP_DaughterIDs.clear();
+   MCP_StatusCode.clear();
+   MCP_MotherID.clear();
+   MCP_StartPosition.clear();
+   MCP_EndPosition.clear();
 
    // True neutrino variables
    nu_vtx.clear();
@@ -617,8 +623,8 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
          art::Ptr<simb::MCTruth> mc_truth = fMCTruthMatching -> TrackIDToMCTruth(mcpar -> TrackId());
          if (mc_truth -> Origin() != simb::kBeamNeutrino) continue;
-         if (mcpar -> Mother() != 0) continue;
-         if (mcpar -> StatusCode() != 1) continue;
+//         if (mcpar -> Mother() != 0) continue;
+//         if (mcpar -> StatusCode() != 1) continue;
 
          MCP_PDG.emplace_back(mcpar -> PdgCode());
 
@@ -638,6 +644,23 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          MCP_process.emplace_back(mcpar -> Process());
          MCP_endprocess.emplace_back(mcpar -> EndProcess());
          MCP_numdaughters.emplace_back(mcpar -> NumberDaughters());
+
+         MCP_ID.emplace_back(mcpar -> TrackId());
+         MCP_StatusCode.emplace_back(mcpar -> StatusCode());
+         MCP_MotherID.emplace_back(mcpar -> Mother());
+
+         auto StartPosition = mcpar -> Position();
+         auto EndPosition = mcpar -> EndPosition();
+         std::vector<double> StartPosition_vect = {StartPosition.X(),StartPosition.Y(),StartPosition.Z()};
+         std::vector<double> EndPosition_vect = {EndPosition.X(),EndPosition.Y(),EndPosition.Z()};
+         MCP_StartPosition.emplace_back(StartPosition_vect);
+         MCP_EndPosition.emplace_back(EndPosition_vect);
+
+         std::vector<int> DaughterIDs;
+         for (int daughter_i = 0; daughter_i < mcpar -> NumberDaughters(); daughter_i++) {
+            DaughterIDs.emplace_back(mcpar->Daughter(daughter_i));
+         }
+         MCP_DaughterIDs.emplace_back(DaughterIDs);
 
          //Record neutrino info (once)
          //Note: Potential issues for events with multiple neutrinos
@@ -758,6 +781,12 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("MCP_E", &(vars->MCP_E));
    t -> Branch("MCP_KE", &(vars->MCP_KE));
    t -> Branch("MCP_isContained", &(vars->MCP_isContained));
+   t -> Branch("MCP_ID", &(vars->MCP_ID));
+   t -> Branch("MCP_DaughterIDs", &(vars->MCP_DaughterIDs));
+   t -> Branch("MCP_StatusCode", &(vars->MCP_StatusCode));
+   t -> Branch("MCP_MotherID", &(vars->MCP_MotherID));
+   t -> Branch("MCP_StartPosition", &(vars->MCP_StartPosition));
+   t -> Branch("MCP_EndPosition", &(vars->MCP_EndPosition));
 
    t -> Branch("nu_vtx", &(vars->nu_vtx));
    t -> Branch("nu_vtx_spacecharge", &(vars->nu_vtx_spacecharge));
