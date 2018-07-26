@@ -135,12 +135,12 @@ inline std::string topologyenum2str_coarse(NuIntTopology topology)
   case kCC1pizero0p:
   case kCC1pizero1p:
   case kCC1pizeroNp:
-    returnString = "#nu_{#mu} CC 1pi^{0}";
+    returnString = "#nu_{#mu} CC 1#pi^{0}";
     break;
   case kCCmultipi0p:
   case kCCmultipi1p:
   case kCCmultipiNp:
-    returnString = "#nu_{#mu} CC multi#pi";
+    returnString = "#nu_{#mu} CC >1#pi";
     break;
   case kCCother:
     returnString = "#nu_{#mu} CC other";
