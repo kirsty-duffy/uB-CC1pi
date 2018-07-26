@@ -103,7 +103,7 @@ inline std::string PDGenum2str(PDGCode type)
       returnString = "Bindino";
       break;
     case kPDGUnknown:
-      returnString = "Unknown";
+      returnString = "Other";
       break;
     default:
       std::cout << "[ERROR: PDGEnums.h] Could not find string conversion for " << type << std::endl;

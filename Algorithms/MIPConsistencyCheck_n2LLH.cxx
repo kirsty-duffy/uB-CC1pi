@@ -45,16 +45,16 @@ bool IsMIP(art::FindManyP<anab::ParticleID> trackPIDAssn, int TrackID)
 
      anab::sParticleIDAlgScores AlgScore = AlgScoresVec.at(i_algscore);
 
-     if (AlgScore.fAlgName == "BraggPeakLLH"){
-       if (anab::kVariableType(AlgScore.fVariableType) == anab::kLogL_fwd){
+     if (AlgScore.fAlgName == "BraggPeakLLH" && anab::kVariableType(AlgScore.fVariableType) == anab::kLikelihood){
+       if (anab::kTrackDir(AlgScore.fTrackDir) == anab::kForward){
          //if (AlgScore.fAssumedPdg == 13)   Bragg_fwd_mu = AlgScore.fValue;
          if (AlgScore.fAssumedPdg == 2212) Bragg_fwd_p =  AlgScore.fValue;
          //if (AlgScore.fAssumedPdg == 0)    noBragg_MIP = AlgScore.fValue;
-       }// if fVariableType == anab::kLogL_fwd
-       else if (anab::kVariableType(AlgScore.fVariableType) == anab::kLogL_bwd){
+       }// if fTrackDir == kForward
+       else if (anab::kTrackDir(AlgScore.fTrackDir) == anab::kBackward){
          //if (AlgScore.fAssumedPdg == 13)   Bragg_bwd_mu = AlgScore.fValue;
          if (AlgScore.fAssumedPdg == 2212) Bragg_bwd_p =  AlgScore.fValue;
-       } // if fVariableType == anab::kLogL_bwd
+       } // if fTrackDir = kBackward
      } // if fAlName = BraggPeakLLH
    } // end loop through AlgScoresVec
 

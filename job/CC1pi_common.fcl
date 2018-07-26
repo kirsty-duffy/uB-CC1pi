@@ -23,6 +23,7 @@
 services.TPCEnergyCalib: @local::microboone_tpcenergycalib_service
 
 physics.producers.UBXSecpandoraNucali: @local::microboone_calibrationdedx
+physics.producers.dedxcalibration: @local::simulation_calibration
 physics.producers.pid: @local::particleidconfig
 physics.producers.cc1piselec:
 {
@@ -46,15 +47,21 @@ physics.producers.cc1piselec:
   ResidualsMeanCutDown:  -0.7
   ResidualsMeanCutUp:    0.7
   PercUsedHitsCut:       0.7
+  BraggAlgoConfig:       @local::braggalgo_mcc8_dedxcalib
 }
 
 
 physics.producers.UBXSecpandoraNucali.TrackModuleLabel:       "pandoraNu::CC1pi"
 physics.producers.UBXSecpandoraNucali.CalorimetryModuleLabel: "pandoraNucalo::CC1pi"
-physics.producers.pid.ProducerLabels:
+physics.producers.dedxcalibration.ProducerLabels:
 {
   TrackLabel       : "pandoraNu::CC1pi"
   CalorimetryLabel : "UBXSecpandoraNucali::CC1pi"
+}
+physics.producers.pid.ProducerLabels:
+{
+  TrackLabel       : "pandoraNu::CC1pi"
+  CalorimetryLabel : "dedxcalibration::CC1pi"
 }
 
 physics.producers.CC1piStoppingMuonTagger: @local::StoppingMuonTagger
@@ -65,6 +72,7 @@ CC1piStoppingMuonTagger.TrackProducer:      "pandoraNu::CC1pi"
 
 cc1pi_producermods: [
    "UBXSecpandoraNucali",
+   "dedxcalibration",
    "pid",
    "cc1piselec",
    "CC1piStoppingMuonTagger"

@@ -117,9 +117,11 @@ void StackedHistTopology::DrawStack(double norm, TCanvas *c1, bool coarse)
 
   // Next: add histogramst to the stack and make TLegend
   // Only do this for histograms that have entries
-  TLegend *leg = new TLegend(0.55,0.7,0.95,0.95);
-
-  leg -> SetNColumns(2);
+  TLegend *leg = new TLegend(0.1,0.88,0.9,0.99);
+  // leg->SetTextFont(132);
+  leg->SetLineColor(kWhite);
+  leg->SetTextAlign(12);
+  leg->SetNColumns(6);
 
   for (int i_hist = 0; i_hist < nHists; i_hist++){
     hists[i_hist]->Scale(norm);
@@ -150,6 +152,7 @@ else { // fine
 }
 
   c1->cd();
+  c1->SetTopMargin(0.13);
   stack->Draw("hist");
   leg->Draw();
 

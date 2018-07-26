@@ -94,10 +94,11 @@ void StackedHistPDGCode::DrawStack(double norm, TCanvas *c1, TString option="")
 
   // Next: add histogramst to the stack and make TLegend
   // Only do this for histograms that have entries
-//  TLegend *leg = new TLegend(0.55,0.7,0.95,0.95);
-  TLegend *leg = new TLegend(0.75,0.7,0.95,0.95);
-
-  leg -> SetNColumns(2);
+  TLegend *leg = new TLegend(0.1,0.88,0.9,0.99);
+  // leg->SetTextFont(132);
+  leg->SetLineColor(kWhite);
+  leg->SetTextAlign(12);
+  leg->SetNColumns(6);
 
   for (int i_hist=0; i_hist < nHists; i_hist++){
     if (hists[i_hist]->GetEntries() == 0) continue;
@@ -110,6 +111,7 @@ void StackedHistPDGCode::DrawStack(double norm, TCanvas *c1, TString option="")
   }
 
   c1->cd();
+  c1->SetTopMargin(0.13);
   stack->Draw("hist"+option);
   leg->Draw();
 }
@@ -122,8 +124,11 @@ void StackedHistPDGCode::DrawOverlay(double norm, TCanvas *c1, TString option=""
 
   // Next: add histogramst to the stack and make TLegend
   // Only do this for histograms that have entries
-//  TLegend *leg = new TLegend(0.55,0.7,0.95,0.95);
-  TLegend *leg = new TLegend(0.75,0.7,0.95,0.95);
+  TLegend *leg = new TLegend(0.1,0.88,0.9,0.99);
+  // leg->SetTextFont(132);
+  leg->SetLineColor(kWhite);
+  leg->SetTextAlign(12);
+  leg->SetNColumns(6);
 
   leg -> SetNColumns(2);
 
@@ -142,6 +147,7 @@ void StackedHistPDGCode::DrawOverlay(double norm, TCanvas *c1, TString option=""
     hists[i_hist]->SetLineWidth(2);
 
     c1->cd();
+    c1->SetTopMargin(0.13);
     if (!drawn_first){
       if (norm == 0.) hists[i_hist]->GetYaxis()->SetRangeUser(0,1.);
       hists[i_hist]->Draw("hist"+option);
@@ -164,7 +170,11 @@ void StackedHistPDGCode::DrawOverlayMuPi(double norm, TCanvas *c1, TString optio
 
   // Next: make TLegend
   // Only do this for histograms that have entries
-  TLegend *leg = new TLegend(0.75,0.7,0.95,0.95);
+  TLegend *leg = new TLegend(0.1,0.88,0.9,0.99);
+  // leg->SetTextFont(132);
+  leg->SetLineColor(kWhite);
+  leg->SetTextAlign(12);
+  leg->SetNColumns(2);
 
   bool drawn_first = false;
 
@@ -211,6 +221,7 @@ void StackedHistPDGCode::DrawOverlayMuPi(double norm, TCanvas *c1, TString optio
     hist->Rebin(2);
 
     c1->cd();
+    c1->SetTopMargin(0.13);
     if (!drawn_first){
       if (norm == 0.) hist->GetYaxis()->SetRangeUser(0,1.);
       hist->Draw("hist"+option);
@@ -298,7 +309,7 @@ unsigned int StackedHistPDGCode::GetHistN(PDGCode particle_pdg)
   }
 
   if (!found_hist){
-    std::cout << "[ERROR: StackedHistPDGCode.h] Could not find histogram for PDG code " << particle_pdg << std::endl;
+    //std::cout << "[ERROR: StackedHistPDGCode.h] Could not find histogram for PDG code " << particle_pdg << std::endl;
     HistN = nHists-1;
   }
 

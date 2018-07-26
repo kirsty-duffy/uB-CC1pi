@@ -53,6 +53,10 @@
 #include "uboone/CC1pi/Algorithms/InputTags.h"
 #include "uboone/CC1pi/Algorithms/ShowerRejection.h"
 
+// Particle ID includes
+#include "uboone/ParticleID/Algorithms/Bragg_Likelihood_Estimator.h"
+#include "uboone/ParticleID/Algorithms/uB_PlaneIDBitsetHelperFunctions.h"
+
 struct cc1pianavars{
 
   // Event variables
@@ -62,6 +66,9 @@ struct cc1pianavars{
   art::EventNumber_t event_num;
 
   NuIntTopology Truth_topology;
+
+  // For likelihood-based PID (specifically for Lmip per hit)
+  particleid::Bragg_Likelihood_Estimator braggcalc;
 
   // Selection result variables
   std::map<std::string,bool> Marco_cutflow;
@@ -126,6 +133,7 @@ struct cc1pianavars{
   std::vector<std::vector<double>> TPCObj_PFP_track_Chi2Pion;
   std::vector<double> TPCObj_PFP_track_rangeE_mu;
   std::vector<double> TPCObj_PFP_track_rangeE_p;
+  std::vector<std::vector<std::vector<double>>> TPCObj_PFP_track_Lmip_perhit;
 
   // MCParticle variables
   std::vector<int> MCP_PDG;
