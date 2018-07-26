@@ -163,10 +163,11 @@ void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists, std::string drawop
    hpur->Clear();
    heffpur->Clear();
 
-   TLegend *l = new TLegend(0.59,0.64,0.81,0.87);
-   l->SetTextFont(132);
+   TLegend *l = new TLegend(0.1,0.94,0.9,0.99);
+   // l->SetTextFont(132);
    l->SetLineColor(kWhite);
-   l->SetFillColor(kWhite);
+   l->SetTextAlign(12);
+   l->SetNColumns(3);
 
    for (int i_bin=1; i_bin < heff->GetXaxis()->GetNbins()+1; i_bin++){
       double selected_cc1pi = hists->h_cc1pi_sel->GetBinContent(i_bin);
@@ -205,6 +206,7 @@ void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists, std::string drawop
    gStyle->SetOptStat(0); // No stats box
 
    c->cd();
+   c->SetTopMargin(0.07);
    heff->Draw(drawopt.c_str());
    hpur->Draw((std::string("same")+drawopt).c_str());
    heffpur->Draw((std::string("same")+drawopt).c_str());
@@ -249,8 +251,8 @@ void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists, std::string drawop
       c->SetBottomMargin(0.13);
       //c->SetRightMargin(0.15);
 
-      l->SetX1(0.15);
-      l->SetX2(0.37);
+      // l->SetX1(0.15);
+      // l->SetX2(0.37);
    }
 
    c->Draw();
