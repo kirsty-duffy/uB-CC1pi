@@ -57,11 +57,17 @@ physics.producers.pid.ProducerLabels:
   CalorimetryLabel : "UBXSecpandoraNucali::CC1pi"
 }
 
+physics.producers.CC1piStoppingMuonTagger: @local::StoppingMuonTagger
+CC1piStoppingMuonTagger.TPCObjectProducer:  "TPCObjectMaker::CC1pi"
+CC1piStoppingMuonTagger.PFParticleProducer: "pandoraNu::CC1pi"
+CC1piStoppingMuonTagger.ClusterProducer:    "pandoraNu::CC1pi"
+CC1piStoppingMuonTagger.TrackProducer:      "pandoraNu::CC1pi"
 
 cc1pi_producermods: [
    "UBXSecpandoraNucali",
    "pid",
-   "cc1piselec"
+   "cc1piselec",
+   "CC1piStoppingMuonTagger"
 ]
 
 # ----------------------------------------------- #
