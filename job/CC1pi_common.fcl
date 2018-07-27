@@ -65,10 +65,10 @@ physics.producers.pid.ProducerLabels:
 }
 
 physics.producers.CC1piStoppingMuonTagger: @local::StoppingMuonTagger
-CC1piStoppingMuonTagger.TPCObjectProducer:  "TPCObjectMaker::CC1pi"
-CC1piStoppingMuonTagger.PFParticleProducer: "pandoraNu::CC1pi"
-CC1piStoppingMuonTagger.ClusterProducer:    "pandoraNu::CC1pi"
-CC1piStoppingMuonTagger.TrackProducer:      "pandoraNu::CC1pi"
+physics.producers.CC1piStoppingMuonTagger.TPCObjectProducer:  "TPCObjectMaker::CC1pi"
+physics.producers.CC1piStoppingMuonTagger.PFParticleProducer: "pandoraNu::CC1pi"
+physics.producers.CC1piStoppingMuonTagger.ClusterProducer:    "pandoraNu::CC1pi"
+physics.producers.CC1piStoppingMuonTagger.TrackProducer:      "pandoraNu::CC1pi"
 
 cc1pi_producermods: [
    "UBXSecpandoraNucali",
