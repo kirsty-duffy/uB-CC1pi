@@ -14,6 +14,8 @@ art_make( BASENAME_ONLY
           LIB_LIBRARIES
 		   uboonecode_uboone_CC1pi_Algorithms
                    uboonecode_uboone_UBXSec_DataTypes
+                   HitCosmicTag_Base
+                   HitCosmicTag_Algorithms
 	  	   larcore_Geometry
 		   larcore_Geometry_Geometry_service
 		   uboone_AnalysisTree_MCTruth
@@ -52,6 +54,8 @@ art_make( BASENAME_ONLY
           MODULE_LIBRARIES
                    uboonecode_uboone_UBXSec_DataTypes
 		   uboonecode_uboone_CC1pi_Algorithms
+			 HitCosmicTag_Base
+			 HitCosmicTag_Algorithms
 		   larpandora_LArPandoraInterface
                    #                   larpandora_LArPandoraContent
 
@@ -65,7 +69,7 @@ art_make( BASENAME_ONLY
 		   lardataobj_RecoBase
                    lardataobj_AnalysisBase
                    lardata_Utilities
-                   larsim_Simulation lardataobj_Simulation 
+                   larsim_Simulation lardataobj_Simulation
                    nusimdata_SimulationBase
 		   ${UBOONECODE_LIB}
 		   ${LARDATA_LIB}
@@ -90,4 +94,3 @@ art_make( BASENAME_ONLY
 
 install_headers()
 install_source()
-
