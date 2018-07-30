@@ -64,12 +64,18 @@ physics.producers.pid.ProducerLabels:
   CalorimetryLabel : "dedxcalibration::CC1pi"
 }
 
+physics.producers.CC1piStoppingMuonTagger: @local::StoppingMuonTagger
+physics.producers.CC1piStoppingMuonTagger.TPCObjectProducer:  "TPCObjectMaker::CC1pi"
+physics.producers.CC1piStoppingMuonTagger.PFParticleProducer: "pandoraNu::CC1pi"
+physics.producers.CC1piStoppingMuonTagger.ClusterProducer:    "pandoraNu::CC1pi"
+physics.producers.CC1piStoppingMuonTagger.TrackProducer:      "pandoraNu::CC1pi"
 
 cc1pi_producermods: [
    "UBXSecpandoraNucali",
    "dedxcalibration",
    "pid",
-   "cc1piselec"
+   "cc1piselec",
+   "CC1piStoppingMuonTagger"
 ]
 
 # ----------------------------------------------- #
