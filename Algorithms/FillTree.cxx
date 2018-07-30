@@ -177,7 +177,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       art::FindManyP<ubana::TPCObject> TPCObject_from_selection(selection_h, evt, CC1piInputTags->fSelectionLabel);
       art::Ptr<ubana::TPCObject> TPCObj_candidate = TPCObject_from_selection.at(0).at(0);
       art::Handle<std::vector<ubana::TPCObject>> TPCObj_h;
-      evt.getByLabel("TPCObjectMaker", TPCObj_h);
+      evt.getByLabel(CC1piInputTags->fTPCObjectProducer, TPCObj_h);
 
       TPCObj_origin = TPCObj_candidate -> GetOrigin();
       TPCObj_origin_extra = TPCObj_candidate -> GetOriginExtra();
@@ -201,12 +201,12 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
 
       //Get PFPs (in TPCObject)
-      art::FindManyP<recob::PFParticle> pfps_from_TPCObject(TPCObj_h, evt, "TPCObjectMaker");
+      art::FindManyP<recob::PFParticle> pfps_from_TPCObject(TPCObj_h, evt, CC1piInputTags->fTPCObjectProducer);
       std::vector<art::Ptr<recob::PFParticle>> pfps = pfps_from_TPCObject.at(TPCObj_candidate.key());
       TPCObj_NPFPs = pfps.size();
 
       //Get tracks (in TPCObject)
-      art::FindManyP<recob::Track> tracks_from_TPCObject(TPCObj_h, evt, "TPCObjectMaker");
+      art::FindManyP<recob::Track> tracks_from_TPCObject(TPCObj_h, evt, CC1piInputTags->fTPCObjectProducer);
       std::vector<art::Ptr<recob::Track>> tracks = tracks_from_TPCObject.at(TPCObj_candidate.key());
       TPCObj_NTracks = tracks.size();
 
@@ -217,13 +217,13 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       art::FindManyP<anab::Calorimetry> calos_from_tracks(track_h, evt, CC1piInputTags->fCalorimetryLabel);
 
       // Also get track-PID association objects
-      art::FindManyP<anab::ParticleID> trackPIDAssn(track_h, evt, "pid");
+      art::FindManyP<anab::ParticleID> trackPIDAssn(track_h, evt, CC1piInputTags->fPIDProducer);
       // std::cout << "[CC1pi] trackPIDAssn.IsValid() = " << trackPIDAssn.isValid() << std::endl;
       // std::cout << "[CC1pi] trackPIDAssn.size() = " << trackPIDAssn.size() << std::endl;
       art::FindManyP<anab::ParticleID> trackPIDAssnforChi2(track_h, evt, CC1piInputTags->fPIDLabelChi2);
 
       //Get showers (in TPCObject)
-      art::FindManyP<recob::Shower> showers_from_TPCObject(TPCObj_h, evt, "TPCObjectMaker");
+      art::FindManyP<recob::Shower> showers_from_TPCObject(TPCObj_h, evt, CC1piInputTags->fTPCObjectProducer);
       std::vector<art::Ptr<recob::Shower>> showers = showers_from_TPCObject.at(TPCObj_candidate.key());
       TPCObj_NShowers = showers.size();
 

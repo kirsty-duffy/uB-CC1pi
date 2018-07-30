@@ -10,8 +10,11 @@ struct InputTags{
    art::InputTag fCalorimetryLabel;
    art::InputTag fSelectionLabel;
    art::InputTag fPIDLabelChi2;
+   art::InputTag fPIDProducer;
    art::InputTag fPFParticleProducer;
+   art::InputTag fClusterProducer;
    art::InputTag fSpacePointProducer;
+   art::InputTag fTPCObjectProducer;
    double fResidualsStdCutUp;
    double fResidualsStdCutDown;
    double fResidualsMeanCutDown;
