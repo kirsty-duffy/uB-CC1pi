@@ -1,6 +1,7 @@
 #ifndef __TREEVARS_H__
 #define __TREEVARS_H__
 
+#include "../Algorithms/TopologyEnums.h"
 
 // This code defines the variables we read in from the tree and new derived variables from there.
 // The implementation (i.e. the code that actually calculates the new derived variables) is in treevars_header.h
@@ -34,6 +35,55 @@ struct treevars{
    std::vector<std::vector<std::vector<double>>> *TPCObj_PFP_track_trajPoint_Direction=nullptr;
    std::vector<std::vector<std::vector<double>>> *TPCObj_PFP_track_dedx_perhit=nullptr;
    std::vector<std::vector<std::vector<double>>> *TPCObj_PFP_track_resrange_perhit=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSmu_fwdMom=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSmu_bwdMom=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSmu_bestMom=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSmu_fwdMomUncert=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSmu_bwdMomUncert=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSmu_bestMomUncert=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSmu_fwdLL=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSmu_bwdLL=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSmu_bestLL=nullptr;
+   std::vector<std::vector<double>>* TPCObj_PFP_track_MCSmu_segmentRadLengths=nullptr;
+   std::vector<std::vector<double>>* TPCObj_PFP_track_MCSmu_scatterAngles=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSp_fwdMom=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSp_bwdMom=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSp_bestMom=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSp_fwdMomUncert=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSp_bwdMomUncert=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSp_bestMomUncert=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSp_fwdLL=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSp_bwdLL=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSp_bestLL=nullptr;
+   std::vector<std::vector<double>>* TPCObj_PFP_track_MCSp_segmentRadLengths=nullptr;
+   std::vector<std::vector<double>>* TPCObj_PFP_track_MCSp_scatterAngles=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSpi_fwdMom=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSpi_bwdMom=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSpi_bestMom=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSpi_fwdMomUncert=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSpi_bwdMomUncert=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSpi_bestMomUncert=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSpi_fwdLL=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSpi_bwdLL=nullptr;
+   std::vector<double>* TPCObj_PFP_track_MCSpi_bestLL=nullptr;
+   std::vector<std::vector<double>>* TPCObj_PFP_track_MCSpi_segmentRadLengths=nullptr;
+   std::vector<std::vector<double>>* TPCObj_PFP_track_MCSpi_scatterAngles=nullptr;
+
+   std::vector<std::vector<double>>* TPCObj_PFP_track_SimpleCluster_hitTime=nullptr;
+   std::vector<std::vector<int>>* TPCObj_PFP_track_SimpleCluster_hitWire=nullptr;
+   std::vector<std::vector<int>>* TPCObj_PFP_track_SimpleCluster_hitPlane=nullptr;
+   std::vector<std::vector<double>>* TPCObj_PFP_track_SimpleCluster_hitIntegral=nullptr;
+   std::vector<std::vector<double>>* TPCObj_PFP_track_SimpleCluster_hitTimeTicks=nullptr;
+   std::vector<std::vector<int>>* TPCObj_PFP_track_SimpleCluster_hitWireNo=nullptr;
+   std::vector<int>* TPCObj_PFP_track_SimpleCluster_StartIndex=nullptr;
+   std::vector<std::vector<double>>* TPCObj_PFP_track_SimpleCluster_hitdQds=nullptr;
+   std::vector<std::vector<double>>* TPCObj_PFP_track_SimpleCluster_hitds=nullptr;
+   std::vector<std::vector<double>>* TPCObj_PFP_track_SimpleCluster_hitdQdsSlider=nullptr;
+   std::vector<std::vector<double>>* TPCObj_PFP_track_SimpleCluster_hitLinearity=nullptr;
+   std::vector<bool>* TPCObj_PFP_track_ct_passed_basic=nullptr;
+   std::vector<bool>* TPCObj_PFP_track_ct_result_bragg=nullptr;
+   std::vector<bool>* TPCObj_PFP_track_ct_result_michel=nullptr;
+
 
    // These are derived quantities - derived from the values above in Calcvars
    std::vector<double> *TPCObj_PFP_LH_p;
