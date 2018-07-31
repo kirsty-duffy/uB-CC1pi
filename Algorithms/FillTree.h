@@ -30,6 +30,7 @@
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/AnalysisBase/ParticleID.h"
+#include "lardataobj/RecoBase/MCSFitResult.h"
 #include "larevt/SpaceChargeServices/SpaceChargeService.h"
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 #include "nusimdata/SimulationBase/MCParticle.h"
@@ -52,6 +53,7 @@
 #include "uboone/CC1pi/Algorithms/PDGEnums.h"
 #include "uboone/CC1pi/Algorithms/InputTags.h"
 #include "uboone/CC1pi/Algorithms/ShowerRejection.h"
+#include "uboone/CC1pi/Algorithms/MapBuilderUtility.h"
 
 // Particle ID includes
 #include "uboone/ParticleID/Algorithms/Bragg_Likelihood_Estimator.h"
@@ -93,6 +95,39 @@ struct cc1pianavars{
   std::vector<double> TPCObj_PFP_track_residual_mean;
   std::vector<double> TPCObj_PFP_track_residual_std;
   std::vector<double> TPCObj_PFP_track_perc_used_hits;
+  std::vector<double> TPCObj_PFP_track_MCSmu_fwdMom;
+  std::vector<double> TPCObj_PFP_track_MCSmu_bwdMom;
+  std::vector<double> TPCObj_PFP_track_MCSmu_bestMom;
+  std::vector<double> TPCObj_PFP_track_MCSmu_fwdMomUncert;
+  std::vector<double> TPCObj_PFP_track_MCSmu_bwdMomUncert;
+  std::vector<double> TPCObj_PFP_track_MCSmu_bestMomUncert;
+  std::vector<double> TPCObj_PFP_track_MCSmu_fwdLL;
+  std::vector<double> TPCObj_PFP_track_MCSmu_bwdLL;
+  std::vector<double> TPCObj_PFP_track_MCSmu_bestLL;
+  std::vector<std::vector<double>> TPCObj_PFP_track_MCSmu_segmentRadLengths;
+  std::vector<std::vector<double>> TPCObj_PFP_track_MCSmu_scatterAngles;
+  std::vector<double> TPCObj_PFP_track_MCSp_fwdMom;
+  std::vector<double> TPCObj_PFP_track_MCSp_bwdMom;
+  std::vector<double> TPCObj_PFP_track_MCSp_bestMom;
+  std::vector<double> TPCObj_PFP_track_MCSp_fwdMomUncert;
+  std::vector<double> TPCObj_PFP_track_MCSp_bwdMomUncert;
+  std::vector<double> TPCObj_PFP_track_MCSp_bestMomUncert;
+  std::vector<double> TPCObj_PFP_track_MCSp_fwdLL;
+  std::vector<double> TPCObj_PFP_track_MCSp_bwdLL;
+  std::vector<double> TPCObj_PFP_track_MCSp_bestLL;
+  std::vector<std::vector<double>> TPCObj_PFP_track_MCSp_segmentRadLengths;
+  std::vector<std::vector<double>> TPCObj_PFP_track_MCSp_scatterAngles;
+  std::vector<double> TPCObj_PFP_track_MCSpi_fwdMom;
+  std::vector<double> TPCObj_PFP_track_MCSpi_bwdMom;
+  std::vector<double> TPCObj_PFP_track_MCSpi_bestMom;
+  std::vector<double> TPCObj_PFP_track_MCSpi_fwdMomUncert;
+  std::vector<double> TPCObj_PFP_track_MCSpi_bwdMomUncert;
+  std::vector<double> TPCObj_PFP_track_MCSpi_bestMomUncert;
+  std::vector<double> TPCObj_PFP_track_MCSpi_fwdLL;
+  std::vector<double> TPCObj_PFP_track_MCSpi_bwdLL;
+  std::vector<double> TPCObj_PFP_track_MCSpi_bestLL;
+  std::vector<std::vector<double>> TPCObj_PFP_track_MCSpi_segmentRadLengths;
+  std::vector<std::vector<double>> TPCObj_PFP_track_MCSpi_scatterAngles;
 
   // Shower variables
   std::vector<double> TPCObj_PFP_shower_length;

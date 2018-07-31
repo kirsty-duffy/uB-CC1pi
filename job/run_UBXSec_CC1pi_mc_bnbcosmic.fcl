@@ -4,6 +4,8 @@
 #include "config_particle_identification_fiducialvolume.fcl"
 #include "config_particle_identification_braggalgo.fcl"
 #include "config_dedx_calibration.fcl"
+#include "StoppingParticleConfig.fcl"
+#include "mcsfitproducer.fcl"
 
 # This line should be different for MC/BNB data/EXT data
 #include "run_ubxsec_mc_bnbcosmic.fcl"
@@ -17,6 +19,6 @@ services.TFileService.fileName: "CC1pi_out.root"
 
 physics.producermods: [ @sequence::ubxsec_producermods , @sequence::cc1pi_producermods ]
 
-physics.end_paths : [ outputFiles ]
+#physics.end_paths : [ outputFiles ]
 
 physics.producers.pid.BraggAlgo: @local::braggalgo_mcc8

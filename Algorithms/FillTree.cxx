@@ -55,6 +55,39 @@ void cc1pianavars::Clear(){
    TPCObj_PFP_track_residual_mean.clear();
    TPCObj_PFP_track_residual_std.clear();
    TPCObj_PFP_track_perc_used_hits.clear();
+   TPCObj_PFP_track_MCSmu_fwdMom.clear();
+   TPCObj_PFP_track_MCSmu_bwdMom.clear();
+   TPCObj_PFP_track_MCSmu_bestMom.clear();
+   TPCObj_PFP_track_MCSmu_fwdMomUncert.clear();
+   TPCObj_PFP_track_MCSmu_bwdMomUncert.clear();
+   TPCObj_PFP_track_MCSmu_bestMomUncert.clear();
+   TPCObj_PFP_track_MCSmu_fwdLL.clear();
+   TPCObj_PFP_track_MCSmu_bwdLL.clear();
+   TPCObj_PFP_track_MCSmu_bestLL.clear();
+   TPCObj_PFP_track_MCSmu_segmentRadLengths.clear();
+   TPCObj_PFP_track_MCSmu_scatterAngles.clear();
+   TPCObj_PFP_track_MCSp_fwdMom.clear();
+   TPCObj_PFP_track_MCSp_bwdMom.clear();
+   TPCObj_PFP_track_MCSp_bestMom.clear();
+   TPCObj_PFP_track_MCSp_fwdMomUncert.clear();
+   TPCObj_PFP_track_MCSp_bwdMomUncert.clear();
+   TPCObj_PFP_track_MCSp_bestMomUncert.clear();
+   TPCObj_PFP_track_MCSp_fwdLL.clear();
+   TPCObj_PFP_track_MCSp_bwdLL.clear();
+   TPCObj_PFP_track_MCSp_bestLL.clear();
+   TPCObj_PFP_track_MCSp_segmentRadLengths.clear();
+   TPCObj_PFP_track_MCSp_scatterAngles.clear();
+   TPCObj_PFP_track_MCSpi_fwdMom.clear();
+   TPCObj_PFP_track_MCSpi_bwdMom.clear();
+   TPCObj_PFP_track_MCSpi_bestMom.clear();
+   TPCObj_PFP_track_MCSpi_fwdMomUncert.clear();
+   TPCObj_PFP_track_MCSpi_bwdMomUncert.clear();
+   TPCObj_PFP_track_MCSpi_bestMomUncert.clear();
+   TPCObj_PFP_track_MCSpi_fwdLL.clear();
+   TPCObj_PFP_track_MCSpi_bwdLL.clear();
+   TPCObj_PFP_track_MCSpi_bestLL.clear();
+   TPCObj_PFP_track_MCSpi_segmentRadLengths.clear();
+   TPCObj_PFP_track_MCSpi_scatterAngles.clear();
 
    // Shower variables
    TPCObj_PFP_shower_length.clear();
@@ -253,6 +286,45 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       art::FindManyP<ubana::MCGhost>   mcghost_from_pfp (pfp_h,   evt, "RecoTrueMatcher");
       art::FindManyP<simb::MCParticle> mcp_from_mcghost (ghost_h, evt, "RecoTrueMatcher");
 
+      // Get MCS fit results for all tracks in event (we'll only use the result for the tracks that are in the selected TPC object but there's no way to do this without getting them all)
+      art::Handle<std::vector<recob::MCSFitResult> > mcsfitresultHandle_mu;
+      evt.getByLabel(CC1piInputTags->fMCSMuProducer,mcsfitresultHandle_mu);
+      if(!mcsfitresultHandle_mu.isValid()){
+        std::cout << "[UBXSec] MCSFitResult product " << CC1piInputTags->fMCSMuProducer.label() << " not found..." << std::endl;
+        //throw std::exception();
+      }
+      std::vector<art::Ptr<recob::MCSFitResult>> mcsfitresultVector_mu;
+      art::fill_ptr_vector(mcsfitresultVector_mu, mcsfitresultHandle_mu);
+
+      art::Handle<std::vector<recob::MCSFitResult> > mcsfitresultHandle_p;
+      evt.getByLabel(CC1piInputTags->fMCSPProducer,mcsfitresultHandle_p);
+      if(!mcsfitresultHandle_p.isValid()){
+        std::cout << "[UBXSec] MCSFitResult product " << CC1piInputTags->fMCSPProducer.label() << " not found..." << std::endl;
+        //throw std::exception();
+      }
+      std::vector<art::Ptr<recob::MCSFitResult>> mcsfitresultVector_p;
+      art::fill_ptr_vector(mcsfitresultVector_p, mcsfitresultHandle_p);
+
+      art::Handle<std::vector<recob::MCSFitResult> > mcsfitresultHandle_pi;
+      evt.getByLabel(CC1piInputTags->fMCSPiProducer,mcsfitresultHandle_pi);
+      if(!mcsfitresultHandle_pi.isValid()){
+        std::cout << "[UBXSec] MCSFitResult product " << CC1piInputTags->fMCSPiProducer.label() << " not found..." << std::endl;
+        //throw std::exception();
+      }
+      std::vector<art::Ptr<recob::MCSFitResult>> mcsfitresultVector_pi;
+      art::fill_ptr_vector(mcsfitresultVector_pi, mcsfitresultHandle_pi);
+
+      // there is no association between tracks and the MCSResult stored in the file,
+      // so going to build a map between each track ID and an art::Ptr to the
+      // recob::MCSFitResult for quick finding
+      MapBuilderUtil mbutil;
+      std::vector<art::Ptr<recob::Track>> trackVector;
+      art::fill_ptr_vector(trackVector, track_h);
+      std::map<int, art::Ptr<recob::MCSFitResult> > trackIdMcsFitMap_mu = mbutil.buildTrackIdMcsResultMap(trackVector, mcsfitresultVector_mu);
+      std::map<int, art::Ptr<recob::MCSFitResult> > trackIdMcsFitMap_p = mbutil.buildTrackIdMcsResultMap(trackVector, mcsfitresultVector_p);
+      std::map<int, art::Ptr<recob::MCSFitResult> > trackIdMcsFitMap_pi = mbutil.buildTrackIdMcsResultMap(trackVector, mcsfitresultVector_pi);
+
+
       //Find neutrino
       int nuID = -1;
       for (auto pfp : pfps) {
@@ -300,6 +372,40 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          bool isContained = true;
          std::pair<double,double> residual_mean_std(-9999,-9999);
          double perc_used_hits = -9999;
+         double MCSmu_fwdMom = -9999;
+         double MCSmu_bwdMom = -9999;
+         double MCSmu_bestMom = -9999;
+         double MCSmu_fwdMomUncert = -9999;
+         double MCSmu_bwdMomUncert = -9999;
+         double MCSmu_bestMomUncert = -9999;
+         double MCSmu_fwdLL = -9999;
+         double MCSmu_bwdLL = -9999;
+         double MCSmu_bestLL = -9999;
+         std::vector<double> MCSmu_segmentRadLengths(1,-9999.);
+         std::vector<double> MCSmu_scatterAngles(1,-9999.);
+         double MCSp_fwdMom = -9999;
+         double MCSp_bwdMom = -9999;
+         double MCSp_bestMom = -9999;
+         double MCSp_fwdMomUncert = -9999;
+         double MCSp_bwdMomUncert = -9999;
+         double MCSp_bestMomUncert = -9999;
+         double MCSp_fwdLL = -9999;
+         double MCSp_bwdLL = -9999;
+         double MCSp_bestLL = -9999;
+         std::vector<double> MCSp_segmentRadLengths(1,-9999.);
+         std::vector<double> MCSp_scatterAngles(1,-9999.);
+         double MCSpi_fwdMom = -9999;
+         double MCSpi_bwdMom = -9999;
+         double MCSpi_bestMom = -9999;
+         double MCSpi_fwdMomUncert = -9999;
+         double MCSpi_bwdMomUncert = -9999;
+         double MCSpi_bestMomUncert = -9999;
+         double MCSpi_fwdLL = -9999;
+         double MCSpi_bwdLL = -9999;
+         double MCSpi_bestLL = -9999;
+         std::vector<double> MCSpi_segmentRadLengths(1,-9999.);
+         std::vector<double> MCSpi_scatterAngles(1,-9999.);
+
 
          double shower_length = -9999;
          std::vector<double> shower_start = {-9999, -9999, -9999};
@@ -486,6 +592,65 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
             // Shower Rejection
             ShowerCheck(evt, CC1piInputTags, pfp, track, residual_mean_std, perc_used_hits);
 
+
+            // Now save MCS fit results
+            art::Ptr<recob::MCSFitResult> mcsFitResult;
+
+            for (auto const& x : trackIdMcsFitMap_mu){
+              if (track->ID() == x.first){
+                mcsFitResult = x.second;
+                break;
+              }
+            }
+            MCSmu_fwdMom = mcsFitResult->fwdMomentum();
+            MCSmu_bwdMom = mcsFitResult->bwdMomentum();
+            MCSmu_bestMom = mcsFitResult->bestMomentum();
+            MCSmu_fwdMomUncert = mcsFitResult->fwdMomUncertainty();
+            MCSmu_bwdMomUncert = mcsFitResult->bwdMomUncertainty();
+            MCSmu_bestMomUncert = mcsFitResult->bestMomUncertainty();
+            MCSmu_fwdLL = mcsFitResult->fwdLogLikelihood();
+            MCSmu_bwdLL = mcsFitResult->fwdLogLikelihood();
+            MCSmu_bestLL = mcsFitResult->fwdLogLikelihood();
+            MCSmu_segmentRadLengths = mcsFitResult->segmentRadLengths();
+            MCSmu_scatterAngles = mcsFitResult->scatterAngles();
+
+            for (auto const& x : trackIdMcsFitMap_p){
+              if (track->ID() == x.first){
+                mcsFitResult = x.second;
+                break;
+              }
+            }
+            MCSp_fwdMom = mcsFitResult->fwdMomentum();
+            MCSp_bwdMom = mcsFitResult->bwdMomentum();
+            MCSp_bestMom = mcsFitResult->bestMomentum();
+            MCSp_fwdMomUncert = mcsFitResult->fwdMomUncertainty();
+            MCSp_bwdMomUncert = mcsFitResult->bwdMomUncertainty();
+            MCSp_bestMomUncert = mcsFitResult->bestMomUncertainty();
+            MCSp_fwdLL = mcsFitResult->fwdLogLikelihood();
+            MCSp_bwdLL = mcsFitResult->fwdLogLikelihood();
+            MCSp_bestLL = mcsFitResult->fwdLogLikelihood();
+            MCSp_segmentRadLengths = mcsFitResult->segmentRadLengths();
+            MCSp_scatterAngles = mcsFitResult->scatterAngles();
+
+            for (auto const& x : trackIdMcsFitMap_pi){
+              if (track->ID() == x.first){
+                mcsFitResult = x.second;
+                break;
+              }
+            }
+            MCSpi_fwdMom = mcsFitResult->fwdMomentum();
+            MCSpi_bwdMom = mcsFitResult->bwdMomentum();
+            MCSpi_bestMom = mcsFitResult->bestMomentum();
+            MCSpi_fwdMomUncert = mcsFitResult->fwdMomUncertainty();
+            MCSpi_bwdMomUncert = mcsFitResult->bwdMomUncertainty();
+            MCSpi_bestMomUncert = mcsFitResult->bestMomUncertainty();
+            MCSpi_fwdLL = mcsFitResult->fwdLogLikelihood();
+            MCSpi_bwdLL = mcsFitResult->fwdLogLikelihood();
+            MCSpi_bestLL = mcsFitResult->fwdLogLikelihood();
+            MCSpi_segmentRadLengths = mcsFitResult->segmentRadLengths();
+            MCSpi_scatterAngles = mcsFitResult->scatterAngles();
+
+
          } // end loop over tracks
 
          std::vector<art::Ptr<recob::Shower>> showers_pfp = showers_from_pfps.at(pfp.key());
@@ -535,6 +700,41 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          TPCObj_PFP_track_rangeE_mu.emplace_back(track_rangeE_mu);
          TPCObj_PFP_track_rangeE_p.emplace_back(track_rangeE_p);
          TPCObj_PFP_track_Lmip_perhit.emplace_back(noBragg_MIP_perhit);
+
+
+        TPCObj_PFP_track_MCSmu_fwdMom.emplace_back(MCSmu_fwdMom);
+        TPCObj_PFP_track_MCSmu_bwdMom.emplace_back(MCSmu_bwdMom);
+        TPCObj_PFP_track_MCSmu_bestMom.emplace_back(MCSmu_bestMom);
+        TPCObj_PFP_track_MCSmu_fwdMomUncert.emplace_back(MCSmu_fwdMomUncert);
+        TPCObj_PFP_track_MCSmu_bwdMomUncert.emplace_back(MCSmu_bwdMomUncert);
+        TPCObj_PFP_track_MCSmu_bestMomUncert.emplace_back(MCSmu_bestMomUncert);
+        TPCObj_PFP_track_MCSmu_fwdLL.emplace_back(MCSmu_fwdLL);
+        TPCObj_PFP_track_MCSmu_bwdLL.emplace_back(MCSmu_bwdLL);
+        TPCObj_PFP_track_MCSmu_bestLL.emplace_back(MCSmu_bestLL);
+        TPCObj_PFP_track_MCSmu_segmentRadLengths.emplace_back(MCSmu_segmentRadLengths);
+        TPCObj_PFP_track_MCSmu_scatterAngles.emplace_back(MCSmu_scatterAngles);
+        TPCObj_PFP_track_MCSp_fwdMom.emplace_back(MCSp_fwdMom);
+        TPCObj_PFP_track_MCSp_bwdMom.emplace_back(MCSp_bwdMom);
+        TPCObj_PFP_track_MCSp_bestMom.emplace_back(MCSp_bestMom);
+        TPCObj_PFP_track_MCSp_fwdMomUncert.emplace_back(MCSp_fwdMomUncert);
+        TPCObj_PFP_track_MCSp_bwdMomUncert.emplace_back(MCSp_bwdMomUncert);
+        TPCObj_PFP_track_MCSp_bestMomUncert.emplace_back(MCSp_bestMomUncert);
+        TPCObj_PFP_track_MCSp_fwdLL.emplace_back(MCSp_fwdLL);
+        TPCObj_PFP_track_MCSp_bwdLL.emplace_back(MCSp_bwdLL);
+        TPCObj_PFP_track_MCSp_bestLL.emplace_back(MCSp_bestLL);
+        TPCObj_PFP_track_MCSp_segmentRadLengths.emplace_back(MCSp_segmentRadLengths);
+        TPCObj_PFP_track_MCSp_scatterAngles.emplace_back(MCSp_scatterAngles);
+        TPCObj_PFP_track_MCSpi_fwdMom.emplace_back(MCSpi_fwdMom);
+        TPCObj_PFP_track_MCSpi_bwdMom.emplace_back(MCSpi_bwdMom);
+        TPCObj_PFP_track_MCSpi_bestMom.emplace_back(MCSpi_bestMom);
+        TPCObj_PFP_track_MCSpi_fwdMomUncert.emplace_back(MCSpi_fwdMomUncert);
+        TPCObj_PFP_track_MCSpi_bwdMomUncert.emplace_back(MCSpi_bwdMomUncert);
+        TPCObj_PFP_track_MCSpi_bestMomUncert.emplace_back(MCSpi_bestMomUncert);
+        TPCObj_PFP_track_MCSpi_fwdLL.emplace_back(MCSpi_fwdLL);
+        TPCObj_PFP_track_MCSpi_bwdLL.emplace_back(MCSpi_bwdLL);
+        TPCObj_PFP_track_MCSpi_bestLL.emplace_back(MCSpi_bestLL);
+        TPCObj_PFP_track_MCSpi_segmentRadLengths.emplace_back(MCSpi_segmentRadLengths);
+        TPCObj_PFP_track_MCSpi_scatterAngles.emplace_back(MCSpi_scatterAngles);
 
 
          // Fill non-specific variables
@@ -731,6 +931,41 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("TPCObj_PFP_track_residual_mean", &(vars->TPCObj_PFP_track_residual_mean));
    t -> Branch("TPCObj_PFP_track_residual_std", &(vars->TPCObj_PFP_track_residual_std));
    t -> Branch("TPCObj_PFP_track_perc_used_hits", &(vars->TPCObj_PFP_track_perc_used_hits));
+
+   t -> Branch("TPCObj_PFP_track_MCSmu_fwdMom", &(vars->TPCObj_PFP_track_MCSmu_fwdMom));
+   t -> Branch("TPCObj_PFP_track_MCSmu_bwdMom", &(vars->TPCObj_PFP_track_MCSmu_bwdMom));
+   t -> Branch("TPCObj_PFP_track_MCSmu_bestMom", &(vars->TPCObj_PFP_track_MCSmu_bestMom));
+   t -> Branch("TPCObj_PFP_track_MCSmu_fwdMomUncert", &(vars->TPCObj_PFP_track_MCSmu_fwdMomUncert));
+   t -> Branch("TPCObj_PFP_track_MCSmu_bwdMomUncert", &(vars->TPCObj_PFP_track_MCSmu_bwdMomUncert));
+   t -> Branch("TPCObj_PFP_track_MCSmu_bestMomUncert", &(vars->TPCObj_PFP_track_MCSmu_bestMomUncert));
+   t -> Branch("TPCObj_PFP_track_MCSmu_fwdLL", &(vars->TPCObj_PFP_track_MCSmu_fwdLL));
+   t -> Branch("TPCObj_PFP_track_MCSmu_bwdLL", &(vars->TPCObj_PFP_track_MCSmu_bwdLL));
+   t -> Branch("TPCObj_PFP_track_MCSmu_bestLL", &(vars->TPCObj_PFP_track_MCSmu_bestLL));
+   t -> Branch("TPCObj_PFP_track_MCSmu_segmentRadLengths", &(vars->TPCObj_PFP_track_MCSmu_segmentRadLengths));
+   t -> Branch("TPCObj_PFP_track_MCSmu_scatterAngles", &(vars->TPCObj_PFP_track_MCSmu_scatterAngles));
+   t -> Branch("TPCObj_PFP_track_MCSp_fwdMom", &(vars->TPCObj_PFP_track_MCSp_fwdMom));
+   t -> Branch("TPCObj_PFP_track_MCSp_bwdMom", &(vars->TPCObj_PFP_track_MCSp_bwdMom));
+   t -> Branch("TPCObj_PFP_track_MCSp_bestMom", &(vars->TPCObj_PFP_track_MCSp_bestMom));
+   t -> Branch("TPCObj_PFP_track_MCSp_fwdMomUncert", &(vars->TPCObj_PFP_track_MCSp_fwdMomUncert));
+   t -> Branch("TPCObj_PFP_track_MCSp_bwdMomUncert", &(vars->TPCObj_PFP_track_MCSp_bwdMomUncert));
+   t -> Branch("TPCObj_PFP_track_MCSp_bestMomUncert", &(vars->TPCObj_PFP_track_MCSp_bestMomUncert));
+   t -> Branch("TPCObj_PFP_track_MCSp_fwdLL", &(vars->TPCObj_PFP_track_MCSp_fwdLL));
+   t -> Branch("TPCObj_PFP_track_MCSp_bwdLL", &(vars->TPCObj_PFP_track_MCSp_bwdLL));
+   t -> Branch("TPCObj_PFP_track_MCSp_bestLL", &(vars->TPCObj_PFP_track_MCSp_bestLL));
+   t -> Branch("TPCObj_PFP_track_MCSp_segmentRadLengths", &(vars->TPCObj_PFP_track_MCSp_segmentRadLengths));
+   t -> Branch("TPCObj_PFP_track_MCSp_scatterAngles", &(vars->TPCObj_PFP_track_MCSp_scatterAngles));
+   t -> Branch("TPCObj_PFP_track_MCSpi_fwdMom", &(vars->TPCObj_PFP_track_MCSpi_fwdMom));
+   t -> Branch("TPCObj_PFP_track_MCSpi_bwdMom", &(vars->TPCObj_PFP_track_MCSpi_bwdMom));
+   t -> Branch("TPCObj_PFP_track_MCSpi_bestMom", &(vars->TPCObj_PFP_track_MCSpi_bestMom));
+   t -> Branch("TPCObj_PFP_track_MCSpi_fwdMomUncert", &(vars->TPCObj_PFP_track_MCSpi_fwdMomUncert));
+   t -> Branch("TPCObj_PFP_track_MCSpi_bwdMomUncert", &(vars->TPCObj_PFP_track_MCSpi_bwdMomUncert));
+   t -> Branch("TPCObj_PFP_track_MCSpi_bestMomUncert", &(vars->TPCObj_PFP_track_MCSpi_bestMomUncert));
+   t -> Branch("TPCObj_PFP_track_MCSpi_fwdLL", &(vars->TPCObj_PFP_track_MCSpi_fwdLL));
+   t -> Branch("TPCObj_PFP_track_MCSpi_bwdLL", &(vars->TPCObj_PFP_track_MCSpi_bwdLL));
+   t -> Branch("TPCObj_PFP_track_MCSpi_bestLL", &(vars->TPCObj_PFP_track_MCSpi_bestLL));
+   t -> Branch("TPCObj_PFP_track_MCSpi_segmentRadLengths", &(vars->TPCObj_PFP_track_MCSpi_segmentRadLengths));
+   t -> Branch("TPCObj_PFP_track_MCSpi_scatterAngles", &(vars->TPCObj_PFP_track_MCSpi_scatterAngles));
+
 
    t -> Branch("TPCObj_PFP_shower_length", &(vars->TPCObj_PFP_shower_length));
    t -> Branch("TPCObj_PFP_shower_start", &(vars->TPCObj_PFP_shower_start));

@@ -15,6 +15,9 @@ struct InputTags{
    art::InputTag fClusterProducer;
    art::InputTag fSpacePointProducer;
    art::InputTag fTPCObjectProducer;
+   art::InputTag fMCSMuProducer;
+   art::InputTag fMCSPProducer;
+   art::InputTag fMCSPiProducer;
    double fResidualsStdCutUp;
    double fResidualsStdCutDown;
    double fResidualsMeanCutDown;
@@ -23,6 +26,7 @@ struct InputTags{
 
    // Constructor (pass the fhicl parameters here)
    InputTags(fhicl::ParameterSet const &p);
+   void PrintConfig();
 };
 
 #endif

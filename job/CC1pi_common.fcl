@@ -40,8 +40,14 @@ physics.producers.cc1piselec:
   CalorimetryLabel:      "UBXSecpandoraNucali::CC1pi"
   SelectionLabel:        "UBXSec::CC1pi"
   ParticleIdChi2Label:   "pandoraNupid::CC1pi"
+  ParticleIdProducer:    "pid::CC1pi"
   PFParticleProducer:    "pandoraNu::CC1pi"
+  ClusterProducer:       "pandoraNu::CC1pi"
   SpacePointProducer:    "pandoraNu::CC1pi"
+  TPCObjectProducer:     "TPCObjectMaker::CC1pi"
+  MCSMuProducer:         "CC1piMCSMu::CC1pi"
+  MCSPProducer:          "CC1piMCSP::CC1pi"
+  MCSPiProducer:         "CC1piMCSPi::CC1pi"
   ResidualsStdCutUp:     2.5
   ResidualsStdCutDown:   0
   ResidualsMeanCutDown:  -0.7
@@ -49,6 +55,18 @@ physics.producers.cc1piselec:
   PercUsedHitsCut:       0.7
   BraggAlgoConfig:       @local::braggalgo_mcc8_dedxcalib
 }
+
+physics.producers.StoppingParticleTagger: @local::cc1pi_micheltagger
+
+physics.producers.CC1piMCSMu: @local::mcsfitproducer
+physics.producers.CC1piMCSMu.inputs.inputLabel: "pandoraNu::CC1pi"
+physics.producers.CC1piMCSMu.fitter.pIdHypothesis: 13
+physics.producers.CC1piMCSP: @local::mcsfitproducer
+physics.producers.CC1piMCSP.inputs.inputLabel: "pandoraNu::CC1pi"
+physics.producers.CC1piMCSP.fitter.pIdHypothesis: 2212
+physics.producers.CC1piMCSPi: @local::mcsfitproducer
+physics.producers.CC1piMCSPi.inputs.inputLabel: "pandoraNu::CC1pi"
+physics.producers.CC1piMCSPi.fitter.pIdHypothesis: 211
 
 
 physics.producers.UBXSecpandoraNucali.TrackModuleLabel:       "pandoraNu::CC1pi"
@@ -64,18 +82,15 @@ physics.producers.pid.ProducerLabels:
   CalorimetryLabel : "dedxcalibration::CC1pi"
 }
 
-physics.producers.CC1piStoppingMuonTagger: @local::StoppingMuonTagger
-physics.producers.CC1piStoppingMuonTagger.TPCObjectProducer:  "TPCObjectMaker::CC1pi"
-physics.producers.CC1piStoppingMuonTagger.PFParticleProducer: "pandoraNu::CC1pi"
-physics.producers.CC1piStoppingMuonTagger.ClusterProducer:    "pandoraNu::CC1pi"
-physics.producers.CC1piStoppingMuonTagger.TrackProducer:      "pandoraNu::CC1pi"
-
 cc1pi_producermods: [
    "UBXSecpandoraNucali",
    "dedxcalibration",
    "pid",
+   "CC1piMCSMu",
+   "CC1piMCSP",
+   "CC1piMCSPi",
    "cc1piselec",
-   "CC1piStoppingMuonTagger"
+   "StoppingParticleTagger"
 ]
 
 # ----------------------------------------------- #
