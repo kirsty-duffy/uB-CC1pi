@@ -41,6 +41,14 @@ void MakeCC1piPlots(std::string mcfile){
 
    TFile *f_bnbcos = new TFile(mcfile.c_str(), "read");
    TTree *t_bnbcos = (TTree*)f_bnbcos->Get("cc1piselec/outtree");
+   TTree *t_bnbcos_friend = (TTree*)f_bnbcos->Get("StoppingParticleTagger/StopStoppingTaggerTree");
+
+   if (t_bnbcos->GetEntries() != t_bnbcos_friend->GetEntries()){
+     std::cout << "ERROR: cc1piselec/outtree has " << t_bnbcos->GetEntries() << " entries, and StoppingParticleTagger/StoppingTaggerTree has " << t_bnbcos_friend->GetEntries() << " entries. Cannot make friend tree, exiting." << std::endl;
+     return;
+   }
+   t_bnbcos->AddFriend(t_bnbcos_friend);
+
    treevars mc_vars;
    settreevars(t_bnbcos,&mc_vars);
 
