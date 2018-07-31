@@ -1,0 +1,44 @@
+#include "cosmictagalgo.fcl"
+
+BEGIN_PROLOG
+
+micheltagger_config: {
+  module_type: StoppingParticleMichelTagger
+
+  TrackLabel:            "pandoraNu::CC1pi"
+  SelectionLabel:        "UBXSec::CC1pi"
+  PFParticleProducer:    "pandoraNu::CC1pi"
+  ClusterProducer:       "pandoraNu::CC1pi"
+  TPCObjectProducer:     "TPCObjectMaker::CC1pi"
+  CalorimetryLabel:      "UBXSecpandoraNucali::CC1pi"
+
+  DebugMode:             true
+  CreateTree:            false
+  CoplanarCut:           6.
+
+  CosmicTagManager: @local::cosmictag_config_mc
+
+  AlgorithmConfiguration:  {
+  WireToCmConstant:        0.3
+  TimeToCmConstant:        0.0557
+  GainCalib:               198
+  SliderWindow:            10
+  MaxAllowedHitDistance:   6
+  SlopeThreshold:          0.25
+  HitsToRemove:            3
+  PrePostWindow:           10
+  PercDiffCut:             35 #50
+  LocalLinerityThreshold:  0.9
+  MinMuonHits:             20
+  MaxMuonHits:             2000
+  MinMichelHits:           2
+  MaxMichelHits:           70
+  MaxEndHits:              100
+  DebugMode:               true
+  }
+}
+
+cc1pi_micheltagger: @local::micheltagger_config
+cc1pi_micheltagger.CosmicTagManager.ClassicStartHitFinder.MaxAllowedHitDistance: 0.
+
+END_PROLOG
