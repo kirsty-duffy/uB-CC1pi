@@ -66,7 +66,7 @@ void MakeStoppingParticlePlots_SingleTrack(TCanvas *c1, treevars *vars, int trac
   pt->SetFillStyle(0);
   pt->SetTextFont(132);
   pt->AddText(std::string(std::string("True PDG: ")+PDGenum2str((PDGCode)vars->TPCObj_PFP_truePDG->at(trackIndex))).c_str());
-  pt->AddText(TString::Format("Classed as MIP?"/*"Classed as MIP? %d",(int)vars->TPCObj_PFP_track_passesMIPcut->at(trackIndex)*/).Data());
+  pt->AddText(TString::Format("Classed as MIP? %d",(int)vars->TPCObj_PFP_track_passesMIPcut->at(trackIndex)).Data());
   pt->AddText(TString::Format("Passes basic cosmic tagging? %d",track_ct_passed_basic).Data());
   pt->AddText(TString::Format("Identified Michel? %d",track_ct_result_michel).Data());
   pt->AddText(TString::Format("Identified Bragg (no Michel)? %d",track_ct_result_bragg).Data());

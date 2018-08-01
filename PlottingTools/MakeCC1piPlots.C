@@ -6,6 +6,7 @@
 #include "CC1pi_plotvars_def.h"
 #include "CC1pi_cuts.h"
 #include "CC1pi_cuts.cxx"
+#include "StoppingParticlePlots.h"
 
 // What variables do we want these plots as a function of?
 std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
@@ -116,6 +117,16 @@ void MakeCC1piPlots(std::string mcfile){
             if(isSelected) {
                mc_hists_cc1pi_pdg_aftercuts[i_h]->Fill((PDGCode)mc_vars.TPCObj_PFP_truePDG->at(i_tr),vartoplot.at(i_tr));
                mc_hists_cc1pi_top_aftercuts[i_h]->Fill((NuIntTopology)mc_vars.Truth_topology,vartoplot.at(i_tr),1.0/vartoplot.size());
+
+               // For selected events, make hit dQds and local linearity plots for the two MIP-like tracks.
+               // Do this for the first 100 events only because otherwise we'll just have a ridiculous number of plots
+               if (MakeKinkFindingPlots && i<100){
+                 if (mc_vars.TPCObj_PFP_isDaughter->at(i_tr) && bool(mc_vars.TPCObj_PFP_track_passesMIPcut->at(i_tr))){
+                   TCanvas *c0 = new TCanvas("","",400,500);
+                   MakeStoppingParticlePlots_SingleTrack(c0, &mc_vars, i_tr);
+                   c0->Print(std::string(std::string("StoppingParticlePlots_TPCObj")+i+std::string("_track")+i_tr+std::string(".pdf")).c_str());
+                 }
+               }
 
             } // end if(isSelected)
 
