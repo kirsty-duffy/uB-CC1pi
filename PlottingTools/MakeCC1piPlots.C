@@ -33,7 +33,7 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
 //  Now the function starts
 // ---------------------------------------------------- //
 
-void MakeCC1piPlots(std::string mcfile){
+void MakeCC1piPlots(std::string mcfile, bool MakeKinkFindingPlots=false){
 
    gStyle->SetTitleX(0.5);
    gStyle->SetTitleAlign(23);
