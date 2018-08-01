@@ -14,10 +14,10 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       Var_TPCObj_PFP_lnLmipoverp(vars)
       ,Var_TPCObj_PFP_Lmumipovermumipp(vars)
       ,Var_TPCObj_PFP_BrokenTrackAngle(vars)
-      ,Var_TPCObj_PFP_track_residual_mean_low(vars)
-      ,Var_TPCObj_PFP_track_residual_mean_high(vars)
-      ,Var_TPCObj_PFP_track_residual_std_low(vars)
-      ,Var_TPCObj_PFP_track_residual_std_high(vars)
+      // ,Var_TPCObj_PFP_track_residual_mean_low(vars)
+      // ,Var_TPCObj_PFP_track_residual_mean_high(vars)
+      // ,Var_TPCObj_PFP_track_residual_std_low(vars)
+      // ,Var_TPCObj_PFP_track_residual_std_high(vars)
       ,Var_TPCObj_PFP_track_perc_used_hits(vars)
       ,Var_TPCObj_PFP_VtxTrackDist(vars)
       ,Var_TPCObj_PFP_isContained(vars)
@@ -25,6 +25,10 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       ,Var_TPCObj_DaughterTracks_Order_dEdxtr(vars)
       ,Var_TPCObj_DaughterTracks_Order_dEdxtr_selMIPs(vars)
       ,Var_TPCObj_DaughterTracks_Order_trklen_selMIPs(vars)
+      ,Var_TPCObj_PFP_MCSLLmuMinusLLp_DaughterMIPs(vars)
+      ,Var_TPCObj_PFP_track_MCSLLmuMinusLLp_ContDaughterMIPs(vars)
+      ,Var_TPCObj_PFP_track_MomRangeMinusMCS_p_ContDaughterMIPs(vars)
+      ,Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_ContDaughterMIPs(vars)
    };
    return varstoplot;
 }
@@ -42,8 +46,16 @@ void MakeCC1piPlots(std::string mcfile, bool MakeKinkFindingPlots=false){
 
    TFile *f_bnbcos = new TFile(mcfile.c_str(), "read");
    TTree *t_bnbcos = (TTree*)f_bnbcos->Get("cc1piselec/outtree");
-   TTree *t_bnbcos_friend = (TTree*)f_bnbcos->Get("StoppingParticleTagger/StopStoppingTaggerTree");
+   TTree *t_bnbcos_friend = (TTree*)f_bnbcos->Get("StoppingParticleTagger/StoppingTaggerTree");
 
+    if (!t_bnbcos){
+      std::cout << "Error: did not find tree cc1piselec/outtree in file" << std::endl;
+      return;
+    }
+    if (!t_bnbcos_friend){
+      std::cout << "Error: did not find tree StoppingParticleTagger/StoppingTaggerTree in file" << std::endl;
+      return;
+    }
    if (t_bnbcos->GetEntries() != t_bnbcos_friend->GetEntries()){
      std::cout << "ERROR: cc1piselec/outtree has " << t_bnbcos->GetEntries() << " entries, and StoppingParticleTagger/StoppingTaggerTree has " << t_bnbcos_friend->GetEntries() << " entries. Cannot make friend tree, exiting." << std::endl;
      return;
@@ -111,6 +123,9 @@ void MakeCC1piPlots(std::string mcfile, bool MakeKinkFindingPlots=false){
          for (size_t i_tr = 0; i_tr < vartoplot.size(); i_tr++){
             // if (!(mc_vars.TPCObj_PFP_isDaughter->at(i_tr) && bool(mc_vars.TPCObj_PFP_track_passesMIPcut->at(i_tr)))) continue;
 
+            if (Varstoplot.at(i_h).PlotOnlyDaughterMIPs && !(mc_vars.TPCObj_PFP_isDaughter->at(i_tr) && mc_vars.TPCObj_PFP_track_passesMIPcut->at(i_tr))) continue;
+            if (Varstoplot.at(i_h).PlotOnlyContained && !(mc_vars.TPCObj_PFP_track_isContained->at(i_tr))) continue;
+
             mc_hists_cc1pi_pdg_beforecuts[i_h]->Fill((PDGCode)mc_vars.TPCObj_PFP_truePDG->at(i_tr),vartoplot.at(i_tr));
             mc_hists_cc1pi_top_beforecuts[i_h]->Fill((NuIntTopology)mc_vars.Truth_topology,vartoplot.at(i_tr),1.0/vartoplot.size());
 
@@ -124,7 +139,7 @@ void MakeCC1piPlots(std::string mcfile, bool MakeKinkFindingPlots=false){
                  if (mc_vars.TPCObj_PFP_isDaughter->at(i_tr) && bool(mc_vars.TPCObj_PFP_track_passesMIPcut->at(i_tr))){
                    TCanvas *c0 = new TCanvas("","",400,500);
                    MakeStoppingParticlePlots_SingleTrack(c0, &mc_vars, i_tr);
-                   c0->Print(std::string(std::string("StoppingParticlePlots_TPCObj")+i+std::string("_track")+i_tr+std::string(".pdf")).c_str());
+                   c0->Print(std::string(std::string("StoppingParticlePlots_TPCObj")+std::to_string(i)+std::string("_track")+std::to_string(i_tr)+std::string(".pdf")).c_str());
                  }
                }
 
