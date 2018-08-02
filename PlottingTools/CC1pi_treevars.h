@@ -105,6 +105,9 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_track_MCSLLmuMinusLLp;
    std::vector<double> *TPCObj_PFP_track_MomRangeMinusMCS_p;
    std::vector<double> *TPCObj_PFP_track_MomRangeMinusMCS_mu;
+   std::vector<double> *TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum;
+   std::vector<double> *TPCObj_PFP_track_SimpleCluster_hitLinearity_mean;
+   std::vector<double> *TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean;
 
    // Is the track a MIP? Evaluate MIP cuts and then put this as an input into selection
    // Coded as a double (to fit in with the other code) but should be evaluated as a bool
