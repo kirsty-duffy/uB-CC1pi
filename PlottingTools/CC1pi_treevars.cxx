@@ -26,6 +26,10 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("TPCObj_PFP_LH_bwd_pi", &(varstoset->TPCObj_PFP_LH_bwd_pi));
    intree->SetBranchStatus("TPCObj_PFP_LH_MIP",1);
    intree->SetBranchAddress("TPCObj_PFP_LH_MIP", &(varstoset->TPCObj_PFP_LH_MIP));
+   intree->SetBranchStatus("TPCObj_PFP_track_rangeE_p",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_rangeE_p", &(varstoset->TPCObj_PFP_track_rangeE_p));
+   intree->SetBranchStatus("TPCObj_PFP_track_rangeE_mu",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_rangeE_mu", &(varstoset->TPCObj_PFP_track_rangeE_mu));
    intree->SetBranchStatus("Truth_topology",1);
    intree->SetBranchAddress("Truth_topology", &(varstoset->Truth_topology));
    intree->SetBranchStatus("Marco_selected",1);
@@ -180,6 +184,9 @@ void Calcvars(treevars *vars){
    vars->TPCObj_DaughterTracks_Order_dEdxtr = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_DaughterTracks_Order_dEdxtr_selMIPs = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_DaughterTracks_Order_trklen_selMIPs = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_MCSLLmuMinusLLp = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_MomRangeMinusMCS_p = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_MomRangeMinusMCS_mu = new std::vector<double>(vecsize,-9999);
 
    vars->TPCObj_PFP_track_passesMIPcut = new std::vector<double>(vecsize,-9999.);
 
@@ -210,6 +217,9 @@ void Calcvars(treevars *vars){
          vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) = -9999;
          pair_dEdx_truncmean_index->at(i_track)=std::make_pair(-9999.,i_track);
          pair_trklen_index->at(i_track)=std::make_pair(-9999.,i_track);
+         vars->TPCObj_PFP_track_MCSLLmuMinusLLp->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_MomRangeMinusMCS_p->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_MomRangeMinusMCS_mu->at(i_track) = -9999.;
          vars->TPCObj_PFP_track_passesMIPcut->at(i_track) = -9999.;
 
          continue;
@@ -314,6 +324,34 @@ void Calcvars(treevars *vars){
       // Make pair for ordering tracks by Length
       pair_trklen_index->at(i_track) = std::make_pair(vars->TPCObj_PFP_track_length->at(i_track),i_track);
 
+
+      // MCS-related variables: MCS LLmu-LLp, momentum by range - momentum by MCS for a muon, momentum by range - momentum by MCS for a proton
+      if (vars->TPCObj_PFP_track_MCSmu_fwdLL->at(i_track)==-9999 || vars->TPCObj_PFP_track_MCSmu_fwdLL->at(i_track)==-999 || vars->TPCObj_PFP_track_MCSp_fwdLL->at(i_track)==-9999 || vars->TPCObj_PFP_track_MCSp_fwdLL->at(i_track)==-999){
+         vars->TPCObj_PFP_track_MCSLLmuMinusLLp->at(i_track) = -9999.;
+      }
+      else{
+         vars->TPCObj_PFP_track_MCSLLmuMinusLLp->at(i_track) = vars->TPCObj_PFP_track_MCSmu_fwdLL->at(i_track)-vars->TPCObj_PFP_track_MCSp_fwdLL->at(i_track);
+      }
+
+      if (vars->TPCObj_PFP_track_rangeE_p->at(i_track)==-9999 || vars->TPCObj_PFP_track_rangeE_p->at(i_track)==-999 || vars->TPCObj_PFP_track_MCSp_fwdMom->at(i_track)==-9999 || vars->TPCObj_PFP_track_MCSp_fwdMom->at(i_track)==-999){
+         vars->TPCObj_PFP_track_MomRangeMinusMCS_p->at(i_track) = -9999;
+      }
+      else{
+         double KE_p = vars->TPCObj_PFP_track_rangeE_p->at(i_track);
+         double M_p = 938.272;
+         double MomRange_p = TMath::Sqrt((KE_p*KE_p)+(2*M_p*KE_p));
+         vars->TPCObj_PFP_track_MomRangeMinusMCS_p->at(i_track) = MomRange_p/1000.-vars->TPCObj_PFP_track_MCSp_fwdMom->at(i_track);
+      }
+
+      if (vars->TPCObj_PFP_track_rangeE_mu->at(i_track)==-9999 || vars->TPCObj_PFP_track_rangeE_mu->at(i_track)==-999 || vars->TPCObj_PFP_track_MCSmu_fwdMom->at(i_track)==-9999 || vars->TPCObj_PFP_track_MCSmu_fwdMom->at(i_track)==-999){
+         vars->TPCObj_PFP_track_MomRangeMinusMCS_mu->at(i_track) = -9999;
+      }
+      else{
+         double KE_mu = vars->TPCObj_PFP_track_rangeE_mu->at(i_track);
+         double M_mu = 105.7;
+         double MomRange_mu =  TMath::Sqrt((KE_mu*KE_mu)+(2*M_mu*KE_mu));
+         vars->TPCObj_PFP_track_MomRangeMinusMCS_mu->at(i_track) = MomRange_mu/1000.-vars->TPCObj_PFP_track_MCSmu_fwdMom->at(i_track);
+      }
 
 
       // Evaluate MIP cut (i.e. whether we want to class this track as a MIP). Cut algorithm defined in CutValues_header.h

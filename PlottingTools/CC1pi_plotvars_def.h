@@ -16,6 +16,8 @@ struct CC1piPlotVars{
   std::vector<double> bins;
   std::string histtitle;
   std::string histname;
+  bool PlotOnlyDaughterMIPs;
+  bool PlotOnlyContained;
 };
 
 // TPCObj_PFP_BrokenTrackAngle
@@ -29,6 +31,8 @@ CC1piPlotVars Var_TPCObj_PFP_BrokenTrackAngle(treevars *vars){
   tmp.bins = {25,2.8,3.15};
   tmp.histtitle = ";Angle [rad];";
   tmp.histname = "BrokenTrackAngle";
+  tmp.PlotOnlyDaughterMIPs = false;
+  tmp.PlotOnlyContained = false;
   return tmp;
 }
 
@@ -43,6 +47,8 @@ CC1piPlotVars Var_TPCObj_PFP_track_perc_used_hits(treevars *vars){
   tmp.bins = {25,0,1};
   tmp.histtitle = ";Fraction of used hits in cluster;";
   tmp.histname = "perc_used_hits";
+  tmp.PlotOnlyDaughterMIPs = false;
+  tmp.PlotOnlyContained = false;
   return tmp;
 }
 
@@ -57,6 +63,8 @@ CC1piPlotVars Var_TPCObj_PFP_VtxTrackDist(treevars *vars){
   tmp.bins = {25,0,20};
   tmp.histtitle = ";Distance from reconstructed vertex;";
   tmp.histname = "VtxTrackDist";
+  tmp.PlotOnlyDaughterMIPs = false;
+  tmp.PlotOnlyContained = false;
   return tmp;
 }
 
@@ -71,6 +79,8 @@ CC1piPlotVars Var_TPCObj_PFP_track_dEdx_truncmean_start(treevars *vars){
   tmp.bins = {50,0,10};
   tmp.histtitle = ";Truncated Mean dE/dx at start of track;";
   tmp.histname = "dEdx_truncmean_atstart";
+  tmp.PlotOnlyDaughterMIPs = false;
+  tmp.PlotOnlyContained = false;
   return tmp;
 }
 
@@ -85,6 +95,8 @@ CC1piPlotVars Var_TPCObj_PFP_track_passesMIPcut(treevars *vars){
   tmp.bins = {2,0,2};
   tmp.histtitle = ";IsMIP;";
   tmp.histname = "isMIP";
+  tmp.PlotOnlyDaughterMIPs = false;
+  tmp.PlotOnlyContained = false;
   return tmp;
 }
 
@@ -99,6 +111,8 @@ CC1piPlotVars Var_TPCObj_PFP_track_residual_mean_low(treevars *vars){
   tmp.bins = {25,-2.8,0};
   tmp.histtitle = ";<r_{i}>;";
   tmp.histname = "residual_mean_down";
+  tmp.PlotOnlyDaughterMIPs = false;
+  tmp.PlotOnlyContained = false;
   return tmp;
 }
 
@@ -113,6 +127,8 @@ CC1piPlotVars Var_TPCObj_PFP_track_residual_mean_high(treevars *vars){
   tmp.bins = {25,0,2.8};
   tmp.histtitle = ";<r_{i}>;";
   tmp.histname = "residual_mean_up";
+  tmp.PlotOnlyDaughterMIPs = false;
+  tmp.PlotOnlyContained = false;
   return tmp;
 }
 
@@ -127,6 +143,8 @@ CC1piPlotVars Var_TPCObj_PFP_track_residual_std_low(treevars *vars){
   tmp.bins = {25,0,2};
   tmp.histtitle = ";#sigma_{r_{i}};";
   tmp.histname = "residual_std_down";
+  tmp.PlotOnlyDaughterMIPs = false;
+  tmp.PlotOnlyContained = false;
   return tmp;
 }
 
@@ -141,6 +159,8 @@ CC1piPlotVars Var_TPCObj_PFP_track_residual_std_high(treevars *vars){
   tmp.bins = {25,0,4};
   tmp.histtitle = ";#sigma_{r_{i}};";
   tmp.histname = "residual_std_up";
+  tmp.PlotOnlyDaughterMIPs = false;
+  tmp.PlotOnlyContained = false;
   return tmp;
 }
 
@@ -155,6 +175,8 @@ CC1piPlotVars Var_TPCObj_PFP_isContained(treevars *vars){
   tmp.bins = {2,0,2};
   tmp.histtitle = ";isContained;";
   tmp.histname = "isContained";
+  tmp.PlotOnlyDaughterMIPs = false;
+  tmp.PlotOnlyContained = false;
   return tmp;
 }
 
@@ -167,6 +189,8 @@ CC1piPlotVars Var_TPCObj_PFP_lnLmipoverp(treevars *vars){
   tmp.bins = {60,-10,10};
   tmp.histtitle = ";ln(L_{MIP})/(L_{p});";
   tmp.histname = "lnLmipoverp";
+  tmp.PlotOnlyDaughterMIPs = false;
+  tmp.PlotOnlyContained = false;
   return tmp;
 }
 
@@ -179,6 +203,8 @@ CC1piPlotVars Var_TPCObj_PFP_Lmumipovermumipp(treevars *vars){
   tmp.bins = {25,0.5,0.9};
   tmp.histtitle = ";(L_{#mu}+L_{MIP})/(L_{#mu}+L_{MIP}+L_{p});";
   tmp.histname = "Lmumipovermumipp";
+  tmp.PlotOnlyDaughterMIPs = false;
+  tmp.PlotOnlyContained = false;
   return tmp;
 }
 
@@ -189,6 +215,8 @@ CC1piPlotVars Var_TPCObj_DaughterTracks_Order_dEdxtr(treevars *vars){
   tmp.bins = {10,0,10};
   tmp.histtitle = ";Daughter PFPs (ordered lowest to highest <dE/dx>_{tr});";
   tmp.histname = "daughterPFPs_bydEdxstart";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyContained = false;
   return tmp;
 }
 
@@ -199,6 +227,8 @@ CC1piPlotVars Var_TPCObj_DaughterTracks_Order_dEdxtr_selMIPs(treevars *vars){
   tmp.bins = {10,0,10};
   tmp.histtitle = ";Daughter PFPs classed as MIPs (ordered lowest to highest <dE/dx>_{tr});";
   tmp.histname = "daughterPFPs_bydEdxstart_MIPs";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyContained = false;
   return tmp;
 }
 
@@ -209,6 +239,56 @@ CC1piPlotVars Var_TPCObj_DaughterTracks_Order_trklen_selMIPs(treevars *vars){
   tmp.bins = {10,0,10};
   tmp.histtitle = ";Daughter PFPs classed as MIPs (ordered lowest to highest track length);";
   tmp.histname = "daughterPFPs_bytrklen_MIPs";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyContained = false;
+  return tmp;
+}
+
+// TPCObj_PFP_MCSLLmuMinusLLp: daughter MIPs only
+CC1piPlotVars Var_TPCObj_PFP_MCSLLmuMinusLLp_DaughterMIPs(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_MCSLLmuMinusLLp;
+  tmp.bins = {60,-50,10};
+  tmp.histtitle = ";MCS LL_{#mu} - LL_{p} (Daughter PFPs classed as MIPs only);";
+  tmp.histname = "MCSLLmuMinusLLp_daughterMIPs";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyContained = false;
+  return tmp;
+}
+
+// TPCObj_PFP_track_MCSLLmuMinusLLp: contained daughter MIPs only
+CC1piPlotVars Var_TPCObj_PFP_track_MCSLLmuMinusLLp_ContDaughterMIPs(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_MCSLLmuMinusLLp;
+  tmp.bins = {60,-50,10};
+  tmp.histtitle = ";MCS LL_{#mu} - LL_{p} (Contained daughter PFPs classed as MIPs only);";
+  tmp.histname = "MCSLLmuMinusLLp_contdaughterMIPs";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyContained = true;
+  return tmp;
+}
+
+// TPCObj_PFP_track_MomRangeMinusMCS_p: contained daughter MIPs only
+CC1piPlotVars Var_TPCObj_PFP_track_MomRangeMinusMCS_p_ContDaughterMIPs(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_MomRangeMinusMCS_p;
+  tmp.bins = {100,-5,5};
+  tmp.histtitle = ";Mom. by range - Mom. by MCS, p assumption, GeV (Cont. daughter MIP-like PFPs only);";
+  tmp.histname = "MomRangeMinusMCS_p_contdaughterMIPs";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyContained = true;
+  return tmp;
+}
+
+// TPCObj_PFP_track_MomRangeMinusMCS_mu: contained daughter MIPs only
+CC1piPlotVars Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_ContDaughterMIPs(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_MomRangeMinusMCS_mu;
+  tmp.bins = {100,-5,5};
+  tmp.histtitle = ";Mom. by range - Mom. by MCS, #mu assumption, GeV (Cont. daughter MIP-like PFPs only);";
+  tmp.histname = "MomRangeMinusMCS_mu_contdaughterMIPs";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyContained = true;
   return tmp;
 }
 

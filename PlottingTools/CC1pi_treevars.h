@@ -16,6 +16,8 @@ struct treevars{
    std::vector<std::vector<double>> *TPCObj_PFP_LH_bwd_p = nullptr;
    std::vector<std::vector<double>> *TPCObj_PFP_LH_bwd_pi = nullptr;
    std::vector<std::vector<double>> *TPCObj_PFP_LH_MIP = nullptr;
+   std::vector<double> *TPCObj_PFP_track_rangeE_p = nullptr;
+   std::vector<double> *TPCObj_PFP_track_rangeE_mu = nullptr;
    NuIntTopology Truth_topology = kUnknown;
    bool Marco_selected = false;
    std::vector<bool> *TPCObj_PFP_isDaughter = nullptr;
@@ -100,6 +102,9 @@ struct treevars{
    std::vector<double> *TPCObj_DaughterTracks_Order_dEdxtr;
    std::vector<double> *TPCObj_DaughterTracks_Order_dEdxtr_selMIPs;
    std::vector<double> *TPCObj_DaughterTracks_Order_trklen_selMIPs;
+   std::vector<double> *TPCObj_PFP_track_MCSLLmuMinusLLp;
+   std::vector<double> *TPCObj_PFP_track_MomRangeMinusMCS_p;
+   std::vector<double> *TPCObj_PFP_track_MomRangeMinusMCS_mu;
 
    // Is the track a MIP? Evaluate MIP cuts and then put this as an input into selection
    // Coded as a double (to fit in with the other code) but should be evaluated as a bool
