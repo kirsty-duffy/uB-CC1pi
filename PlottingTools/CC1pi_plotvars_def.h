@@ -292,5 +292,40 @@ CC1piPlotVars Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_ContDaughterMIPs(treevars
   return tmp;
 }
 
+// TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum
+CC1piPlotVars Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum;
+  tmp.bins = {10,0,1};
+  tmp.histtitle = ";Local Linearity Minimum;";
+  tmp.histname = "hitLinearity_minimum";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyContained = true;
+  return tmp;
+}
+
+// TPCObj_PFP_track_SimpleCluster_hitLinearity_mean
+CC1piPlotVars Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_mean;
+  tmp.bins = {10,0,1};
+  tmp.histtitle = ";Local Linearity Mean;";
+  tmp.histname = "hitLinearity_mean";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyContained = true;
+  return tmp;
+}
+
+// TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean
+CC1piPlotVars Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean;
+  tmp.bins = {10,0,1};
+  tmp.histtitle = ";Local Linearity Truncated Mean;";
+  tmp.histname = "hitLinearity_truncated_mean";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyContained = true;
+  return tmp;
+}
 
 #endif

@@ -187,6 +187,9 @@ void Calcvars(treevars *vars){
    vars->TPCObj_PFP_track_MCSLLmuMinusLLp = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_track_MomRangeMinusMCS_p = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_track_MomRangeMinusMCS_mu = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum = new std::vector<double>(vecsize);
+   vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_mean = new std::vector<double>(vecsize);
+   vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean= new std::vector<double>(vecsize);
 
    vars->TPCObj_PFP_track_passesMIPcut = new std::vector<double>(vecsize,-9999.);
 
@@ -220,6 +223,9 @@ void Calcvars(treevars *vars){
          vars->TPCObj_PFP_track_MCSLLmuMinusLLp->at(i_track) = -9999.;
          vars->TPCObj_PFP_track_MomRangeMinusMCS_p->at(i_track) = -9999.;
          vars->TPCObj_PFP_track_MomRangeMinusMCS_mu->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum->at(i_track) = -9999;
+         vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_mean->at(i_track) = -9999;
+         vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean->at(i_track) = -9999;
          vars->TPCObj_PFP_track_passesMIPcut->at(i_track) = -9999.;
 
          continue;
@@ -352,6 +358,23 @@ void Calcvars(treevars *vars){
          double MomRange_mu =  TMath::Sqrt((KE_mu*KE_mu)+(2*M_mu*KE_mu));
          vars->TPCObj_PFP_track_MomRangeMinusMCS_mu->at(i_track) = MomRange_mu/1000.-vars->TPCObj_PFP_track_MCSmu_fwdMom->at(i_track);
       }
+
+
+      // Calculate local linearity minimum
+      if(vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).size() > 0) {
+      vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum->at(i_track) = *std::min_element(vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).begin(),vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).end());
+      }
+      else vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum->at(i_track) = -9999;
+      
+      //Calculate local linearity mean and truncated mean (ignore first and last 5 hits)
+      double sum = std::accumulate(vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).begin(), vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).end(), 0.);
+      vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_mean->at(i_track) = sum/vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).size();
+
+      if(vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).size() >= 11) {
+         double trunc_sum = std::accumulate(vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).begin()+5, vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).end()-5, 0.);
+         vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean->at(i_track) = trunc_sum/(vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).size() - 10);
+      }
+      else vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean->at(i_track) = -9999;
 
 
       // Evaluate MIP cut (i.e. whether we want to class this track as a MIP). Cut algorithm defined in CutValues_header.h

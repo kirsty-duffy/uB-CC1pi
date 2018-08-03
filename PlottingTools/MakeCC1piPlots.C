@@ -29,6 +29,9 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       ,Var_TPCObj_PFP_track_MCSLLmuMinusLLp_ContDaughterMIPs(vars)
       ,Var_TPCObj_PFP_track_MomRangeMinusMCS_p_ContDaughterMIPs(vars)
       ,Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_ContDaughterMIPs(vars)
+      ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum(vars)
+      ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean(vars)
+      ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean(vars)
    };
    return varstoplot;
 }
