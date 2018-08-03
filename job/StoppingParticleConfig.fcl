@@ -13,7 +13,6 @@ micheltagger_config: {
   CalorimetryLabel:      "UBXSecpandoraNucali::CC1pi"
 
   DebugMode:             true
-  CreateTree:            false
   CoplanarCut:           6.
 
   CosmicTagManager: @local::cosmictag_config_mc
@@ -35,10 +34,12 @@ micheltagger_config: {
   MaxMichelHits:           70
   MaxEndHits:              100
   DebugMode:               true
+  Verbosity: 0
   }
 }
 
 cc1pi_micheltagger: @local::micheltagger_config
 cc1pi_micheltagger.CosmicTagManager.ClassicStartHitFinder.MaxAllowedHitDistance: 0.
+cc1pi_micheltagger.CosmicTagManager.Verbosity: 0
 
 END_PROLOG
