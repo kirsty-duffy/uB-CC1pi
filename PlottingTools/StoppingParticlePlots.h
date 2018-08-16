@@ -21,8 +21,9 @@ void MakeStoppingParticlePlots_SingleTrack(TCanvas *c1, treevars *vars, int trac
   bool track_ct_result_michel = vars->TPCObj_PFP_track_ct_result_michel->at(trackIndex);
 
   // Now make the TGraphs we want to fill...
-  int npoints = track_SimpleCluster_hitTime.size();
+  int npoints = track_SimpleCluster_hitLinearity.size();
   // std::cout << "npoints = " << npoints << ", StartIndex = " << track_SimpleCluster_StartIndex << std::endl;
+  if (npoints==0) return;
 
   // ... TGraph for hit time vs hit wire
   TGraph *g_timevswire_sm = new TGraph(npoints);
@@ -49,6 +50,12 @@ void MakeStoppingParticlePlots_SingleTrack(TCanvas *c1, treevars *vars, int trac
   // ... TGraph for hit linearity vs hit number in ordered vector
   TGraph *g_linearityvshitno = new TGraph(npoints);
   g_linearityvshitno->SetTitle(";hit no.;Local linearity at hit");
+
+  // std::cout << "track_SimpleCluster_hitWire.size() = " << track_SimpleCluster_hitWire.size() << std::endl
+  // << "track_SimpleCluster_hitTime.size() = " << track_SimpleCluster_hitTime.size() << std::endl
+  // << "track_SimpleCluster_hitdQds.size() = " << track_SimpleCluster_hitdQds.size() << std::endl
+  // << "track_SimpleCluster_hitdQdsSlider.size() = " << track_SimpleCluster_hitdQdsSlider.size() << std::endl
+  // << "track_SimpleCluster_hitLinearity.size() = " << track_SimpleCluster_hitLinearity.size() << std::endl;
 
   for (size_t i_hit=0; i_hit<npoints; i_hit++){
     g_timevswire_sm->SetPoint(i_hit,track_SimpleCluster_hitWire.at(i_hit),track_SimpleCluster_hitTime.at(i_hit));
