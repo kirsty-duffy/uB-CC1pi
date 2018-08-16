@@ -17,7 +17,8 @@ class StackedHistTopology{
   void Fill(NuIntTopology topology, double value);
   void Fill(NuIntTopology topology, double value, double weight);
   void DrawStack(double norm, TCanvas *c1, bool coarse=true);
-  void GetHistIntegrals(bool coarse=true);
+  void PrintHistIntegrals(bool coarse=true);
+  double GetCC1piIntegral();
 
  protected:
   int nHists;
@@ -28,6 +29,8 @@ class StackedHistTopology{
 
   THStack *stack;
   TH1F *hists[25];
+
+  double invalid_total;
 
   void StyleHists();
   unsigned int GetHistN(NuIntTopology topology);
@@ -75,6 +78,8 @@ StackedHistTopology::StackedHistTopology(std::string histname, std::string title
 
   // Style the histograms
   StackedHistTopology::StyleHists();
+
+  invalid_total = 0.;
 }
 
 // -------------------------- Function to fill the correct histogram -------------------------- //
@@ -82,6 +87,8 @@ void StackedHistTopology::Fill(NuIntTopology topology, double value)
 {
   unsigned int n_hist = StackedHistTopology::GetHistN(topology);
   hists[n_hist]->Fill(value);
+
+  if (value==-999 || value==-9999) invalid_total++;
 }
 
 // -------------------------- Function to fill the correct histogram -------------------------- //
@@ -90,11 +97,17 @@ void StackedHistTopology::Fill(NuIntTopology topology, double value, double weig
 {
   unsigned int n_hist = StackedHistTopology::GetHistN(topology);
   hists[n_hist]->Fill(value, weight);
+
+  if (value==-999 || value==-9999) invalid_total++;
 }
 
 // -------------------------- Function to collapse fine topo enums onto coarse topo names -------------------------- //
 void StackedHistTopology::GenerateCoarseHistos()
 {
+  // Clear coarse histos and remake
+  coarse_histos.clear();
+
+
   for (int i_hist = nHists-1; i_hist >=0; i_hist--) {
     NuIntTopology topology_for_legend =
         StackedHistTopology::GetTopologyFromHistN((unsigned int)i_hist);
@@ -117,11 +130,19 @@ void StackedHistTopology::DrawStack(double norm, TCanvas *c1, bool coarse)
 
   // Next: add histogramst to the stack and make TLegend
   // Only do this for histograms that have entries
-  TLegend *leg = new TLegend(0.1,0.88,0.9,0.99);
+  TLegend *leg = new TLegend(0.1,0.88,0.65,0.99);
   // leg->SetTextFont(132);
   leg->SetLineColor(kWhite);
   leg->SetTextAlign(12);
   leg->SetNColumns(6);
+
+  TPaveText *pt = new TPaveText(0.65,0.88,0.9,0.99,"NDC NB");
+  pt->SetLineColor(kWhite);
+  pt->SetFillColor(kWhite);
+  pt->SetTextAlign(12);
+
+  double underflow_total = 0.;
+  double overflow_total = 0.;
 
   for (int i_hist = 0; i_hist < nHists; i_hist++){
     hists[i_hist]->Scale(norm);
@@ -135,6 +156,9 @@ void StackedHistTopology::DrawStack(double norm, TCanvas *c1, bool coarse)
     stack->Add(ch.second);
     leg->AddEntry(ch.second, ch.first.c_str(), "f");
     //std::cout << "Integral for topology " << ch.first.c_str() << ": " << ch.second->Integral() << std::endl;
+
+    underflow_total += ch.second->GetBinContent(0);
+    overflow_total += ch.second->GetBinContent(ch.second->GetXaxis()->GetNbins()+1);
   }
 }
 else { // fine
@@ -148,13 +172,20 @@ else { // fine
     leg->AddEntry(hists[i_hist],
                   topologyenum2str(topology_for_legend).c_str(), "f");
     //std::cout << "Integral for topology " << topologyenum2str(topology_for_legend).c_str() << ": " << hists[i_hist]->Integral() << std::endl;
+
+    underflow_total += hists[i_hist]->GetBinContent(0);
+    overflow_total += hists[i_hist]->GetBinContent(hists[i_hist]->GetXaxis()->GetNbins()+1);
   }
 }
+
+  pt->AddText(TString::Format("Underflow (Invalid): %.2f (%.2f)",underflow_total,invalid_total).Data());
+  pt->AddText(TString::Format("Overflow: %.2f",overflow_total).Data());
 
   c1->cd();
   c1->SetTopMargin(0.13);
   stack->Draw("hist");
   leg->Draw();
+  pt->Draw();
 
   // TList * histKeys = stack->GetHists();
   // TIter next(histKeys);
@@ -232,7 +263,7 @@ NuIntTopology StackedHistTopology::GetTopologyFromHistN(unsigned int hist_n)
 }
 
 // ---------------------- Function to get histogram integrals ---------------------- //
-void StackedHistTopology::GetHistIntegrals(bool coarse)
+void StackedHistTopology::PrintHistIntegrals(bool coarse)
 {
   // Calculate and print out relative integrals (percentage of events that are each topology)
    if (coarse) {
@@ -267,6 +298,19 @@ void StackedHistTopology::GetHistIntegrals(bool coarse)
 
    }
  }
+}
+
+// ---------------------- Function to get total number of CC1pi events ---------------------- //
+double StackedHistTopology::GetCC1piIntegral()
+{
+  // Do "coarse" integral because we want all CC1pi events, and don't care about subcategories
+  StackedHistTopology::GenerateCoarseHistos();
+
+   for (std::pair<std::string, TH1F *> ch : coarse_histos) {
+     if (ch.first == "#nu_{#mu} CC 1#pi^{+}") return ch.second->Integral();
+   }
+
+   return 0.;
 }
 
 #endif
