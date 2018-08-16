@@ -26,6 +26,11 @@ double EvalMIPCut(treevars *vars, int i_tr){
          isMIP=-9999;
          break;
       }
+      else if (!std::isnormal(value)){
+         // std::cout << "[WARNING :: CC1pi_MIPcut.cxx] not-normal value for " << MIPCutVars.at(i_mipcut).histtitle << std::endl;
+         isMIP=-9999;
+         break;
+      }
       else if (MIPlow && (value > cutval)){
          isMIP=0;
          break;
@@ -34,6 +39,8 @@ double EvalMIPCut(treevars *vars, int i_tr){
          isMIP=0;
          break;
       }
+
+      // std::cout << i_tr << ": " << value << "  " << cutval << "  " << isMIP << std::endl;
    }
    return isMIP;
 };
