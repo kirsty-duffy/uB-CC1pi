@@ -8,6 +8,7 @@
 #include "CC1pi_treevars.h"
 #include "CC1pi_cuts.h"
 #include "CC1pi_MIPcut.cxx"
+#include "CC1pi_Pioncut.cxx"
 
 
 void settreevars(TTree *intree, treevars *varstoset){
@@ -26,6 +27,8 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("TPCObj_PFP_LH_bwd_pi", &(varstoset->TPCObj_PFP_LH_bwd_pi));
    intree->SetBranchStatus("TPCObj_PFP_LH_MIP",1);
    intree->SetBranchAddress("TPCObj_PFP_LH_MIP", &(varstoset->TPCObj_PFP_LH_MIP));
+   intree->SetBranchStatus("TPCObj_PFP_track_Chi2Proton",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_Chi2Proton", &(varstoset->TPCObj_PFP_track_Chi2Proton));
    intree->SetBranchStatus("TPCObj_PFP_track_rangeE_p",1);
    intree->SetBranchAddress("TPCObj_PFP_track_rangeE_p", &(varstoset->TPCObj_PFP_track_rangeE_p));
    intree->SetBranchStatus("TPCObj_PFP_track_rangeE_mu",1);
@@ -36,6 +39,10 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("Marco_selected", &(varstoset->Marco_selected));
    intree->SetBranchStatus("TPCObj_PFP_isDaughter",1);
    intree->SetBranchAddress("TPCObj_PFP_isDaughter", &(varstoset->TPCObj_PFP_isDaughter));
+   intree->SetBranchStatus("TPCObj_PFP_daughterids",1);
+   intree->SetBranchAddress("TPCObj_PFP_daughterids", &(varstoset->TPCObj_PFP_daughterids));
+   intree->SetBranchStatus("TPCObj_PFP_PandoraClassedAsTrack",1);
+   intree->SetBranchAddress("TPCObj_PFP_PandoraClassedAsTrack",&(varstoset->TPCObj_PFP_PandoraClassedAsTrack));
    intree->SetBranchStatus("TPCObj_PFP_track_theta",1);
    intree->SetBranchAddress("TPCObj_PFP_track_theta", &(varstoset->TPCObj_PFP_track_theta));
    intree->SetBranchStatus("TPCObj_PFP_track_phi",1);
@@ -58,6 +65,10 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("TPCObj_PFP_track_isContained", &(varstoset->TPCObj_PFP_track_isContained));
    intree->SetBranchStatus("TPCObj_PFP_truePDG",1);
    intree->SetBranchAddress("TPCObj_PFP_truePDG", &(varstoset->TPCObj_PFP_truePDG));
+   intree->SetBranchStatus("TPCObj_PFP_trueKE",1);
+   intree->SetBranchAddress("TPCObj_PFP_trueKE", &(varstoset->TPCObj_PFP_trueKE));
+   intree->SetBranchStatus("TPCObj_PFP_trueEndP",1);
+   intree->SetBranchAddress("TPCObj_PFP_trueEndP", &(varstoset->TPCObj_PFP_trueEndP));
    intree->SetBranchStatus("TPCObj_PFP_track_trajPoint_Position",1);
    intree->SetBranchAddress("TPCObj_PFP_track_trajPoint_Position", &(varstoset->TPCObj_PFP_track_trajPoint_Position));
    intree->SetBranchStatus("TPCObj_PFP_track_trajPoint_Direction",1);
@@ -177,21 +188,42 @@ void Calcvars(treevars *vars){
    vars->TPCObj_PFP_Lmipoverp = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_lnLmipoverp = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_Lmumipovermumipp = new std::vector<double>(vecsize);
+   vars->TPCObj_PFP_track_Chi2Proton_plane2 = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_BrokenTrackAngle = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_VtxTrackDist = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_isContained_double = new std::vector<double>(vecsize);
-   vars->TPCObj_PFP_track_dEdx_truncmean_start = new std::vector<double>(vecsize);
+   vars->TPCObj_PFP_isDaughter_double = new std::vector<double>(vecsize);
+   vars->TPCObj_PFP_PandoraClassedAsTrack_double = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_nhits = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_ndaughters = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_dEdx_truncmean_start = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_dEdx_mean_start = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_dEdx_truncmoverm_start = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_dEdx_stddev_start = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_dedx_grminhits = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_dedx_stddev = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_DaughterTracks_Order_dEdxtr = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_DaughterTracks_Order_dEdxtr_selMIPs = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_DaughterTracks_Order_trklen_selMIPs = new std::vector<double>(vecsize,-9999);
-   vars->TPCObj_PFP_track_MCSLLmuMinusLLp = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_MCSLLpiMinusLLp = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_track_MomRangeMinusMCS_p = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_track_MomRangeMinusMCS_mu = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_MCS_pi_maxScatter = new std::vector<double>(vecsize,-9999.);
+   vars->TPCObj_PFP_track_MCS_p_maxScatter = new std::vector<double>(vecsize,-9999.);
+   vars->TPCObj_PFP_track_MCS_pi_meanScatter = new std::vector<double>(vecsize,-9999.);
+   vars->TPCObj_PFP_track_MCS_p_meanScatter = new std::vector<double>(vecsize,-9999.);
    vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_mean = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean= new std::vector<double>(vecsize);
 
    vars->TPCObj_PFP_track_passesMIPcut = new std::vector<double>(vecsize,-9999.);
+   vars->TPCObj_PFP_track_passesPioncut = new std::vector<double>(vecsize,-9999.);
+
+   vars->TPCObj_LeadingMIPtrackIndex = -9999;
+   vars->TPCObj_SecondMIPtrackIndex = -9999;
+
+   if (vecsize>0) vars->TPCObj_AngleBetweenMIPs = new std::vector<double>(1,-9999);
+   else vars->TPCObj_AngleBetweenMIPs = new std::vector<double>(0,-9999);
 
    // Just use collection plane for now
    int i_pl = 2;
@@ -213,28 +245,46 @@ void Calcvars(treevars *vars){
          vars->TPCObj_PFP_Lmipoverp->at(i_track) = -9999;
          vars->TPCObj_PFP_lnLmipoverp->at(i_track) = -9999;
          vars->TPCObj_PFP_Lmumipovermumipp->at(i_track) = -9999;
+         vars->TPCObj_PFP_track_Chi2Proton_plane2->at(i_track) = -9999;
          vars->TPCObj_PFP_VtxTrackDist->at(i_track) = -9999;
          vars->TPCObj_PFP_BrokenTrackAngle->at(i_track) = -9999;
          vars->TPCObj_PFP_isContained_double->at(i_track) = -9999;
+         vars->TPCObj_PFP_isDaughter_double->at(i_track) = -9999;
+         vars->TPCObj_PFP_PandoraClassedAsTrack_double->at(i_track) = -9999;
+         vars->TPCObj_PFP_track_nhits->at(i_track) = -9999;
+         vars->TPCObj_PFP_ndaughters->at(i_track) = -9999;
          vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) = -9999;
-         vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) = -9999;
+         vars->TPCObj_PFP_track_dEdx_truncmoverm_start->at(i_track) = -9999;
+         vars->TPCObj_PFP_track_dEdx_mean_start->at(i_track) = -9999;
+         vars->TPCObj_PFP_track_dEdx_stddev_start->at(i_track) = -9999;
+         vars->TPCObj_PFP_track_dedx_grminhits->at(i_track) = -9999;
          pair_dEdx_truncmean_index->at(i_track)=std::make_pair(-9999.,i_track);
          pair_trklen_index->at(i_track)=std::make_pair(-9999.,i_track);
-         vars->TPCObj_PFP_track_MCSLLmuMinusLLp->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_MCSLLpiMinusLLp->at(i_track) = -9999.;
          vars->TPCObj_PFP_track_MomRangeMinusMCS_p->at(i_track) = -9999.;
          vars->TPCObj_PFP_track_MomRangeMinusMCS_mu->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_MCS_pi_maxScatter->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_MCS_p_maxScatter->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_MCS_pi_meanScatter->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_MCS_p_meanScatter->at(i_track) = -9999.;
          vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum->at(i_track) = -9999;
          vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_mean->at(i_track) = -9999;
          vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean->at(i_track) = -9999;
          vars->TPCObj_PFP_track_passesMIPcut->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_passesPioncut->at(i_track) = -9999.;
 
          continue;
       }
+
+      vars->TPCObj_PFP_track_nhits->at(i_track) = vars->TPCObj_PFP_track_trajPoint_Position->at(i_track).size();
+      vars->TPCObj_PFP_ndaughters->at(i_track) = vars->TPCObj_PFP_daughterids->at(i_track).size();
 
       vars->TPCObj_PFP_LH_p->at(i_track) = std::max(vars->TPCObj_PFP_LH_fwd_p->at(i_track).at(i_pl), vars->TPCObj_PFP_LH_bwd_p->at(i_track).at(i_pl));
       vars->TPCObj_PFP_LH_mu->at(i_track) = std::max(vars->TPCObj_PFP_LH_fwd_mu->at(i_track).at(i_pl), vars->TPCObj_PFP_LH_bwd_mu->at(i_track).at(i_pl));
       vars->TPCObj_PFP_LH_pi->at(i_track) = std::max(vars->TPCObj_PFP_LH_fwd_pi->at(i_track).at(i_pl), vars->TPCObj_PFP_LH_bwd_pi->at(i_track).at(i_pl));
       vars->TPCObj_PFP_LH_mip->at(i_track) = vars->TPCObj_PFP_LH_MIP->at(i_track).at(i_pl);
+
+      vars->TPCObj_PFP_track_Chi2Proton_plane2->at(i_track) = vars->TPCObj_PFP_track_Chi2Proton->at(i_track).at(i_pl);
 
       // Divisions are only valid if none of the values are <0 (i.e. -999 or -9999: only set for invalid tracks)
       // Otherwise set to -9999
@@ -250,6 +300,8 @@ void Calcvars(treevars *vars){
       }
       vars->TPCObj_PFP_VtxTrackDist->at(i_track) = std::hypot(std::hypot(vars->TPCObj_reco_vtx->at(0) - vars->TPCObj_PFP_track_start->at(i_track).at(0), vars->TPCObj_reco_vtx->at(1) - vars->TPCObj_PFP_track_start->at(i_track).at(1)), vars->TPCObj_reco_vtx->at(2) - vars->TPCObj_PFP_track_start->at(i_track).at(2));
       vars->TPCObj_PFP_isContained_double->at(i_track) = (double)(vars->TPCObj_PFP_track_isContained->at(i_track));
+      vars->TPCObj_PFP_isDaughter_double->at(i_track) = (double)(vars->TPCObj_PFP_isDaughter->at(i_track));
+      vars->TPCObj_PFP_PandoraClassedAsTrack_double->at(i_track) = (double)(vars->TPCObj_PFP_PandoraClassedAsTrack->at(i_track));
 
       // Angle between tracks (using theta and phi)...
       int track1 = i_track;
@@ -258,7 +310,8 @@ void Calcvars(treevars *vars){
       // But we want tracks that just don't have other tracks close by to get 0
       double maxangle = -1;
 
-      for (int track2 = track1+1; track2 < vecsize; track2++) {
+      for (int track2 = 0; track2 < vecsize; track2++) {
+         if (track2==track1) continue;
          if(vars->TPCObj_PFP_track_theta->at(track1) == -9999) continue;
          if(vars->TPCObj_PFP_track_theta->at(track2) == -9999) continue;
 
@@ -300,12 +353,24 @@ void Calcvars(treevars *vars){
 
       vars->TPCObj_PFP_BrokenTrackAngle->at(i_track) = maxangle;
 
+      // Calculate standard deviation of dE/dx
+      double dedx_sum = std::accumulate(std::begin(vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl)), std::end(vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl)), 0.0);
+      double dedx_m = dedx_sum / vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl).size();
+      double dedx_accum = 0.0;
+      std::for_each(std::begin(vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl)), std::end(vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl)), [&](const double d){
+        dedx_accum += (d-dedx_m)*(d-dedx_m);
+      });
+      vars->TPCObj_PFP_track_dedx_stddev->at(i_track) = TMath::Sqrt(dedx_accum / (vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl).size()-1));
+
       // Calculate truncated mean dE/dx at the start of the track
-      int nhits_start = 15;
+      int nhits_start = 30;
+      int nhits_skip = 3;
       std::vector<float> dEdx_float;
+      if (vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl).size()>=nhits_start) vars->TPCObj_PFP_track_dedx_grminhits->at(i_track) = 1.0;
+      else vars->TPCObj_PFP_track_dedx_grminhits->at(i_track) = 0.0;
       //std::cout << "---" << std::endl;
       // Vector order is track/plane/hit
-      for (int i=1; i<nhits_start+1; i++){
+      for (int i=nhits_skip; i<nhits_skip+nhits_start; i++){
           // Skip first hit (start from i=1) and last hit
           size_t perhit_size = vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl).size();
           // std::cout << "perhit_size = " << perhit_size << std::endl;
@@ -327,16 +392,34 @@ void Calcvars(treevars *vars){
       } vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) = tmpval;
       pair_dEdx_truncmean_index->at(i_track) = std::make_pair(tmpval,i_track);
 
+
+      // Calculate mean and standard deviation of dE/dx at start of track
+      dedx_sum = 0.0;
+      dedx_mean = 0.0;
+      dedx_accum = 0.0;
+      if (dEdx_float.size()>0){
+         dedx_sum = std::accumulate(std::begin(dEdx_float), std::end(dEdx_float), 0.0);
+         dedx_m = dedx_sum / dEdx_float.size();
+         std::for_each(std::begin(dEdx_float), std::end(dEdx_float), [&](const double d){
+           dedx_accum += (d-dedx_m)*(d-dedx_m);
+         });
+      }
+      vars->TPCObj_PFP_track_dEdx_mean_start->at(i_track) = dedx_m;
+      vars->TPCObj_PFP_track_dEdx_stddev_start->at(i_track) = TMath::Sqrt(dedx_accum / (dEdx_float).size()-1);
+      if (dedx_m!=0){
+         vars->TPCObj_PFP_track_dEdx_truncmoverm_start->at(i_track) = tmpval/dedx_m;
+      }
+
       // Make pair for ordering tracks by Length
       pair_trklen_index->at(i_track) = std::make_pair(vars->TPCObj_PFP_track_length->at(i_track),i_track);
 
 
-      // MCS-related variables: MCS LLmu-LLp, momentum by range - momentum by MCS for a muon, momentum by range - momentum by MCS for a proton
-      if (vars->TPCObj_PFP_track_MCSmu_fwdLL->at(i_track)==-9999 || vars->TPCObj_PFP_track_MCSmu_fwdLL->at(i_track)==-999 || vars->TPCObj_PFP_track_MCSp_fwdLL->at(i_track)==-9999 || vars->TPCObj_PFP_track_MCSp_fwdLL->at(i_track)==-999){
-         vars->TPCObj_PFP_track_MCSLLmuMinusLLp->at(i_track) = -9999.;
+      // MCS-related variables: MCS LLpi-LLp, momentum by range - momentum by MCS for a pion, momentum by range - momentum by MCS for a proton
+      if (vars->TPCObj_PFP_track_MCSpi_fwdLL->at(i_track)==-9999 || vars->TPCObj_PFP_track_MCSpi_fwdLL->at(i_track)==-999 || vars->TPCObj_PFP_track_MCSp_fwdLL->at(i_track)==-9999 || vars->TPCObj_PFP_track_MCSp_fwdLL->at(i_track)==-999){
+         vars->TPCObj_PFP_track_MCSLLpiMinusLLp->at(i_track) = -9999.;
       }
       else{
-         vars->TPCObj_PFP_track_MCSLLmuMinusLLp->at(i_track) = vars->TPCObj_PFP_track_MCSmu_fwdLL->at(i_track)-vars->TPCObj_PFP_track_MCSp_fwdLL->at(i_track);
+         vars->TPCObj_PFP_track_MCSLLpiMinusLLp->at(i_track) = (vars->TPCObj_PFP_track_MCSpi_fwdLL->at(i_track)-vars->TPCObj_PFP_track_MCSp_fwdLL->at(i_track))/(vars->TPCObj_PFP_track_MCSpi_fwdLL->at(i_track));
       }
 
       if (vars->TPCObj_PFP_track_rangeE_p->at(i_track)==-9999 || vars->TPCObj_PFP_track_rangeE_p->at(i_track)==-999 || vars->TPCObj_PFP_track_MCSp_fwdMom->at(i_track)==-9999 || vars->TPCObj_PFP_track_MCSp_fwdMom->at(i_track)==-999){
@@ -346,7 +429,7 @@ void Calcvars(treevars *vars){
          double KE_p = vars->TPCObj_PFP_track_rangeE_p->at(i_track);
          double M_p = 938.272;
          double MomRange_p = TMath::Sqrt((KE_p*KE_p)+(2*M_p*KE_p));
-         vars->TPCObj_PFP_track_MomRangeMinusMCS_p->at(i_track) = MomRange_p/1000.-vars->TPCObj_PFP_track_MCSp_fwdMom->at(i_track);
+         vars->TPCObj_PFP_track_MomRangeMinusMCS_p->at(i_track) = (MomRange_p/1000.-vars->TPCObj_PFP_track_MCSp_fwdMom->at(i_track))/(MomRange_p/1000.);
       }
 
       if (vars->TPCObj_PFP_track_rangeE_mu->at(i_track)==-9999 || vars->TPCObj_PFP_track_rangeE_mu->at(i_track)==-999 || vars->TPCObj_PFP_track_MCSmu_fwdMom->at(i_track)==-9999 || vars->TPCObj_PFP_track_MCSmu_fwdMom->at(i_track)==-999){
@@ -356,7 +439,21 @@ void Calcvars(treevars *vars){
          double KE_mu = vars->TPCObj_PFP_track_rangeE_mu->at(i_track);
          double M_mu = 105.7;
          double MomRange_mu =  TMath::Sqrt((KE_mu*KE_mu)+(2*M_mu*KE_mu));
-         vars->TPCObj_PFP_track_MomRangeMinusMCS_mu->at(i_track) = MomRange_mu/1000.-vars->TPCObj_PFP_track_MCSmu_fwdMom->at(i_track);
+         vars->TPCObj_PFP_track_MomRangeMinusMCS_mu->at(i_track) = (MomRange_mu/1000.-vars->TPCObj_PFP_track_MCSmu_fwdMom->at(i_track))/(MomRange_mu/1000.);
+      }
+
+      if(vars->TPCObj_PFP_track_MCSpi_scatterAngles->at(i_track).size()>0){
+         vars->TPCObj_PFP_track_MCS_pi_maxScatter->at(i_track) = *max_element(vars->TPCObj_PFP_track_MCSpi_scatterAngles->at(i_track).begin(), vars->TPCObj_PFP_track_MCSpi_scatterAngles->at(i_track).end());
+
+         double sum = std::accumulate(vars->TPCObj_PFP_track_MCSpi_scatterAngles->at(i_track).begin(), vars->TPCObj_PFP_track_MCSpi_scatterAngles->at(i_track).end(), 0.);
+         vars->TPCObj_PFP_track_MCS_pi_meanScatter->at(i_track) = sum/vars->TPCObj_PFP_track_MCSpi_scatterAngles->at(i_track).size();
+      }
+
+      if(vars->TPCObj_PFP_track_MCSp_scatterAngles->at(i_track).size()>0){
+         vars->TPCObj_PFP_track_MCS_p_maxScatter->at(i_track) = *max_element(vars->TPCObj_PFP_track_MCSp_scatterAngles->at(i_track).begin(), vars->TPCObj_PFP_track_MCSp_scatterAngles->at(i_track).end());
+
+         double sum = std::accumulate(vars->TPCObj_PFP_track_MCSp_scatterAngles->at(i_track).begin(), vars->TPCObj_PFP_track_MCSp_scatterAngles->at(i_track).end(), 0.);
+         vars->TPCObj_PFP_track_MCS_p_meanScatter->at(i_track) = sum/vars->TPCObj_PFP_track_MCSp_scatterAngles->at(i_track).size();
       }
 
 
@@ -365,7 +462,7 @@ void Calcvars(treevars *vars){
       vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum->at(i_track) = *std::min_element(vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).begin(),vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).end());
       }
       else vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum->at(i_track) = -9999;
-      
+
       //Calculate local linearity mean and truncated mean (ignore first and last 5 hits)
       double sum = std::accumulate(vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).begin(), vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).end(), 0.);
       vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_mean->at(i_track) = sum/vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).size();
@@ -377,8 +474,11 @@ void Calcvars(treevars *vars){
       else vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean->at(i_track) = -9999;
 
 
-      // Evaluate MIP cut (i.e. whether we want to class this track as a MIP). Cut algorithm defined in CutValues_header.h
+      // Evaluate MIP cut (i.e. whether we want to class this track as a MIP). Cut algorithm defined in CC1pi_cuts.cxx and the variables that go into the decision are defined in CC1pi_cuts.h
       vars->TPCObj_PFP_track_passesMIPcut->at(i_track) = (double)EvalMIPCut(vars,i_track);
+
+      // Evaluate pion cut (i.e. whether we want to class this track as a pion). Cut algorithm defined in CC1pi_cuts.cxx and the variables that go into the decision are defined in CC1pi_cuts.h
+      vars->TPCObj_PFP_track_passesPioncut->at(i_track) = EvalPionCut(vars,i_track);
 
    } // end loop over tracks in TPCObj (i_track)
 
@@ -409,6 +509,36 @@ void Calcvars(treevars *vars){
          i_order_mip++;
       }
    }
+
+
+   // Store which track is the leading MIP and the second-leading MIP (if applicable).
+   // Loop backwards through pair_trklen_index (so: from longest to shortest tracks) and set track IDs for the first two MIPs it encounters
+   i_order_mip=0;
+   for (int i_vec=vecsize-1; i_vec>=0; i_vec--){
+      int i_track = pair_trklen_index->at(i_vec).second;
+      if (bool(vars->TPCObj_PFP_track_passesMIPcut->at(i_track)) && vars->TPCObj_PFP_isDaughter->at(i_track) && pair_trklen_index->at(i_vec).first >= 0){
+         if (i_order_mip==0) vars->TPCObj_LeadingMIPtrackIndex = i_track;
+         else if (i_order_mip==1) vars->TPCObj_SecondMIPtrackIndex = i_track;
+         else if (i_order_mip>1) break;
+         i_order_mip++;
+      }
+   }
+
+   // Calculate angle between MIP-candidate tracks
+   if (vars->TPCObj_LeadingMIPtrackIndex>=0 && vars->TPCObj_SecondMIPtrackIndex>=0)
+   {
+      TVector3 v1(1,1,1);
+      TVector3 v2(1,1,1);
+      v1.SetMag(1);
+      v2.SetMag(1);
+      v1.SetTheta(vars->TPCObj_PFP_track_theta->at(vars->TPCObj_LeadingMIPtrackIndex));
+      v2.SetTheta(vars->TPCObj_PFP_track_theta->at(vars->TPCObj_SecondMIPtrackIndex));
+      v1.SetPhi(vars->TPCObj_PFP_track_phi->at(vars->TPCObj_LeadingMIPtrackIndex));
+      v2.SetPhi(vars->TPCObj_PFP_track_phi->at(vars->TPCObj_SecondMIPtrackIndex));
+
+      vars->TPCObj_AngleBetweenMIPs->at(0) = TMath::ACos(v1.Dot(v2));
+   }
+
 }
 
 
