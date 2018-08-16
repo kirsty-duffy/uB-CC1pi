@@ -23,6 +23,8 @@ bool IsEventSelected_SingleCut(double cutval, treevars *vars, int i_cut){
    int tracks_in_event = cutvar.Var->size();
    int n_tracks = 0;
    int n_failed = 0;
+   bool passes_LeadingMIP = false;
+   bool passes_SecondMIP = false;
    for (size_t i_track=0; i_track<tracks_in_event; i_track++){
       double value = cutvar.Var->at(i_track);
 
@@ -41,14 +43,19 @@ bool IsEventSelected_SingleCut(double cutval, treevars *vars, int i_cut){
 
       if (KeepBelowCut_i && value < cutval){
          track_passes_cut=true;
+         if (i_track == vars->TPCObj_LeadingMIPtrackIndex) passes_LeadingMIP = true;
+         if (i_track == vars->TPCObj_SecondMIPtrackIndex) passes_SecondMIP = true;
       }
       else if (!KeepBelowCut_i && value > cutval){
          track_passes_cut=true;
+         if (i_track == vars->TPCObj_LeadingMIPtrackIndex) passes_LeadingMIP = true;
+         if (i_track == vars->TPCObj_SecondMIPtrackIndex) passes_SecondMIP = true;
       }
 
       if (track_passes_cut){
          n_tracks++;
       }
+
    } // end loop over tracks in TPCObject
 
    // Throw away events that failed the CC inclusive selection or that have PFPs that failed to reco as tracks.
@@ -63,7 +70,23 @@ bool IsEventSelected_SingleCut(double cutval, treevars *vars, int i_cut){
          if (OnlyDaughters_i && n_tracks == std::count(TPCObj_PFP_isDaughter.begin(),TPCObj_PFP_isDaughter.end(),true)) isSelected = true;
          else if(!OnlyDaughters_i && n_tracks == tracks_in_event-1) isSelected = true; // Again, 1 less because of the neutrino
       }
+
+      else if (TracksNeeded_i == "NA" && n_tracks == tracks_in_event) isSelected = true;
+
+      else if (TracksNeeded_i == "LeadingMIP" && passes_LeadingMIP) isSelected = true;
+
+      else if (TracksNeeded_i == "SecondMIP" && passes_SecondMIP) isSelected = true;
+
+      else if (TracksNeeded_i == "BothMIPs" && passes_LeadingMIP && passes_SecondMIP) isSelected = true;
+
+      else if (TracksNeeded_i == "allExceptLeadingMIP"){
+        if (OnlyDaughters_i && passes_LeadingMIP && n_tracks == std::count(TPCObj_PFP_isDaughter.begin(),TPCObj_PFP_isDaughter.end(),true)) isSelected = true;
+        else if (OnlyDaughters_i && !passes_LeadingMIP && n_tracks == std::count(TPCObj_PFP_isDaughter.begin(),TPCObj_PFP_isDaughter.end(),true)-1) isSelected = true;
+        else if (!OnlyDaughters_i && passes_LeadingMIP && n_tracks == tracks_in_event-1) isSelected = true;
+        else if (!OnlyDaughters_i && !passes_LeadingMIP && n_tracks == tracks_in_event-2) isSelected = true;
+      }
    }
+
    return isSelected;
 }
 
