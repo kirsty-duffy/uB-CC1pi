@@ -14,21 +14,46 @@
 // What variables do we want to cut on?
 std::vector<CC1piPlotVars> GetCutVars(treevars *vars) {
    std::vector<CC1piPlotVars> cut_vars = {
-   Var_TPCObj_PFP_BrokenTrackAngle(vars),
-   Var_TPCObj_PFP_track_perc_used_hits(vars),
-   Var_TPCObj_PFP_VtxTrackDist(vars),
-   Var_TPCObj_PFP_track_passesMIPcut(vars)
+   Var_TPCObj_AngleBetweenMIPs(vars),
+   Var_TPCObj_AngleBetweenMIPs_high(vars),
+   Var_TPCObj_PFP_track_passesMIPcut(vars),
+   Var_TPCObj_LeadingMIP_PandoraClassedAsTrack(vars)
+
+   // ,Var_TPCObj_SecondMIP_isContained(vars)
+   // ,Var_TPCObj_FirstMIP_isContained(vars)
+   // ,Var_TPCObj_AllDaughters_isContained(vars)
+   // ,Var_TPCObj_AllTracks_isContained(vars)
+   // ,Var_TPCObj_AllDaughtersExceptLeadingMIP_isContained(vars)
+   // ,Var_TPCObj_PFP_track_nhits_LeadingMIP(vars) // Doesn't matter that it's got LeadingMIP in name, applies to all tracks
    };
    return cut_vars;
 };
 
 // --------------------------------------------------- //
-// Now define the vectors that go into the MIP cut. In the section after this we define EvalMIPCut - that function will loop over all of these variables and evaluate whether a track passes a cut in them. Only if a track passes all cuts will it be defined as a MIP.
+// Now define the vectors that go into the MIP cut. In CC1pi_MIPcut.cxx we define EvalMIPCut - that function will loop over all of these variables and evaluate whether a track passes a cut in them. Only if a track passes all cuts will it be defined as a MIP.
 
 // What variables do we want to cut on?
 std::vector<CC1piPlotVars> GetMIPCutVars(treevars *vars) {
    std::vector<CC1piPlotVars> cut_vars = {
    Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)
+   ,Var_TPCObj_PFP_track_dEdx_truncmean_start_lowcut(vars)
+   ,Var_TPCObj_PFP_VtxTrackDist(vars)
+   ,Var_TPCObj_PFP_track_perc_used_hits(vars)
+   ,Var_TPCObj_PFP_track_dedx_grminhits(vars)
+
+   ,Var_TPCObj_PFP_lnLmipoverp(vars)
+   };
+   return cut_vars;
+};
+
+// --------------------------------------------------- //
+// Now define the vectors that go into the pion cut. In CC1pi_Pioncut.cxx we define EvalPionCut - that function will loop over all of these variables and evaluate whether a track passes a cut in them. Only if a track passes all cuts will it be defined as a pion.
+
+// What variables do we want to cut on?
+std::vector<CC1piPlotVars> GetPionCutVars(treevars *vars) {
+   std::vector<CC1piPlotVars> cut_vars = {
+   Var_TPCObj_PFP_ndaughters_SecondMIP(vars)
+   ,Var_TPCObj_PFP_isDaughter(vars)
    };
    return cut_vars;
 };
