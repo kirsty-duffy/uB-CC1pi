@@ -9,6 +9,7 @@
 #include "CC1pi_cuts.cxx"
 #include "StoppingParticlePlots.h"
 #include "ProtondEdxrrPlots.h"
+#include "getSimPot.C"
 
 #include <boost/algorithm/string.hpp>
 
@@ -49,29 +50,29 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       // ,Var_TPCObj_DaughterTracks_Order_trklen_selMIPs(vars)
 
       // Var_TPCObj_PFP_MCSLLpiMinusLLp_LeadingMIP(vars)
-      // ,Var_TPCObj_PFP_MCSLLpiMinusLLp_SecondMIP(vars)
+      ,Var_TPCObj_PFP_MCSLLpiMinusLLp_SecondMIP(vars)
       // ,Var_TPCObj_PFP_MCSLLpiMinusLLp_NotPion(vars)
       // ,Var_TPCObj_PFP_MCSLLpiMinusLLp_LeadingMIPcont(vars)
-      // ,Var_TPCObj_PFP_MCSLLpiMinusLLp_SecondMIPcont(vars)
+      ,Var_TPCObj_PFP_MCSLLpiMinusLLp_SecondMIPcont(vars)
       // ,Var_TPCObj_PFP_MCSLLpiMinusLLp_NotPioncont(vars)
       // ,Var_TPCObj_PFP_track_MomRangeMinusMCS_p_LeadingMIPcont(vars)
-      // ,Var_TPCObj_PFP_track_MomRangeMinusMCS_p_SecondMIPcont(vars)
+      ,Var_TPCObj_PFP_track_MomRangeMinusMCS_p_SecondMIPcont(vars)
       // ,Var_TPCObj_PFP_track_MomRangeMinusMCS_p_NotPioncont(vars)
       // ,Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_LeadingMIPcont(vars)
-      ,Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_SecondMIPcont(vars)
-      ,Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_SecondMIPcont_mumupairs(vars)
+      // ,Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_SecondMIPcont(vars)
+      // ,Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_SecondMIPcont_mumupairs(vars)
       // ,Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_NotPioncont(vars)
       // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum_LeadingMIPcont(vars)
-      ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum_SecondMIPcont(vars)
-      ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum_SecondMIPcont_mumupairs(vars)
+      // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum_SecondMIPcont(vars)
+      // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum_SecondMIPcont_mumupairs(vars)
       // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum_NotPioncont(vars)
       // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_LeadingMIPcont(vars)
-      ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_SecondMIPcont(vars)
-      ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_SecondMIPcont_mumupairs(vars)
+      // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_SecondMIPcont(vars)
+      // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_SecondMIPcont_mumupairs(vars)
       // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_NotPioncont(vars)
       // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean_LeadingMIPcont(vars)
-      ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean_SecondMIPcont(vars)
-      ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean_SecondMIPcont_mumupairs(vars)
+      // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean_SecondMIPcont(vars)
+      // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean_SecondMIPcont_mumupairs(vars)
       // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean_NotPioncont(vars)
       // ,Var_TPCObj_PFP_track_nhits_LeadingMIP(vars)
       // ,Var_TPCObj_PFP_track_nhits_SecondMIP(vars)
@@ -86,10 +87,13 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       // ,Var_TPCObj_LeadingMIP_PandoraClassedAsTrack(vars)
       // ,Var_TPCObj_PFP_trueKE_selMIPs(vars)
       // ,Var_TPCObj_PFP_trueKE_SecondMIP(vars)
-      // ,Var_TPCObj_PFP_trueEndP_selMIPs(vars)
+      ,Var_TPCObj_PFP_trueEndP_SecondMIP(vars)
       // ,Var_TPCObj_NotMIPs_isContained(vars)
-      ,Var_TPCObj_PFP_ndaughters_SecondMIP(vars)
-      ,Var_TPCObj_PFP_ndaughters_SecondMIP_mumupairs(vars)
+      // ,Var_TPCObj_PFP_ndaughters_SecondMIP(vars)
+      // ,Var_TPCObj_PFP_ndaughters_SecondMIP_mumupairs(vars)
+      // ,Var_TPCObj_PFP_MCP_PDG_mTruePDG(vars)
+      // ,Var_TPCObj_PFP_MCP_numdaughters_SecondMIP(vars)
+      ,Var_TPCObj_PFP_MCP_motherIDeq0_SecondMIP(vars)
    };
    return varstoplot;
 }
@@ -98,10 +102,10 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
 // What variables do we want these 2D plots as a function of?
 std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> GetVarstoplot2D(treevars *vars){
    std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> varstoplot2D = {
-      {Var_TPCObj_PFP_track_dEdx_stddev_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
-      ,{Var_TPCObj_PFP_track_dEdx_mean_start_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
-      ,{Var_TPCObj_PFP_track_dEdx_stddev_start_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
-      ,{Var_TPCObj_PFP_track_theta_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
+      // {Var_TPCObj_PFP_track_dEdx_stddev_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
+      // ,{Var_TPCObj_PFP_track_dEdx_mean_start_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
+      // ,{Var_TPCObj_PFP_track_dEdx_stddev_start_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
+      // ,{Var_TPCObj_PFP_track_theta_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
       // {Var_TPCObj_PFP_VtxTrackDist_mumupairs(vars),Var_TPCObj_PFP_VtxTrackDist_SecondMIP_mumupairs(vars)}
       // {Var_TPCObj_PFP_MCSLLpiMinusLLp_NotPion(vars),Var_TPCObj_PFP_track_length(vars)}
       // ,{Var_TPCObj_PFP_MCSLLpiMinusLLp_NotPioncont(vars),Var_TPCObj_PFP_track_length(vars)}
@@ -412,5 +416,7 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
    SelectedEvents->PrintHistIntegrals();
    double CC1pi_selected = SelectedEvents->GetCC1piIntegral();
    double CC1pi_all = AllEvents->GetCC1piIntegral();
-   std::cout << std::endl << "CC1pi+ selection efficiency: " << CC1pi_selected << "/" << CC1pi_all << " = " << CC1pi_selected/CC1pi_all << std::endl;
+   std::cout << std::endl << "Total number of selected events: " << SelectedEvents->GetTotalIntegral() << std::endl;
+   std::cout << "CC1pi+ selection efficiency: " << CC1pi_selected << "/" << CC1pi_all << " = " << CC1pi_selected/CC1pi_all << std::endl;
+   getSimPot(mcfile);
 }
