@@ -19,6 +19,7 @@ class StackedHistTopology{
   void DrawStack(double norm, TCanvas *c1, bool coarse=true);
   void PrintHistIntegrals(bool coarse=true);
   double GetCC1piIntegral();
+  double GetTotalIntegral();
 
  protected:
   int nHists;
@@ -298,6 +299,20 @@ void StackedHistTopology::PrintHistIntegrals(bool coarse)
 
    }
  }
+}
+
+// ---------------------- Function to get histogram integrals ---------------------- //
+double StackedHistTopology::GetTotalIntegral()
+{
+   // Compute total integral
+   double total_integral = 0;
+   for (int i_hist=0; i_hist < nHists; i_hist++){
+      if (hists[i_hist]->GetEntries() == 0) continue;
+
+      double integral = hists[i_hist]->Integral();
+      total_integral += integral;
+   }
+   return total_integral;
 }
 
 // ---------------------- Function to get total number of CC1pi events ---------------------- //
