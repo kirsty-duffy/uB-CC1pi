@@ -8,6 +8,9 @@
 #include "CC1pi_EffPurHists.h"
 #include "CC1pi_EffPurHists2D.h"
 
+#include "TFile.h"
+#include "TTree.h"
+
 
 // ---------------------------------------------------- //
 //  Now the function starts
@@ -22,18 +25,45 @@ void MakeCutEfficiencyPlots(std::string mcfile){
 
    TFile *f_bnbcos = new TFile(mcfile.c_str(), "read");
    TTree *t_bnbcos = (TTree*)f_bnbcos->Get("cc1piselec/outtree");
+   TTree *t_bnbcos_friend = (TTree*)f_bnbcos->Get("StoppingParticleTagger/StoppingTaggerTree");
+
+    if (!t_bnbcos){
+      std::cout << "Error: did not find tree cc1piselec/outtree in file" << std::endl;
+      return;
+    }
+    if (!t_bnbcos_friend){
+      std::cout << "Error: did not find tree StoppingParticleTagger/StoppingTaggerTree in file" << std::endl;
+      return;
+    }
+   if (t_bnbcos->GetEntries() != t_bnbcos_friend->GetEntries()){
+     std::cout << "ERROR: cc1piselec/outtree has " << t_bnbcos->GetEntries() << " entries, and StoppingParticleTagger/StoppingTaggerTree has " << t_bnbcos_friend->GetEntries() << " entries. Cannot make friend tree, exiting." << std::endl;
+     return;
+   }
+   t_bnbcos->AddFriend(t_bnbcos_friend);
+
    treevars mc_vars;
    settreevars(t_bnbcos,&mc_vars);
 
-   // Sanity check: the plot vectors should be the same size
+   // Get vector of cuts we want to plot
+   // We want both the "normal" cut vars and the ones that define a MIP
    t_bnbcos->GetEntry(0);
    Calcvars(&mc_vars);
-   std::vector<CC1piPlotVars> varstoplot_dummy = GetCutVars(&mc_vars);
+   std::vector<CC1piPlotVars> cutvars_notMIPs = GetCutVars(&mc_vars);
+   std::vector<CC1piPlotVars> cutvars_MIPs = GetMIPCutVars(&mc_vars);
+   std::vector<CC1piPlotVars> varstoplot_dummy;
+   for (size_t i_cut=0; i_cut<cutvars_notMIPs.size(); i_cut++){
+      varstoplot_dummy.push_back(cutvars_notMIPs.at(i_cut));
+   }
+   for (size_t i_cut=0; i_cut<cutvars_MIPs.size(); i_cut++){
+      varstoplot_dummy.push_back(cutvars_MIPs.at(i_cut));
+   }
+
 
    // ----------------- MC
 
    // Make histograms to fill
    const size_t nplots = varstoplot_dummy.size();
+
    histCC1piselEffPur *mc_hists_cc1pieffpur[nplots];
    for (size_t i_h=0; i_h<nplots; i_h++){
       std::string histtitle_i = varstoplot_dummy.at(i_h).histtitle;
@@ -59,12 +89,14 @@ void MakeCutEfficiencyPlots(std::string mcfile){
 
    // Loop through MC tree and fill plots
    for (int i = 0; i < t_bnbcos->GetEntries(); i++){
+      if (i%1000==0 || i==t_bnbcos->GetEntries()-1) std::cout << i << "/" << t_bnbcos->GetEntries() << std::endl;
       t_bnbcos->GetEntry(i);
       Calcvars(&mc_vars);
 
-      for (size_t i_h = 0; i_h < nplots; i_h++){
-         FillCC1piEffPurHist(mc_hists_cc1pieffpur[i_h], &mc_vars, (int)i_h);
-      }
+      // for (size_t i_h = 8; i_h < 10/*nplots*/; i_h++){
+      //    // std::cout << i_h << std::endl;
+      //    FillCC1piEffPurHist(mc_hists_cc1pieffpur[i_h], &mc_vars, (int)i_h);
+      // }
 
       // Now fill histograms for N-1 plots
       FillNminus1EffPurHist(Nminus1plots,&mc_vars);
@@ -72,16 +104,16 @@ void MakeCutEfficiencyPlots(std::string mcfile){
    } // end loop over entries in tree
 
    // -------------------- Now make all the plots
-
-   for (size_t i_h=0; i_h < nplots; i_h++){
-      TCanvas *c1 = new TCanvas("c1","c1");
-
-      DrawCC1piMCEffPur(c1, mc_hists_cc1pieffpur[i_h]);
-      std::string printname = std::string(varstoplot_dummy.at(i_h).histname+".png");
-      c1->Print(std::string(std::string("CC1pi_effpur_")+printname).c_str());
-
-      delete c1;
-   }
+   std::cout << "Drawing plots..." << std::endl;
+   // for (size_t i_h=8; i_h < 10/*nplots*/; i_h++){
+   //    TCanvas *c1 = new TCanvas("c1","c1");
+   //
+   //    DrawCC1piMCEffPur(c1, mc_hists_cc1pieffpur[i_h]);
+   //    std::string printname = std::string(varstoplot_dummy.at(i_h).histname+".png");
+   //    c1->Print(std::string(std::string("CC1pi_effpur_")+printname).c_str());
+   //
+   //    delete c1;
+   // }
    TCanvas *c1 = new TCanvas("c1","c1");
    DrawCC1piMCEffPur(c1, Nminus1plots,"hist",true);
    c1->Print("Nminus1plots.png");
