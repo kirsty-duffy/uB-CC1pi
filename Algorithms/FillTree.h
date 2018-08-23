@@ -187,6 +187,7 @@ struct cc1pianavars{
   std::vector<std::vector<int>> MCP_DaughterIDs;
   std::vector<int> MCP_StatusCode;
   std::vector<int> MCP_MotherID;
+  std::vector<bool> MCP_isNuDaughter;
   std::vector<std::vector<double>> MCP_StartPosition;
   std::vector<std::vector<double>> MCP_EndPosition;
 
@@ -196,6 +197,7 @@ struct cc1pianavars{
   bool nu_isCC;
   int nu_PDG;
   double nu_E;
+  int nu_MCPID;
 
 
   fhicl::ParameterSet pset;

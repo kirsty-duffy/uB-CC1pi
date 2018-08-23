@@ -193,6 +193,8 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       simb::MCNeutrino top_nu = top_mctruth.GetNeutrino();
       simb::MCParticle top_neutrino = top_nu.Nu();
 
+      nu_MCPID = top_neutrino.TrackId();
+
       const TLorentzVector& top_vertex = top_neutrino.Position(0);
       double top_vertexXYZT[4];
       top_vertex.GetXYZT(top_vertexXYZT);
@@ -774,8 +776,9 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          TPCObj_PFP_truePDG.emplace_back(mcp -> PdgCode());
          TPCObj_PFP_trueE.emplace_back(mcp -> E());
          TPCObj_PFP_trueKE.emplace_back(mcp -> E() - mcp -> Mass());
-         TVector3 trueEndP(mcp -> EndPx(), mcp -> EndPy(), mcp -> EndPz());
-         TPCObj_PFP_trueEndP.emplace_back(trueEndP.Mag());
+         // TVector3 trueEndP(mcp -> EndPx(), mcp -> EndPy(), mcp -> EndPz());
+         // TPCObj_PFP_trueEndP.emplace_back(trueEndP.Mag());
+         TPCObj_PFP_trueEndP.emplace_back(mcp->EndE() - mcp->Mass());
          // std::cout << "trueEndP = " << mcp->EndPx() << ", " << mcp->EndPy() << ", " << mcp->EndPz() << std::endl;
          // std::cout << "trueEndP.Mag() = " << trueEndP.Mag() << std::endl;
          // std::cout << "EndE = " << mcp -> EndE() << std::endl;
@@ -848,6 +851,11 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          MCP_ID.emplace_back(mcpar -> TrackId());
          MCP_StatusCode.emplace_back(mcpar -> StatusCode());
          MCP_MotherID.emplace_back(mcpar -> Mother());
+
+         if (mcpar->Mother() == nu_MCPID)
+          MCP_isNuDaughter.emplace_back(true);
+         else
+          MCP_isNuDaughter.emplace_back(false);
 
          auto StartPosition = mcpar -> Position();
          auto EndPosition = mcpar -> EndPosition();
@@ -1020,6 +1028,7 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("MCP_DaughterIDs", &(vars->MCP_DaughterIDs));
    t -> Branch("MCP_StatusCode", &(vars->MCP_StatusCode));
    t -> Branch("MCP_MotherID", &(vars->MCP_MotherID));
+   t -> Branch("MCP_isNuDaughter", &(vars->MCP_isNuDaughter));
    t -> Branch("MCP_StartPosition", &(vars->MCP_StartPosition));
    t -> Branch("MCP_EndPosition", &(vars->MCP_EndPosition));
 
@@ -1028,6 +1037,7 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("nu_isCC", &(vars->nu_isCC));
    t -> Branch("nu_PDG", &(vars->nu_PDG));
    t -> Branch("nu_E", &(vars->nu_E));
+   t -> Branch("nu_MCPID", &(vars->nu_MCPID));
 
 }
 
