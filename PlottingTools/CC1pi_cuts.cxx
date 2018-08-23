@@ -4,8 +4,9 @@
 // #include <vector>
 
 #include "CC1pi_treevars.h"
+// #include "CC1pi_treevars.cxx"
 #include "CC1pi_cuts.h"
-#include "CC1pi_cuts.cxx"
+#include "CC1pi_MIPcut.cxx"
 
 
 bool IsEventSelected_SingleCut(double cutval, treevars *vars, int i_cut){
@@ -20,13 +21,16 @@ bool IsEventSelected_SingleCut(double cutval, treevars *vars, int i_cut){
    bool OnlyDaughters_i = cutvar.OnlyDaughters;
    std::string TracksNeeded_i = cutvar.TracksNeeded;
 
+   // std::cout << "i_cut = " << i_cut << ", cutval = " << cutval << ", KeepBelowCut = " << KeepBelowCut_i << ", OnlyDaughters = " << OnlyDaughters_i << ", TracksNeeded = " << TracksNeeded_i << std::endl;
+
    int tracks_in_event = cutvar.Var->size();
    int n_tracks = 0;
    int n_failed = 0;
    bool passes_LeadingMIP = false;
    bool passes_SecondMIP = false;
-   for (size_t i_track=0; i_track<tracks_in_event; i_track++){
+   for (int i_track=0; i_track<tracks_in_event; i_track++){
       double value = cutvar.Var->at(i_track);
+      // std::cout << " --- Track " << i_track << " value " << value << std::endl;
 
       // Ignore PFPs that failed to reco as tracks. The neutrino PFP will also have a bogus value.
       if (value == -9999 || value == -999) {
@@ -86,7 +90,7 @@ bool IsEventSelected_SingleCut(double cutval, treevars *vars, int i_cut){
         else if (!OnlyDaughters_i && !passes_LeadingMIP && n_tracks == tracks_in_event-2) isSelected = true;
       }
    }
-
+   // std::cout << "isSelected_i = " << isSelected << std::endl;
    return isSelected;
 }
 
