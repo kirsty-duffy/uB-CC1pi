@@ -3,12 +3,14 @@
 
 #include "../Algorithms/TopologyEnums.h"
 #include "TH1.h"
+#include "TH2.h"
 #include "TColor.h"
 #include "TLegend.h"
 #include "TCanvas.h"
 #include "THStack.h"
 #include "TStyle.h"
-// #include <vector>
+#include "TLine.h"
+#include <vector>
 
 #include "CC1pi_treevars.h"
 #include "CC1pi_cuts.h"
@@ -50,12 +52,44 @@ struct histCC1piselEffPur{
    }
 };
 
-void FillCC1piEffPurHist(histCC1piselEffPur *hists, treevars *vars, int i_cut){
+void FillCC1piEffPurHist(histCC1piselEffPur *hists, treevars *vars, int i_thiscut){
+   std::vector<CC1piPlotVars> CutVars = GetCutVars(vars);
+   int n_notMIPcuts = CutVars.size();
+
    // Loop through all bins in the histograms, and evaluate a cut value at the centre of each bin
+   // Also apply all other cuts (note that if this is a MIP-defining cut, changing the value of this cut may also change the effect of the other cuts because the definition of the MIPs may change)
+   std::vector<CC1piPlotVars> MIPCutVars = GetMIPCutVars(vars);
    for (int i_bin=1; i_bin < hists->h_cc1pi_sel->GetXaxis()->GetNbins()+1; i_bin++){
       double cutval = hists->h_cc1pi_sel->GetXaxis()->GetBinCenter(i_bin);
 
-      bool isSelected = IsEventSelected_SingleCut(cutval, vars, i_cut);
+      if (i_thiscut>=n_notMIPcuts){
+        int i_mipcut = i_thiscut - n_notMIPcuts;
+        MIPCutVars.at(i_mipcut).CutValue = cutval;
+      }
+      // Call Calcvars with the new vector of MIPCutVars
+      Calcvars(vars,&MIPCutVars);
+
+      // Now loop through all non-MIP cuts and apply them
+      // For the case of the cut we want to change, don't use the stored cut value but use cutval instead
+      // Work this out by comparing i_thiscut to i_cut. If it's a MIP cut, it won't ever be true, but that's ok because we already evaluated the MIP cut value above.
+      bool isSelected = true;
+      for (int i_cut=0; i_cut < n_notMIPcuts; i_cut++){
+         // std::cout << "-- cut " << i_cut << std::endl;
+         // Skip cut associated to current bin
+         // For bin with i_bin=ncuts+1, it will not be equal to i_cut+1 for any cut, so it should just evaluate all of them
+         // Same goes for the MIP-defining cuts
+         bool isSelected_i = true;
+         if (i_cut == i_thiscut) {
+            isSelected_i = IsEventSelected_SingleCut(cutval, vars, i_thiscut);
+         }
+         else{
+            isSelected_i = IsEventSelected_SingleCut(CutVars.at(i_cut).CutValue, vars, i_cut);
+         }
+         if (isSelected_i == false) isSelected = false;
+      } // end loop over cuts
+
+      Calcvars(vars);// Reset MIPs
+
 
       // Fill selection info into the relevant histograms
       if (isSelected){
@@ -78,36 +112,68 @@ void FillCC1piEffPurHist(histCC1piselEffPur *hists, treevars *vars, int i_cut){
 }
 
 void FillNminus1EffPurHist(histCC1piselEffPur *hists, treevars *vars){
-   int ncuts = GetCutVars(vars).size();
+   std::vector<CC1piPlotVars> CutVars = GetCutVars(vars);
+   int n_notMIPcuts = CutVars.size();
+   int n_MIPcuts = GetMIPCutVars(vars).size();
+   int ncuts = n_notMIPcuts + n_MIPcuts;
    // Loop through all bins in the histogram and evaluate the cuts
    // Each bin represents one cut (note: that means that for a given bin, we apply all cuts EXCEPT that one), with the final bin showing what we get when we apply all cuts.
    // "Applying" cuts means using the cut values given in the vector
+   // If the cut defines a MIP, neglect that cut and apply the "isMIP" cut to the event.
    for (int i_bin=1; i_bin < hists->h_cc1pi_sel->GetXaxis()->GetNbins()+1; i_bin++){
       // Now loop over cuts and apply them
       bool isSelected = true;
       if (i_bin<ncuts+2){
-         for (int i_cut=0; i_cut < ncuts; i_cut++){
+         // if (i_bin != ncuts+1) continue;
+         // std::cout << "bin " << i_bin << std::endl;
+         // if current bin is associated with a MIP-defining cut, redefine MIP cuts without that one
+         std::vector<CC1piPlotVars> MIPCutVars = GetMIPCutVars(vars);
+         if ((i_bin-1>=n_notMIPcuts) && (i_bin!=ncuts+1)){
+            int i_mipcut = i_bin-1 - n_notMIPcuts;
+            // std::cout << "Erasing MIP cut " << MIPCutVars.at(i_mipcut).histtitle << std::endl;
+            MIPCutVars.erase(MIPCutVars.begin()+i_mipcut);
+         }
+         // Call Calcvars with the new vector of MIPCutVars
+         Calcvars(vars,&MIPCutVars);
+
+         for (int i_cut=0; i_cut < n_notMIPcuts; i_cut++){
+            // std::cout << "-- cut " << i_cut << std::endl;
             // Skip cut associated to current bin
-            // For bin with i_bin=ncuts+2, it will not be equal to i_cut+1 for any cut, so it should just evaluate all of them
+            // For bin with i_bin=ncuts+1, it will not be equal to i_cut+1 for any cut, so it should just evaluate all of them
+            // Same goes for the MIP-defining cuts
             if (i_cut+1 == i_bin) {
                // std::cout << "skipping cut" << std::endl;
                continue;
             }
             // Evaluate whether event passes this cut. If it doesn't, set isSelected to false for the event
-            bool isSelected_i = IsEventSelected_SingleCut(GetCutVars(vars).at(i_cut).CutValue, vars, i_cut);
+            bool isSelected_i = IsEventSelected_SingleCut(CutVars.at(i_cut).CutValue, vars, i_cut);
             if (isSelected_i == false) isSelected = false;
+
+            // std::cout << "Cut " << i_cut+1 << ": isSelected = " << isSelected_i << std::endl;
 
             // if (isSelected) std::cout << "bin: " << i_bin << ", cut: " << i_cut << "isSelected = " << isSelected << std::endl;
          } // end loop over cuts
+         // std::cout << "  " << isSelected << std::endl;
       }
       // Bin ncuts+2: only evaluate whether the event passed Marco's selection and has 2 tracks
       else if (i_bin==ncuts+2){
          int n_tracks = 0;
-         for (size_t i_track=0; i_track<GetCutVars(vars).at(0).Var->size(); i_track++){
-            double value = GetCutVars(vars).at(0).Var->at(i_track);
-
+         int n_bogus = 0;
+         for (size_t i_track=0; i_track<vars->TPCObj_PFP_track_passesMIPcut->size(); i_track++){
             // Ignore PFPs that failed to reco as tracks. The neutrino PFP will also have a bogus value.
+            // Fail any events with more than one track with bogus values (these are badly reconstructed and we can't use them)
+
+            // Test on isMIP cut
+            double value = vars->TPCObj_PFP_track_passesMIPcut->at(i_track);
+
             if (value == -9999 || value == -999) {
+               if (n_bogus>0){
+                  // std::cout << "More than one bad track: throwing event away" << std::endl;
+                  isSelected = false;
+                  n_tracks = 0;
+                  break;
+               }
+               n_bogus++;
                continue;
             }
 
@@ -119,6 +185,7 @@ void FillNminus1EffPurHist(histCC1piselEffPur *hists, treevars *vars){
          else{
             isSelected = false;
          }
+         // std::cout << "CCincl+2 tracks isSelected: " << isSelected << std::endl;
       }
       // Bin ncuts+3: only evaluate whether the event passed Marco's selection
       if (i_bin==ncuts+3){
@@ -132,7 +199,7 @@ void FillNminus1EffPurHist(histCC1piselEffPur *hists, treevars *vars){
 
       // Now fill selection info into the relevant histograms
       double fillval = hists->h_cc1pi_sel->GetBinCenter(i_bin);
-      //if (isSelected) std::cout << "Bin " << i_bin << ", isSelected = " << isSelected << ", fillval = " << fillval << std::endl;
+      // if (isSelected) std::cout << "Bin " << i_bin << ", isSelected = " << isSelected << ", fillval = " << fillval << std::endl;
       if (isSelected){
          if (vars->Truth_topology == kCC1piplus0p || vars->Truth_topology == kCC1piplus1p || vars->Truth_topology == kCC1piplusNp){
             hists->h_cc1pi_sel->Fill(fillval);
@@ -150,11 +217,14 @@ void FillNminus1EffPurHist(histCC1piselEffPur *hists, treevars *vars){
          // }
       }
 
+     // Reset MIPs by calling Calcvars again so it doesn't cause us problems later
+     Calcvars(vars);
+
    } // end loop over bins (i.e. cuts)
 
 }
 
-void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists, std::string drawopt="p",bool isNminus1=false){
+void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists, std::string drawopt="lp",bool isNminus1=false){
    TH1D *heff = (TH1D*)hists->h_cc1pi_sel->Clone("heff");
    TH1D *hpur = (TH1D*)hists->h_cc1pi_sel->Clone("hpur");
    TH1D *heffpur = (TH1D*)hists->h_cc1pi_sel->Clone("heffpur");
@@ -174,12 +244,21 @@ void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists, std::string drawop
       double total_cc1pi = hists->h_cc1pi_sel->GetBinContent(i_bin)+hists->h_cc1pi_notsel->GetBinContent(i_bin);
       double selected_all = hists->h_cc1pi_sel->GetBinContent(i_bin)+hists->h_bg_sel->GetBinContent(i_bin);
 
+      if (isNminus1){
+         std::cout << "---" << hists->h_cc1pi_sel->GetXaxis()->GetBinLabel(i_bin) << "---" << std::endl;
+         std::cout << "selected_cc1pi = " << selected_cc1pi << std::endl;
+         std::cout << "total_cc1pi = " << total_cc1pi << std::endl;
+         std::cout << "selected_all = " << selected_all << std::endl;
+      }
+
       double eff = selected_cc1pi/total_cc1pi;
       double pur = selected_cc1pi/selected_all;
       if (selected_all==0) pur=0;
-      //
-      // std::cout << "eff = " << eff << std::endl;
-      // std::cout << "pur = " << pur << std::endl;
+
+      if (isNminus1){
+         std::cout << "eff = " << eff << std::endl;
+         std::cout << "pur = " << pur << std::endl;
+      }
 
       heff->SetBinContent(i_bin,eff);
       hpur->SetBinContent(i_bin,pur);
@@ -211,9 +290,9 @@ void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists, std::string drawop
    hpur->Draw((std::string("same")+drawopt).c_str());
    heffpur->Draw((std::string("same")+drawopt).c_str());
 
-   l->AddEntry(heff,"Efficiency","p");
-   l->AddEntry(hpur,"Purity","p");
-   l->AddEntry(heffpur,"Efficiency #times Purity","p");
+   l->AddEntry(heff,"Efficiency","lp");
+   l->AddEntry(hpur,"Purity","lp");
+   l->AddEntry(heffpur,"Efficiency #times Purity","lp");
    l->Draw();
 
    // For N-1 plots only, we want to overlay a histogram that has the "all cuts" values in all bins, for easy comparison. Hardcode that "all cuts" will be in bin 2.
