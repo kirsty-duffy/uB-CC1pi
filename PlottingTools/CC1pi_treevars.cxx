@@ -7,6 +7,7 @@
 #include "../../../../larana/larana/TruncatedMean/Algorithm/TruncMean.cxx"
 #include "CC1pi_treevars.h"
 #include "CC1pi_cuts.h"
+#include "CC1pi_plotvars_def.h"
 #include "CC1pi_MIPcut.cxx"
 #include "CC1pi_Pioncut.cxx"
 
@@ -69,6 +70,18 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("TPCObj_PFP_trueKE", &(varstoset->TPCObj_PFP_trueKE));
    intree->SetBranchStatus("TPCObj_PFP_trueEndP",1);
    intree->SetBranchAddress("TPCObj_PFP_trueEndP", &(varstoset->TPCObj_PFP_trueEndP));
+   intree->SetBranchStatus("TPCObj_PFP_MCPid",1);
+   intree->SetBranchAddress("TPCObj_PFP_MCPid", &(varstoset->TPCObj_PFP_MCPid));
+   intree->SetBranchStatus("MCP_PDG",1);
+   intree->SetBranchAddress("MCP_PDG", &(varstoset->MCP_PDG));
+   intree->SetBranchStatus("MCP_numdaughters",1);
+   intree->SetBranchAddress("MCP_numdaughters", &(varstoset->MCP_numdaughters));
+   intree->SetBranchStatus("MCP_MotherID",1);
+   intree->SetBranchAddress("MCP_MotherID", &(varstoset->MCP_MotherID));
+   intree->SetBranchStatus("MCP_ID",1);
+   intree->SetBranchAddress("MCP_ID", &(varstoset->MCP_ID));
+   intree->SetBranchStatus("MCP_DaughterIDs",1);
+   intree->SetBranchAddress("MCP_DaughterIDs", &(varstoset->MCP_DaughterIDs));
    intree->SetBranchStatus("TPCObj_PFP_track_trajPoint_Position",1);
    intree->SetBranchAddress("TPCObj_PFP_track_trajPoint_Position", &(varstoset->TPCObj_PFP_track_trajPoint_Position));
    intree->SetBranchStatus("TPCObj_PFP_track_trajPoint_Direction",1);
@@ -176,8 +189,8 @@ void settreevars(TTree *intree, treevars *varstoset){
 
 }
 
-void Calcvars(treevars *vars){
-
+void Calcvars(treevars *vars, std::vector<CC1piPlotVars> *MIPCutVars=nullptr){
+   // std::cout << "Calling calcvars" << std::endl;
    // Initialise vectors that we are going to fill with calculated values
    int vecsize = vars->TPCObj_PFP_LH_fwd_p->size();
 
@@ -215,8 +228,13 @@ void Calcvars(treevars *vars){
    vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_mean = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean= new std::vector<double>(vecsize);
+   vars->TPCObj_PFP_MCP_PDG = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_MCP_numdaughters = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_MCP_numdaughters_notphotons = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_MCP_motherIDeq0 = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_MCP_PDG_mTruePDG = new std::vector<double>(vecsize,-9999);
 
-   vars->TPCObj_PFP_track_passesMIPcut = new std::vector<double>(vecsize,-9999.);
+   vars->TPCObj_PFP_track_passesMIPcut = new std::vector<double>(vecsize,1.);
    vars->TPCObj_PFP_track_passesPioncut = new std::vector<double>(vecsize,-9999.);
 
    vars->TPCObj_LeadingMIPtrackIndex = -9999;
@@ -235,6 +253,46 @@ void Calcvars(treevars *vars){
    // Now calculate the values for all variables
    for (int i_track=0; i_track < vecsize; i_track++){
 
+      // Get variables related to MCP by looping through MCPs and matching MCPid
+      vars->TPCObj_PFP_MCP_motherIDeq0->at(i_track) = 0;
+      for (size_t i_MCP=0; i_MCP < vars->MCP_ID->size(); i_MCP++){
+         if (vars->TPCObj_PFP_MCPid->at(i_track) == vars->MCP_ID->at(i_MCP)){
+            vars->TPCObj_PFP_MCP_PDG->at(i_track) = vars->MCP_PDG->at(i_MCP);
+            vars->TPCObj_PFP_MCP_numdaughters->at(i_track) = vars->MCP_numdaughters->at(i_MCP);
+
+            // Loop through mothers and find mother PDG
+            int motherID = vars->MCP_MotherID->at(i_MCP);
+            if (motherID==0){
+               vars->TPCObj_PFP_MCP_motherIDeq0->at(i_track) = 1.0;
+            }
+            else{
+               vars->TPCObj_PFP_MCP_motherIDeq0->at(i_track) = 0.0;
+            }
+            // std::cout << "MCP ID: " << vars->TPCObj_PFP_MCPid->at(i_track) << ", mother ID = " << motherID;
+            // for (size_t i_motherMCP=0; i_motherMCP < vars->MCP_ID->size(); i_motherMCP++){
+            //    if (vars->MCP_ID->at(i_motherMCP) == motherID){
+            //       vars->TPCObj_PFP_MCP_motherPDG->at(i_track) = vars->MCP_PDG->at(i_motherMCP);
+            //       // std::cout << ", mother PDG = " << vars->TPCObj_PFP_MCP_motherPDG->at(i_track) << std::endl;
+            //       break;
+            //    }
+            // }
+
+
+            // Loop through daughters and find daughter PDGs
+            int n_daughters_notphotons = 0;
+            for (size_t i_daughterMCP=0; i_daughterMCP < vars->MCP_DaughterIDs->at(i_MCP).size(); i_daughterMCP++){
+               for (size_t i_daughterMCPb=0; i_daughterMCPb<vars->MCP_ID->size(); i_daughterMCPb++){
+                  if (vars->MCP_DaughterIDs->at(i_MCP).at(i_daughterMCP) != vars->MCP_ID->at(i_daughterMCPb)) continue;
+                  if (vars->MCP_PDG->at(i_daughterMCPb) != 22 && vars->MCP_PDG->at(i_daughterMCPb) != 11) n_daughters_notphotons++;
+               }
+            }
+            vars->TPCObj_PFP_MCP_numdaughters_notphotons->at(i_track) = n_daughters_notphotons;
+            break;
+         }
+      } // end loop over MCPs
+      vars->TPCObj_PFP_MCP_PDG_mTruePDG->at(i_track) = vars->TPCObj_PFP_MCP_PDG->at(i_track) - vars->TPCObj_PFP_truePDG->at(i_track);
+
+      // Now on to reconstructed variables
       // The neutrino and any other PFPs that didn't get reco'd as tracks should get bogus values
       if(vars->TPCObj_PFP_track_theta->at(i_track) == -9999) {
 
@@ -366,13 +424,13 @@ void Calcvars(treevars *vars){
       int nhits_start = 30;
       int nhits_skip = 3;
       std::vector<float> dEdx_float;
-      if (vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl).size()>=nhits_start) vars->TPCObj_PFP_track_dedx_grminhits->at(i_track) = 1.0;
+      if ((int)vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl).size()>=nhits_start) vars->TPCObj_PFP_track_dedx_grminhits->at(i_track) = 1.0;
       else vars->TPCObj_PFP_track_dedx_grminhits->at(i_track) = 0.0;
       //std::cout << "---" << std::endl;
       // Vector order is track/plane/hit
       for (int i=nhits_skip; i<nhits_skip+nhits_start; i++){
           // Skip first hit (start from i=1) and last hit
-          size_t perhit_size = vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl).size();
+          int perhit_size = (int)vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl).size();
           // std::cout << "perhit_size = " << perhit_size << std::endl;
           if (i>=perhit_size) continue;
           int index = i;
@@ -395,7 +453,7 @@ void Calcvars(treevars *vars){
 
       // Calculate mean and standard deviation of dE/dx at start of track
       dedx_sum = 0.0;
-      dedx_mean = 0.0;
+      dedx_m = 0.0;
       dedx_accum = 0.0;
       if (dEdx_float.size()>0){
          dedx_sum = std::accumulate(std::begin(dEdx_float), std::end(dEdx_float), 0.0);
@@ -475,7 +533,7 @@ void Calcvars(treevars *vars){
 
 
       // Evaluate MIP cut (i.e. whether we want to class this track as a MIP). Cut algorithm defined in CC1pi_cuts.cxx and the variables that go into the decision are defined in CC1pi_cuts.h
-      vars->TPCObj_PFP_track_passesMIPcut->at(i_track) = (double)EvalMIPCut(vars,i_track);
+      vars->TPCObj_PFP_track_passesMIPcut->at(i_track) = (double)EvalMIPCut(vars,i_track,MIPCutVars);
 
       // Evaluate pion cut (i.e. whether we want to class this track as a pion). Cut algorithm defined in CC1pi_cuts.cxx and the variables that go into the decision are defined in CC1pi_cuts.h
       vars->TPCObj_PFP_track_passesPioncut->at(i_track) = EvalPionCut(vars,i_track);

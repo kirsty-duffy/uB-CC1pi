@@ -3,6 +3,10 @@
 
 #include "../Algorithms/TopologyEnums.h"
 
+#include "TMath.h"
+#include "TVector3.h"
+#include "TTree.h"
+
 // This code defines the variables we read in from the tree and new derived variables from there.
 // The implementation (i.e. the code that actually calculates the new derived variables) is in treevars_header.h
 
@@ -37,6 +41,12 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_trueKE = nullptr;
    std::vector<double> *TPCObj_PFP_trueEndP = nullptr;
    std::vector<double> *TPCObj_PFP_track_length = nullptr;
+   std::vector<int> *TPCObj_PFP_MCPid = nullptr;
+   std::vector<int> *MCP_PDG = nullptr;
+   std::vector<int> *MCP_numdaughters = nullptr;
+   std::vector<int> *MCP_MotherID = nullptr;
+   std::vector<int> *MCP_ID = nullptr;
+   std::vector<std::vector<int>> *MCP_DaughterIDs = nullptr;
 
    std::vector<std::vector<std::vector<double>>> *TPCObj_PFP_track_trajPoint_Position=nullptr;
    std::vector<std::vector<std::vector<double>>> *TPCObj_PFP_track_trajPoint_Direction=nullptr;
@@ -127,6 +137,11 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum;
    std::vector<double> *TPCObj_PFP_track_SimpleCluster_hitLinearity_mean;
    std::vector<double> *TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean;
+   std::vector<double> *TPCObj_PFP_MCP_PDG;
+   std::vector<double> *TPCObj_PFP_MCP_numdaughters;
+   std::vector<double> *TPCObj_PFP_MCP_numdaughters_notphotons;
+   std::vector<double> *TPCObj_PFP_MCP_motherIDeq0;
+   std::vector<double> *TPCObj_PFP_MCP_PDG_mTruePDG;
 
    // Is the track a MIP? Evaluate MIP cuts and then put this as an input into selection
    // Coded as a double (to fit in with the other code) but should be evaluated as a bool
