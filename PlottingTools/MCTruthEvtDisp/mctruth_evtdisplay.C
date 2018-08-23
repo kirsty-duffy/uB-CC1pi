@@ -16,6 +16,8 @@
 #include "TAxis.h"
 #include "TString.h"
 #include "nusimdata/SimulationBase/MCParticle.h"
+#include "nusimdata/SimulationBase/MCNeutrino.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
 
 using namespace art;
 using namespace std;
@@ -61,6 +63,18 @@ void mctruth_evtdisplay(std::string const& filename, int ievcount=-999, double x
 
 	if (ievcount != -999 && ievcount != ev.eventAuxiliary().event()) continue;
 
+	vector<simb::MCTruth> mc_truth = *ev.getValidHandle<vector<simb::MCTruth>>("generator");
+	std::cout << "MCTruth.size() = " << mc_truth.size() << std::endl;
+	simb::MCNeutrino mc_nu = mc_truth.at(0).GetNeutrino();
+	simb::MCParticle nu = mc_nu.Nu();
+	std::cout << "Neutrino PDG code: " << nu.PdgCode() << std::endl;
+	// std::cout << "Neutrino daughters: " << std::endl;
+	// for (int i_daughter=0; i_daughter<nu.NumberDaughters(); i_daughter++){
+	// 	std::cout << nu.Daughter(i_daughter) << std::endl;
+	// 	for (int i_mcp=0; i_mcp<mcparticles.size(); i_mcp++){
+	// 		if (mcparticles[i_mcp].TrackId() == nu.Daughter(i_daughter)) std::cout << "-- " << mcparticles[i_mcp].PdgCode() << std::endl;
+	// 	}
+	// }
 
 	TString savename = Form("evt_%d",ev.eventAuxiliary().event());
 	TCanvas *c = new TCanvas(savename.Data(),"TGraph2D Event Display",0,0,800,800);
