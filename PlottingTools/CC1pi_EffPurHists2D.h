@@ -117,7 +117,7 @@ void DrawCC1piMCEffPur2D(TCanvas *c, histCC1piselEffPur2D *hists){
       heffpur
    };
 
-   for (int i_h=0; i_h<histstoeval.size(); i_h++){
+   for (size_t i_h=0; i_h<histstoeval.size(); i_h++){
       c->cd(i_h+1);
 //      histstoeval.at(i_h)->GetZaxis()->SetRangeUser(0,1);
       histstoeval.at(i_h)->Draw("colz");
