@@ -7,6 +7,7 @@ struct CC1piPlotVars{
   std::vector<double> const *Var;
 
   // For cut variables
+  bool isMIPcut;
   bool KeepBelowCut;
   bool OnlyDaughters;
   std::string TracksNeeded;
@@ -27,6 +28,7 @@ struct CC1piPlotVars{
 
   // Default initialisation of plotting bools only
   CC1piPlotVars(){
+    isMIPcut = false;
     KeepBelowCut = false;
     OnlyDaughters = false;
     TracksNeeded = "NA";
@@ -77,7 +79,7 @@ CC1piPlotVars Var_TPCObj_AngleBetweenMIPs(treevars *vars){
   tmp.KeepBelowCut = false;
   tmp.TracksNeeded = "NA";
   tmp.CutValue = 0.1;
-  tmp.bins = {32,0,3.2};
+  tmp.bins = {5,0,0.5};
   tmp.histtitle = ";Angle between MIP candidates [rad];";
   tmp.histname = "AngleBetweenMIPs";
   tmp.PlotOnlyDaughterMIPs = true;
@@ -104,7 +106,7 @@ CC1piPlotVars Var_TPCObj_AngleBetweenMIPs_high(treevars *vars){
   tmp.KeepBelowCut = true;
   tmp.TracksNeeded = "NA";
   tmp.CutValue = 2.6;
-  tmp.bins = {32,0,3.2};
+  tmp.bins = {12,2,3.2};
   tmp.histtitle = ";Angle between MIP candidates [rad];";
   tmp.histname = "AngleBetweenMIPs_high";
   tmp.PlotOnlyDaughterMIPs = true;
@@ -117,8 +119,9 @@ CC1piPlotVars Var_TPCObj_PFP_track_perc_used_hits(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_perc_used_hits;
   tmp.KeepBelowCut = false;
+  tmp.isMIPcut = true;
   tmp.CutValue = 0.7;
-  tmp.bins = {25,0,1};
+  tmp.bins = {5,0.5,1};
   tmp.histtitle = ";Fraction of used hits in cluster;";
   tmp.histname = "perc_used_hits";
   return tmp;
@@ -159,8 +162,9 @@ CC1piPlotVars Var_TPCObj_PFP_VtxTrackDist(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_VtxTrackDist;
   tmp.KeepBelowCut = true;
+  tmp.isMIPcut = true;
   tmp.CutValue = 5.;
-  tmp.bins = {25,0,20};
+  tmp.bins = {20,0,20};
   tmp.histtitle = ";Track start distance from reconstructed vertex [cm];";
   tmp.histname = "VtxTrackDist";
   return tmp;
@@ -259,8 +263,9 @@ CC1piPlotVars Var_TPCObj_PFP_track_dEdx_truncmean_start(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_dEdx_truncmean_start;
   tmp.KeepBelowCut = true;
+  tmp.isMIPcut = true;
   tmp.CutValue = 2.4;
-  tmp.bins = {30,0,3};
+  tmp.bins = {15,1.5,3};
   tmp.histtitle = ";Truncated Mean dE/dx at start of track;";
   tmp.histname = "dEdx_truncmean_atstart";
   tmp.PlotOnlyDaughterMIPs = false;
@@ -273,8 +278,11 @@ CC1piPlotVars Var_TPCObj_PFP_track_dEdx_truncmean_start_lowcut(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_dEdx_truncmean_start;
   tmp.KeepBelowCut = false;
+  tmp.isMIPcut = true;
   tmp.CutValue = 1.0;
+  tmp.bins = {10,0.5,1.5};
   tmp.histtitle = ";Truncated Mean dE/dx at start of track;";
+  tmp.histname = "dEdx_truncmean_atstart_lowcut";
   return tmp;
 }
 
@@ -330,7 +338,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_passesMIPcut(treevars *vars){
   tmp.OnlyDaughters = true;
   tmp.TracksNeeded = "exactlytwo";
   tmp.CutValue = 0.5;
-  tmp.bins = {2,0,2};
+  tmp.bins = {2,-1,1};
   tmp.histtitle = ";IsMIP;";
   tmp.histname = "isMIP";
   tmp.PlotOnlyDaughterMIPs = false;
@@ -423,8 +431,9 @@ CC1piPlotVars Var_TPCObj_PFP_lnLmipoverp(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_lnLmipoverp;
   tmp.KeepBelowCut = false;
+  tmp.isMIPcut = true;
   tmp.CutValue = -0.5;
-  tmp.bins = {60,-10,10};
+  tmp.bins = {8,-2,2};
   tmp.histtitle = ";ln(L_{MIP})/(L_{p}) (MIPs only);";
   tmp.histname = "lnLmipoverp";
   tmp.PlotOnlyDaughterMIPs = true;
@@ -1108,8 +1117,11 @@ CC1piPlotVars Var_TPCObj_PFP_track_dedx_grminhits(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_dedx_grminhits;
   tmp.KeepBelowCut = false;
+  tmp.isMIPcut = true;
   tmp.CutValue = 0.5;
   tmp.histtitle = ";Passes min. no. hits threshold for collection plane;";
+  tmp.histname = "grminhits";
+  tmp.bins = {2,-1,1};
   return tmp;
 }
 
@@ -1120,7 +1132,7 @@ CC1piPlotVars Var_TPCObj_LeadingMIP_PandoraClassedAsTrack(treevars *vars){
   tmp.KeepBelowCut = false;
   tmp.CutValue = 0.5;
   tmp.TracksNeeded = "LeadingMIP";
-  tmp.bins = {2,0,2};
+  tmp.bins = {2,-1,1};
   tmp.histtitle = ";Pandora classed as track? (1=true, 0=false) (Leading MIP only);";
   tmp.histname = "Pandoraclassedastrack_LeadingMIP";
   tmp.PlotOnlyLeadingDaughterMIP= true;
@@ -1215,7 +1227,7 @@ CC1piPlotVars Var_TPCObj_PFP_trueKE_SecondMIP(treevars *vars){
   tmp.Var = vars->TPCObj_PFP_trueKE;
   tmp.bins = {100,0,5};
   tmp.histtitle = ";True Kinetic Energy (Second MIP candidates only);";
-  tmp.histname = "TrueKE_MIPs";
+  tmp.histname = "TrueKE_SecondMIP";
   tmp.PlotOnlySecondDaughterMIP = true;
   return tmp;
 }
@@ -1228,6 +1240,17 @@ CC1piPlotVars Var_TPCObj_PFP_trueEndP_selMIPs(treevars *vars){
   tmp.histtitle = ";True momentum at end of track (MIP candidates only);";
   tmp.histname = "TrueEndP_MIPs";
   tmp.PlotOnlyDaughterMIPs = true;
+  return tmp;
+}
+
+//
+CC1piPlotVars Var_TPCObj_PFP_trueEndP_SecondMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_trueEndP;
+  tmp.bins = {100,0,0.1};
+  tmp.histtitle = ";True momentum at end of track (MIP candidates only);";
+  tmp.histname = "TrueEndP_SecondMIP";
+  tmp.PlotOnlySecondDaughterMIP = true;
   return tmp;
 }
 
@@ -1249,6 +1272,38 @@ CC1piPlotVars Var_TPCObj_PFP_track_phi_SecondMIP(treevars *vars){
   tmp.bins = {60,-3.15,3.15};
   tmp.histtitle = ";Track phi (Second MIP only);";
   tmp.histname = "Phi_SecondMIP";
+  tmp.PlotOnlySecondDaughterMIP = true;
+  return tmp;
+}
+
+//
+CC1piPlotVars Var_TPCObj_PFP_MCP_PDG_mTruePDG(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_MCP_PDG_mTruePDG;
+  tmp.bins = {100,-1,1};
+  tmp.histtitle = ";MCP PDG - 'True PDG';";
+  tmp.histname = "MCPPDG_mTruePDG";
+  return tmp;
+}
+
+//
+CC1piPlotVars Var_TPCObj_PFP_MCP_numdaughters_SecondMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_MCP_numdaughters_notphotons;
+  tmp.bins = {100,0,100};
+  tmp.histtitle = ";MCP: no. daughters (excl. #gamma);";
+  tmp.histname = "MCP_numdaughters_notphotons_SecondMIP";
+  tmp.PlotOnlySecondDaughterMIP = true;
+  return tmp;
+}
+
+//
+CC1piPlotVars Var_TPCObj_PFP_MCP_motherIDeq0_SecondMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_MCP_motherIDeq0;
+  tmp.bins = {2,0,2};
+  tmp.histtitle = ";MCP: mother ID=0? (1=yes, 0=no) (Second MIP only);";
+  tmp.histname = "MCP_motherIDeq0_SecondMIP";
   tmp.PlotOnlySecondDaughterMIP = true;
   return tmp;
 }
