@@ -71,7 +71,7 @@ for iline in range(0,len(input_lines)):
         ypos = line.split()[6]
         zpos = line.split()[7]
         # Now run script to make plot
-        rootcommand = "root -x -b -q \"/uboone/app/users/kduffy/CC1pi/CC1pi_uboonecode/srcs/uboonecode/uboone/CC1pi/PlottingTools/mctruth_evtdisplay.C(\\\"%s\\\",%s,%s,%s,%s,\\\"%s\\\")\""%(rootfile[:-1],event,xpos,ypos,zpos,outdir)
+        rootcommand = "root -x -b -q \"/uboone/app/users/kduffy/CC1pi/CC1pi_uboonecode/srcs/uboonecode/uboone/CC1pi/PlottingTools/MCTruthEvtDisp/mctruth_evtdisplay.C(\\\"%s\\\",%s,%s,%s,%s,\\\"%s\\\")\""%(rootfile[:-1],event,xpos,ypos,zpos,outdir)
         #print rootcommand
         os.system(rootcommand)
         # Finally, reset all values before carrying on in the loop over lines in the file
