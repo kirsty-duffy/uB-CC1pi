@@ -101,6 +101,10 @@ struct treevars{
    std::vector<bool>* TPCObj_PFP_track_ct_result_bragg=nullptr;
    std::vector<bool>* TPCObj_PFP_track_ct_result_michel=nullptr;
 
+   unsigned int run_num;
+   unsigned int subrun_num;
+   unsigned int event_num;
+
 
    // These are derived quantities - derived from the values above in Calcvars
    std::vector<double> *TPCObj_PFP_isDaughter_double;
@@ -123,6 +127,7 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_track_dEdx_truncmoverm_start;
    std::vector<double> *TPCObj_PFP_track_dEdx_stddev_start;
    std::vector<double> *TPCObj_PFP_track_dedx_grminhits;
+   std::vector<double> *TPCObj_PFP_track_dEdx_nhits;
    std::vector<double> *TPCObj_PFP_track_dedx_stddev;
    std::vector<double> *TPCObj_DaughterTracks_Order_dEdxtr;
    std::vector<double> *TPCObj_DaughterTracks_Order_dEdxtr_selMIPs;
@@ -151,6 +156,10 @@ struct treevars{
    // Not really a vector, only going to have one entry
    // But easier to store this way so it's compatible with the plotting code
    std::vector<double> *TPCObj_AngleBetweenMIPs;
+   std::vector<double> *TPCObj_dEdx_truncmean_MIPdiff;
+   std::vector<double> *TPCObj_dEdx_truncmean_MIPdiff_mupi;
+   std::vector<double> *TPCObj_dEdx_truncmean_MIPdiff_muproton;
+   std::vector<double> *TPCObj_dEdx_truncmean_MIPdiff_other;
 
    int TPCObj_LeadingMIPtrackIndex;
    int TPCObj_SecondMIPtrackIndex;

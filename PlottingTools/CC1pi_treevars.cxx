@@ -157,6 +157,12 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("TPCObj_PFP_track_MCSpi_segmentRadLengths", &(varstoset->TPCObj_PFP_track_MCSpi_segmentRadLengths));
    intree->SetBranchStatus("TPCObj_PFP_track_MCSpi_scatterAngles",1);
    intree->SetBranchAddress("TPCObj_PFP_track_MCSpi_scatterAngles", &(varstoset->TPCObj_PFP_track_MCSpi_scatterAngles));
+   intree->SetBranchStatus("run_num",1);
+   intree->SetBranchAddress("run_num",&(varstoset->run_num));
+   intree->SetBranchStatus("subrun_num",1);
+   intree->SetBranchAddress("subrun_num",&(varstoset->subrun_num));
+   intree->SetBranchStatus("event_num",1);
+   intree->SetBranchAddress("event_num",&(varstoset->event_num));
 
    intree->SetBranchStatus("TPCObj_PFP_track_SimpleCluster_hitTime",1);
    intree->SetBranchAddress("TPCObj_PFP_track_SimpleCluster_hitTime", &(varstoset->TPCObj_PFP_track_SimpleCluster_hitTime));
@@ -214,6 +220,7 @@ void Calcvars(treevars *vars, std::vector<CC1piPlotVars> *MIPCutVars=nullptr){
    vars->TPCObj_PFP_track_dEdx_truncmoverm_start = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_track_dEdx_stddev_start = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_track_dedx_grminhits = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_dEdx_nhits = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_track_dedx_stddev = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_DaughterTracks_Order_dEdxtr = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_DaughterTracks_Order_dEdxtr_selMIPs = new std::vector<double>(vecsize,-9999);
@@ -242,6 +249,15 @@ void Calcvars(treevars *vars, std::vector<CC1piPlotVars> *MIPCutVars=nullptr){
 
    if (vecsize>0) vars->TPCObj_AngleBetweenMIPs = new std::vector<double>(1,-9999);
    else vars->TPCObj_AngleBetweenMIPs = new std::vector<double>(0,-9999);
+
+   if (vecsize>0) vars->TPCObj_dEdx_truncmean_MIPdiff = new std::vector<double>(1,-9999);
+   else vars->TPCObj_dEdx_truncmean_MIPdiff = new std::vector<double>(0,-9999);
+   if (vecsize>0) vars->TPCObj_dEdx_truncmean_MIPdiff_mupi = new std::vector<double>(1,-9999);
+   else vars->TPCObj_dEdx_truncmean_MIPdiff_mupi = new std::vector<double>(0,-9999);
+   if (vecsize>0) vars->TPCObj_dEdx_truncmean_MIPdiff_muproton = new std::vector<double>(1,-9999);
+   else vars->TPCObj_dEdx_truncmean_MIPdiff_muproton = new std::vector<double>(0,-9999);
+   if (vecsize>0) vars->TPCObj_dEdx_truncmean_MIPdiff_other = new std::vector<double>(1,-9999);
+   else vars->TPCObj_dEdx_truncmean_MIPdiff_other = new std::vector<double>(0,-9999);
 
    // Just use collection plane for now
    int i_pl = 2;
@@ -316,6 +332,7 @@ void Calcvars(treevars *vars, std::vector<CC1piPlotVars> *MIPCutVars=nullptr){
          vars->TPCObj_PFP_track_dEdx_mean_start->at(i_track) = -9999;
          vars->TPCObj_PFP_track_dEdx_stddev_start->at(i_track) = -9999;
          vars->TPCObj_PFP_track_dedx_grminhits->at(i_track) = -9999;
+         vars->TPCObj_PFP_track_dEdx_nhits->at(i_track) = -9999;
          pair_dEdx_truncmean_index->at(i_track)=std::make_pair(-9999.,i_track);
          pair_trklen_index->at(i_track)=std::make_pair(-9999.,i_track);
          vars->TPCObj_PFP_track_MCSLLpiMinusLLp->at(i_track) = -9999.;
@@ -424,7 +441,8 @@ void Calcvars(treevars *vars, std::vector<CC1piPlotVars> *MIPCutVars=nullptr){
       int nhits_start = 30;
       int nhits_skip = 3;
       std::vector<float> dEdx_float;
-      if ((int)vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl).size()>=nhits_start) vars->TPCObj_PFP_track_dedx_grminhits->at(i_track) = 1.0;
+      vars->TPCObj_PFP_track_dEdx_nhits->at(i_track) = (double)vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl).size();
+      if (vars->TPCObj_PFP_track_dEdx_nhits->at(i_track)>=nhits_start+nhits_skip) vars->TPCObj_PFP_track_dedx_grminhits->at(i_track) = 1.0;
       else vars->TPCObj_PFP_track_dedx_grminhits->at(i_track) = 0.0;
       //std::cout << "---" << std::endl;
       // Vector order is track/plane/hit
@@ -595,6 +613,30 @@ void Calcvars(treevars *vars, std::vector<CC1piPlotVars> *MIPCutVars=nullptr){
       v2.SetPhi(vars->TPCObj_PFP_track_phi->at(vars->TPCObj_SecondMIPtrackIndex));
 
       vars->TPCObj_AngleBetweenMIPs->at(0) = TMath::ACos(v1.Dot(v2));
+   }
+
+   // Calculate Truncated mean dE/dx difference for MIP candidates
+   if (vars->TPCObj_LeadingMIPtrackIndex>=0 && vars->TPCObj_SecondMIPtrackIndex>=0)
+   {
+      double LeadingMIP_dEdx_truncmean = vars->TPCObj_PFP_track_dEdx_truncmean_start->at(vars->TPCObj_LeadingMIPtrackIndex);
+      double SecondMIP_dEdx_truncmean = vars->TPCObj_PFP_track_dEdx_truncmean_start->at(vars->TPCObj_SecondMIPtrackIndex);
+      double dEdx_truncmean_MIPdiff = std::abs(LeadingMIP_dEdx_truncmean - SecondMIP_dEdx_truncmean);
+
+      vars->TPCObj_dEdx_truncmean_MIPdiff->at(0) = dEdx_truncmean_MIPdiff;
+
+      int LeadingMIP_PDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_LeadingMIPtrackIndex);
+      int SecondMIP_PDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_SecondMIPtrackIndex);
+
+      if((LeadingMIP_PDG==13 && SecondMIP_PDG==211) || (LeadingMIP_PDG==211 && SecondMIP_PDG==13)) {
+         vars->TPCObj_dEdx_truncmean_MIPdiff_mupi->at(0) = dEdx_truncmean_MIPdiff;
+      }
+      else if((LeadingMIP_PDG==13 && SecondMIP_PDG==2212) || (LeadingMIP_PDG==2212 && SecondMIP_PDG==13)) {
+         vars->TPCObj_dEdx_truncmean_MIPdiff_muproton->at(0) = dEdx_truncmean_MIPdiff;
+      }
+
+      else {
+         vars->TPCObj_dEdx_truncmean_MIPdiff_other->at(0) = dEdx_truncmean_MIPdiff;
+      }
    }
 
 }

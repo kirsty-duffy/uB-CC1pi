@@ -17,7 +17,7 @@
 std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
    std::vector<CC1piPlotVars> varstoplot = {
       Var_TPCObj_PFP_lnLmipoverp_SecondMIP(vars)
-      // ,Var_TPCObj_PFP_Lmumipovermumipp(vars)
+      ,Var_TPCObj_PFP_Lmumipovermumipp(vars)
       ,Var_TPCObj_PFP_lnLmipoverp_SecondMIPcont(vars)
       // ,Var_TPCObj_PFP_Lmumipovermumipp_cont(vars)
       // ,Var_TPCObj_PFP_BrokenTrackAngle(vars)
@@ -44,7 +44,7 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       ,Var_TPCObj_PFP_track_dEdx_mean_start_SecondMIP(vars)
       ,Var_TPCObj_PFP_track_dEdx_truncmoverm_start_SecondMIP(vars)
       // ,Var_TPCObj_PFP_isContained(vars)
-      // ,Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)
+      ,Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)
       // ,Var_TPCObj_DaughterTracks_Order_dEdxtr(vars)
       // ,Var_TPCObj_DaughterTracks_Order_dEdxtr_selMIPs(vars)
       // ,Var_TPCObj_DaughterTracks_Order_trklen_selMIPs(vars)
@@ -62,15 +62,15 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       // ,Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_SecondMIPcont(vars)
       // ,Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_SecondMIPcont_mumupairs(vars)
       // ,Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_NotPioncont(vars)
-      // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum_LeadingMIPcont(vars)
+       ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum_LeadingMIPcont(vars)
       // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum_SecondMIPcont(vars)
       // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum_SecondMIPcont_mumupairs(vars)
       // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum_NotPioncont(vars)
-      // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_LeadingMIPcont(vars)
+       ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_LeadingMIPcont(vars)
       // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_SecondMIPcont(vars)
       // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_SecondMIPcont_mumupairs(vars)
       // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_NotPioncont(vars)
-      // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean_LeadingMIPcont(vars)
+       ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean_LeadingMIPcont(vars)
       // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean_SecondMIPcont(vars)
       // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean_SecondMIPcont_mumupairs(vars)
       // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean_NotPioncont(vars)
@@ -94,6 +94,11 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       // ,Var_TPCObj_PFP_MCP_PDG_mTruePDG(vars)
       // ,Var_TPCObj_PFP_MCP_numdaughters_SecondMIP(vars)
       ,Var_TPCObj_PFP_MCP_motherIDeq0_SecondMIP(vars)
+      ,Var_TPCObj_dEdx_truncmean_MIPdiff(vars)
+      ,Var_TPCObj_dEdx_truncmean_MIPdiff_mupi(vars)
+      ,Var_TPCObj_dEdx_truncmean_MIPdiff_muproton(vars)
+      ,Var_TPCObj_dEdx_truncmean_MIPdiff_other(vars)
+      ,Var_TPCObj_PFP_track_dEdx_nhits(vars)
    };
    return varstoplot;
 }
@@ -151,6 +156,9 @@ void MakeCC1piPlots(std::string mcfile, bool MakeKinkFindingPlots=false, bool Ma
 
    treevars mc_vars;
    settreevars(t_bnbcos,&mc_vars);
+
+   ofstream evdinfo;
+   evdinfo.open("evdinfo.txt");
 
    // Sanity check: the plot vectors should be the same size
    t_bnbcos->GetEntry(0);
@@ -304,6 +312,22 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
                protonplotsmade++;
             }
          }
+
+
+         //Record info for event displays
+         if(SecondMIPpdg==kProton) {
+            evdinfo << "Run/Subrun/Event: " << mc_vars.run_num << " " << mc_vars.subrun_num << " " << mc_vars.event_num << std::endl;
+            evdinfo << "True topology: " << topologyenum2str(mc_vars.Truth_topology) << std::endl;
+            evdinfo << "Reco nu vertex position (x,y,z): " << mc_vars.TPCObj_reco_vtx->at(0) << " " << mc_vars.TPCObj_reco_vtx->at(1) << " " << mc_vars.TPCObj_reco_vtx->at(2) << std::endl;
+            for(int PFP = 0; PFP < mc_vars.TPCObj_PFP_truePDG->size(); PFP++) {
+               evdinfo << "PDG: " << mc_vars.TPCObj_PFP_truePDG->at(PFP) << " – ";
+               evdinfo << "Start (z,x): " << mc_vars.TPCObj_PFP_track_start->at(PFP).at(2) << " " << mc_vars.TPCObj_PFP_track_start->at(PFP).at(0) << " – ";
+               evdinfo << "End (z,x): " << mc_vars.TPCObj_PFP_track_end->at(PFP).at(2) << " " << mc_vars.TPCObj_PFP_track_end->at(PFP).at(0);
+               evdinfo << std::endl;
+            }
+            evdinfo << std::endl;
+         }
+
       } // end if (isSelected)
 
       // Fill 1D plots
@@ -349,6 +373,8 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
       } // end loop over 2D Varstoplot
 
    } // end loop over entries in tree
+
+   evdinfo.close();
 
    // -------------------- Now make all the plots
 

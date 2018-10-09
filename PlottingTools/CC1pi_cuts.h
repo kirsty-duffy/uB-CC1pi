@@ -25,6 +25,8 @@ std::vector<CC1piPlotVars> GetCutVars(treevars *vars) {
    // ,Var_TPCObj_AllTracks_isContained(vars)
    // ,Var_TPCObj_AllDaughtersExceptLeadingMIP_isContained(vars)
    // ,Var_TPCObj_PFP_track_nhits_LeadingMIP(vars) // Doesn't matter that it's got LeadingMIP in name, applies to all tracks
+
+   //,Var_TPCObj_dEdx_truncmean_MIPdiff(vars)
    };
    return cut_vars;
 };

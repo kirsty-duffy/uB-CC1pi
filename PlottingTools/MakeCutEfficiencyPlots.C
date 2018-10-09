@@ -93,10 +93,10 @@ void MakeCutEfficiencyPlots(std::string mcfile){
       t_bnbcos->GetEntry(i);
       Calcvars(&mc_vars);
 
-      // for (size_t i_h = 8; i_h < 10/*nplots*/; i_h++){
-      //    // std::cout << i_h << std::endl;
-      //    FillCC1piEffPurHist(mc_hists_cc1pieffpur[i_h], &mc_vars, (int)i_h);
-      // }
+       for (size_t i_h = 2; i_h < 3; i_h++){
+          // std::cout << i_h << std::endl;
+          FillCC1piEffPurHist(mc_hists_cc1pieffpur[i_h], &mc_vars, (int)i_h);
+       }
 
       // Now fill histograms for N-1 plots
       FillNminus1EffPurHist(Nminus1plots,&mc_vars);
@@ -105,15 +105,15 @@ void MakeCutEfficiencyPlots(std::string mcfile){
 
    // -------------------- Now make all the plots
    std::cout << "Drawing plots..." << std::endl;
-   // for (size_t i_h=8; i_h < 10/*nplots*/; i_h++){
-   //    TCanvas *c1 = new TCanvas("c1","c1");
-   //
-   //    DrawCC1piMCEffPur(c1, mc_hists_cc1pieffpur[i_h]);
-   //    std::string printname = std::string(varstoplot_dummy.at(i_h).histname+".png");
-   //    c1->Print(std::string(std::string("CC1pi_effpur_")+printname).c_str());
-   //
-   //    delete c1;
-   // }
+    for (size_t i_h=2; i_h < 3; i_h++){
+       TCanvas *c1 = new TCanvas("c1","c1");
+   
+       DrawCC1piMCEffPur(c1, mc_hists_cc1pieffpur[i_h]);
+       std::string printname = std::string(varstoplot_dummy.at(i_h).histname+".png");
+       c1->Print(std::string(std::string("CC1pi_effpur_")+printname).c_str());
+   
+       delete c1;
+    }
    TCanvas *c1 = new TCanvas("c1","c1");
    DrawCC1piMCEffPur(c1, Nminus1plots,"hist",true);
    c1->Print("Nminus1plots.png");

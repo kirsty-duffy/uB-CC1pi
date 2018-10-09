@@ -79,7 +79,7 @@ CC1piPlotVars Var_TPCObj_AngleBetweenMIPs(treevars *vars){
   tmp.KeepBelowCut = false;
   tmp.TracksNeeded = "NA";
   tmp.CutValue = 0.1;
-  tmp.bins = {5,0,0.5};
+  tmp.bins = {25,0,3.14};
   tmp.histtitle = ";Angle between MIP candidates [rad];";
   tmp.histname = "AngleBetweenMIPs";
   tmp.PlotOnlyDaughterMIPs = true;
@@ -265,7 +265,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_dEdx_truncmean_start(treevars *vars){
   tmp.KeepBelowCut = true;
   tmp.isMIPcut = true;
   tmp.CutValue = 2.4;
-  tmp.bins = {15,1.5,3};
+  tmp.bins = {25,0,3};
   tmp.histtitle = ";Truncated Mean dE/dx at start of track;";
   tmp.histname = "dEdx_truncmean_atstart";
   tmp.PlotOnlyDaughterMIPs = false;
@@ -1125,6 +1125,18 @@ CC1piPlotVars Var_TPCObj_PFP_track_dedx_grminhits(treevars *vars){
   return tmp;
 }
 
+CC1piPlotVars Var_TPCObj_PFP_track_dEdx_nhits(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_dEdx_nhits;
+  tmp.KeepBelowCut = false;
+  tmp.isMIPcut = true;
+  tmp.CutValue = 33;
+  tmp.histtitle = ";Number of collection plane hits;";
+  tmp.histname = "nhits";
+  tmp.bins = {25,0,300};
+  return tmp;
+}
+
 // Longest MIP: originally classed as track?
 CC1piPlotVars Var_TPCObj_LeadingMIP_PandoraClassedAsTrack(treevars *vars){
   CC1piPlotVars tmp;
@@ -1308,7 +1320,56 @@ CC1piPlotVars Var_TPCObj_PFP_MCP_motherIDeq0_SecondMIP(treevars *vars){
   return tmp;
 }
 
+// Truncated mean dE/dx difference for MIP candidates
+CC1piPlotVars Var_TPCObj_dEdx_truncmean_MIPdiff(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_dEdx_truncmean_MIPdiff;
+  tmp.KeepBelowCut = true;
+  tmp.TracksNeeded = "NA";
+  tmp.CutValue = 0.3;
+  tmp.bins = {10,0,1};
+  tmp.histtitle = ";Difference between MIP candidates' truncated mean dE/dx;";
+  tmp.histname = "dEdx_truncmean_MIPdiff";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyContained = false;
+  return tmp;
+}
 
+// Truncated mean dE/dx difference for MIP candidates
+CC1piPlotVars Var_TPCObj_dEdx_truncmean_MIPdiff_mupi(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_dEdx_truncmean_MIPdiff_mupi;
+  tmp.bins = {10,0,1};
+  tmp.histtitle = ";Difference between MIP candidates' truncated mean dE/dx (true #mu-#pi selected);";
+  tmp.histname = "dEdx_truncmean_MIPdiff_mupi";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyContained = false;
+  return tmp;
+}
+
+// Truncated mean dE/dx difference for MIP candidates
+CC1piPlotVars Var_TPCObj_dEdx_truncmean_MIPdiff_muproton(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_dEdx_truncmean_MIPdiff_muproton;
+  tmp.bins = {10,0,1};
+  tmp.histtitle = ";Difference between MIP candidates' truncated mean dE/dx (true #mu-p selected);";
+  tmp.histname = "dEdx_truncmean_MIPdiff_muproton";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyContained = false;
+  return tmp;
+}
+
+// Truncated mean dE/dx difference for MIP candidates
+CC1piPlotVars Var_TPCObj_dEdx_truncmean_MIPdiff_other(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_dEdx_truncmean_MIPdiff_other;
+  tmp.bins = {10,0,1};
+  tmp.histtitle = ";Difference between MIP candidates' truncated mean dE/dx (other);";
+  tmp.histname = "dEdx_truncmean_MIPdiff_other";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyContained = false;
+  return tmp;
+}
 
 // Decide whether to fill a plot for a given track. This is useful for e.g. plots with PlotOnlyDaughterMIPs=true
 bool FillPlotForTrack(CC1piPlotVars *plotvar, treevars *vars, int i_tr){
