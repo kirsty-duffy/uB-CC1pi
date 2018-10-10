@@ -44,10 +44,17 @@ void MakeCutEfficiencyPlots(std::string mcfile){
    treevars mc_vars;
    settreevars(t_bnbcos,&mc_vars);
 
+   TMVA::Reader fReader("");
+   fReader.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
+   fReader.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
+   fReader.AddVariable("nhits", &(mc_vars.float_nhits));
+   fReader.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
+   fReader.BookMVA("BDT", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_pi0/weights/TMVAClassification_BDT.weights.xml");
+
    // Get vector of cuts we want to plot
    // We want both the "normal" cut vars and the ones that define a MIP
    t_bnbcos->GetEntry(0);
-   Calcvars(&mc_vars);
+   Calcvars(&mc_vars, &fReader);
    std::vector<CC1piPlotVars> cutvars_notMIPs = GetCutVars(&mc_vars);
    std::vector<CC1piPlotVars> cutvars_MIPs = GetMIPCutVars(&mc_vars);
    std::vector<CC1piPlotVars> varstoplot_dummy;
@@ -89,23 +96,24 @@ void MakeCutEfficiencyPlots(std::string mcfile){
 
    // Loop through MC tree and fill plots
    for (int i = 0; i < t_bnbcos->GetEntries(); i++){
+//   for (int i = 0; i < 1000; i++){
       if (i%1000==0 || i==t_bnbcos->GetEntries()-1) std::cout << i << "/" << t_bnbcos->GetEntries() << std::endl;
       t_bnbcos->GetEntry(i);
-      Calcvars(&mc_vars);
+      Calcvars(&mc_vars, &fReader);
 
-       for (size_t i_h = 2; i_h < 3; i_h++){
+       for (size_t i_h = 1; i_h < 2; i_h++){
           // std::cout << i_h << std::endl;
-          FillCC1piEffPurHist(mc_hists_cc1pieffpur[i_h], &mc_vars, (int)i_h);
+          FillCC1piEffPurHist(mc_hists_cc1pieffpur[i_h], &mc_vars, &fReader, (int)i_h);
        }
 
       // Now fill histograms for N-1 plots
-      FillNminus1EffPurHist(Nminus1plots,&mc_vars);
+      FillNminus1EffPurHist(Nminus1plots,&mc_vars,&fReader);
 
    } // end loop over entries in tree
 
    // -------------------- Now make all the plots
    std::cout << "Drawing plots..." << std::endl;
-    for (size_t i_h=2; i_h < 3; i_h++){
+    for (size_t i_h=1; i_h < 2; i_h++){
        TCanvas *c1 = new TCanvas("c1","c1");
    
        DrawCC1piMCEffPur(c1, mc_hists_cc1pieffpur[i_h]);

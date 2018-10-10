@@ -52,7 +52,7 @@ struct histCC1piselEffPur{
    }
 };
 
-void FillCC1piEffPurHist(histCC1piselEffPur *hists, treevars *vars, int i_thiscut){
+void FillCC1piEffPurHist(histCC1piselEffPur *hists, treevars *vars, TMVA::Reader *fReader, int i_thiscut){
    std::vector<CC1piPlotVars> CutVars = GetCutVars(vars);
    int n_notMIPcuts = CutVars.size();
 
@@ -67,7 +67,7 @@ void FillCC1piEffPurHist(histCC1piselEffPur *hists, treevars *vars, int i_thiscu
         MIPCutVars.at(i_mipcut).CutValue = cutval;
       }
       // Call Calcvars with the new vector of MIPCutVars
-      Calcvars(vars,&MIPCutVars);
+      Calcvars(vars,fReader,&MIPCutVars);
 
       // Now loop through all non-MIP cuts and apply them
       // For the case of the cut we want to change, don't use the stored cut value but use cutval instead
@@ -88,7 +88,7 @@ void FillCC1piEffPurHist(histCC1piselEffPur *hists, treevars *vars, int i_thiscu
          if (isSelected_i == false) isSelected = false;
       } // end loop over cuts
 
-      Calcvars(vars);// Reset MIPs
+      Calcvars(vars,fReader);// Reset MIPs
 
 
       // Fill selection info into the relevant histograms
@@ -111,7 +111,8 @@ void FillCC1piEffPurHist(histCC1piselEffPur *hists, treevars *vars, int i_thiscu
    } // End loop over bins in the histograms
 }
 
-void FillNminus1EffPurHist(histCC1piselEffPur *hists, treevars *vars){
+void FillNminus1EffPurHist(histCC1piselEffPur *hists, treevars *vars, TMVA::Reader *fReader){
+
    std::vector<CC1piPlotVars> CutVars = GetCutVars(vars);
    int n_notMIPcuts = CutVars.size();
    int n_MIPcuts = GetMIPCutVars(vars).size();
@@ -134,7 +135,7 @@ void FillNminus1EffPurHist(histCC1piselEffPur *hists, treevars *vars){
             MIPCutVars.erase(MIPCutVars.begin()+i_mipcut);
          }
          // Call Calcvars with the new vector of MIPCutVars
-         Calcvars(vars,&MIPCutVars);
+         Calcvars(vars,fReader,&MIPCutVars);
 
          for (int i_cut=0; i_cut < n_notMIPcuts; i_cut++){
             // std::cout << "-- cut " << i_cut << std::endl;
@@ -218,7 +219,7 @@ void FillNminus1EffPurHist(histCC1piselEffPur *hists, treevars *vars){
       }
 
      // Reset MIPs by calling Calcvars again so it doesn't cause us problems later
-     Calcvars(vars);
+     Calcvars(vars,fReader);
 
    } // end loop over bins (i.e. cuts)
 

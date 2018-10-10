@@ -1371,6 +1371,21 @@ CC1piPlotVars Var_TPCObj_dEdx_truncmean_MIPdiff_other(treevars *vars){
   return tmp;
 }
 
+// BDT score
+CC1piPlotVars Var_TPCObj_PFP_track_BDTscore(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_BDTscore;
+  tmp.KeepBelowCut = false;
+//  tmp.OnlyDaughters = true;
+//  tmp.TracksNeeded = "exactlytwo";
+  tmp.isMIPcut = true;
+  tmp.CutValue = 0;
+  tmp.bins = {25,-0.32,0.32};
+  tmp.histtitle = ";BDT score;";
+  tmp.histname = "BDTscore";
+  return tmp;
+}
+
 // Decide whether to fill a plot for a given track. This is useful for e.g. plots with PlotOnlyDaughterMIPs=true
 bool FillPlotForTrack(CC1piPlotVars *plotvar, treevars *vars, int i_tr){
   bool DoFillPlot = true;

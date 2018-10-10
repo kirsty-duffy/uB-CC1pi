@@ -99,6 +99,7 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       ,Var_TPCObj_dEdx_truncmean_MIPdiff_muproton(vars)
       ,Var_TPCObj_dEdx_truncmean_MIPdiff_other(vars)
       ,Var_TPCObj_PFP_track_dEdx_nhits(vars)
+      ,Var_TPCObj_PFP_track_BDTscore(vars)
    };
    return varstoplot;
 }
@@ -124,11 +125,26 @@ std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> GetVarstoplot2D(treevars *va
    return varstoplot2D;
 }
 
+
+
 // ---------------------------------------------------- //
 //  Now the function starts
 // ---------------------------------------------------- //
 
 void MakeCC1piPlots(std::string mcfile, bool MakeKinkFindingPlots=false, bool MakeProtonPlots=false){
+
+   TFile f_MVA("MVA_Trees.root", "RECREATE");
+   MVAvars *MVA_vars = new MVAvars();
+   TTree *signal = new TTree("signal","signal");
+   TTree *background = new TTree("background","background");
+   signal -> Branch("dEdx_truncmean_start", &(MVA_vars->dEdx_truncmean_start));
+   signal -> Branch("VtxTrackDist", &(MVA_vars->VtxTrackDist));
+   signal -> Branch("nhits", &(MVA_vars->nhits));
+   signal -> Branch("lnLmipoverp", &(MVA_vars->lnLmipoverp));
+   background -> Branch("dEdx_truncmean_start", &(MVA_vars->dEdx_truncmean_start));
+   background -> Branch("VtxTrackDist", &(MVA_vars->VtxTrackDist));
+   background -> Branch("nhits", &(MVA_vars->nhits));
+   background -> Branch("lnLmipoverp", &(MVA_vars->lnLmipoverp));
 
    gStyle->SetTitleX(0.5);
    gStyle->SetTitleAlign(23);
@@ -157,12 +173,19 @@ void MakeCC1piPlots(std::string mcfile, bool MakeKinkFindingPlots=false, bool Ma
    treevars mc_vars;
    settreevars(t_bnbcos,&mc_vars);
 
+   TMVA::Reader fReader("");
+   fReader.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
+   fReader.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
+   fReader.AddVariable("nhits", &(mc_vars.float_nhits));
+   fReader.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
+   fReader.BookMVA("BDT", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_pi0/weights/TMVAClassification_BDT.weights.xml");
+
    ofstream evdinfo;
    evdinfo.open("evdinfo.txt");
 
    // Sanity check: the plot vectors should be the same size
    t_bnbcos->GetEntry(0);
-   Calcvars(&mc_vars);
+   Calcvars(&mc_vars, &fReader);
    std::vector<CC1piPlotVars> varstoplot_dummy = GetVarstoplot(&mc_vars);
    std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> varstoplot2D_dummy = GetVarstoplot2D(&mc_vars);
    std::vector<CC1piPlotVars> cutvars_dummy = GetCutVars(&mc_vars);
@@ -270,7 +293,8 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
    // Loop through MC tree and fill plots
    for (int i = 0; i < t_bnbcos->GetEntries(); i++){
       t_bnbcos->GetEntry(i);
-      Calcvars(&mc_vars);
+      Calcvars(&mc_vars, &fReader);
+      MakeMVATrees(signal, background, MVA_vars, &mc_vars);
       std::vector<CC1piPlotVars> Varstoplot = GetVarstoplot(&mc_vars);
       std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> Varstoplot2D = GetVarstoplot2D(&mc_vars);
 
@@ -445,4 +469,6 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
    std::cout << std::endl << "Total number of selected events: " << SelectedEvents->GetTotalIntegral() << std::endl;
    std::cout << "CC1pi+ selection efficiency: " << CC1pi_selected << "/" << CC1pi_all << " = " << CC1pi_selected/CC1pi_all << std::endl;
    getSimPot(mcfile);
+
+   f_MVA.Write();
 }

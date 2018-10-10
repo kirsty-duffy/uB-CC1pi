@@ -195,7 +195,7 @@ void settreevars(TTree *intree, treevars *varstoset){
 
 }
 
-void Calcvars(treevars *vars, std::vector<CC1piPlotVars> *MIPCutVars=nullptr){
+void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> *MIPCutVars=nullptr){
    // std::cout << "Calling calcvars" << std::endl;
    // Initialise vectors that we are going to fill with calculated values
    int vecsize = vars->TPCObj_PFP_LH_fwd_p->size();
@@ -258,6 +258,8 @@ void Calcvars(treevars *vars, std::vector<CC1piPlotVars> *MIPCutVars=nullptr){
    else vars->TPCObj_dEdx_truncmean_MIPdiff_muproton = new std::vector<double>(0,-9999);
    if (vecsize>0) vars->TPCObj_dEdx_truncmean_MIPdiff_other = new std::vector<double>(1,-9999);
    else vars->TPCObj_dEdx_truncmean_MIPdiff_other = new std::vector<double>(0,-9999);
+
+   vars->TPCObj_PFP_track_BDTscore = new std::vector<double>(vecsize,-9999);
 
    // Just use collection plane for now
    int i_pl = 2;
@@ -366,7 +368,7 @@ void Calcvars(treevars *vars, std::vector<CC1piPlotVars> *MIPCutVars=nullptr){
       vars->TPCObj_PFP_Lmipoverp->at(i_track)=-9999;
       vars->TPCObj_PFP_lnLmipoverp->at(i_track)=-9999;
       vars->TPCObj_PFP_Lmumipovermumipp->at(i_track)=-9999;
-      if (vars->TPCObj_PFP_LH_mip->at(i_track)>=0 && vars->TPCObj_PFP_LH_p->at(i_track)>=0){
+      if (vars->TPCObj_PFP_LH_mip->at(i_track)>0 && vars->TPCObj_PFP_LH_p->at(i_track)>0){
          vars->TPCObj_PFP_Lmipoverp->at(i_track) = vars->TPCObj_PFP_LH_mip->at(i_track) / vars->TPCObj_PFP_LH_p->at(i_track);
          vars->TPCObj_PFP_lnLmipoverp->at(i_track) = TMath::Log(vars->TPCObj_PFP_Lmipoverp->at(i_track));
          if (vars->TPCObj_PFP_LH_mu->at(i_track)>=0){
@@ -556,6 +558,19 @@ void Calcvars(treevars *vars, std::vector<CC1piPlotVars> *MIPCutVars=nullptr){
       // Evaluate pion cut (i.e. whether we want to class this track as a pion). Cut algorithm defined in CC1pi_cuts.cxx and the variables that go into the decision are defined in CC1pi_cuts.h
       vars->TPCObj_PFP_track_passesPioncut->at(i_track) = EvalPionCut(vars,i_track);
 
+      // Calculate BDT score
+      vars->float_dEdx_truncmean_start = (float)(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track));
+      vars->float_VtxTrackDist = (float)(vars->TPCObj_PFP_VtxTrackDist->at(i_track));
+      vars->float_nhits = (float)(vars->TPCObj_PFP_track_dEdx_nhits->at(i_track));
+      vars->float_lnLmipoverp = (float)(vars->TPCObj_PFP_lnLmipoverp->at(i_track));
+      if(vars->float_dEdx_truncmean_start==-9999 || vars->float_VtxTrackDist==-9999 || vars->float_nhits==-9999 || vars->float_lnLmipoverp==-9999) {
+         vars->TPCObj_PFP_track_BDTscore->at(i_track) = -9999;
+      }
+      else {
+         vars->TPCObj_PFP_track_BDTscore->at(i_track) = fReader->EvaluateMVA("BDT");
+      }
+      //std::cout << "BDT result: " << vars->TPCObj_PFP_track_BDTscore->at(i_track) << std::endl;
+
    } // end loop over tracks in TPCObj (i_track)
 
    // Now fill TPCObj_DaughterTracks_Order_dEdxtr
@@ -639,6 +654,27 @@ void Calcvars(treevars *vars, std::vector<CC1piPlotVars> *MIPCutVars=nullptr){
       }
    }
 
+
+}
+
+void MakeMVATrees(TTree *signal_tree, TTree *background_tree, MVAvars *MVA_vars, treevars *vars) {
+
+   for(int i_track=0; i_track < vars->TPCObj_PFP_truePDG->size(); i_track++){
+
+      if(vars->TPCObj_PFP_lnLmipoverp->at(i_track) == -9999) continue;
+
+      MVA_vars->dEdx_truncmean_start = vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track);
+      MVA_vars->VtxTrackDist = vars->TPCObj_PFP_VtxTrackDist->at(i_track);
+      MVA_vars->nhits = vars->TPCObj_PFP_track_dEdx_nhits->at(i_track);
+      MVA_vars->lnLmipoverp = vars->TPCObj_PFP_lnLmipoverp->at(i_track);
+
+      if(vars->TPCObj_PFP_truePDG->at(i_track)==13 || vars->TPCObj_PFP_truePDG->at(i_track)==211) {
+         signal_tree->Fill();
+      }
+      else if(vars->TPCObj_PFP_truePDG->at(i_track)!=-9999) {
+         background_tree->Fill();
+      }
+   }
 }
 
 

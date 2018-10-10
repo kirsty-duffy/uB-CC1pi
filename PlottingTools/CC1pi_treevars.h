@@ -6,6 +6,7 @@
 #include "TMath.h"
 #include "TVector3.h"
 #include "TTree.h"
+#include "TMVA/Reader.h"
 
 // This code defines the variables we read in from the tree and new derived variables from there.
 // The implementation (i.e. the code that actually calculates the new derived variables) is in treevars_header.h
@@ -147,6 +148,7 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_MCP_numdaughters_notphotons;
    std::vector<double> *TPCObj_PFP_MCP_motherIDeq0;
    std::vector<double> *TPCObj_PFP_MCP_PDG_mTruePDG;
+   std::vector<double> *TPCObj_PFP_track_BDTscore;
 
    // Is the track a MIP? Evaluate MIP cuts and then put this as an input into selection
    // Coded as a double (to fit in with the other code) but should be evaluated as a bool
@@ -163,6 +165,20 @@ struct treevars{
 
    int TPCObj_LeadingMIPtrackIndex;
    int TPCObj_SecondMIPtrackIndex;
+
+   float float_dEdx_truncmean_start;
+   float float_VtxTrackDist;
+   float float_nhits;
+   float float_lnLmipoverp;
+
+};
+
+
+struct MVAvars {
+   double dEdx_truncmean_start;
+   double VtxTrackDist;
+   double nhits;
+   double lnLmipoverp;
 };
 
 #endif
