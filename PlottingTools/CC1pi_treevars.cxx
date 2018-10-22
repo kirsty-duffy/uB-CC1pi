@@ -195,7 +195,7 @@ void settreevars(TTree *intree, treevars *varstoset){
 
 }
 
-void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> *MIPCutVars=nullptr){
+void Calcvars(treevars *vars, TMVA::Reader *fReader_contained, TMVA::Reader *fReader_uncontained, std::vector<CC1piPlotVars> *MIPCutVars=nullptr){
    // std::cout << "Calling calcvars" << std::endl;
    // Initialise vectors that we are going to fill with calculated values
    int vecsize = vars->TPCObj_PFP_LH_fwd_p->size();
@@ -259,7 +259,9 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
    if (vecsize>0) vars->TPCObj_dEdx_truncmean_MIPdiff_other = new std::vector<double>(1,-9999);
    else vars->TPCObj_dEdx_truncmean_MIPdiff_other = new std::vector<double>(0,-9999);
 
-   vars->TPCObj_PFP_track_BDTscore = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_BDTscore_contained = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_BDTscore_uncontained = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_BDTscore_combined = new std::vector<double>(vecsize,-9999);
 
    // Just use collection plane for now
    int i_pl = 2;
@@ -559,12 +561,23 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
       vars->float_nhits = (float)(vars->TPCObj_PFP_track_dEdx_nhits->at(i_track));
       vars->float_lnLmipoverp = (float)(vars->TPCObj_PFP_lnLmipoverp->at(i_track));
       if(vars->float_dEdx_truncmean_start==-9999 || vars->float_VtxTrackDist==-9999 || vars->float_nhits==-9999 || vars->float_lnLmipoverp==-9999) {
-         vars->TPCObj_PFP_track_BDTscore->at(i_track) = -9999;
+         vars->TPCObj_PFP_track_BDTscore_contained->at(i_track) = -9999;
+         vars->TPCObj_PFP_track_BDTscore_uncontained->at(i_track) = -9999;
       }
       else {
-         vars->TPCObj_PFP_track_BDTscore->at(i_track) = fReader->EvaluateMVA("BDT");
+         if(vars->TPCObj_PFP_track_isContained->at(i_track)) {
+            vars->TPCObj_PFP_track_BDTscore_contained->at(i_track) = fReader_contained->EvaluateMVA("BDT");
+            vars->TPCObj_PFP_track_BDTscore_uncontained->at(i_track) = -9999;
+         }
+         else {
+            vars->TPCObj_PFP_track_BDTscore_contained->at(i_track) = -9999;
+            vars->TPCObj_PFP_track_BDTscore_uncontained->at(i_track) = fReader_uncontained->EvaluateMVA("BDT");
+         }
       }
-      //std::cout << "BDT result: " << vars->TPCObj_PFP_track_BDTscore->at(i_track) << std::endl;
+
+      double BDTscore_contained_cut = 0;
+      double BDTscore_uncontained_cut = 0;
+      vars->TPCObj_PFP_track_BDTscore_combined->at(i_track) = (double)((vars->TPCObj_PFP_track_isContained->at(i_track) && vars->TPCObj_PFP_track_BDTscore_contained->at(i_track) > BDTscore_contained_cut) || (!(vars->TPCObj_PFP_track_isContained->at(i_track)) && vars->TPCObj_PFP_track_BDTscore_uncontained->at(i_track) > BDTscore_uncontained_cut));
 
 
       // Evaluate MIP cut (i.e. whether we want to class this track as a MIP). Cut algorithm defined in CC1pi_cuts.cxx and the variables that go into the decision are defined in CC1pi_cuts.h

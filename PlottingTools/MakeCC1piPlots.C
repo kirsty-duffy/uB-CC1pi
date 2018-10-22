@@ -99,7 +99,8 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       ,Var_TPCObj_dEdx_truncmean_MIPdiff_muproton(vars)
       ,Var_TPCObj_dEdx_truncmean_MIPdiff_other(vars)
       ,Var_TPCObj_PFP_track_dEdx_nhits(vars)
-      ,Var_TPCObj_PFP_track_BDTscore(vars)
+      //,Var_TPCObj_PFP_track_BDTscore_contained(vars)
+      //,Var_TPCObj_PFP_track_BDTscore_uncontained(vars)
       ,Var_TPCObj_PFP_track_passesMIPcut(vars)
    };
    return varstoplot;
@@ -179,19 +180,26 @@ void MakeCC1piPlots(std::string mcfile, bool MakeKinkFindingPlots=false, bool Ma
    treevars mc_vars;
    settreevars(t_bnbcos,&mc_vars);
 
-   TMVA::Reader fReader("");
-   fReader.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
-   fReader.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
-   fReader.AddVariable("nhits", &(mc_vars.float_nhits));
-   fReader.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
-   fReader.BookMVA("BDT", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_mupi_4MIPvars_equalweighting_binsadjusted/weights/TMVAClassification_BDT.weights.xml");
+   TMVA::Reader fReader_contained("");
+   fReader_contained.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
+   fReader_contained.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
+   fReader_contained.AddVariable("nhits", &(mc_vars.float_nhits));
+   fReader_contained.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
+   fReader_contained.BookMVA("BDT", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_contained/weights/TMVAClassification_BDT.weights.xml");
+
+   TMVA::Reader fReader_uncontained("");
+   fReader_uncontained.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
+   fReader_uncontained.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
+   fReader_uncontained.AddVariable("nhits", &(mc_vars.float_nhits));
+   fReader_uncontained.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
+   fReader_uncontained.BookMVA("BDT", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_uncontained/weights/TMVAClassification_BDT.weights.xml");
 
    ofstream evdinfo;
    evdinfo.open("evdinfo.txt");
 
    // Sanity check: the plot vectors should be the same size
    t_bnbcos->GetEntry(0);
-   Calcvars(&mc_vars, &fReader);
+   Calcvars(&mc_vars, &fReader_contained, &fReader_uncontained);
    std::vector<CC1piPlotVars> varstoplot_dummy = GetVarstoplot(&mc_vars);
    std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> varstoplot2D_dummy = GetVarstoplot2D(&mc_vars);
    std::vector<CC1piPlotVars> cutvars_dummy = GetCutVars(&mc_vars);
@@ -299,7 +307,7 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
    // Loop through MC tree and fill plots
    for (int i = 0; i < t_bnbcos->GetEntries(); i++){
       t_bnbcos->GetEntry(i);
-      Calcvars(&mc_vars, &fReader);
+      Calcvars(&mc_vars, &fReader_contained, &fReader_uncontained);
       MakeMVATrees(muon, pion, background, MVA_vars, &mc_vars);
       std::vector<CC1piPlotVars> Varstoplot = GetVarstoplot(&mc_vars);
       std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> Varstoplot2D = GetVarstoplot2D(&mc_vars);
@@ -413,7 +421,7 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
       TCanvas *c1 = new TCanvas("c1","c1");
       std::string printname = std::string(varstoplot_dummy.at(i_h).histname+".png");
 
-      mc_hists_cc1pi_pdg_beforecuts[i_h]->DrawStack(1.,c1,"nostack");
+      mc_hists_cc1pi_pdg_beforecuts[i_h]->DrawStack(1.,c1);
       c1->Print(std::string(std::string("CC1pi_pdg_beforecuts")+printname).c_str());
       c1->Clear();
 

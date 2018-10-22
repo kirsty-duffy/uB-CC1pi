@@ -43,7 +43,7 @@ std::vector<CC1piPlotVars> GetMIPCutVars(treevars *vars) {
    // ,Var_TPCObj_PFP_track_perc_used_hits(vars)
    // ,Var_TPCObj_PFP_track_dedx_grminhits(vars)
    // ,Var_TPCObj_PFP_lnLmipoverp(vars)
-   Var_TPCObj_PFP_track_BDTscore(vars)
+   Var_TPCObj_PFP_track_BDTscore_combined(vars)
    };
    return cut_vars;
 };

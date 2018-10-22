@@ -44,17 +44,24 @@ void MakeCutEfficiencyPlots(std::string mcfile){
    treevars mc_vars;
    settreevars(t_bnbcos,&mc_vars);
 
-   TMVA::Reader fReader("");
-   fReader.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
-   fReader.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
-   fReader.AddVariable("nhits", &(mc_vars.float_nhits));
-   fReader.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
-   fReader.BookMVA("BDT", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_mupi_4MIPvars_equalweighting_binsadjusted/weights/TMVAClassification_BDT.weights.xml");
+   TMVA::Reader fReader_contained("");
+   fReader_contained.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
+   fReader_contained.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
+   fReader_contained.AddVariable("nhits", &(mc_vars.float_nhits));
+   fReader_contained.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
+   fReader_contained.BookMVA("BDT", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_contained/weights/TMVAClassification_BDT.weights.xml");
+
+   TMVA::Reader fReader_uncontained("");
+   fReader_uncontained.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
+   fReader_uncontained.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
+   fReader_uncontained.AddVariable("nhits", &(mc_vars.float_nhits));
+   fReader_uncontained.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
+   fReader_uncontained.BookMVA("BDT", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_uncontained/weights/TMVAClassification_BDT.weights.xml");
 
    // Get vector of cuts we want to plot
    // We want both the "normal" cut vars and the ones that define a MIP
    t_bnbcos->GetEntry(0);
-   Calcvars(&mc_vars, &fReader);
+   Calcvars(&mc_vars, &fReader_contained, &fReader_uncontained);
    std::vector<CC1piPlotVars> cutvars_notMIPs = GetCutVars(&mc_vars);
    std::vector<CC1piPlotVars> cutvars_MIPs = GetMIPCutVars(&mc_vars);
    std::vector<CC1piPlotVars> varstoplot_dummy;
@@ -99,15 +106,15 @@ void MakeCutEfficiencyPlots(std::string mcfile){
 //   for (int i = 0; i < 1000; i++){
       if (i%1000==0 || i==t_bnbcos->GetEntries()-1) std::cout << i << "/" << t_bnbcos->GetEntries() << std::endl;
       t_bnbcos->GetEntry(i);
-      Calcvars(&mc_vars, &fReader);
+      Calcvars(&mc_vars, &fReader_contained, &fReader_uncontained);
 
        for (size_t i_h = 2; i_h < 3; i_h++){
           // std::cout << i_h << std::endl;
-          FillCC1piEffPurHist(mc_hists_cc1pieffpur[i_h], &mc_vars, &fReader, (int)i_h);
+          FillCC1piEffPurHist(mc_hists_cc1pieffpur[i_h], &mc_vars, &fReader_contained, &fReader_uncontained, (int)i_h);
        }
 
       // Now fill histograms for N-1 plots
-      FillNminus1EffPurHist(Nminus1plots,&mc_vars,&fReader);
+      FillNminus1EffPurHist(Nminus1plots,&mc_vars,&fReader_contained,&fReader_uncontained);
 
    } // end loop over entries in tree
 
