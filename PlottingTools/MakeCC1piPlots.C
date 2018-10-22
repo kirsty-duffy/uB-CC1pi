@@ -100,6 +100,7 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       ,Var_TPCObj_dEdx_truncmean_MIPdiff_other(vars)
       ,Var_TPCObj_PFP_track_dEdx_nhits(vars)
       ,Var_TPCObj_PFP_track_BDTscore(vars)
+      ,Var_TPCObj_PFP_track_passesMIPcut(vars)
    };
    return varstoplot;
 }
@@ -135,12 +136,17 @@ void MakeCC1piPlots(std::string mcfile, bool MakeKinkFindingPlots=false, bool Ma
 
    TFile f_MVA("MVA_Trees.root", "RECREATE");
    MVAvars *MVA_vars = new MVAvars();
-   TTree *signal = new TTree("signal","signal");
+   TTree *muon = new TTree("muon","muon");
+   TTree *pion = new TTree("pion","pion");
    TTree *background = new TTree("background","background");
-   signal -> Branch("dEdx_truncmean_start", &(MVA_vars->dEdx_truncmean_start));
-   signal -> Branch("VtxTrackDist", &(MVA_vars->VtxTrackDist));
-   signal -> Branch("nhits", &(MVA_vars->nhits));
-   signal -> Branch("lnLmipoverp", &(MVA_vars->lnLmipoverp));
+   muon -> Branch("dEdx_truncmean_start", &(MVA_vars->dEdx_truncmean_start));
+   muon -> Branch("VtxTrackDist", &(MVA_vars->VtxTrackDist));
+   muon -> Branch("nhits", &(MVA_vars->nhits));
+   muon -> Branch("lnLmipoverp", &(MVA_vars->lnLmipoverp));
+   pion -> Branch("dEdx_truncmean_start", &(MVA_vars->dEdx_truncmean_start));
+   pion -> Branch("VtxTrackDist", &(MVA_vars->VtxTrackDist));
+   pion -> Branch("nhits", &(MVA_vars->nhits));
+   pion -> Branch("lnLmipoverp", &(MVA_vars->lnLmipoverp));
    background -> Branch("dEdx_truncmean_start", &(MVA_vars->dEdx_truncmean_start));
    background -> Branch("VtxTrackDist", &(MVA_vars->VtxTrackDist));
    background -> Branch("nhits", &(MVA_vars->nhits));
@@ -178,7 +184,7 @@ void MakeCC1piPlots(std::string mcfile, bool MakeKinkFindingPlots=false, bool Ma
    fReader.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
    fReader.AddVariable("nhits", &(mc_vars.float_nhits));
    fReader.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
-   fReader.BookMVA("BDT", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_pi0/weights/TMVAClassification_BDT.weights.xml");
+   fReader.BookMVA("BDT", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_mupi_4MIPvars_equalweighting_binsadjusted/weights/TMVAClassification_BDT.weights.xml");
 
    ofstream evdinfo;
    evdinfo.open("evdinfo.txt");
@@ -294,7 +300,7 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
    for (int i = 0; i < t_bnbcos->GetEntries(); i++){
       t_bnbcos->GetEntry(i);
       Calcvars(&mc_vars, &fReader);
-      MakeMVATrees(signal, background, MVA_vars, &mc_vars);
+      MakeMVATrees(muon, pion, background, MVA_vars, &mc_vars);
       std::vector<CC1piPlotVars> Varstoplot = GetVarstoplot(&mc_vars);
       std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> Varstoplot2D = GetVarstoplot2D(&mc_vars);
 
@@ -407,7 +413,7 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
       TCanvas *c1 = new TCanvas("c1","c1");
       std::string printname = std::string(varstoplot_dummy.at(i_h).histname+".png");
 
-      mc_hists_cc1pi_pdg_beforecuts[i_h]->DrawStack(1.,c1);
+      mc_hists_cc1pi_pdg_beforecuts[i_h]->DrawStack(1.,c1,"nostack");
       c1->Print(std::string(std::string("CC1pi_pdg_beforecuts")+printname).c_str());
       c1->Clear();
 
@@ -468,6 +474,7 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
    double CC1pi_all = AllEvents->GetCC1piIntegral();
    std::cout << std::endl << "Total number of selected events: " << SelectedEvents->GetTotalIntegral() << std::endl;
    std::cout << "CC1pi+ selection efficiency: " << CC1pi_selected << "/" << CC1pi_all << " = " << CC1pi_selected/CC1pi_all << std::endl;
+   std::cout << "Background rejection: 1 - " << SelectedEvents->GetTotalIntegral() - CC1pi_selected << "/" << AllEvents->GetTotalIntegral() << " = " << 1-(SelectedEvents->GetTotalIntegral() - CC1pi_selected)/(1.0*AllEvents->GetTotalIntegral()) << std::endl;
    getSimPot(mcfile);
 
    f_MVA.Write();

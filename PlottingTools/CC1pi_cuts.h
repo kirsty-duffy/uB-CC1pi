@@ -14,10 +14,10 @@
 // What variables do we want to cut on?
 std::vector<CC1piPlotVars> GetCutVars(treevars *vars) {
    std::vector<CC1piPlotVars> cut_vars = {
-   // Var_TPCObj_AngleBetweenMIPs(vars)
-   // ,Var_TPCObj_AngleBetweenMIPs_high(vars)
+   //Var_TPCObj_AngleBetweenMIPs(vars)
+   Var_TPCObj_AngleBetweenMIPs_high(vars)
    // ,Var_TPCObj_LeadingMIP_PandoraClassedAsTrack(vars)
-   Var_TPCObj_PFP_track_passesMIPcut(vars)
+   ,Var_TPCObj_PFP_track_passesMIPcut(vars)
 
    // ,Var_TPCObj_SecondMIP_isContained(vars)
    // ,Var_TPCObj_FirstMIP_isContained(vars)

@@ -449,7 +449,8 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
       //std::cout << "---" << std::endl;
       // Vector order is track/plane/hit
       for (int i=nhits_skip; i<nhits_skip+nhits_start; i++){
-          // Skip first hit (start from i=1) and last hit
+          // Skip first three hits (start from i=3)
+
           int perhit_size = (int)vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl).size();
           // std::cout << "perhit_size = " << perhit_size << std::endl;
           if (i>=perhit_size) continue;
@@ -551,13 +552,7 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
       }
       else vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean->at(i_track) = -9999;
 
-
-      // Evaluate MIP cut (i.e. whether we want to class this track as a MIP). Cut algorithm defined in CC1pi_cuts.cxx and the variables that go into the decision are defined in CC1pi_cuts.h
-      vars->TPCObj_PFP_track_passesMIPcut->at(i_track) = (double)EvalMIPCut(vars,i_track,MIPCutVars);
-
-      // Evaluate pion cut (i.e. whether we want to class this track as a pion). Cut algorithm defined in CC1pi_cuts.cxx and the variables that go into the decision are defined in CC1pi_cuts.h
-      vars->TPCObj_PFP_track_passesPioncut->at(i_track) = EvalPionCut(vars,i_track);
-
+      
       // Calculate BDT score
       vars->float_dEdx_truncmean_start = (float)(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track));
       vars->float_VtxTrackDist = (float)(vars->TPCObj_PFP_VtxTrackDist->at(i_track));
@@ -570,6 +565,13 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
          vars->TPCObj_PFP_track_BDTscore->at(i_track) = fReader->EvaluateMVA("BDT");
       }
       //std::cout << "BDT result: " << vars->TPCObj_PFP_track_BDTscore->at(i_track) << std::endl;
+
+
+      // Evaluate MIP cut (i.e. whether we want to class this track as a MIP). Cut algorithm defined in CC1pi_cuts.cxx and the variables that go into the decision are defined in CC1pi_cuts.h
+      vars->TPCObj_PFP_track_passesMIPcut->at(i_track) = (double)EvalMIPCut(vars,i_track,MIPCutVars);
+
+      // Evaluate pion cut (i.e. whether we want to class this track as a pion). Cut algorithm defined in CC1pi_cuts.cxx and the variables that go into the decision are defined in CC1pi_cuts.h
+      vars->TPCObj_PFP_track_passesPioncut->at(i_track) = EvalPionCut(vars,i_track);
 
    } // end loop over tracks in TPCObj (i_track)
 
@@ -657,19 +659,36 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
 
 }
 
-void MakeMVATrees(TTree *signal_tree, TTree *background_tree, MVAvars *MVA_vars, treevars *vars) {
+void MakeMVATrees(TTree *muon_tree, TTree *pion_tree, TTree *background_tree, MVAvars *MVA_vars, treevars *vars) {
 
    for(int i_track=0; i_track < vars->TPCObj_PFP_truePDG->size(); i_track++){
 
-      if(vars->TPCObj_PFP_lnLmipoverp->at(i_track) == -9999) continue;
+      //Only daughter get considered as possible MIP candidates, so also only train with them
+      if(!(vars->TPCObj_PFP_isDaughter->at(i_track))) continue;
+
+      //Don't train on bogus values (though also, we should probably try to understand why there are bogus values)
+      if(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track)==-9999
+            || vars->TPCObj_PFP_VtxTrackDist->at(i_track)==-9999
+            || vars->TPCObj_PFP_track_dEdx_nhits->at(i_track)==-9999
+            || vars->TPCObj_PFP_lnLmipoverp->at(i_track) == -9999) continue;
+
+      // Try playing with variable ranges (cut out ridiculous high values that affect the binning)
+      //if(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) > 100) continue;
+
+      //Have two different samples for contained and uncontained tracks
+      if(!(vars->TPCObj_PFP_track_isContained->at(i_track))) continue;
+
 
       MVA_vars->dEdx_truncmean_start = vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track);
       MVA_vars->VtxTrackDist = vars->TPCObj_PFP_VtxTrackDist->at(i_track);
       MVA_vars->nhits = vars->TPCObj_PFP_track_dEdx_nhits->at(i_track);
       MVA_vars->lnLmipoverp = vars->TPCObj_PFP_lnLmipoverp->at(i_track);
 
-      if(vars->TPCObj_PFP_truePDG->at(i_track)==13 || vars->TPCObj_PFP_truePDG->at(i_track)==211) {
-         signal_tree->Fill();
+      if(vars->TPCObj_PFP_truePDG->at(i_track)==13) {
+         muon_tree->Fill();
+      }
+      else if(vars->TPCObj_PFP_truePDG->at(i_track)==211) {
+         pion_tree->Fill();
       }
       else if(vars->TPCObj_PFP_truePDG->at(i_track)!=-9999) {
          background_tree->Fill();
