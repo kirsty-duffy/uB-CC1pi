@@ -575,8 +575,8 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader_contained, TMVA::Reader *fRe
          }
       }
 
-      double BDTscore_contained_cut = 0;
-      double BDTscore_uncontained_cut = 0;
+      double BDTscore_contained_cut = 0.5;
+      double BDTscore_uncontained_cut = 0.3;
       vars->TPCObj_PFP_track_BDTscore_combined->at(i_track) = (double)((vars->TPCObj_PFP_track_isContained->at(i_track) && vars->TPCObj_PFP_track_BDTscore_contained->at(i_track) > BDTscore_contained_cut) || (!(vars->TPCObj_PFP_track_isContained->at(i_track)) && vars->TPCObj_PFP_track_BDTscore_uncontained->at(i_track) > BDTscore_uncontained_cut));
 
 
@@ -689,7 +689,7 @@ void MakeMVATrees(TTree *muon_tree, TTree *pion_tree, TTree *background_tree, MV
       //if(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) > 100) continue;
 
       //Have two different samples for contained and uncontained tracks
-      if(!(vars->TPCObj_PFP_track_isContained->at(i_track))) continue;
+      if((vars->TPCObj_PFP_track_isContained->at(i_track))) continue;
 
 
       MVA_vars->dEdx_truncmean_start = vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track);

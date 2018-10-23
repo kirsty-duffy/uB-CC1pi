@@ -185,14 +185,14 @@ void MakeCC1piPlots(std::string mcfile, bool MakeKinkFindingPlots=false, bool Ma
    fReader_contained.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
    fReader_contained.AddVariable("nhits", &(mc_vars.float_nhits));
    fReader_contained.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
-   fReader_contained.BookMVA("BDT", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_contained/weights/TMVAClassification_BDT.weights.xml");
+   fReader_contained.BookMVA("BDTG", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_contained/weights/TMVAClassification_BDTG.weights.xml");
 
    TMVA::Reader fReader_uncontained("");
    fReader_uncontained.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
    fReader_uncontained.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
    fReader_uncontained.AddVariable("nhits", &(mc_vars.float_nhits));
    fReader_uncontained.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
-   fReader_uncontained.BookMVA("BDT", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_uncontained/weights/TMVAClassification_BDT.weights.xml");
+   fReader_uncontained.BookMVA("BDTG", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_uncontained/weights/TMVAClassification_BDTG.weights.xml");
 
    ofstream evdinfo;
    evdinfo.open("evdinfo.txt");
