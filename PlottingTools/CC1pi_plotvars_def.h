@@ -17,6 +17,7 @@ struct CC1piPlotVars{
   std::vector<double> bins;
   std::string histtitle;
   std::string histname;
+  bool PlotOnlyDaughters;
   bool PlotOnlyDaughterMIPs;
   bool PlotOnlyNotMIPDaughters;
   bool PlotOnlyContained;
@@ -34,6 +35,7 @@ struct CC1piPlotVars{
     TracksNeeded = "NA";
     CutValue = -9999;
 
+    PlotOnlyDaughters = false;
     PlotOnlyDaughterMIPs = false;
     PlotOnlyNotMIPDaughters = false;
     PlotOnlyContained = false;
@@ -167,6 +169,7 @@ CC1piPlotVars Var_TPCObj_PFP_VtxTrackDist(treevars *vars){
   tmp.bins = {20,0,20};
   tmp.histtitle = ";Track start distance from reconstructed vertex [cm];";
   tmp.histname = "VtxTrackDist";
+  tmp.PlotOnlyDaughters = true;
   return tmp;
 }
 
@@ -264,12 +267,13 @@ CC1piPlotVars Var_TPCObj_PFP_track_dEdx_truncmean_start(treevars *vars){
   tmp.Var = vars->TPCObj_PFP_track_dEdx_truncmean_start;
   tmp.KeepBelowCut = true;
   tmp.isMIPcut = true;
-  tmp.CutValue = 2.4;
-  tmp.bins = {25,0,3};
+  tmp.CutValue = 2.3;
+  tmp.bins = {25,0,10};
   tmp.histtitle = ";Truncated Mean dE/dx at start of track;";
   tmp.histname = "dEdx_truncmean_atstart";
   tmp.PlotOnlyDaughterMIPs = false;
   tmp.PlotOnlyContained = false;
+  tmp.PlotOnlyDaughters = true;
   return tmp;
 }
 
@@ -283,6 +287,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_dEdx_truncmean_start_lowcut(treevars *vars){
   tmp.bins = {10,0.5,1.5};
   tmp.histtitle = ";Truncated Mean dE/dx at start of track;";
   tmp.histname = "dEdx_truncmean_atstart_lowcut";
+  tmp.PlotOnlyDaughters = true;
   return tmp;
 }
 
@@ -434,10 +439,11 @@ CC1piPlotVars Var_TPCObj_PFP_lnLmipoverp(treevars *vars){
   tmp.isMIPcut = true;
   tmp.CutValue = -0.5;
   tmp.bins = {8,-2,2};
-  tmp.histtitle = ";ln(L_{MIP})/(L_{p}) (MIPs only);";
+  tmp.histtitle = ";ln(L_{MIP})/(L_{p});";
   tmp.histname = "lnLmipoverp";
-  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyDaughterMIPs = false;
   tmp.PlotOnlyContained = false;
+  tmp.PlotOnlyDaughters = true;
   return tmp;
 }
 
@@ -461,7 +467,7 @@ CC1piPlotVars Var_TPCObj_PFP_lnLmipoverp_SecondMIP(treevars *vars){
   tmp.Var = vars->TPCObj_PFP_lnLmipoverp;
   tmp.bins = {60,-10,10};
   tmp.histtitle = ";ln(L_{MIP})/(L_{p}) (Second MIP only);";
-  tmp.histname = "lnLmipoverp";
+  tmp.histname = "lnLmipoverp_secondMIPonly";
   tmp.PlotOnlySecondDaughterMIP = true;
   tmp.PlotOnlyContained = false;
   return tmp;
@@ -1121,7 +1127,8 @@ CC1piPlotVars Var_TPCObj_PFP_track_dedx_grminhits(treevars *vars){
   tmp.CutValue = 0.5;
   tmp.histtitle = ";Passes min. no. hits threshold for collection plane;";
   tmp.histname = "grminhits";
-  tmp.bins = {2,-1,1};
+  tmp.bins = {2,0,2};
+  tmp.PlotOnlyDaughters = true;
   return tmp;
 }
 
@@ -1134,6 +1141,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_dEdx_nhits(treevars *vars){
   tmp.histtitle = ";Number of collection plane hits;";
   tmp.histname = "nhits";
   tmp.bins = {25,0,300};
+  tmp.PlotOnlyDaughters = true;
   return tmp;
 }
 
@@ -1379,8 +1387,8 @@ CC1piPlotVars Var_TPCObj_PFP_track_BDTscore(treevars *vars){
 //  tmp.OnlyDaughters = true;
 //  tmp.TracksNeeded = "exactlytwo";
   tmp.isMIPcut = true;
-  tmp.CutValue = 0.07;
-  tmp.bins = {25,-0.3,0.3};
+  tmp.CutValue = 0.5;
+  tmp.bins = {25,-1,1};
   tmp.histtitle = ";BDT score;";
   tmp.histname = "BDTscore";
   return tmp;
@@ -1389,6 +1397,8 @@ CC1piPlotVars Var_TPCObj_PFP_track_BDTscore(treevars *vars){
 // Decide whether to fill a plot for a given track. This is useful for e.g. plots with PlotOnlyDaughterMIPs=true
 bool FillPlotForTrack(CC1piPlotVars *plotvar, treevars *vars, int i_tr){
   bool DoFillPlot = true;
+
+  if (plotvar->PlotOnlyDaughters && !(vars->TPCObj_PFP_isDaughter->at(i_tr))) DoFillPlot = false;
 
   if (plotvar->PlotOnlyDaughterMIPs && !(vars->TPCObj_PFP_isDaughter->at(i_tr) && vars->TPCObj_PFP_track_passesMIPcut->at(i_tr))) DoFillPlot = false;
 

@@ -136,21 +136,32 @@ void MakeCC1piPlots(std::string mcfile, bool MakeKinkFindingPlots=false, bool Ma
 
    TFile f_MVA("MVA_Trees.root", "RECREATE");
    MVAvars *MVA_vars = new MVAvars();
-   TTree *muon = new TTree("muon","muon");
-   TTree *pion = new TTree("pion","pion");
+   TTree *muon_contained = new TTree("muon_contained","muon_contained");
+   TTree *muon_uncontained = new TTree("muon_uncontained","muon_uncontained");
+   TTree *pion_contained = new TTree("pion_contained","pion_contained");
+   TTree *pion_uncontained = new TTree("pion_uncontained","pion_uncontained");
    TTree *background = new TTree("background","background");
-   muon -> Branch("dEdx_truncmean_start", &(MVA_vars->dEdx_truncmean_start));
-   muon -> Branch("VtxTrackDist", &(MVA_vars->VtxTrackDist));
-   muon -> Branch("nhits", &(MVA_vars->nhits));
-   muon -> Branch("lnLmipoverp", &(MVA_vars->lnLmipoverp));
-   pion -> Branch("dEdx_truncmean_start", &(MVA_vars->dEdx_truncmean_start));
-   pion -> Branch("VtxTrackDist", &(MVA_vars->VtxTrackDist));
-   pion -> Branch("nhits", &(MVA_vars->nhits));
-   pion -> Branch("lnLmipoverp", &(MVA_vars->lnLmipoverp));
+   muon_contained -> Branch("dEdx_truncmean_start", &(MVA_vars->dEdx_truncmean_start));
+   muon_contained -> Branch("VtxTrackDist", &(MVA_vars->VtxTrackDist));
+   muon_contained -> Branch("nhits", &(MVA_vars->nhits));
+   muon_contained -> Branch("lnLmipoverp", &(MVA_vars->lnLmipoverp));
+   muon_uncontained -> Branch("dEdx_truncmean_start", &(MVA_vars->dEdx_truncmean_start));
+   muon_uncontained -> Branch("VtxTrackDist", &(MVA_vars->VtxTrackDist));
+   muon_uncontained -> Branch("nhits", &(MVA_vars->nhits));
+   muon_uncontained -> Branch("lnLmipoverp", &(MVA_vars->lnLmipoverp));
+   pion_contained -> Branch("dEdx_truncmean_start", &(MVA_vars->dEdx_truncmean_start));
+   pion_contained -> Branch("VtxTrackDist", &(MVA_vars->VtxTrackDist));
+   pion_contained -> Branch("nhits", &(MVA_vars->nhits));
+   pion_contained -> Branch("lnLmipoverp", &(MVA_vars->lnLmipoverp));
+   pion_uncontained -> Branch("dEdx_truncmean_start", &(MVA_vars->dEdx_truncmean_start));
+   pion_uncontained -> Branch("VtxTrackDist", &(MVA_vars->VtxTrackDist));
+   pion_uncontained -> Branch("nhits", &(MVA_vars->nhits));
+   pion_uncontained -> Branch("lnLmipoverp", &(MVA_vars->lnLmipoverp));
    background -> Branch("dEdx_truncmean_start", &(MVA_vars->dEdx_truncmean_start));
    background -> Branch("VtxTrackDist", &(MVA_vars->VtxTrackDist));
    background -> Branch("nhits", &(MVA_vars->nhits));
    background -> Branch("lnLmipoverp", &(MVA_vars->lnLmipoverp));
+//   background -> Branch("isContained", &(MVA_vars->isContained));
 
    gStyle->SetTitleX(0.5);
    gStyle->SetTitleAlign(23);
@@ -184,7 +195,8 @@ void MakeCC1piPlots(std::string mcfile, bool MakeKinkFindingPlots=false, bool Ma
    fReader.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
    fReader.AddVariable("nhits", &(mc_vars.float_nhits));
    fReader.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
-   fReader.BookMVA("BDT", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_mupi_4MIPvars_equalweighting_binsadjusted/weights/TMVAClassification_BDT.weights.xml");
+   //fReader.AddVariable("isContained", &(mc_vars.float_isContained));
+   fReader.BookMVA("BDTG", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_equalweightContainment/weights/TMVAClassification_BDTG.weights.xml");
 
    ofstream evdinfo;
    evdinfo.open("evdinfo.txt");
@@ -300,7 +312,7 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
    for (int i = 0; i < t_bnbcos->GetEntries(); i++){
       t_bnbcos->GetEntry(i);
       Calcvars(&mc_vars, &fReader);
-      MakeMVATrees(muon, pion, background, MVA_vars, &mc_vars);
+      MakeMVATrees(muon_contained, muon_uncontained, pion_contained, pion_uncontained, background, MVA_vars, &mc_vars);
       std::vector<CC1piPlotVars> Varstoplot = GetVarstoplot(&mc_vars);
       std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> Varstoplot2D = GetVarstoplot2D(&mc_vars);
 
@@ -413,7 +425,7 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
       TCanvas *c1 = new TCanvas("c1","c1");
       std::string printname = std::string(varstoplot_dummy.at(i_h).histname+".png");
 
-      mc_hists_cc1pi_pdg_beforecuts[i_h]->DrawStack(1.,c1,"nostack");
+      mc_hists_cc1pi_pdg_beforecuts[i_h]->DrawStack(1.,c1);
       c1->Print(std::string(std::string("CC1pi_pdg_beforecuts")+printname).c_str());
       c1->Clear();
 

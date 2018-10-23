@@ -49,7 +49,8 @@ void MakeCutEfficiencyPlots(std::string mcfile){
    fReader.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
    fReader.AddVariable("nhits", &(mc_vars.float_nhits));
    fReader.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
-   fReader.BookMVA("BDT", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_mupi_4MIPvars_equalweighting_binsadjusted/weights/TMVAClassification_BDT.weights.xml");
+//   fReader.AddVariable("isContained", &(mc_vars.float_isContained));
+   fReader.BookMVA("BDTG", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_equalweightContainment/weights/TMVAClassification_BDTG.weights.xml");
 
    // Get vector of cuts we want to plot
    // We want both the "normal" cut vars and the ones that define a MIP
@@ -95,8 +96,8 @@ void MakeCutEfficiencyPlots(std::string mcfile){
    std::cout << "------" << std::endl;
 
    // Loop through MC tree and fill plots
-   for (int i = 0; i < t_bnbcos->GetEntries(); i++){
-//   for (int i = 0; i < 1000; i++){
+//   for (int i = 0; i < t_bnbcos->GetEntries(); i++){
+   for (int i = 0; i < 10000; i++){
       if (i%1000==0 || i==t_bnbcos->GetEntries()-1) std::cout << i << "/" << t_bnbcos->GetEntries() << std::endl;
       t_bnbcos->GetEntry(i);
       Calcvars(&mc_vars, &fReader);
@@ -113,7 +114,7 @@ void MakeCutEfficiencyPlots(std::string mcfile){
 
    // -------------------- Now make all the plots
    std::cout << "Drawing plots..." << std::endl;
-    for (size_t i_h=2; i_h < 3; i_h++){
+    for (size_t i_h = 2; i_h < 3; i_h++){
        TCanvas *c1 = new TCanvas("c1","c1");
    
        DrawCC1piMCEffPur(c1, mc_hists_cc1pieffpur[i_h]);

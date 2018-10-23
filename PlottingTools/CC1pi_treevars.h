@@ -170,6 +170,7 @@ struct treevars{
    float float_VtxTrackDist;
    float float_nhits;
    float float_lnLmipoverp;
+   float float_isContained;
 
 };
 
@@ -179,6 +180,7 @@ struct MVAvars {
    double VtxTrackDist;
    double nhits;
    double lnLmipoverp;
+   double isContained;
 };
 
 #endif
