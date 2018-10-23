@@ -102,8 +102,8 @@ void MakeCutEfficiencyPlots(std::string mcfile){
    std::cout << "------" << std::endl;
 
    // Loop through MC tree and fill plots
-   for (int i = 0; i < t_bnbcos->GetEntries(); i++){
-//   for (int i = 0; i < 1000; i++){
+//   for (int i = 0; i < t_bnbcos->GetEntries(); i++){
+   for (int i = 0; i < 10000; i++){
       if (i%1000==0 || i==t_bnbcos->GetEntries()-1) std::cout << i << "/" << t_bnbcos->GetEntries() << std::endl;
       t_bnbcos->GetEntry(i);
       Calcvars(&mc_vars, &fReader_contained, &fReader_uncontained);

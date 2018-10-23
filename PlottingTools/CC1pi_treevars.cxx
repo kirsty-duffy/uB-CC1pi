@@ -442,15 +442,15 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader_contained, TMVA::Reader *fRe
       vars->TPCObj_PFP_track_dedx_stddev->at(i_track) = TMath::Sqrt(dedx_accum / (vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl).size()-1));
 
       // Calculate truncated mean dE/dx at the start of the track
-      int nhits_start = 30;
       int nhits_skip = 3;
       std::vector<float> dEdx_float;
-      vars->TPCObj_PFP_track_dEdx_nhits->at(i_track) = (double)vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl).size();
-      if (vars->TPCObj_PFP_track_dEdx_nhits->at(i_track)>=nhits_start+nhits_skip) vars->TPCObj_PFP_track_dedx_grminhits->at(i_track) = 1.0;
+      int nhits = vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl).size(); // Number of collection plane hits
+      vars->TPCObj_PFP_track_dEdx_nhits->at(i_track) = (double)nhits;
+      if (nhits>nhits_skip) vars->TPCObj_PFP_track_dedx_grminhits->at(i_track) = 1.0;
       else vars->TPCObj_PFP_track_dedx_grminhits->at(i_track) = 0.0;
       //std::cout << "---" << std::endl;
       // Vector order is track/plane/hit
-      for (int i=nhits_skip; i<nhits_skip+nhits_start; i++){
+      for (int i=nhits_skip; i<nhits_skip+floor(nhits/3); i++){
           // Skip first three hits (start from i=3)
 
           int perhit_size = (int)vars->TPCObj_PFP_track_dedx_perhit->at(i_track).at(i_pl).size();
@@ -566,12 +566,12 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader_contained, TMVA::Reader *fRe
       }
       else {
          if(vars->TPCObj_PFP_track_isContained->at(i_track)) {
-            vars->TPCObj_PFP_track_BDTscore_contained->at(i_track) = fReader_contained->EvaluateMVA("BDT");
+            vars->TPCObj_PFP_track_BDTscore_contained->at(i_track) = fReader_contained->EvaluateMVA("BDTG");
             vars->TPCObj_PFP_track_BDTscore_uncontained->at(i_track) = -9999;
          }
          else {
             vars->TPCObj_PFP_track_BDTscore_contained->at(i_track) = -9999;
-            vars->TPCObj_PFP_track_BDTscore_uncontained->at(i_track) = fReader_uncontained->EvaluateMVA("BDT");
+            vars->TPCObj_PFP_track_BDTscore_uncontained->at(i_track) = fReader_uncontained->EvaluateMVA("BDTG");
          }
       }
 
