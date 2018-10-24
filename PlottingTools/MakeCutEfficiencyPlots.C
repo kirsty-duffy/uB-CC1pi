@@ -49,14 +49,14 @@ void MakeCutEfficiencyPlots(std::string mcfile){
    fReader_contained.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
    fReader_contained.AddVariable("nhits", &(mc_vars.float_nhits));
    fReader_contained.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
-   fReader_contained.BookMVA("BDT", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_contained/weights/TMVAClassification_BDT.weights.xml");
+   fReader_contained.BookMVA("BDTG", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_contained/weights/TMVAClassification_BDTG.weights.xml");
 
    TMVA::Reader fReader_uncontained("");
    fReader_uncontained.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
    fReader_uncontained.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
    fReader_uncontained.AddVariable("nhits", &(mc_vars.float_nhits));
    fReader_uncontained.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
-   fReader_uncontained.BookMVA("BDT", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_uncontained/weights/TMVAClassification_BDT.weights.xml");
+   fReader_uncontained.BookMVA("BDTG", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_uncontained/weights/TMVAClassification_BDTG.weights.xml");
 
    // Get vector of cuts we want to plot
    // We want both the "normal" cut vars and the ones that define a MIP
@@ -107,12 +107,12 @@ void MakeCutEfficiencyPlots(std::string mcfile){
       if (i%1000==0 || i==t_bnbcos->GetEntries()-1) std::cout << i << "/" << t_bnbcos->GetEntries() << std::endl;
       t_bnbcos->GetEntry(i);
       Calcvars(&mc_vars, &fReader_contained, &fReader_uncontained);
-
-       for (size_t i_h = 2; i_h < 3; i_h++){
+/*
+       for (size_t i_h = 0; i_h < nplots; i_h++){
           // std::cout << i_h << std::endl;
           FillCC1piEffPurHist(mc_hists_cc1pieffpur[i_h], &mc_vars, &fReader_contained, &fReader_uncontained, (int)i_h);
        }
-
+*/
       // Now fill histograms for N-1 plots
       FillNminus1EffPurHist(Nminus1plots,&mc_vars,&fReader_contained,&fReader_uncontained);
 
@@ -120,7 +120,8 @@ void MakeCutEfficiencyPlots(std::string mcfile){
 
    // -------------------- Now make all the plots
    std::cout << "Drawing plots..." << std::endl;
-    for (size_t i_h=2; i_h < 3; i_h++){
+   /*
+    for (size_t i_h=0; i_h < nplots; i_h++){
        TCanvas *c1 = new TCanvas("c1","c1");
    
        DrawCC1piMCEffPur(c1, mc_hists_cc1pieffpur[i_h]);
@@ -129,6 +130,7 @@ void MakeCutEfficiencyPlots(std::string mcfile){
    
        delete c1;
     }
+    */
    TCanvas *c1 = new TCanvas("c1","c1");
    DrawCC1piMCEffPur(c1, Nminus1plots,"hist",true);
    c1->Print("Nminus1plots.png");

@@ -263,12 +263,16 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader_contained, TMVA::Reader *fRe
    vars->TPCObj_PFP_track_BDTscore_uncontained = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_track_BDTscore_combined = new std::vector<double>(vecsize,-9999);
 
+   vars->TPCObj_NDaughterPFPs = new std::vector<double>(1,-9999);
+
    // Just use collection plane for now
    int i_pl = 2;
 
    // For ordering tracks by various things
    std::vector<std::pair<double, int>> *pair_dEdx_truncmean_index = new std::vector<std::pair<double, int>>(vecsize);
    std::vector<std::pair<double, int>> *pair_trklen_index = new std::vector<std::pair<double, int>>(vecsize);
+
+   vars->TPCObj_NDaughterPFPs->at(0) = std::count(vars->TPCObj_PFP_isDaughter->begin(),vars->TPCObj_PFP_isDaughter->end(),1);
 
    // Now calculate the values for all variables
    for (int i_track=0; i_track < vecsize; i_track++){

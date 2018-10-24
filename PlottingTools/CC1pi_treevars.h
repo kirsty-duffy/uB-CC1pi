@@ -151,6 +151,7 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_track_BDTscore_contained;
    std::vector<double> *TPCObj_PFP_track_BDTscore_uncontained;
    std::vector<double> *TPCObj_PFP_track_BDTscore_combined;
+   std::vector<double> *TPCObj_NDaughterPFPs;
 
    // Is the track a MIP? Evaluate MIP cuts and then put this as an input into selection
    // Coded as a double (to fit in with the other code) but should be evaluated as a bool

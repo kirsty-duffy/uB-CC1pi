@@ -16,7 +16,8 @@
 // What variables do we want these plots as a function of?
 std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
    std::vector<CC1piPlotVars> varstoplot = {
-      Var_TPCObj_PFP_lnLmipoverp_SecondMIP(vars)
+      Var_TPCObj_PFP_lnLmipoverp(vars)
+      ,Var_TPCObj_PFP_lnLmipoverp_SecondMIP(vars)
       ,Var_TPCObj_PFP_Lmumipovermumipp(vars)
       ,Var_TPCObj_PFP_lnLmipoverp_SecondMIPcont(vars)
       // ,Var_TPCObj_PFP_Lmumipovermumipp_cont(vars)
@@ -102,6 +103,7 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       //,Var_TPCObj_PFP_track_BDTscore_contained(vars)
       //,Var_TPCObj_PFP_track_BDTscore_uncontained(vars)
       ,Var_TPCObj_PFP_track_passesMIPcut(vars)
+      //,Var_TPCObj_NDaughterPFPs(vars)
    };
    return varstoplot;
 }
@@ -114,6 +116,7 @@ std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> GetVarstoplot2D(treevars *va
       // ,{Var_TPCObj_PFP_track_dEdx_mean_start_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
       // ,{Var_TPCObj_PFP_track_dEdx_stddev_start_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
       // ,{Var_TPCObj_PFP_track_theta_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
+      {Var_TPCObj_PFP_track_theta(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
       // {Var_TPCObj_PFP_VtxTrackDist_mumupairs(vars),Var_TPCObj_PFP_VtxTrackDist_SecondMIP_mumupairs(vars)}
       // {Var_TPCObj_PFP_MCSLLpiMinusLLp_NotPion(vars),Var_TPCObj_PFP_track_length(vars)}
       // ,{Var_TPCObj_PFP_MCSLLpiMinusLLp_NotPioncont(vars),Var_TPCObj_PFP_track_length(vars)}
@@ -301,6 +304,7 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
    // Dummy plot in order to get percentage of different topologies that are selected
    StackedHistTopology *SelectedEvents = new StackedHistTopology("SelectedEvents",";;",1,0,1);
    StackedHistTopology *AllEvents = new StackedHistTopology("AllEvents",";;",1,0,1);
+   StackedHistTopology *NDaughters = new StackedHistTopology("NDaughters",";Number of #nu daughter PFPs in selected TPCObject;",9,1,10);
 
    int protonplotsmade=0;
 
@@ -313,6 +317,7 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
       std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> Varstoplot2D = GetVarstoplot2D(&mc_vars);
 
       AllEvents->Fill((NuIntTopology)mc_vars.Truth_topology,0.5);
+      NDaughters->Fill((NuIntTopology)mc_vars.Truth_topology,mc_vars.TPCObj_NDaughterPFPs->at(0));
 
       bool isSelected = IsEventSelected(&mc_vars);
 
@@ -473,6 +478,9 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
 
    AllEvents->DrawStack(1.,c1);
    c1->Print("CC1pi_AllEvents.png");
+
+   NDaughters->DrawStack(1.,c1);
+   c1->Print("CC1pi_NDaughters.png");
 
    delete c1;
 

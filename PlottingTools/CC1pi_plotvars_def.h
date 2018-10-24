@@ -267,9 +267,9 @@ CC1piPlotVars Var_TPCObj_PFP_track_dEdx_truncmean_start(treevars *vars){
   tmp.Var = vars->TPCObj_PFP_track_dEdx_truncmean_start;
   tmp.KeepBelowCut = true;
   tmp.isMIPcut = true;
-  tmp.CutValue = 2.3;
-  tmp.bins = {25,0,10};
-  tmp.histtitle = ";Truncated Mean dE/dx at start of track;";
+  tmp.CutValue = 2.2;
+  tmp.bins = {25,0,2.2};
+  tmp.histtitle = ";Truncated Mean dE/dx at start of track [MeV/cm];";
   tmp.histname = "dEdx_truncmean_atstart";
   tmp.PlotOnlyDaughterMIPs = false;
   tmp.PlotOnlyContained = false;
@@ -438,7 +438,7 @@ CC1piPlotVars Var_TPCObj_PFP_lnLmipoverp(treevars *vars){
   tmp.KeepBelowCut = false;
   tmp.isMIPcut = true;
   tmp.CutValue = -0.5;
-  tmp.bins = {8,-2,2};
+  tmp.bins = {60,-10,10};
   tmp.histtitle = ";ln(L_{MIP})/(L_{p});";
   tmp.histname = "lnLmipoverp";
   tmp.PlotOnlyDaughterMIPs = false;
@@ -479,7 +479,7 @@ CC1piPlotVars Var_TPCObj_PFP_lnLmipoverp_SecondMIPcont(treevars *vars){
   tmp.Var = vars->TPCObj_PFP_lnLmipoverp;
   tmp.bins = {60,-10,10};
   tmp.histtitle = ";ln(L_{MIP})/(L_{p}) (Second MIP, cont. only);";
-  tmp.histname = "lnLmipoverp_cont";
+  tmp.histname = "lnLmipoverp_secondMIPonly_cont";
   tmp.PlotOnlySecondDaughterMIP = true;
   tmp.PlotOnlyContained = true;
   return tmp;
@@ -1285,6 +1285,16 @@ CC1piPlotVars Var_TPCObj_PFP_track_theta_SecondMIP(treevars *vars){
   return tmp;
 }
 
+CC1piPlotVars Var_TPCObj_PFP_track_theta(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_theta;
+  tmp.bins = {30,0,3.15};
+  tmp.histtitle = ";Track theta [rad];";
+  tmp.histname = "Theta";
+  tmp.PlotOnlyDaughters = true;
+  return tmp;
+}
+
 //
 CC1piPlotVars Var_TPCObj_PFP_track_phi_SecondMIP(treevars *vars){
   CC1piPlotVars tmp;
@@ -1406,6 +1416,17 @@ CC1piPlotVars Var_TPCObj_PFP_track_BDTscore_combined(treevars *vars){
   tmp.bins = {2,0,2};
   tmp.histtitle = ";BDT score (combined);";
   tmp.histname = "BDTscore_combined";
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_NDaughterPFPs(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_NDaughterPFPs;
+//  tmp.OnlyDaughters = true;
+//  tmp.TracksNeeded = "exactlytwo";
+  tmp.bins = {10,0,10};
+  tmp.histtitle = ";Number of #nu daughter PFPs in selected TPCObject;";
+  tmp.histname = "NDaughterPFPs";
   return tmp;
 }
 
