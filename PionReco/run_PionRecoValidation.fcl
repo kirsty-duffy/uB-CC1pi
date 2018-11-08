@@ -1,0 +1,46 @@
+#include "services_microboone.fcl"
+#include "messageservice.fcl"
+#include "time_memory_tracker_microboone.fcl"
+
+process_name: pirecovalid
+
+services:
+{
+
+  TFileService:  {fileName: "pionrecovalid_out.root"}
+  TimeTracker:   @local::microboone_time_tracker
+  MemoryTracker: @local::microboone_memory_tracker
+                 @table::microboone_simulation_services
+
+} # services
+
+source:
+{
+  fileNames: [ "/pnfs/uboone/persistent/users/kduffy/CC1pi/v06_26_01_13_alister_v0/10994402_87/prodgenie_bnb_nu_cosmic_uboone_0_20170307T101714_gen2_d80db8a6-0c90-43cb-aa98-4498b4d68f89_20171221T161100_reco1_20171221T163343_reco2_20180208T035142_4ce5a100-ecaf-4497-88ec-df6dd678298c.root" ]
+  module_type: RootInput
+  inputCommands: [ "keep *_*_*_*", "drop sumdata::RunData_*_*_*" ]
+
+}
+
+physics:
+{
+  analyzers:
+  {
+    pirecovalid:
+    {
+      module_type: "ArePionsWellReconstructed"
+      TrackLabel: "pandoraNu::CC1pi"
+      HitLabel: "pandoraCosmicHitRemoval::CC1pi"
+      HitTrackAssns: "pandoraNu::CC1pi"
+      HitTruthAssns: "pandoraCosmicHitRemoval::CC1pi"
+      PFPproducerlabel: "pandoraNu::CC1pi"
+
+      verbose: false
+    }
+  }
+
+  analysis: [ pirecovalid ]
+  end_paths: [ analysis ]
+}
+
+services.DetectorClocksService.InheritClockConfig: false
