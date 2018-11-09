@@ -16,7 +16,7 @@ class StackedHistTopology{
   StackedHistTopology(std::string histname, std::string title, int nbins, double lowlimit, double highlimit);// Constructor
   void Fill(NuIntTopology topology, double value);
   void Fill(NuIntTopology topology, double value, double weight);
-  void DrawStack(double norm, TCanvas *c1, bool coarse=true);
+  void DrawStack(double mc_scaling, TCanvas *c1, bool coarse=true, TH1F *onbeam_h=nullptr, TH1F *offbeam_h=nullptr, double offbeam_scaling=1.0, bool onminusoffbeam=false);
   void PrintHistIntegrals(bool coarse=true);
   double GetCC1piIntegral();
   double GetTotalIntegral();
@@ -126,7 +126,7 @@ void StackedHistTopology::GenerateCoarseHistos()
 };
 
 // -------------------------- Function to draw the histograms -------------------------- //
-void StackedHistTopology::DrawStack(double norm, TCanvas *c1, bool coarse)
+void StackedHistTopology::DrawStack(double mc_scaling, TCanvas *c1, bool coarse=true, TH1F *onbeam_h=nullptr, TH1F *offbeam_h=nullptr, double offbeam_scaling=1.0, bool onminusoffbeam=false)
 {
 
   // Next: add histogramst to the stack and make TLegend
@@ -146,7 +146,7 @@ void StackedHistTopology::DrawStack(double norm, TCanvas *c1, bool coarse)
   double overflow_total = 0.;
 
   for (int i_hist = 0; i_hist < nHists; i_hist++){
-    hists[i_hist]->Scale(norm);
+    hists[i_hist]->Scale(mc_scaling);
   }
 
   if (coarse) {
@@ -177,14 +177,41 @@ else { // fine
     underflow_total += hists[i_hist]->GetBinContent(0);
     overflow_total += hists[i_hist]->GetBinContent(hists[i_hist]->GetXaxis()->GetNbins()+1);
   }
-}
+} // end if coarse/fine
 
   pt->AddText(TString::Format("Underflow (Invalid): %.2f (%.2f)",underflow_total,invalid_total).Data());
   pt->AddText(TString::Format("Overflow: %.2f",overflow_total).Data());
 
+  // If data histograms are given, deal with them here
+  TH1F *datatodraw;
+  if (onbeam_h && offbeam_h){
+    offbeam_h->Sumw2();
+    offbeam_h->Scale(offbeam_scaling);
+    datatodraw = (TH1F*)onbeam_h->Clone();
+    datatodraw->Sumw2();
+    datatodraw->SetMarkerStyle(20);
+    datatodraw->SetMarkerSize(0.6);
+    datatodraw->SetFillStyle(0);
+    if (onminusoffbeam){
+      datatodraw->Add(offbeam_h,-1);
+      leg->AddEntry(datatodraw,"Data (on-off beam)","lp");
+    }
+    else{
+      offbeam_h->SetFillStyle(3345);
+      offbeam_h->SetFillColor(kBlack);
+      offbeam_h->SetLineColor(kBlack);
+      stack->Add(offbeam_h);
+      leg->AddEntry(offbeam_h,"Beam-off data","f");
+      leg->AddEntry(datatodraw,"Beam-on data","lp");
+    }
+    pt->AddText(TString::Format("Beam-off Data Underflow/Overflow: %.2f/%.2f",offbeam_h->GetBinContent(0),offbeam_h->GetBinContent(offbeam_h->GetXaxis()->GetNbins()+1)).Data());
+    pt->AddText(TString::Format("Beam-on Data Underflow/Overflow: %.2f/%.2f",onbeam_h->GetBinContent(0),onbeam_h->GetBinContent(onbeam_h->GetXaxis()->GetNbins()+1)).Data());
+  } // end if (data histograms)
+
   c1->cd();
   c1->SetTopMargin(0.13);
   stack->Draw("hist");
+  if (onbeam_h && offbeam_h) datatodraw->Draw("same p E1");
   leg->Draw();
   pt->Draw();
 

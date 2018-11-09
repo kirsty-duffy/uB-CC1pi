@@ -7,7 +7,6 @@
 #include "CC1pi_plotvars_def.h"
 #include "CC1pi_cuts.h"
 #include "CC1pi_cuts.cxx"
-#include "StoppingParticlePlots.h"
 #include "ProtondEdxrrPlots.h"
 #include "getSimPot.C"
 
@@ -136,8 +135,9 @@ std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> GetVarstoplot2D(treevars *va
 //  Now the function starts
 // ---------------------------------------------------- //
 
-void MakeCC1piPlots(std::string mcfile, bool MakeKinkFindingPlots=false, bool MakeProtonPlots=false){
+void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeamdatafile="", std::string offbeamdatafile="", double offbeamscaling=0., bool onminusoffbeam=false, bool MakeKinkFindingPlots=false, bool MakeProtonPlots=false){
 
+  // Note: MVA trees are made for MC only
    TFile f_MVA("MVA_Trees.root", "RECREATE");
    MVAvars *MVA_vars = new MVAvars();
    TTree *muon = new TTree("muon","muon");
@@ -164,38 +164,81 @@ void MakeCC1piPlots(std::string mcfile, bool MakeKinkFindingPlots=false, bool Ma
 
    TFile *f_bnbcos = new TFile(mcfile.c_str(), "read");
    TTree *t_bnbcos = (TTree*)f_bnbcos->Get("cc1piselec/outtree");
-   TTree *t_bnbcos_friend = (TTree*)f_bnbcos->Get("StoppingParticleTagger/StoppingTaggerTree");
 
     if (!t_bnbcos){
       std::cout << "Error: did not find tree cc1piselec/outtree in file" << std::endl;
       return;
     }
-    if (!t_bnbcos_friend){
-      std::cout << "Error: did not find tree StoppingParticleTagger/StoppingTaggerTree in file" << std::endl;
-      return;
-    }
-   if (t_bnbcos->GetEntries() != t_bnbcos_friend->GetEntries()){
-     std::cout << "ERROR: cc1piselec/outtree has " << t_bnbcos->GetEntries() << " entries, and StoppingParticleTagger/StoppingTaggerTree has " << t_bnbcos_friend->GetEntries() << " entries. Cannot make friend tree, exiting." << std::endl;
-     return;
-   }
-   t_bnbcos->AddFriend(t_bnbcos_friend);
 
    treevars mc_vars;
    settreevars(t_bnbcos,&mc_vars);
+
+   std::string containedBookMVAType = "BDTG";
+   std::string containedBookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_contained/weights/TMVAClassification_BDTG.weights.xml";
+   std::string uncontainedBookMVAType = "BDTG";
+   std::string uncontainedBookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_uncontained/weights/TMVAClassification_BDTG.weights.xml";
 
    TMVA::Reader fReader_contained("");
    fReader_contained.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
    fReader_contained.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
    fReader_contained.AddVariable("nhits", &(mc_vars.float_nhits));
    fReader_contained.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
-   fReader_contained.BookMVA("BDTG", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_contained/weights/TMVAClassification_BDTG.weights.xml");
+   fReader_contained.BookMVA(containedBookMVAType.c_str(), containedBookMVALoc.c_str());
 
    TMVA::Reader fReader_uncontained("");
    fReader_uncontained.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
    fReader_uncontained.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
    fReader_uncontained.AddVariable("nhits", &(mc_vars.float_nhits));
    fReader_uncontained.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
-   fReader_uncontained.BookMVA("BDTG", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_uncontained/weights/TMVAClassification_BDTG.weights.xml");
+   fReader_uncontained.BookMVA(uncontainedBookMVAType.c_str(), uncontainedBookMVALoc.c_str());
+
+   TFile *f_onbeam=nullptr;
+   TTree *t_onbeam=nullptr;
+   treevars onbeam_vars;
+   TMVA::Reader fReader_onbeam_contained("");
+   TMVA::Reader fReader_onbeam_uncontained("");
+   if (onbeamdatafile!=""){
+     std::cout << "Making data-MC comparisons" << std::endl;
+     f_onbeam = new TFile(onbeamdatafile.c_str(), "read");
+     t_onbeam = (TTree*)f_onbeam->Get("cc1piselec/outtree");
+     settreevars(t_onbeam,&onbeam_vars);
+
+     fReader_onbeam_contained.AddVariable("dEdx_truncmean_start", &(onbeam_vars.float_dEdx_truncmean_start));
+     fReader_onbeam_contained.AddVariable("VtxTrackDist", &(onbeam_vars.float_VtxTrackDist));
+     fReader_onbeam_contained.AddVariable("nhits", &(onbeam_vars.float_nhits));
+     fReader_onbeam_contained.AddVariable("lnLmipoverp", &(onbeam_vars.float_lnLmipoverp));
+     fReader_onbeam_contained.BookMVA(containedBookMVAType.c_str(), containedBookMVALoc.c_str());
+
+     fReader_onbeam_uncontained.AddVariable("dEdx_truncmean_start", &(onbeam_vars.float_dEdx_truncmean_start));
+     fReader_onbeam_uncontained.AddVariable("VtxTrackDist", &(onbeam_vars.float_VtxTrackDist));
+     fReader_onbeam_uncontained.AddVariable("nhits", &(onbeam_vars.float_nhits));
+     fReader_onbeam_uncontained.AddVariable("lnLmipoverp", &(onbeam_vars.float_lnLmipoverp));
+     fReader_onbeam_uncontained.BookMVA(uncontainedBookMVAType.c_str(), uncontainedBookMVALoc.c_str());
+   }
+
+   TFile *f_offbeam=nullptr;
+   TTree *t_offbeam=nullptr;
+   treevars offbeam_vars;
+   TMVA::Reader fReader_offbeam_contained("");
+   TMVA::Reader fReader_offbeam_uncontained("");
+   if (offbeamdatafile!=""){
+     std::cout << "Making data-MC comparisons" << std::endl;
+     f_offbeam = new TFile(offbeamdatafile.c_str(), "read");
+     t_offbeam = (TTree*)f_offbeam->Get("cc1piselec/outtree");
+     settreevars(t_offbeam,&offbeam_vars);
+
+     fReader_offbeam_contained.AddVariable("dEdx_truncmean_start", &(offbeam_vars.float_dEdx_truncmean_start));
+     fReader_offbeam_contained.AddVariable("VtxTrackDist", &(offbeam_vars.float_VtxTrackDist));
+     fReader_offbeam_contained.AddVariable("nhits", &(offbeam_vars.float_nhits));
+     fReader_offbeam_contained.AddVariable("lnLmipoverp", &(offbeam_vars.float_lnLmipoverp));
+     fReader_offbeam_contained.BookMVA(containedBookMVAType.c_str(), containedBookMVALoc.c_str());
+
+     fReader_offbeam_uncontained.AddVariable("dEdx_truncmean_start", &(offbeam_vars.float_dEdx_truncmean_start));
+     fReader_offbeam_uncontained.AddVariable("VtxTrackDist", &(offbeam_vars.float_VtxTrackDist));
+     fReader_offbeam_uncontained.AddVariable("nhits", &(offbeam_vars.float_nhits));
+     fReader_offbeam_uncontained.AddVariable("lnLmipoverp", &(offbeam_vars.float_lnLmipoverp));
+     fReader_offbeam_uncontained.BookMVA(uncontainedBookMVAType.c_str(), uncontainedBookMVALoc.c_str());
+   }
 
    ofstream evdinfo;
    evdinfo.open("evdinfo.txt");
@@ -340,13 +383,13 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
          // For selected events, make hit dQds and local linearity plots for the two MIP-like tracks.
          for (int i_tr=0; i_tr<mc_vars.TPCObj_PFP_isDaughter->size(); i_tr++){
             // Do this for the first 100 events only because otherwise we'll just have a ridiculous number of plots
-            if (MakeKinkFindingPlots && i<500){
-              if (mc_vars.TPCObj_PFP_isDaughter->at(i_tr) && bool(mc_vars.TPCObj_PFP_track_passesMIPcut->at(i_tr))){
-                TCanvas *c0 = new TCanvas("","",400,500);
-                MakeStoppingParticlePlots_SingleTrack(c0, &mc_vars, i_tr);
-                c0->Print(std::string(std::string("StoppingParticlePlots_TPCObj")+std::to_string(i)+std::string("_track")+std::to_string(i_tr)+std::string(".pdf")).c_str());
-              }
-            }
+            // if (MakeKinkFindingPlots && i<500){
+            //   if (mc_vars.TPCObj_PFP_isDaughter->at(i_tr) && bool(mc_vars.TPCObj_PFP_track_passesMIPcut->at(i_tr))){
+            //     TCanvas *c0 = new TCanvas("","",400,500);
+            //     MakeStoppingParticlePlots_SingleTrack(c0, &mc_vars, i_tr);
+            //     c0->Print(std::string(std::string("StoppingParticlePlots_TPCObj")+std::to_string(i)+std::string("_track")+std::to_string(i_tr)+std::string(".pdf")).c_str());
+            //   }
+            // }
 
             if (MakeProtonPlots && protonplotsmade<30 && i_tr == mc_vars.TPCObj_SecondMIPtrackIndex && mc_vars.TPCObj_PFP_truePDG->at(i_tr) == 2212){
                TCanvas *c0 = new TCanvas();
@@ -419,6 +462,115 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
 
    evdinfo.close();
 
+   // ----------------- Data: on-beam
+
+   // Make histograms to fill
+   TH1F *onb_hists_cc1pi_pdg_beforecuts[nplots];
+   TH1F *onb_hists_cc1pi_top_beforecuts[nplots];
+   TH1F *onb_hists_cc1pi_pdg_aftercuts[nplots];
+   TH1F *onb_hists_cc1pi_top_aftercuts[nplots];
+   if (t_onbeam){
+      for (size_t i_h=0; i_h<nplots; i_h++){
+        std::string histtitle_i = varstoplot_dummy.at(i_h).histtitle;
+        std::string histname_i = varstoplot_dummy.at(i_h).histname;
+        std::vector<double> bins_i = varstoplot_dummy.at(i_h).bins;
+
+         onb_hists_cc1pi_pdg_beforecuts[i_h] = new TH1F(TString::Format("hCC1pi_onbeam_PDG_beforecuts_%s",histname_i.c_str()).Data(),histtitle_i.c_str(),bins_i.at(0),bins_i.at(1),bins_i.at(2));
+         onb_hists_cc1pi_top_beforecuts[i_h] = new TH1F(TString::Format("hCC1pi_onbeam_Top_beforecuts_%s",histname_i.c_str()).Data(),histtitle_i.c_str(),bins_i.at(0),bins_i.at(1),bins_i.at(2));
+
+         onb_hists_cc1pi_pdg_aftercuts[i_h] = new TH1F(TString::Format("hCC1pi_onbeam_PDG_aftercuts_%s",histname_i.c_str()).Data(),histtitle_i.c_str(),bins_i.at(0),bins_i.at(1),bins_i.at(2));
+         onb_hists_cc1pi_top_aftercuts[i_h] = new TH1F(TString::Format("hCC1pi_onbeam_Top_aftercuts_%s",histname_i.c_str()).Data(),histtitle_i.c_str(),bins_i.at(0),bins_i.at(1),bins_i.at(2));
+     }
+
+     // Loop through on-beam data tree and fill plots
+     for (int i = 0; i < t_onbeam->GetEntries(); i++){
+        t_onbeam->GetEntry(i);
+        Calcvars(&onbeam_vars, &fReader_onbeam_contained, &fReader_onbeam_uncontained);
+        std::vector<CC1piPlotVars> Varstoplot = GetVarstoplot(&onbeam_vars);
+
+        bool isSelected = IsEventSelected(&onbeam_vars);
+
+        // Fill 1D plots
+        // Loop over Varstoplot
+        for (size_t i_h = 0; i_h < nplots; i_h++){
+          std::vector<double> vartoplot = *(Varstoplot.at(i_h).Var);
+           // Loop over tracks
+           for (size_t i_tr = 0; i_tr < vartoplot.size(); i_tr++){
+
+              // if (!(onbeam_vars.TPCObj_PFP_isDaughter->at(i_tr) && bool(onbeam_vars.TPCObj_PFP_track_passesMIPcut->at(i_tr)))) continue;
+
+              if (!(FillPlotForTrack(&(Varstoplot.at(i_h)), &onbeam_vars, i_tr))) continue;
+
+              onb_hists_cc1pi_pdg_beforecuts[i_h]->Fill(vartoplot.at(i_tr));
+              onb_hists_cc1pi_top_beforecuts[i_h]->Fill(vartoplot.at(i_tr),1.0/vartoplot.size());
+
+              if(isSelected) {
+                 onb_hists_cc1pi_pdg_aftercuts[i_h]->Fill(vartoplot.at(i_tr));
+                 onb_hists_cc1pi_top_aftercuts[i_h]->Fill(vartoplot.at(i_tr),1.0/vartoplot.size());
+              } // end if(isSelected)
+           } // end loop over tracks
+        } // end loop over 1D Varstoplot
+
+     } // end loop over entries in tree
+
+  } // end if onbeam data tree exists
+
+  // ----------------- Data: EXT/off-beam
+
+  // Make histograms to fill
+  TH1F *offb_hists_cc1pi_pdg_beforecuts[nplots];
+  TH1F *offb_hists_cc1pi_top_beforecuts[nplots];
+  TH1F *offb_hists_cc1pi_pdg_aftercuts[nplots];
+  TH1F *offb_hists_cc1pi_top_aftercuts[nplots];
+  if (t_onbeam){
+     for (size_t i_h=0; i_h<nplots; i_h++){
+      std::string histtitle_i = varstoplot_dummy.at(i_h).histtitle;
+      std::string histname_i = varstoplot_dummy.at(i_h).histname;
+      std::vector<double> bins_i = varstoplot_dummy.at(i_h).bins;
+
+        offb_hists_cc1pi_pdg_beforecuts[i_h] = new TH1F(TString::Format("hCC1pi_offbeam_PDG_beforecuts_%s",histname_i.c_str()).Data(),histtitle_i.c_str(),bins_i.at(0),bins_i.at(1),bins_i.at(2));
+        offb_hists_cc1pi_top_beforecuts[i_h] = new TH1F(TString::Format("hCC1pi_offbeam_Top_beforecuts_%s",histname_i.c_str()).Data(),histtitle_i.c_str(),bins_i.at(0),bins_i.at(1),bins_i.at(2));
+
+        offb_hists_cc1pi_pdg_aftercuts[i_h] = new TH1F(TString::Format("hCC1pi_offbeam_PDG_aftercuts_%s",histname_i.c_str()).Data(),histtitle_i.c_str(),bins_i.at(0),bins_i.at(1),bins_i.at(2));
+        offb_hists_cc1pi_top_aftercuts[i_h] = new TH1F(TString::Format("hCC1pi_offbeam_Top_aftercuts_%s",histname_i.c_str()).Data(),histtitle_i.c_str(),bins_i.at(0),bins_i.at(1),bins_i.at(2));
+    }
+
+    // Loop through on-beam data tree and fill plots
+    for (int i = 0; i < t_offbeam->GetEntries(); i++){
+      t_offbeam->GetEntry(i);
+      Calcvars(&onbeam_vars, &fReader_offbeam_contained, &fReader_offbeam_uncontained);
+      std::vector<CC1piPlotVars> Varstoplot = GetVarstoplot(&offbeam_vars);
+
+      bool isSelected = IsEventSelected(&offbeam_vars);
+
+      // Fill 1D plots
+      // Loop over Varstoplot
+      for (size_t i_h = 0; i_h < nplots; i_h++){
+         std::vector<double> vartoplot = *(Varstoplot.at(i_h).Var);
+          // Loop over tracks
+          for (size_t i_tr = 0; i_tr < vartoplot.size(); i_tr++){
+
+             // if (!(onbeam_vars.TPCObj_PFP_isDaughter->at(i_tr) && bool(onbeam_vars.TPCObj_PFP_track_passesMIPcut->at(i_tr)))) continue;
+
+             if (!(FillPlotForTrack(&(Varstoplot.at(i_h)), &offbeam_vars, i_tr))) continue;
+
+             offb_hists_cc1pi_pdg_beforecuts[i_h]->Fill(vartoplot.at(i_tr));
+             offb_hists_cc1pi_top_beforecuts[i_h]->Fill(vartoplot.at(i_tr),1.0/vartoplot.size());
+
+             if(isSelected) {
+                offb_hists_cc1pi_pdg_aftercuts[i_h]->Fill(vartoplot.at(i_tr));
+                offb_hists_cc1pi_top_aftercuts[i_h]->Fill(vartoplot.at(i_tr),1.0/vartoplot.size());
+             } // end if(isSelected)
+          } // end loop over tracks
+      } // end loop over 1D Varstoplot
+
+    } // end loop over entries in tree
+
+} // end if onbeam data tree exists
+
+
+
+
    // -------------------- Now make all the plots
 
    // Make 1D plots
@@ -426,19 +578,19 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
       TCanvas *c1 = new TCanvas("c1","c1");
       std::string printname = std::string(varstoplot_dummy.at(i_h).histname+".png");
 
-      mc_hists_cc1pi_pdg_beforecuts[i_h]->DrawStack(1.,c1);
+      mc_hists_cc1pi_pdg_beforecuts[i_h]->DrawStack(POTscaling,c1,"",onb_hists_cc1pi_pdg_beforecuts[i_h],offb_hists_cc1pi_pdg_beforecuts[i_h],offbeamscaling,onminusoffbeam);
       c1->Print(std::string(std::string("CC1pi_pdg_beforecuts")+printname).c_str());
       c1->Clear();
 
-      mc_hists_cc1pi_top_beforecuts[i_h]->DrawStack(1.,c1,true);
+      mc_hists_cc1pi_top_beforecuts[i_h]->DrawStack(POTscaling,c1,true,onb_hists_cc1pi_top_beforecuts[i_h],offb_hists_cc1pi_top_beforecuts[i_h],offbeamscaling,onminusoffbeam);
       c1->Print(std::string(std::string("CC1pi_top_beforecuts")+printname).c_str());
       c1->Clear();
 
-      mc_hists_cc1pi_pdg_aftercuts[i_h]->DrawStack(1.,c1);
+      mc_hists_cc1pi_pdg_aftercuts[i_h]->DrawStack(POTscaling,c1,"",onb_hists_cc1pi_pdg_aftercuts[i_h],offb_hists_cc1pi_pdg_aftercuts[i_h],offbeamscaling,onminusoffbeam);
       c1->Print(std::string(std::string("CC1pi_pdg_aftercuts")+printname).c_str());
       c1->Clear();
 
-      mc_hists_cc1pi_top_aftercuts[i_h]->DrawStack(1.,c1,true);
+      mc_hists_cc1pi_top_aftercuts[i_h]->DrawStack(POTscaling,c1,true,onb_hists_cc1pi_top_aftercuts[i_h],offb_hists_cc1pi_top_aftercuts[i_h],offbeamscaling,onminusoffbeam);
       c1->Print(std::string(std::string("CC1pi_top_aftercuts")+printname).c_str());
 
       delete c1;
