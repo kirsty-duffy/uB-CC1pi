@@ -4,6 +4,9 @@
 #include "caldata_microboone.fcl"
 #include "config_particle_identification_fiducialvolume.fcl"
 #include "config_particle_identification_braggalgo.fcl"
+#include "config_dedx_calibration.fcl"
+#include "StoppingParticleConfig.fcl"
+#include "mcsfitproducer.fcl"
 
 # This line should be different for MC/BNB data/EXT data
 #include "run_ubxsec_data_extbnb.fcl"
@@ -13,9 +16,16 @@
 #include "BuildShowersAsTracks.fcl"
 #include "CC1pi_common.fcl"
 
+source.fileNames: [ "/pnfs/uboone/data/uboone/reconstructed/prod_v06_26_01_22/MCC8.17-CCinclusive/extbnb/00/00/64/05/PhysicsRun-2016_5_27_8_23_43-0006405-00039_20160529T230229_ext_bnb_20160530T064009_merged_20171126T120220_reco1_20171126T121539_reco2_20171126T141305__08864792-ad89-48e9-b5e4-d9ddf5209719.root" ] # file from samdef prod_reco_optfilter_extbnb_ccinclusive_v15_mcc8_dev
+
 services.TFileService.fileName: "CC1pi_out_data_extbnb.root"
 
-physics.producermods: [ @sequence::ubxsec_data_producermods , @sequence::cc1pi_producermods ]
+physics.producermods: [ @sequence::ubxsec_data_producers , @sequence::cc1pi_producermods ]
+
+physics.producers.dedxcalibration: @local::data_newboxrecomb
+physics.producers.dedxcalibration.ProducerLabels: @local::cs_producerlabels_mcc8_calib_dedxcalib_data_pmtremap
+physics.producers.dedxcalibration.IsSimulationSmearing: false
+physics.producers.dedxcalibration.IsDataNewRecombination: true
 
 physics.producers.pid.BraggAlgo: @local::braggalgo_mcc8_data
 physics.producers.UBXSecpandoraNucali.CaloAlg: @local::microboone_calorimetryalgmcc84data

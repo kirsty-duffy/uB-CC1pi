@@ -15,6 +15,8 @@
 #include "BuildShowersAsTracks.fcl"
 #include "CC1pi_common.fcl"
 
+#source.fileNames: [ "" ] # file from samdef
+
 services.TFileService.fileName: "CC1pi_out.root"
 
 physics.producermods: [ @sequence::ubxsec_producermods , @sequence::cc1pi_producermods ]
