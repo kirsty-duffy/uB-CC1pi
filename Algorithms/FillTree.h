@@ -28,6 +28,8 @@
 #include "larcore/Geometry/Geometry.h"
 #include "larcore/Geometry/GeometryCore.h"
 #include "lardataobj/RecoBase/Track.h"
+#include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/AnalysisBase/ParticleID.h"
 #include "lardataobj/RecoBase/MCSFitResult.h"
@@ -128,6 +130,8 @@ struct cc1pianavars{
   std::vector<double> TPCObj_PFP_track_MCSpi_bestLL;
   std::vector<std::vector<double>> TPCObj_PFP_track_MCSpi_segmentRadLengths;
   std::vector<std::vector<double>> TPCObj_PFP_track_MCSpi_scatterAngles;
+  std::vector<std::vector<std::vector<double>>> TPCObj_PFP_track_SpacepointsXYZ;
+  std::vector<std::vector<double>> TPCObj_PFP_track_SpacepointsQPlane2;
 
   // Shower variables
   std::vector<double> TPCObj_PFP_shower_length;

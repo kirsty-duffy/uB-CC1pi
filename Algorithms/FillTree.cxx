@@ -88,6 +88,8 @@ void cc1pianavars::Clear(){
    TPCObj_PFP_track_MCSpi_bestLL.clear();
    TPCObj_PFP_track_MCSpi_segmentRadLengths.clear();
    TPCObj_PFP_track_MCSpi_scatterAngles.clear();
+   TPCObj_PFP_track_SpacepointsXYZ.clear();
+   TPCObj_PFP_track_SpacepointsQPlane2.clear();
 
    // Shower variables
    TPCObj_PFP_shower_length.clear();
@@ -338,6 +340,12 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
       art::FindManyP<recob::Track> tracks_from_pfps(pfp_h, evt, CC1piInputTags->fTrackLabel);
       art::FindManyP<recob::Shower> showers_from_pfps(pfp_h, evt, CC1piInputTags->fTrackLabel);
+      art::FindManyP<recob::SpacePoint> spacepoints_from_pfps(pfp_h, evt, CC1piInputTags->fTrackLabel);
+
+      art::Handle<std::vector<recob::SpacePoint>> sp_h;
+      evt.getByLabel(CC1piInputTags->fTrackLabel, sp_h);
+      art::FindManyP<recob::Hit> hits_from_spacepoints(sp_h, evt, CC1piInputTags->fTrackLabel);
+
 
       std::vector<TVector3> vtxDirs = {};
 
@@ -407,6 +415,8 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          double MCSpi_bestLL = -9999;
          std::vector<double> MCSpi_segmentRadLengths(1,-9999.);
          std::vector<double> MCSpi_scatterAngles(1,-9999.);
+         std::vector<std::vector<double>> spacepoints_XYZ;
+         std::vector<double> spacepoints_qplane2;
 
 
          double shower_length = -9999;
@@ -652,7 +662,6 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
             MCSpi_segmentRadLengths = mcsFitResult->segmentRadLengths();
             MCSpi_scatterAngles = mcsFitResult->scatterAngles();
 
-
          } // end loop over tracks
 
          std::vector<art::Ptr<recob::Shower>> showers_pfp = showers_from_pfps.at(pfp.key());
@@ -747,6 +756,35 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          TPCObj_PFP_daughterids.emplace_back(daughterids);
          TPCObj_PFP_id.emplace_back(pfp -> Self());
 
+         // Save spacepoints
+         // Get spacepoints from PFP
+         std::vector<art::Ptr<recob::SpacePoint>> sp_vec;
+         spacepoints_from_pfps.get(pfp.key(),sp_vec);
+         for (size_t i_sp=0; i_sp<sp_vec.size(); i_sp++){
+           const double *XYZ = sp_vec.at(i_sp)->XYZ();
+           if (XYZ==nullptr) continue;
+           std::vector<double> dummytvec = {XYZ[0],XYZ[1],XYZ[2]};
+           spacepoints_XYZ.push_back(dummytvec);
+
+           // we also want to store the charge per spacepoint (so we can do non-track-dependent dE/dx calculations). Since we only trust the plane 2 calorimetry in MCC8, let's only use the plane 2 integrated hit charge. If no plane 2 hit exists for a given spacepoint, set the charge to -9999.
+           double charge=-9999;
+           std::vector<art::Ptr<recob::Hit>> hits_from_sp;
+           hits_from_spacepoints.get(sp_vec.at(i_sp).key(),hits_from_sp);
+           int nhits_plane2=0;
+           for (auto hit_sp : hits_from_sp){
+             if (hit_sp->View()==1){ // plane 2 hits only
+               nhits_plane2++;
+               charge = hit_sp->Integral();
+             }
+           } // end loop over hits from spacepoint
+           if (nhits_plane2>1){
+             std::cout << "[CC1pi::FillTree] Found " << nhits_plane2 << " plane 2 hits associated with one spacepoint. Not using charge from any of them." << std::endl;
+             charge = -9999;
+           }
+           spacepoints_qplane2.push_back(charge);
+         } // end loop over spacepoints
+         TPCObj_PFP_track_SpacepointsXYZ.push_back(spacepoints_XYZ);
+         TPCObj_PFP_track_SpacepointsQPlane2.push_back(spacepoints_qplane2);
 
          // Do reco-truth matching...
 
@@ -973,6 +1011,8 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("TPCObj_PFP_track_MCSpi_bestLL", &(vars->TPCObj_PFP_track_MCSpi_bestLL));
    t -> Branch("TPCObj_PFP_track_MCSpi_segmentRadLengths", &(vars->TPCObj_PFP_track_MCSpi_segmentRadLengths));
    t -> Branch("TPCObj_PFP_track_MCSpi_scatterAngles", &(vars->TPCObj_PFP_track_MCSpi_scatterAngles));
+   t -> Branch("TPCObj_PFP_track_SpacepointsXYZ", &(vars->TPCObj_PFP_track_SpacepointsXYZ));
+   t -> Branch("TPCObj_PFP_track_SpacepointsQPlane2", &(vars->TPCObj_PFP_track_SpacepointsQPlane2));
 
 
    t -> Branch("TPCObj_PFP_shower_length", &(vars->TPCObj_PFP_shower_length));
