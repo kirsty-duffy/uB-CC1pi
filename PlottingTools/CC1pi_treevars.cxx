@@ -10,6 +10,7 @@
 #include "CC1pi_plotvars_def.h"
 #include "CC1pi_MIPcut.cxx"
 #include "CC1pi_Pioncut.cxx"
+#include "CalcLocalLinearity.h"
 
 
 void settreevars(TTree *intree, treevars *varstoset){
@@ -157,41 +158,16 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("TPCObj_PFP_track_MCSpi_segmentRadLengths", &(varstoset->TPCObj_PFP_track_MCSpi_segmentRadLengths));
    intree->SetBranchStatus("TPCObj_PFP_track_MCSpi_scatterAngles",1);
    intree->SetBranchAddress("TPCObj_PFP_track_MCSpi_scatterAngles", &(varstoset->TPCObj_PFP_track_MCSpi_scatterAngles));
+   intree->SetBranchStatus("TPCObj_PFP_track_SpacepointsXYZ",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_SpacepointsXYZ",&(varstoset->TPCObj_PFP_track_SpacepointsXYZ));
+   intree->SetBranchStatus("TPCObj_PFP_track_SpacepointsQPlane2",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_SpacepointsQPlane2",&(varstoset->TPCObj_PFP_track_SpacepointsQPlane2));
    intree->SetBranchStatus("run_num",1);
    intree->SetBranchAddress("run_num",&(varstoset->run_num));
    intree->SetBranchStatus("subrun_num",1);
    intree->SetBranchAddress("subrun_num",&(varstoset->subrun_num));
    intree->SetBranchStatus("event_num",1);
    intree->SetBranchAddress("event_num",&(varstoset->event_num));
-
-   intree->SetBranchStatus("TPCObj_PFP_track_SimpleCluster_hitTime",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_SimpleCluster_hitTime", &(varstoset->TPCObj_PFP_track_SimpleCluster_hitTime));
-   intree->SetBranchStatus("TPCObj_PFP_track_SimpleCluster_hitWire",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_SimpleCluster_hitWire", &(varstoset->TPCObj_PFP_track_SimpleCluster_hitWire));
-   intree->SetBranchStatus("TPCObj_PFP_track_SimpleCluster_hitPlane",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_SimpleCluster_hitPlane", &(varstoset->TPCObj_PFP_track_SimpleCluster_hitPlane));
-   intree->SetBranchStatus("TPCObj_PFP_track_SimpleCluster_hitIntegral",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_SimpleCluster_hitIntegral", &(varstoset->TPCObj_PFP_track_SimpleCluster_hitIntegral));
-   intree->SetBranchStatus("TPCObj_PFP_track_SimpleCluster_hitTimeTicks",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_SimpleCluster_hitTimeTicks", &(varstoset->TPCObj_PFP_track_SimpleCluster_hitTimeTicks));
-   intree->SetBranchStatus("TPCObj_PFP_track_SimpleCluster_hitWireNo",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_SimpleCluster_hitWireNo", &(varstoset->TPCObj_PFP_track_SimpleCluster_hitWireNo));
-   intree->SetBranchStatus("TPCObj_PFP_track_SimpleCluster_StartIndex",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_SimpleCluster_StartIndex", &(varstoset->TPCObj_PFP_track_SimpleCluster_StartIndex));
-   intree->SetBranchStatus("TPCObj_PFP_track_SimpleCluster_hitdQds",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_SimpleCluster_hitdQds", &(varstoset->TPCObj_PFP_track_SimpleCluster_hitdQds));
-   intree->SetBranchStatus("TPCObj_PFP_track_SimpleCluster_hitds",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_SimpleCluster_hitds", &(varstoset->TPCObj_PFP_track_SimpleCluster_hitds));
-   intree->SetBranchStatus("TPCObj_PFP_track_SimpleCluster_hitdQdsSlider",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_SimpleCluster_hitdQdsSlider", &(varstoset->TPCObj_PFP_track_SimpleCluster_hitdQdsSlider));
-   intree->SetBranchStatus("TPCObj_PFP_track_SimpleCluster_hitLinearity",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_SimpleCluster_hitLinearity", &(varstoset->TPCObj_PFP_track_SimpleCluster_hitLinearity));
-   intree->SetBranchStatus("TPCObj_PFP_track_ct_passed_basic",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_ct_passed_basic", &(varstoset->TPCObj_PFP_track_ct_passed_basic));
-   intree->SetBranchStatus("TPCObj_PFP_track_ct_result_bragg",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_ct_result_bragg", &(varstoset->TPCObj_PFP_track_ct_result_bragg));
-   intree->SetBranchStatus("TPCObj_PFP_track_ct_result_michel",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_ct_result_michel", &(varstoset->TPCObj_PFP_track_ct_result_michel));
 
 }
 
@@ -232,14 +208,16 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader_contained, TMVA::Reader *fRe
    vars->TPCObj_PFP_track_MCS_p_maxScatter = new std::vector<double>(vecsize,-9999.);
    vars->TPCObj_PFP_track_MCS_pi_meanScatter = new std::vector<double>(vecsize,-9999.);
    vars->TPCObj_PFP_track_MCS_p_meanScatter = new std::vector<double>(vecsize,-9999.);
-   vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum = new std::vector<double>(vecsize);
-   vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_mean = new std::vector<double>(vecsize);
-   vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean= new std::vector<double>(vecsize);
    vars->TPCObj_PFP_MCP_PDG = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_MCP_numdaughters = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_MCP_numdaughters_notphotons = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_MCP_motherIDeq0 = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_MCP_PDG_mTruePDG = new std::vector<double>(vecsize,-9999);
+
+   vars->TPCObj_PFP_track_SpacepointsXYZ_Ordered = new std::vector<std::vector<std::vector<double>>>(vecsize);
+   vars->TPCObj_PFP_track_SpacepointsQPlane2_Ordered = new std::vector<std::vector<double>>(vecsize);
+   vars->TPCObj_PFP_track_SpacepointsdQdsPlane2_Ordered = new std::vector<std::vector<double>>(vecsize);
+   vars->TPCObj_PFP_track_Spacepoints_LocalLin = new std::vector<std::vector<double>>(vecsize);
 
    vars->TPCObj_PFP_track_passesMIPcut = new std::vector<double>(vecsize,1.);
    vars->TPCObj_PFP_track_passesPioncut = new std::vector<double>(vecsize,-9999.);
@@ -350,9 +328,6 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader_contained, TMVA::Reader *fRe
          vars->TPCObj_PFP_track_MCS_p_maxScatter->at(i_track) = -9999.;
          vars->TPCObj_PFP_track_MCS_pi_meanScatter->at(i_track) = -9999.;
          vars->TPCObj_PFP_track_MCS_p_meanScatter->at(i_track) = -9999.;
-         vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum->at(i_track) = -9999;
-         vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_mean->at(i_track) = -9999;
-         vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean->at(i_track) = -9999;
          vars->TPCObj_PFP_track_passesMIPcut->at(i_track) = -9999.;
          vars->TPCObj_PFP_track_passesPioncut->at(i_track) = -9999.;
 
@@ -542,23 +517,8 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader_contained, TMVA::Reader *fRe
       }
 
 
-      // Calculate local linearity minimum
-      if(vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).size() > 0) {
-      vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum->at(i_track) = *std::min_element(vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).begin(),vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).end());
-      }
-      else vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum->at(i_track) = -9999;
 
-      //Calculate local linearity mean and truncated mean (ignore first and last 5 hits)
-      double sum = std::accumulate(vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).begin(), vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).end(), 0.);
-      vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_mean->at(i_track) = sum/vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).size();
 
-      if(vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).size() >= 11) {
-         double trunc_sum = std::accumulate(vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).begin()+5, vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).end()-5, 0.);
-         vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean->at(i_track) = trunc_sum/(vars->TPCObj_PFP_track_SimpleCluster_hitLinearity->at(i_track).size() - 10);
-      }
-      else vars->TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean->at(i_track) = -9999;
-
-      
       // Calculate BDT score
       vars->float_dEdx_truncmean_start = (float)(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track));
       vars->float_VtxTrackDist = (float)(vars->TPCObj_PFP_VtxTrackDist->at(i_track));
@@ -589,6 +549,52 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader_contained, TMVA::Reader *fRe
 
       // Evaluate pion cut (i.e. whether we want to class this track as a pion). Cut algorithm defined in CC1pi_cuts.cxx and the variables that go into the decision are defined in CC1pi_cuts.h
       vars->TPCObj_PFP_track_passesPioncut->at(i_track) = EvalPionCut(vars,i_track);
+
+
+
+      // Look at spacepoints for local linearity: order vectors containing spacepoints and hit integral (charge) for plane 2 hits in a sensible way (i.e. along the track)
+      // Also calculate local linearity vector based on 3D angles between spacepoints
+      std::vector<std::vector<double>> tmp_spxyz;
+      std::vector<double> tmp_spch;
+      std::vector<double> tmp_dqds;
+      TVector3 prev_sp_xyz(-9999,-9999,-9999);
+      TVector3 curr_sp_xyz(-9999,-9999,-9999);
+      double prev_charge = 0;
+
+      std::vector<std::pair<std::vector<double>,int>> ordered_spacepoints_pair_origidx = OrderSpacepoints(vars->TPCObj_PFP_track_SpacepointsXYZ->at(i_track));
+
+      for (size_t i_sp=0; i_sp<ordered_spacepoints_pair_origidx.size(); i_sp++){
+        int orig_idx = ordered_spacepoints_pair_origidx.at(i_sp).second;
+        double charge = vars->TPCObj_PFP_track_SpacepointsQPlane2->at(i_track).at(orig_idx);
+        tmp_spxyz.push_back(ordered_spacepoints_pair_origidx.at(i_sp).first);
+        tmp_spch.push_back(charge);
+
+        // Calculate dQ (on plane 2)/ds (distance between spacepoints with valid plane 2 charge)
+        if (charge!=-9999){
+           // If this is the first (valid) point, push back -9999 but set "previous point" later for calculation
+           if (prev_sp_xyz == TVector3(-9999,-9999,-9999) && prev_charge==0){
+             tmp_dqds.push_back(-9999);
+          }
+         else{
+          // Calculate ds between this point and the last one
+          curr_sp_xyz.SetXYZ(ordered_spacepoints_pair_origidx.at(i_sp).first.at(0),ordered_spacepoints_pair_origidx.at(i_sp).first.at(1),ordered_spacepoints_pair_origidx.at(i_sp).first.at(2));
+          double ds = (curr_sp_xyz-prev_sp_xyz).Mag();
+          double dq = charge-prev_charge;
+          tmp_dqds.push_back(dq/ds);
+         }
+
+          // Now set this point as the "previous" point
+          prev_sp_xyz = curr_sp_xyz;
+          prev_charge = charge;
+        }
+        else tmp_dqds.push_back(-9999);
+      }
+      vars->TPCObj_PFP_track_SpacepointsXYZ_Ordered->at(i_track) = tmp_spxyz;
+      vars->TPCObj_PFP_track_SpacepointsQPlane2_Ordered->at(i_track) = tmp_spch;
+      vars->TPCObj_PFP_track_SpacepointsdQdsPlane2_Ordered->at(i_track) = tmp_dqds;
+
+      vars->TPCObj_PFP_track_Spacepoints_LocalLin->at(i_track) = GetLocalLinearityVec(ordered_spacepoints_pair_origidx, 10);
+
 
    } // end loop over tracks in TPCObj (i_track)
 

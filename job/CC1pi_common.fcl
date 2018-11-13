@@ -89,8 +89,8 @@ cc1pi_producermods: [
    "CC1piMCSMu",
    "CC1piMCSP",
    "CC1piMCSPi",
-   "cc1piselec",
-   "StoppingParticleTagger"
+   "cc1piselec"
+   #"StoppingParticleTagger"
 ]
 
 # ----------------------------------------------- #

@@ -9,6 +9,7 @@
 #include "CC1pi_cuts.cxx"
 #include "ProtondEdxrrPlots.h"
 #include "getSimPot.C"
+#include "MakeLocalLinearityPlots.C"
 
 #include <boost/algorithm/string.hpp>
 
@@ -62,18 +63,6 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       // ,Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_SecondMIPcont(vars)
       // ,Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_SecondMIPcont_mumupairs(vars)
       // ,Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_NotPioncont(vars)
-       ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum_LeadingMIPcont(vars)
-      // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum_SecondMIPcont(vars)
-      // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum_SecondMIPcont_mumupairs(vars)
-      // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum_NotPioncont(vars)
-       ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_LeadingMIPcont(vars)
-      // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_SecondMIPcont(vars)
-      // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_SecondMIPcont_mumupairs(vars)
-      // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_NotPioncont(vars)
-       ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean_LeadingMIPcont(vars)
-      // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean_SecondMIPcont(vars)
-      // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean_SecondMIPcont_mumupairs(vars)
-      // ,Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean_NotPioncont(vars)
       // ,Var_TPCObj_PFP_track_nhits_LeadingMIP(vars)
       // ,Var_TPCObj_PFP_track_nhits_SecondMIP(vars)
       ,Var_TPCObj_PFP_track_MCSpi_maxScatter_SecondMIP(vars)
@@ -354,6 +343,7 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
    // Loop through MC tree and fill plots
    for (int i = 0; i < t_bnbcos->GetEntries(); i++){
       t_bnbcos->GetEntry(i);
+
       Calcvars(&mc_vars, &fReader_contained, &fReader_uncontained);
       MakeMVATrees(muon, pion, background, MVA_vars, &mc_vars);
       std::vector<CC1piPlotVars> Varstoplot = GetVarstoplot(&mc_vars);
@@ -363,6 +353,26 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
       NDaughters->Fill((NuIntTopology)mc_vars.Truth_topology,mc_vars.TPCObj_NDaughterPFPs->at(0));
 
       bool isSelected = IsEventSelected(&mc_vars);
+
+
+      // For all events, make hit dQds and local linearity plots for true pi+ and mu tracks
+      for (int i_tr=0; i_tr<mc_vars.TPCObj_PFP_isDaughter->size(); i_tr++){
+         // Do this for the first 100 events only because otherwise we'll just have a ridiculous number of plots
+         if (MakeKinkFindingPlots && i<500){
+           if (mc_vars.TPCObj_PFP_track_SpacepointsXYZ->at(i_tr).size()==0) continue;
+           if (!(mc_vars.TPCObj_PFP_truePDG->at(i_tr)==13 ||mc_vars.TPCObj_PFP_truePDG->at(i_tr)==211)) continue;
+
+           TCanvas *c1 = new TCanvas("c1","",400,500);
+           bool saveplot = PlotLocalLinearityDetails(10,&mc_vars,c1,i_tr,isSelected);
+
+           if (!saveplot) break;
+
+           TString savename = TString::Format("./linearity_evt%d_pfp%d.pdf",i,i_tr);
+           c1->Print(savename.Data());
+
+           delete c1;
+         }
+      }
 
       if(isSelected){
          SelectedEvents->Fill((NuIntTopology)mc_vars.Truth_topology,0.5);
@@ -380,16 +390,8 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
 
 
 
-         // For selected events, make hit dQds and local linearity plots for the two MIP-like tracks.
+         // For selected events, make proton plots
          for (int i_tr=0; i_tr<mc_vars.TPCObj_PFP_isDaughter->size(); i_tr++){
-            // Do this for the first 100 events only because otherwise we'll just have a ridiculous number of plots
-            // if (MakeKinkFindingPlots && i<500){
-            //   if (mc_vars.TPCObj_PFP_isDaughter->at(i_tr) && bool(mc_vars.TPCObj_PFP_track_passesMIPcut->at(i_tr))){
-            //     TCanvas *c0 = new TCanvas("","",400,500);
-            //     MakeStoppingParticlePlots_SingleTrack(c0, &mc_vars, i_tr);
-            //     c0->Print(std::string(std::string("StoppingParticlePlots_TPCObj")+std::to_string(i)+std::string("_track")+std::to_string(i_tr)+std::string(".pdf")).c_str());
-            //   }
-            // }
 
             if (MakeProtonPlots && protonplotsmade<30 && i_tr == mc_vars.TPCObj_SecondMIPtrackIndex && mc_vars.TPCObj_PFP_truePDG->at(i_tr) == 2212){
                TCanvas *c0 = new TCanvas();
@@ -457,7 +459,6 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
             } // end if(isSelected)
          } // end loop over tracks
       } // end loop over 2D Varstoplot
-
    } // end loop over entries in tree
 
    evdinfo.close();
@@ -514,6 +515,14 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
      } // end loop over entries in tree
 
   } // end if onbeam data tree exists
+  else{ // this is important for plotting (to make sure DrawStack doesn't segfault when the histograms are given to it)
+     for (size_t i_h=0; i_h<nplots; i_h++){
+        onb_hists_cc1pi_pdg_beforecuts[i_h] = nullptr;
+        onb_hists_cc1pi_top_beforecuts[i_h] = nullptr;
+        onb_hists_cc1pi_pdg_aftercuts[i_h] = nullptr;
+        onb_hists_cc1pi_top_aftercuts[i_h] = nullptr;
+    }
+  }
 
   // ----------------- Data: EXT/off-beam
 
@@ -522,7 +531,7 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
   TH1F *offb_hists_cc1pi_top_beforecuts[nplots];
   TH1F *offb_hists_cc1pi_pdg_aftercuts[nplots];
   TH1F *offb_hists_cc1pi_top_aftercuts[nplots];
-  if (t_onbeam){
+  if (t_offbeam){
      for (size_t i_h=0; i_h<nplots; i_h++){
       std::string histtitle_i = varstoplot_dummy.at(i_h).histtitle;
       std::string histname_i = varstoplot_dummy.at(i_h).histname;
@@ -538,7 +547,7 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
     // Loop through on-beam data tree and fill plots
     for (int i = 0; i < t_offbeam->GetEntries(); i++){
       t_offbeam->GetEntry(i);
-      Calcvars(&onbeam_vars, &fReader_offbeam_contained, &fReader_offbeam_uncontained);
+      Calcvars(&offbeam_vars, &fReader_offbeam_contained, &fReader_offbeam_uncontained);
       std::vector<CC1piPlotVars> Varstoplot = GetVarstoplot(&offbeam_vars);
 
       bool isSelected = IsEventSelected(&offbeam_vars);
@@ -549,7 +558,6 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
          std::vector<double> vartoplot = *(Varstoplot.at(i_h).Var);
           // Loop over tracks
           for (size_t i_tr = 0; i_tr < vartoplot.size(); i_tr++){
-
              // if (!(onbeam_vars.TPCObj_PFP_isDaughter->at(i_tr) && bool(onbeam_vars.TPCObj_PFP_track_passesMIPcut->at(i_tr)))) continue;
 
              if (!(FillPlotForTrack(&(Varstoplot.at(i_h)), &offbeam_vars, i_tr))) continue;
@@ -566,8 +574,15 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
 
     } // end loop over entries in tree
 
-} // end if onbeam data tree exists
-
+   } // end if onbeam data tree exists
+   else{ // this is important for plotting (to make sure DrawStack doesn't segfault when the histograms are given to it)
+      for (size_t i_h=0; i_h<nplots; i_h++){
+         offb_hists_cc1pi_pdg_beforecuts[i_h] = nullptr;
+         offb_hists_cc1pi_top_beforecuts[i_h] = nullptr;
+         offb_hists_cc1pi_pdg_aftercuts[i_h] = nullptr;
+         offb_hists_cc1pi_top_aftercuts[i_h] = nullptr;
+     }
+   }
 
 
 
