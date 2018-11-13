@@ -4,6 +4,9 @@
 #include "caldata_microboone.fcl"
 #include "config_particle_identification_fiducialvolume.fcl"
 #include "config_particle_identification_braggalgo.fcl"
+#include "config_dedx_calibration.fcl"
+#include "StoppingParticleConfig.fcl"
+#include "mcsfitproducer.fcl"
 
 #include "CC1pi_common.fcl"
 
@@ -27,18 +30,33 @@ services.SpaceCharge.EnableCorrSCE:       true
 services.SpaceCharge.EnableSimEfieldSCE:  true
 services.SpaceCharge.EnableSimSpatialSCE: true
 
+source.fileNames: [ "/pnfs/uboone/archive/sam_managed_users/alister1/data/d/6/e/2/prodgenie_bnb_nu_cosmic_uboone_0_20170321T145610_gen2_5f791a54-0ed4-4321-8f8f-827c0d68bf3c_20171222T081558_reco1_20171222T085325_reco2_20180208T052124_cali_20180919T214706_ubxsec.root" ] # file from samdef alister1_ubxsec_bnbcosmic_truthfiltered_dev (CC truth filter and showers built as tracks)
+
 physics.producermods: [ @sequence::cc1pi_producermods ]
 
 physics.producers.pid.BraggAlgo: @local::braggalgo_mcc8
 
 physics.producers.UBXSecpandoraNucali.TrackModuleLabel:       "pandoraNu::UBXSec"
 physics.producers.UBXSecpandoraNucali.CalorimetryModuleLabel: "pandoraNucalo::UBXSec"
-physics.producers.pid.ProducerLabels:
+physics.producers.dedxcalibration.ProducerLabels:
 {
   TrackLabel       : "pandoraNu::UBXSec"
   CalorimetryLabel : "UBXSecpandoraNucali::CC1pi"
+}
+physics.producers.pid.ProducerLabels:
+{
+  TrackLabel       : "pandoraNu::UBXSec"
+  CalorimetryLabel : "dedxcalibration::CC1pi"
 }
 physics.producers.cc1piselec.TrackLabel:          "pandoraNu::UBXSec"
 physics.producers.cc1piselec.CalorimetryLabel:    "UBXSecpandoraNucali::CC1pi"
 physics.producers.cc1piselec.SelectionLabel:      "UBXSec::UBXSec"
 physics.producers.cc1piselec.ParticleIdChi2Label: "pandoraNupid::UBXSec"
+physics.producers.cc1piselec.PFParticleProducer:          "pandoraNu::UBXSec"
+physics.producers.cc1piselec.ClusterProducer:          "pandoraNu::UBXSec"
+physics.producers.cc1piselec.SpacePointProducer:          "pandoraNu::UBXSec"
+physics.producers.cc1piselec.TPCObjectProducer:          "TPCObjectMaker::UBXSec"
+
+physics.producers.CC1piMCSMu.inputs.inputLabel: "pandoraNu::UBXSec"
+physics.producers.CC1piMCSP.inputs.inputLabel: "pandoraNu::UBXSec"
+physics.producers.CC1piMCSPi.inputs.inputLabel: "pandoraNu::UBXSec"

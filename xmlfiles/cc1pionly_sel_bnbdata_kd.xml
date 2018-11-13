@@ -1,0 +1,44 @@
+<!-- Project details -->
+<!DOCTYPE project [
+<!ENTITY release "v06_26_01_22">
+<!ENTITY name "combined_sel_bnbdata">
+<!ENTITY user "kduffy">
+<!ENTITY version "v06_26_01_22_cc1pionly_bnbdata_v0">
+]>
+
+<project name="&name;">
+
+  <!-- Group -->
+  <group>uboone</group>
+
+  <!-- Project size (numevents is an upper limit) -->
+  <numevents>50000</numevents>
+  <numjobs>10</numjobs>
+
+  <!-- Where to look for fcl files (in addition to $FHICL_FILE_PATH) -->
+  <!-- <fcldir>/uboone/app/users/kduffy/CC1pi/CC1pi_uboonecode/localProducts_larsoft_v06_26_01_10_e10_prof/uboonecode/v06_26_01_13/job/</fcldir> -->
+
+  <!-- Batch OS -->
+  <os>SL6</os>
+
+  <!-- Larsoft information -->
+  <larsoft>
+    <!-- tag>&release;</tag -->
+    <!-- qual>e10:prof</qual -->
+    <local>/pnfs/uboone/resilient/users/kduffy/tars/pid_test.tar</local>
+  </larsoft>
+
+  <!-- Stages -->
+  <stage name = "Selection">
+     <maxfilesperjob>1</maxfilesperjob>
+     <inputdef>alister1_ubxsec_onbeam</inputdef> <!-- contains 808 files -->
+     <fcl>run_CC1pionly_data_bnbon.fcl</fcl>
+     <outdir>/pnfs/uboone/persistent/users/kduffy/CC1pi/&version;/</outdir>
+     <logdir>/pnfs/uboone/persistent/users/kduffy/CC1pi/&version;/</logdir>
+     <workdir>/pnfs/uboone/resilient/users/kduffy/CC1pi/work/&version;/</workdir>
+     <bookdir>/uboone/data/users/kduffy/CC1pi/book/&version;/</bookdir>
+     <schema>root</schema>
+     <!-- requested memory, in MB -->
+     <memory>4000</memory>
+  </stage>
+</project>

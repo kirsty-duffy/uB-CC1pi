@@ -1,0 +1,5 @@
+#include "run_CC1pionly_data_bnbon.fcl"
+
+source.fileNames: [ "/pnfs/uboone/archive/sam_managed_users/alister1/data/1/5/0/6/PhysicsRun-2016_3_23_0_55_36-0005557-00132_20160323T143932_ext_bnb_20160323T160922_merged_20171128T074523_reco1_20171128T075236_reco2_20171130T031554__8b4a62c5-1d62-48bd-8747-73b3f5ace0c1.root" ] # file from samdef alister1_ubxsec_offbeam (cc-inclusive filter and showers built as tracks)
+
+services.TFileService.fileName: "CC1pi_out_data_extbnb.root"

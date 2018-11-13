@@ -1,15 +1,15 @@
-#include "config_particle_identification.fcl"
-#include "calibration_microboone.fcl"
-#include "caldata_microboone.fcl"
-#include "config_particle_identification_fiducialvolume.fcl"
-#include "config_particle_identification_braggalgo.fcl"
+#include "run_CC1pionly_mc_bnbcosmic.fcl"
 
-# These bits I think should all be the same for data and MC
-#include "CC1pi_common.fcl"
+source.fileNames: [ "/pnfs/uboone/archive/sam_managed_users/alister1/data/7/4/6/6/PhysicsRun-2016_2_26_17_46_48-0005169-00173_20160303T093407_bnb_20160305T165906_merged_20180106T004033_reco1_20180106T004942_reco2_20180106T033952_mer_d90133ef-10c2-4ba1-9c63-690c97023d46.root" ] # file from samdef alister1_ubxsec_onbeam (cc-inclusive filter and showers built as tracks)
 
 services.TFileService.fileName: "CC1pi_out_data_bnbon.root"
 
 physics.producermods: [ @sequence::cc1pi_producermods ]
+
+physics.producers.dedxcalibration: @local::data_newboxrecomb
+physics.producers.dedxcalibration.ProducerLabels: @local::cs_producerlabels_mcc8_calib_dedxcalib_data_pmtremap
+physics.producers.dedxcalibration.IsSimulationSmearing: false
+physics.producers.dedxcalibration.IsDataNewRecombination: true
 
 physics.producers.pid.BraggAlgo: @local::braggalgo_mcc8_data
 physics.producers.UBXSecpandoraNucali.CaloAlg: @local::microboone_calorimetryalgmcc84data
