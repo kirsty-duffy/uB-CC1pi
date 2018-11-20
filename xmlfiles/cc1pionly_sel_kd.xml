@@ -3,7 +3,7 @@
 <!ENTITY release "v06_26_01_22">
 <!ENTITY name "cc1pi_sel">
 <!ENTITY user "kduffy">
-<!ENTITY version "v06_26_01_22_cc1pionly_mc_v0">
+<!ENTITY version "v06_26_01_22_cc1pionly_mc_v0a">
 ]>
 
 <project name="&name;">
@@ -13,7 +13,7 @@
 
   <!-- Project size (numevents is an upper limit) -->
   <numevents>50000</numevents>
-  <numjobs>10</numjobs>
+  <numjobs>500</numjobs>
 
   <!-- Where to look for fcl files (in addition to $FHICL_FILE_PATH) -->
   <!-- fcldir>/pnfs/uboone/persistent/users/ddevitt/fcl/</fcldir -->

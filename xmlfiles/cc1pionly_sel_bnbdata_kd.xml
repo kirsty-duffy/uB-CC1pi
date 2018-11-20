@@ -3,7 +3,7 @@
 <!ENTITY release "v06_26_01_22">
 <!ENTITY name "combined_sel_bnbdata">
 <!ENTITY user "kduffy">
-<!ENTITY version "v06_26_01_22_cc1pionly_bnbdata_v0">
+<!ENTITY version "v06_26_01_22_cc1pionly_bnbdata_v0a">
 ]>
 
 <project name="&name;">
@@ -13,7 +13,7 @@
 
   <!-- Project size (numevents is an upper limit) -->
   <numevents>50000</numevents>
-  <numjobs>10</numjobs>
+  <numjobs>808</numjobs>
 
   <!-- Where to look for fcl files (in addition to $FHICL_FILE_PATH) -->
   <!-- <fcldir>/uboone/app/users/kduffy/CC1pi/CC1pi_uboonecode/localProducts_larsoft_v06_26_01_10_e10_prof/uboonecode/v06_26_01_13/job/</fcldir> -->
