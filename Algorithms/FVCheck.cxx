@@ -40,7 +40,11 @@ bool FVCheck(art::Event &evt, InputTags *CC1piInputTags)
    double reco_nu_vtx[3];
    tpcobj_nu_vtx.XYZ(reco_nu_vtx);
 
-   return inFV(reco_nu_vtx[0], reco_nu_vtx[1], reco_nu_vtx[2]);
+   // space charge correction
+   auto const* SCE = lar::providerFrom<spacecharge::SpaceChargeService>();
+   std::vector<double> sce_corr = SCE->GetPosOffsets(reco_nu_vtx[0], reco_nu_vtx[1], reco_nu_vtx[2]);
+
+   return inFV(reco_nu_vtx[0] + sce_corr.at(0), reco_nu_vtx[1] - sce_corr.at(1), reco_nu_vtx[2] - sce_corr.at(2));
 }
 
 #endif

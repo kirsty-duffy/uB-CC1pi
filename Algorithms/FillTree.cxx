@@ -46,12 +46,11 @@ void cc1pianavars::Clear(){
    TPCObj_PFP_track_mom.clear();
    TPCObj_PFP_track_dedx_truncmean.clear();
    TPCObj_PFP_track_dedx_perhit.clear();
+   TPCObj_PFP_track_nhits.clear();
    TPCObj_PFP_track_resrange_perhit.clear();
    TPCObj_PFP_isMIP.clear();
    TPCObj_PFP_track_isContained.clear();
    TPCObj_PFP_track_AngleBetweenTracks.clear();
-   TPCObj_PFP_track_trajPoint_Position.clear();
-   TPCObj_PFP_track_trajPoint_Direction.clear();
    TPCObj_PFP_track_residual_mean.clear();
    TPCObj_PFP_track_residual_std.clear();
    TPCObj_PFP_track_perc_used_hits.clear();
@@ -158,9 +157,6 @@ void cc1pianavars::Clear(){
    nu_isCC = false;
    nu_PDG = -9999;
    nu_E = -9999;
-
-   test_distance_fwd.clear();
-   test_distance_bkwd.clear();
 
 }
 
@@ -364,6 +360,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          std::vector<double> track_dedx_truncmean(3,-9999.);
          std::vector<std::vector<double>> track_dedx_perhit(3);
          std::vector<std::vector<double>> track_resrange_perhit(3);
+         double nhits = -9999;
          bool isMIP = false;
          std::vector<std::vector<double>> track_trajpoint_position;
          std::vector<std::vector<double>> track_trajpoint_direction;
@@ -382,7 +379,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          std::vector<double> track_Chi2Pion(3,-999.);
          double track_rangeE_mu = -9999;
          double track_rangeE_p = -9999;
-         bool isContained = true;
+         bool isContained = false;
          std::pair<double,double> residual_mean_std(-9999,-9999);
          double perc_used_hits = -9999;
          double MCSmu_fwdMom = -9999;
@@ -435,33 +432,28 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
             track_theta = track -> Theta();
             track_phi = track -> Phi();
             //if (track->HasMomentum()) track_mom = track -> VertexMomentum(); // Commented out because I don't think this is right, we need to think more about if we can use momentum
+
+            // space charge correction
+            auto const* SCE = lar::providerFrom<spacecharge::SpaceChargeService>();
+
             auto start = track -> Start();
-            track_start = {start.X(),start.Y(),start.Z()};
+            std::vector<double> sce_corr_start = SCE->GetPosOffsets(start.X(), start.Y(), start.Z());
+            track_start = {start.X() + sce_corr_start.at(0), start.Y() - sce_corr_start.at(1), start.Z() - sce_corr_start.at(2)};
+
             auto end = track -> End();
-            track_end = {end.X(),end.Y(),end.Z()};
+            std::vector<double> sce_corr_end = SCE->GetPosOffsets(end.X(), end.Y(), end.Z());
+            track_end = {end.X() + sce_corr_end.at(0), end.Y() - sce_corr_end.at(1), end.Z() - sce_corr_end.at(2)};
 
             vtxDirs.emplace_back(track -> VertexDirection());
 
             //unsigned int trkid = track->ID();
 
-
             // Test containment
-            recob::TrackTrajectory traj = track -> Trajectory();
-            for (int point = 0, npoints = traj.NPoints(); point < npoints; point++){
-               auto position = traj.LocationAtPoint(point);
-               std::vector<double> trajpoint_position(3,-9999.);
-               trajpoint_position = {position.X(), position.Y(), position.Z()};
-               track_trajpoint_position.emplace_back(trajpoint_position);
-               TVector3 direction = track->DirectionAtPoint(point);
-               std::vector<double> trajpoint_direction(3,-9999.);
-               trajpoint_direction = {direction.X(), direction.Y(), direction.Z()};
-               track_trajpoint_direction.emplace_back(trajpoint_direction);
-               if(!inFV(position.X(), position.Y(), position.Z())) {
-                  isContained = false;
-                  break;
-               }
-            }
+            if(inFV(track_start.at(0),track_start.at(1),track_start.at(2)) && inFV(track_end.at(0),track_end.at(1),track_end.at(2))) isContained = true;
+            else isContained = false;
 
+            //Number of 3D hits
+            nhits = track -> NPoints();
 
             // Get calorimetry information
             // Only fill when there is valid calorimetry information (of course)
@@ -687,11 +679,10 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          TPCObj_PFP_track_mom.emplace_back(track_mom);
          TPCObj_PFP_track_dedx_truncmean.emplace_back(track_dedx_truncmean);
          TPCObj_PFP_track_dedx_perhit.emplace_back(track_dedx_perhit);
+         TPCObj_PFP_track_nhits.emplace_back(nhits);
          TPCObj_PFP_track_resrange_perhit.emplace_back(track_resrange_perhit);
          TPCObj_PFP_isMIP.emplace_back(isMIP);
          TPCObj_PFP_track_isContained.emplace_back(isContained);
-         TPCObj_PFP_track_trajPoint_Position.emplace_back(track_trajpoint_position);
-         TPCObj_PFP_track_trajPoint_Direction.emplace_back(track_trajpoint_direction);
          TPCObj_PFP_track_residual_mean.emplace_back(residual_mean_std.first);
          TPCObj_PFP_track_residual_std.emplace_back(residual_mean_std.second);
          TPCObj_PFP_track_perc_used_hits.emplace_back(perc_used_hits);
@@ -937,50 +928,13 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
             // Space Charge correction
             auto const* SCE = lar::providerFrom<spacecharge::SpaceChargeService>();
             std::vector<double> sce_corr = SCE->GetPosOffsets(nu_vtx[0], nu_vtx[1], nu_vtx[2]);
-            std::cout << "SCE correction in x, y, z = " << sce_corr.at(0)
-               << ", " << sce_corr.at(1)
-               << ", " << sce_corr.at(2) << std::endl;
+            //std::cout << "SCE correction in x, y, z = " << sce_corr.at(0)
+            //   << ", " << sce_corr.at(1)
+            //   << ", " << sce_corr.at(2) << std::endl;
             nu_vtx_spacecharge = {nu_vtx[0] - sce_corr.at(0), nu_vtx[1] + sce_corr.at(1), nu_vtx[2] + sce_corr.at(2)};
          }
       } // end loop over MCParticles
    } // end if (!isData)
-
-   // Reverse Space Charge correction test
-   auto const* SCE = lar::providerFrom<spacecharge::SpaceChargeService>();
-   for(double x_orig = 10; x_orig <= 250; x_orig+=10) {
-      for(double y_orig = -110; y_orig <= 110; y_orig+=10) {
-         for(double z_orig = 10; z_orig <= 1000; z_orig+=50) {
-
-            // Take test "true" positions and apply space charge to them
-            std::vector<double> sce_corr_fwd = SCE->GetPosOffsets(x_orig, y_orig, z_orig);
-            double x_corr_fwd = x_orig - sce_corr_fwd.at(0);
-            double y_corr_fwd = y_orig + sce_corr_fwd.at(1);
-            double z_corr_fwd = z_orig + sce_corr_fwd.at(2);
-
-            double distance_fwd = std::hypot(std::hypot(x_orig - x_corr_fwd, y_orig - y_corr_fwd), z_orig - z_corr_fwd);
-
-            // Take the result, calculate a new correction, and apply the opposite sign
-            // This is the "wrong" way to correct from reco to true positions, but maybe it's close enough
-            std::vector<double> sce_corr_bkwd = SCE->GetPosOffsets(x_corr_fwd, y_corr_fwd, z_corr_fwd);
-            double x_corr_bkwd = x_corr_fwd + sce_corr_bkwd.at(0);
-            double y_corr_bkwd = y_corr_fwd - sce_corr_bkwd.at(1);
-            double z_corr_bkwd = z_corr_fwd - sce_corr_bkwd.at(2);
-
-            double distance_bkwd = std::hypot(std::hypot(x_orig - x_corr_bkwd, y_orig - y_corr_bkwd), z_orig - z_corr_bkwd);
-
-            std::cout << "Starting position: " << x_orig << " " << y_orig << " " << z_orig << std::endl;
-            std::cout << "Forward corrected position: " << x_corr_fwd << " " << y_corr_fwd << " " << z_corr_fwd << std::endl;
-            std::cout << "Distance: " << distance_fwd << std::endl;
-            std::cout << "Backward corrected position: " << x_corr_bkwd << " " << y_corr_bkwd << " " << z_corr_bkwd << std::endl;
-            std::cout << "Distance: " << distance_bkwd << std::endl;
-            std::cout << std::endl;
-
-            test_distance_fwd.emplace_back(distance_fwd);
-            test_distance_bkwd.emplace_back(distance_bkwd);
-         }
-      }
-   }
-
 }
 
 
@@ -1008,12 +962,11 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("TPCObj_PFP_track_mom", &(vars->TPCObj_PFP_track_mom));
    t -> Branch("TPCObj_PFP_track_dedx_truncmean", &(vars->TPCObj_PFP_track_dedx_truncmean));
    t -> Branch("TPCObj_PFP_track_dedx_perhit",&(vars->TPCObj_PFP_track_dedx_perhit));
+   t -> Branch("TPCObj_PFP_track_nhits", &(vars->TPCObj_PFP_track_nhits));
    t -> Branch("TPCObj_PFP_track_resrange_perhit",&(vars->TPCObj_PFP_track_resrange_perhit));
    t -> Branch("TPCObj_PFP_isMIP", &(vars->TPCObj_PFP_isMIP));
    t -> Branch("TPCObj_PFP_track_isContained", &(vars->TPCObj_PFP_track_isContained));
    t -> Branch("TPCObj_PFP_track_AngleBetweenTracks", &(vars->TPCObj_PFP_track_AngleBetweenTracks));
-   t -> Branch("TPCObj_PFP_track_trajPoint_Position", &(vars->TPCObj_PFP_track_trajPoint_Position));
-   t -> Branch("TPCObj_PFP_track_trajPoint_Direction", &(vars->TPCObj_PFP_track_trajPoint_Direction));
    t -> Branch("TPCObj_PFP_track_residual_mean", &(vars->TPCObj_PFP_track_residual_mean));
    t -> Branch("TPCObj_PFP_track_residual_std", &(vars->TPCObj_PFP_track_residual_std));
    t -> Branch("TPCObj_PFP_track_perc_used_hits", &(vars->TPCObj_PFP_track_perc_used_hits));
@@ -1118,9 +1071,6 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("nu_PDG", &(vars->nu_PDG));
    t -> Branch("nu_E", &(vars->nu_E));
    t -> Branch("nu_MCPID", &(vars->nu_MCPID));
-
-   t->Branch("test_distance_fwd", &(vars->test_distance_fwd));
-   t->Branch("test_distance_bkwd", &(vars->test_distance_bkwd));
 
 }
 

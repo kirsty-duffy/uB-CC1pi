@@ -89,11 +89,10 @@ struct cc1pianavars{
   std::vector<std::vector<double>> TPCObj_PFP_track_dedx_truncmean;
   std::vector<std::vector<std::vector<double>>> TPCObj_PFP_track_dedx_perhit;
   std::vector<std::vector<std::vector<double>>> TPCObj_PFP_track_resrange_perhit;
+  std::vector<double> TPCObj_PFP_track_nhits;
   std::vector<bool> TPCObj_PFP_isMIP;
   std::vector<bool> TPCObj_PFP_track_isContained;
   std::vector<std::vector<double>> TPCObj_PFP_track_AngleBetweenTracks;
-  std::vector<std::vector<std::vector<double>>> TPCObj_PFP_track_trajPoint_Position;
-  std::vector<std::vector<std::vector<double>>> TPCObj_PFP_track_trajPoint_Direction;
   std::vector<double> TPCObj_PFP_track_residual_mean;
   std::vector<double> TPCObj_PFP_track_residual_std;
   std::vector<double> TPCObj_PFP_track_perc_used_hits;
@@ -202,9 +201,6 @@ struct cc1pianavars{
   int nu_PDG;
   double nu_E;
   int nu_MCPID;
-
-  std::vector<double> test_distance_fwd;
-  std::vector<double> test_distance_bkwd;
 
 
   fhicl::ParameterSet pset;
