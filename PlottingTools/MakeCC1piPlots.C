@@ -363,7 +363,7 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
            if (mc_vars.TPCObj_PFP_track_SpacepointsXYZ->at(i_tr).size()==0) continue;
            if (!(mc_vars.TPCObj_PFP_truePDG->at(i_tr)==13 ||mc_vars.TPCObj_PFP_truePDG->at(i_tr)==211)) continue;
 
-           TCanvas *c1 = new TCanvas("c1","",400,500);
+           TCanvas *c1 = new TCanvas("c1","",500,500);
            bool saveplot = PlotLocalLinearityDetails(10,&mc_vars,c1,i_tr,isSelected);
 
            if (!saveplot) break;

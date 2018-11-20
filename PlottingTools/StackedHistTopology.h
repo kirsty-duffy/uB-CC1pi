@@ -206,14 +206,52 @@ else { // fine
     }
     pt->AddText(TString::Format("Beam-off Data Underflow/Overflow: %.2f/%.2f",offbeam_h->GetBinContent(0),offbeam_h->GetBinContent(offbeam_h->GetXaxis()->GetNbins()+1)).Data());
     pt->AddText(TString::Format("Beam-on Data Underflow/Overflow: %.2f/%.2f",onbeam_h->GetBinContent(0),onbeam_h->GetBinContent(onbeam_h->GetXaxis()->GetNbins()+1)).Data());
-  } // end if (data histograms)
 
-  c1->cd();
-  c1->SetTopMargin(0.13);
-  stack->Draw("hist");
-  if (onbeam_h && offbeam_h) datatodraw->Draw("same p E1");
-  leg->Draw();
-  pt->Draw();
+
+    c1->cd();
+    TPad *topPad = new TPad("topPad", "", 0.005, 0.3, 0.995, 0.995);
+    TPad *bottomPad = new TPad("bottomPad", "", 0.005, 0.005, 0.995, 0.3);
+    topPad->SetTopMargin(0.13);
+    topPad->SetBottomMargin(0.02);
+    bottomPad->SetTopMargin(0.0);
+    bottomPad->SetBottomMargin(0.20);
+    bottomPad->SetGridy();
+    topPad->Draw();
+    bottomPad->Draw();
+
+    topPad->cd();
+    stack->Draw("hist");
+    stack->GetXaxis()->SetTitleSize(0);
+    stack->GetXaxis()->SetLabelSize(0);
+    datatodraw->Draw("same p E1");
+    leg->Draw();
+    pt->Draw();
+
+    bottomPad->cd();
+    TH1* MCtotal = (TH1*)stack->GetStack()->Last()->Clone("MCtotal");
+    TH1* dataratio = (TH1*)datatodraw->Clone("dataratio");
+    dataratio->Divide(MCtotal);
+    dataratio->GetXaxis()->SetTitle(stack->GetXaxis()->GetTitle());
+    dataratio->GetYaxis()->SetTitle("Data/MC ratio");
+    dataratio->GetYaxis()->SetTitleOffset(0.57);
+    dataratio->GetYaxis()->SetTitleSize(0.07);
+    dataratio->GetYaxis()->SetLabelSize(0.075);
+    dataratio->GetXaxis()->SetTitleSize(0.09);
+    dataratio->GetXaxis()->SetLabelSize(0.075);
+    TLine *l1 = new TLine(dataratio->GetXaxis()->GetBinLowEdge(1),1.0,dataratio->GetXaxis()->GetBinUpEdge(dataratio->GetXaxis()->GetNbins()),1.0);
+    l1->SetLineStyle(2);
+    l1->SetLineColor(kBlack);
+    dataratio->Draw("p E1");
+    l1->Draw("same");
+
+  } // end if (data histograms)
+else{
+    c1->cd();
+    c1->SetTopMargin(0.13);
+    stack->Draw("hist");
+    leg->Draw();
+    pt->Draw();
+  }
 
   // TList * histKeys = stack->GetHists();
   // TIter next(histKeys);
