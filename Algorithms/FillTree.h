@@ -203,6 +203,9 @@ struct cc1pianavars{
   double nu_E;
   int nu_MCPID;
 
+  std::vector<double> test_distance_fwd;
+  std::vector<double> test_distance_bkwd;
+
 
   fhicl::ParameterSet pset;
 

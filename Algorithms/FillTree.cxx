@@ -159,6 +159,9 @@ void cc1pianavars::Clear(){
    nu_PDG = -9999;
    nu_E = -9999;
 
+   test_distance_fwd.clear();
+   test_distance_bkwd.clear();
+
 }
 
 void cc1pianavars::SetReco2Vars(art::Event &evt){
@@ -941,6 +944,43 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          }
       } // end loop over MCParticles
    } // end if (!isData)
+
+   // Reverse Space Charge correction test
+   auto const* SCE = lar::providerFrom<spacecharge::SpaceChargeService>();
+   for(double x_orig = 10; x_orig <= 250; x_orig+=10) {
+      for(double y_orig = -110; y_orig <= 110; y_orig+=10) {
+         for(double z_orig = 10; z_orig <= 1000; z_orig+=50) {
+
+            // Take test "true" positions and apply space charge to them
+            std::vector<double> sce_corr_fwd = SCE->GetPosOffsets(x_orig, y_orig, z_orig);
+            double x_corr_fwd = x_orig - sce_corr_fwd.at(0);
+            double y_corr_fwd = y_orig + sce_corr_fwd.at(1);
+            double z_corr_fwd = z_orig + sce_corr_fwd.at(2);
+
+            double distance_fwd = std::hypot(std::hypot(x_orig - x_corr_fwd, y_orig - y_corr_fwd), z_orig - z_corr_fwd);
+
+            // Take the result, calculate a new correction, and apply the opposite sign
+            // This is the "wrong" way to correct from reco to true positions, but maybe it's close enough
+            std::vector<double> sce_corr_bkwd = SCE->GetPosOffsets(x_corr_fwd, y_corr_fwd, z_corr_fwd);
+            double x_corr_bkwd = x_corr_fwd + sce_corr_bkwd.at(0);
+            double y_corr_bkwd = y_corr_fwd - sce_corr_bkwd.at(1);
+            double z_corr_bkwd = z_corr_fwd - sce_corr_bkwd.at(2);
+
+            double distance_bkwd = std::hypot(std::hypot(x_orig - x_corr_bkwd, y_orig - y_corr_bkwd), z_orig - z_corr_bkwd);
+
+            std::cout << "Starting position: " << x_orig << " " << y_orig << " " << z_orig << std::endl;
+            std::cout << "Forward corrected position: " << x_corr_fwd << " " << y_corr_fwd << " " << z_corr_fwd << std::endl;
+            std::cout << "Distance: " << distance_fwd << std::endl;
+            std::cout << "Backward corrected position: " << x_corr_bkwd << " " << y_corr_bkwd << " " << z_corr_bkwd << std::endl;
+            std::cout << "Distance: " << distance_bkwd << std::endl;
+            std::cout << std::endl;
+
+            test_distance_fwd.emplace_back(distance_fwd);
+            test_distance_bkwd.emplace_back(distance_bkwd);
+         }
+      }
+   }
+
 }
 
 
@@ -1078,6 +1118,9 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("nu_PDG", &(vars->nu_PDG));
    t -> Branch("nu_E", &(vars->nu_E));
    t -> Branch("nu_MCPID", &(vars->nu_MCPID));
+
+   t->Branch("test_distance_fwd", &(vars->test_distance_fwd));
+   t->Branch("test_distance_bkwd", &(vars->test_distance_bkwd));
 
 }
 
