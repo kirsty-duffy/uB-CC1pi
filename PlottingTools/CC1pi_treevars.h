@@ -142,6 +142,10 @@ struct treevars{
    std::vector<std::vector<double>> *TPCObj_PFP_track_SpacepointsQPlane2_Ordered;
    std::vector<std::vector<double>> *TPCObj_PFP_track_SpacepointsdQdsPlane2_Ordered;
    std::vector<std::vector<double>> *TPCObj_PFP_track_Spacepoints_LocalLin;
+   std::vector<std::vector<double>> *TPCObj_PFP_track_Spacepoints_Dirz;
+   std::vector<std::vector<double>> *TPCObj_PFP_track_Spacepoints_DirCuSum;
+   std::vector<std::vector<int>> *TPCObj_PFP_track_Spacepoints_kinkidxs;
+   std::vector<double> *TPCObj_PFP_track_Spacepoints_ttest_max;
 
 
    // Is the track a MIP? Evaluate MIP cuts and then put this as an input into selection

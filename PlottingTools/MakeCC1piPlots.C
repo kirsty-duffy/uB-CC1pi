@@ -163,9 +163,9 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    settreevars(t_bnbcos,&mc_vars);
 
    std::string containedBookMVAType = "BDTG";
-   std::string containedBookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_contained/weights/TMVAClassification_BDTG.weights.xml";
+   std::string containedBookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10_copy/srcs/uboonecode/uboone/CC1pi/MVA/dataset_contained/weights/TMVAClassification_BDTG.weights.xml";
    std::string uncontainedBookMVAType = "BDTG";
-   std::string uncontainedBookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10/srcs/uboonecode/uboone/CC1pi/MVA/dataset_uncontained/weights/TMVAClassification_BDTG.weights.xml";
+   std::string uncontainedBookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10_copy/srcs/uboonecode/uboone/CC1pi/MVA/dataset_uncontained/weights/TMVAClassification_BDTG.weights.xml";
 
    TMVA::Reader fReader_contained("");
    fReader_contained.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
@@ -341,7 +341,8 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
    int protonplotsmade=0;
 
    // Loop through MC tree and fill plots
-   for (int i = 0; i < t_bnbcos->GetEntries(); i++){
+   for (int i = 0; i < /*t_bnbcos->GetEntries()*/100; i++){
+     if (i%1000==0) std::cout << "MC: " << i << "/" << t_bnbcos->GetEntries() << std::endl;
       t_bnbcos->GetEntry(i);
 
       Calcvars(&mc_vars, &fReader_contained, &fReader_uncontained);
@@ -358,7 +359,7 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
       // For all events, make hit dQds and local linearity plots for true pi+ and mu tracks
       for (int i_tr=0; i_tr<mc_vars.TPCObj_PFP_isDaughter->size(); i_tr++){
          // Do this for the first 100 events only because otherwise we'll just have a ridiculous number of plots
-         if (MakeKinkFindingPlots && i<500){
+         if (MakeKinkFindingPlots && i<50){
            if (mc_vars.TPCObj_PFP_track_SpacepointsXYZ->at(i_tr).size()==0) continue;
            if (!(mc_vars.TPCObj_PFP_truePDG->at(i_tr)==13 ||mc_vars.TPCObj_PFP_truePDG->at(i_tr)==211)) continue;
 
@@ -465,6 +466,7 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
 
    // ----------------- Data: on-beam
 
+   int nsel_onbeam=0;
    // Make histograms to fill
    TH1F *onb_hists_cc1pi_pdg_beforecuts[nplots];
    TH1F *onb_hists_cc1pi_top_beforecuts[nplots];
@@ -485,11 +487,33 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
 
      // Loop through on-beam data tree and fill plots
      for (int i = 0; i < t_onbeam->GetEntries(); i++){
+       if (i%1000==0) std::cout << "Onbeam: " << i << "/" << t_onbeam->GetEntries() << std::endl;
         t_onbeam->GetEntry(i);
         Calcvars(&onbeam_vars, &fReader_onbeam_contained, &fReader_onbeam_uncontained);
         std::vector<CC1piPlotVars> Varstoplot = GetVarstoplot(&onbeam_vars);
 
         bool isSelected = IsEventSelected(&onbeam_vars);
+
+        if (isSelected) nsel_onbeam++;
+
+        // For all events, make hit dQds and local linearity plots for true pi+ and mu tracks
+        /*for (int i_tr=0; i_tr<onbeam_vars.TPCObj_PFP_isDaughter->size(); i_tr++){
+           // Do this for the first 100 events only because otherwise we'll just have a ridiculous number of plots
+           if (MakeKinkFindingPlots && i<50 && isSelected){
+             if (onbeam_vars.TPCObj_PFP_track_SpacepointsXYZ->at(i_tr).size()==0) continue;
+
+             TCanvas *c1 = new TCanvas("c1","",400,500);
+             bool saveplot = PlotLocalLinearityDetails(10,&onbeam_vars,c1,i_tr,isSelected);
+
+             if (!saveplot) break;
+
+             TString savename = TString::Format("./linearity_bnbdata_evt%d_pfp%d.pdf",i,i_tr);
+             c1->Print(savename.Data());
+
+             delete c1;
+           }
+        }*/
+
 
         // Fill 1D plots
         // Loop over Varstoplot
@@ -526,6 +550,7 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
 
   // ----------------- Data: EXT/off-beam
 
+  int nsel_offbeam=0;
   // Make histograms to fill
   TH1F *offb_hists_cc1pi_pdg_beforecuts[nplots];
   TH1F *offb_hists_cc1pi_top_beforecuts[nplots];
@@ -546,11 +571,14 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
 
     // Loop through on-beam data tree and fill plots
     for (int i = 0; i < t_offbeam->GetEntries(); i++){
+      if (i%1000==0) std::cout << "Offbeam: " << i << "/" << t_offbeam->GetEntries() << std::endl;
       t_offbeam->GetEntry(i);
       Calcvars(&offbeam_vars, &fReader_offbeam_contained, &fReader_offbeam_uncontained);
       std::vector<CC1piPlotVars> Varstoplot = GetVarstoplot(&offbeam_vars);
 
       bool isSelected = IsEventSelected(&offbeam_vars);
+
+      if (isSelected) nsel_offbeam++;
 
       // Fill 1D plots
       // Loop over Varstoplot
@@ -655,7 +683,7 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
    SelectedEvents->PrintHistIntegrals();
    double CC1pi_selected = SelectedEvents->GetCC1piIntegral();
    double CC1pi_all = AllEvents->GetCC1piIntegral();
-   std::cout << std::endl << "Total number of selected events: " << SelectedEvents->GetTotalIntegral() << std::endl;
+   std::cout << std::endl << "Total number of selected events: " << SelectedEvents->GetTotalIntegral() << " MC, " << nsel_onbeam << " beam-on data, " << nsel_offbeam << " ext data" << std::endl;
    std::cout << "CC1pi+ selection efficiency: " << CC1pi_selected << "/" << CC1pi_all << " = " << CC1pi_selected/CC1pi_all << std::endl;
    std::cout << "Background rejection: 1 - " << SelectedEvents->GetTotalIntegral() - CC1pi_selected << "/" << AllEvents->GetTotalIntegral() << " = " << 1-(SelectedEvents->GetTotalIntegral() - CC1pi_selected)/(1.0*AllEvents->GetTotalIntegral()) << std::endl;
    getSimPot(mcfile);

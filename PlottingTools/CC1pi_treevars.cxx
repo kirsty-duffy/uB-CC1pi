@@ -217,7 +217,11 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader_contained, TMVA::Reader *fRe
    vars->TPCObj_PFP_track_SpacepointsXYZ_Ordered = new std::vector<std::vector<std::vector<double>>>(vecsize);
    vars->TPCObj_PFP_track_SpacepointsQPlane2_Ordered = new std::vector<std::vector<double>>(vecsize);
    vars->TPCObj_PFP_track_SpacepointsdQdsPlane2_Ordered = new std::vector<std::vector<double>>(vecsize);
+   vars->TPCObj_PFP_track_Spacepoints_DirCuSum = new std::vector<std::vector<double>>(vecsize);
    vars->TPCObj_PFP_track_Spacepoints_LocalLin = new std::vector<std::vector<double>>(vecsize);
+   vars->TPCObj_PFP_track_Spacepoints_kinkidxs = new std::vector<std::vector<int>>(vecsize);
+   vars->TPCObj_PFP_track_Spacepoints_Dirz = new std::vector<std::vector<double>>(vecsize);
+   vars->TPCObj_PFP_track_Spacepoints_ttest_max = new std::vector<double>(vecsize,-9999);
 
    vars->TPCObj_PFP_track_passesMIPcut = new std::vector<double>(vecsize,1.);
    vars->TPCObj_PFP_track_passesPioncut = new std::vector<double>(vecsize,-9999.);
@@ -561,7 +565,7 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader_contained, TMVA::Reader *fRe
       TVector3 curr_sp_xyz(-9999,-9999,-9999);
       double prev_charge = 0;
 
-      std::vector<std::pair<std::vector<double>,int>> ordered_spacepoints_pair_origidx = OrderSpacepoints(vars->TPCObj_PFP_track_SpacepointsXYZ->at(i_track));
+      std::vector<std::pair<std::vector<double>,int>> ordered_spacepoints_pair_origidx = OrderSpacepoints(vars->TPCObj_PFP_track_SpacepointsXYZ->at(i_track),*(vars->TPCObj_reco_vtx));
 
       for (size_t i_sp=0; i_sp<ordered_spacepoints_pair_origidx.size(); i_sp++){
         int orig_idx = ordered_spacepoints_pair_origidx.at(i_sp).second;
@@ -593,8 +597,15 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader_contained, TMVA::Reader *fRe
       vars->TPCObj_PFP_track_SpacepointsQPlane2_Ordered->at(i_track) = tmp_spch;
       vars->TPCObj_PFP_track_SpacepointsdQdsPlane2_Ordered->at(i_track) = tmp_dqds;
 
-      vars->TPCObj_PFP_track_Spacepoints_LocalLin->at(i_track) = GetLocalLinearityVec(ordered_spacepoints_pair_origidx, 10);
+      vars->TPCObj_PFP_track_Spacepoints_Dirz->at(i_track) = GetSPDirVec(ordered_spacepoints_pair_origidx,vars->TPCObj_PFP_track_theta->at(i_track),vars->TPCObj_PFP_track_phi->at(i_track));
 
+      vars->TPCObj_PFP_track_Spacepoints_DirCuSum->at(i_track) = GetCuSumVec(vars->TPCObj_PFP_track_Spacepoints_Dirz->at(i_track));
+
+      vars->TPCObj_PFP_track_Spacepoints_LocalLin->at(i_track) = GetWelchttestVec(vars->TPCObj_PFP_track_Spacepoints_Dirz->at(i_track));
+
+      vars->TPCObj_PFP_track_Spacepoints_kinkidxs->at(i_track) = *(SplitTracks(vars->TPCObj_PFP_track_Spacepoints_Dirz->at(i_track),vars->TPCObj_PFP_track_Spacepoints_DirCuSum->at(i_track),vars->TPCObj_PFP_track_Spacepoints_LocalLin->at(i_track)));
+
+      vars->TPCObj_PFP_track_Spacepoints_ttest_max->at(i_track) = *std::max_element(vars->TPCObj_PFP_track_Spacepoints_LocalLin->at(i_track).begin(), vars->TPCObj_PFP_track_Spacepoints_LocalLin->at(i_track).end());
 
    } // end loop over tracks in TPCObj (i_track)
 

@@ -1280,6 +1280,17 @@ CC1piPlotVars Var_TPCObj_NDaughterPFPs(treevars *vars){
   return tmp;
 }
 
+// Reconstructed neutrino daughters
+CC1piPlotVars Var_TPCObj_PFP_maxttest(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_Spacepoints_ttest_max;
+  tmp.OnlyDaughters = true;
+  tmp.histtitle = ";Max. t-test value for PFP;";
+  tmp.histname = "Maxttest";
+  tmp.bins = {50,0,100};
+  return tmp;
+}
+
 // Decide whether to fill a plot for a given track. This is useful for e.g. plots with PlotOnlyDaughterMIPs=true
 bool FillPlotForTrack(CC1piPlotVars *plotvar, treevars *vars, int i_tr){
   bool DoFillPlot = true;
