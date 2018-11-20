@@ -7,6 +7,7 @@
 
 // larsoft includes
 #include "lardataobj/RecoBase/Vertex.h"
+#include "larevt/SpaceChargeServices/SpaceChargeService.h"
 
 // art includes
 #include "art/Framework/Principal/Event.h"

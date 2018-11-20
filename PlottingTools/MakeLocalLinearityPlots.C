@@ -266,9 +266,9 @@ void MakeLocalLinearityPlots(std::string inputfile="/uboone/app/users/kduffy/CC1
   // Dummy, just to stop segfaults
 
   std::string containedBookMVAType = "BDTG";
-  std::string containedBookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10_copy/srcs/uboonecode/uboone/CC1pi/MVA/dataset_contained/weights/TMVAClassification_BDTG.weights.xml";
+  std::string containedBookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_contained/weights/TMVAClassification_BDTG.weights.xml";
   std::string uncontainedBookMVAType = "BDTG";
-  std::string uncontainedBookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_10_copy/srcs/uboonecode/uboone/CC1pi/MVA/dataset_uncontained/weights/TMVAClassification_BDTG.weights.xml";
+  std::string uncontainedBookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_uncontained/weights/TMVAClassification_BDTG.weights.xml";
   TMVA::Reader fReader_contained("");
   fReader_contained.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
   fReader_contained.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));

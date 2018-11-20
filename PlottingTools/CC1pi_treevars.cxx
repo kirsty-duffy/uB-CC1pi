@@ -83,14 +83,12 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("MCP_ID", &(varstoset->MCP_ID));
    intree->SetBranchStatus("MCP_DaughterIDs",1);
    intree->SetBranchAddress("MCP_DaughterIDs", &(varstoset->MCP_DaughterIDs));
-   intree->SetBranchStatus("TPCObj_PFP_track_trajPoint_Position",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_trajPoint_Position", &(varstoset->TPCObj_PFP_track_trajPoint_Position));
-   intree->SetBranchStatus("TPCObj_PFP_track_trajPoint_Direction",1);
-   intree->SetBranchAddress("TPCObj_PFP_track_trajPoint_Direction", &(varstoset->TPCObj_PFP_track_trajPoint_Direction));
    intree->SetBranchStatus("TPCObj_PFP_track_dedx_perhit",1);
    intree->SetBranchAddress("TPCObj_PFP_track_dedx_perhit", &(varstoset->TPCObj_PFP_track_dedx_perhit));
    intree->SetBranchStatus("TPCObj_PFP_track_resrange_perhit",1);
    intree->SetBranchAddress("TPCObj_PFP_track_resrange_perhit", &(varstoset->TPCObj_PFP_track_resrange_perhit));
+   intree->SetBranchStatus("TPCObj_PFP_track_nhits",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_nhits", &(varstoset->TPCObj_PFP_track_nhits));
 
    intree->SetBranchStatus("TPCObj_PFP_track_MCSmu_fwdMom",1);
    intree->SetBranchAddress("TPCObj_PFP_track_MCSmu_fwdMom", &(varstoset->TPCObj_PFP_track_MCSmu_fwdMom));
@@ -189,7 +187,6 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader_contained, TMVA::Reader *fRe
    vars->TPCObj_PFP_isContained_double = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_isDaughter_double = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_PandoraClassedAsTrack_double = new std::vector<double>(vecsize,-9999);
-   vars->TPCObj_PFP_track_nhits = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_ndaughters = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_track_dEdx_truncmean_start = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_track_dEdx_mean_start = new std::vector<double>(vecsize,-9999);
@@ -315,7 +312,6 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader_contained, TMVA::Reader *fRe
          vars->TPCObj_PFP_isContained_double->at(i_track) = -9999;
          vars->TPCObj_PFP_isDaughter_double->at(i_track) = -9999;
          vars->TPCObj_PFP_PandoraClassedAsTrack_double->at(i_track) = -9999;
-         vars->TPCObj_PFP_track_nhits->at(i_track) = -9999;
          vars->TPCObj_PFP_ndaughters->at(i_track) = -9999;
          vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) = -9999;
          vars->TPCObj_PFP_track_dEdx_truncmoverm_start->at(i_track) = -9999;
@@ -338,7 +334,6 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader_contained, TMVA::Reader *fRe
          continue;
       }
 
-      vars->TPCObj_PFP_track_nhits->at(i_track) = vars->TPCObj_PFP_track_trajPoint_Position->at(i_track).size();
       vars->TPCObj_PFP_ndaughters->at(i_track) = vars->TPCObj_PFP_daughterids->at(i_track).size();
 
       vars->TPCObj_PFP_LH_p->at(i_track) = std::max(vars->TPCObj_PFP_LH_fwd_p->at(i_track).at(i_pl), vars->TPCObj_PFP_LH_bwd_p->at(i_track).at(i_pl));

@@ -49,10 +49,9 @@ struct treevars{
    std::vector<int> *MCP_ID = nullptr;
    std::vector<std::vector<int>> *MCP_DaughterIDs = nullptr;
 
-   std::vector<std::vector<std::vector<double>>> *TPCObj_PFP_track_trajPoint_Position=nullptr;
-   std::vector<std::vector<std::vector<double>>> *TPCObj_PFP_track_trajPoint_Direction=nullptr;
    std::vector<std::vector<std::vector<double>>> *TPCObj_PFP_track_dedx_perhit=nullptr;
    std::vector<std::vector<std::vector<double>>> *TPCObj_PFP_track_resrange_perhit=nullptr;
+   std::vector<double>* TPCObj_PFP_track_nhits=nullptr;
    std::vector<double>* TPCObj_PFP_track_MCSmu_fwdMom=nullptr;
    std::vector<double>* TPCObj_PFP_track_MCSmu_bwdMom=nullptr;
    std::vector<double>* TPCObj_PFP_track_MCSmu_bestMom=nullptr;
@@ -109,7 +108,6 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_BrokenTrackAngle;
    std::vector<double> *TPCObj_PFP_VtxTrackDist;
    std::vector<double> *TPCObj_PFP_isContained_double;
-   std::vector<double> *TPCObj_PFP_track_nhits;
    std::vector<double> *TPCObj_PFP_ndaughters;
    std::vector<double> *TPCObj_PFP_track_dEdx_truncmean_start;
    std::vector<double> *TPCObj_PFP_track_dEdx_mean_start;
