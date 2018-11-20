@@ -7,7 +7,12 @@ services.TFileService.fileName: "CC1pi_out_data_bnbon.root"
 physics.producermods: [ @sequence::cc1pi_producermods ]
 
 physics.producers.dedxcalibration: @local::data_newboxrecomb
-physics.producers.dedxcalibration.ProducerLabels: @local::cs_producerlabels_mcc8_calib_dedxcalib_data_pmtremap
+physics.producers.dedxcalibration.ProducerLabels:
+{
+  TrackLabel       : "pandoraNu::UBXSec"
+  CalorimetryLabel : "UBXSecpandoraNucali::CC1pi"
+}
+#physics.producers.dedxcalibration.ProducerLabels: @local::cs_producerlabels_mcc8_calib_dedxcalib_data_pmtremap
 physics.producers.dedxcalibration.IsSimulationSmearing: false
 physics.producers.dedxcalibration.IsDataNewRecombination: true
 
