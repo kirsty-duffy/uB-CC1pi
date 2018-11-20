@@ -553,7 +553,7 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader_contained, TMVA::Reader *fRe
 
       // Look at spacepoints for local linearity: order vectors containing spacepoints and hit integral (charge) for plane 2 hits in a sensible way (i.e. along the track)
       // Also calculate local linearity vector based on 3D angles between spacepoints
-      std::vector<std::vector<double>> tmp_spxyz;
+      /*std::vector<std::vector<double>> tmp_spxyz;
       std::vector<double> tmp_spch;
       std::vector<double> tmp_dqds;
       TVector3 prev_sp_xyz(-9999,-9999,-9999);
@@ -601,7 +601,7 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader_contained, TMVA::Reader *fRe
       vars->TPCObj_PFP_track_Spacepoints_kinkidxs->at(i_track) = *(SplitTracks(vars->TPCObj_PFP_track_Spacepoints_Dirz->at(i_track),vars->TPCObj_PFP_track_Spacepoints_DirCuSum->at(i_track),vars->TPCObj_PFP_track_Spacepoints_LocalLin->at(i_track)));
 
       vars->TPCObj_PFP_track_Spacepoints_ttest_max->at(i_track) = *std::max_element(vars->TPCObj_PFP_track_Spacepoints_LocalLin->at(i_track).begin(), vars->TPCObj_PFP_track_Spacepoints_LocalLin->at(i_track).end());
-
+*/
    } // end loop over tracks in TPCObj (i_track)
 
    // Now fill TPCObj_DaughterTracks_Order_dEdxtr
