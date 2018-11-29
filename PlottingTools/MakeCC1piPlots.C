@@ -297,6 +297,15 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
    selMIPs2D->GetYaxis()->SetBinLabel(i_bin,PDGenum2str(MIPpdgs.at(i_bin-1)).c_str());
 }
 
+// Custom 2D histogram: containment vs length for muons and pions from true signal events
+TH2D *ContainmentLength2D = new TH2D("ContainmentLength2D","True CC1#pi^{+} events;Contained;Longer",4,0,4,2,0,2);
+ContainmentLength2D->GetXaxis()->SetBinLabel(1,"neither");
+ContainmentLength2D->GetXaxis()->SetBinLabel(2,"muon only");
+ContainmentLength2D->GetXaxis()->SetBinLabel(3,"pion only");
+ContainmentLength2D->GetXaxis()->SetBinLabel(4,"both");
+ContainmentLength2D->GetYaxis()->SetBinLabel(1,"#pi^{+}");
+ContainmentLength2D->GetYaxis()->SetBinLabel(2,"#mu^{-}");
+
    std::cout << std::endl << "--- Considering the following 1D variables --- " << std::endl;
    for (size_t i_var=0; i_var < nplots; i_var++){
          std::cout << varstoplot_dummy.at(i_var).histtitle.substr(1,varstoplot_dummy.at(i_var).histtitle.size()-2) << std::endl;
@@ -341,7 +350,7 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
    int protonplotsmade=0;
 
    // Loop through MC tree and fill plots
-   for (int i = 0; i < /*t_bnbcos->GetEntries()*/100; i++){
+   for (int i = 0; i < t_bnbcos->GetEntries(); i++){
      if (i%1000==0) std::cout << "MC: " << i << "/" << t_bnbcos->GetEntries() << std::endl;
       t_bnbcos->GetEntry(i);
 
@@ -460,6 +469,10 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
             } // end if(isSelected)
          } // end loop over tracks
       } // end loop over 2D Varstoplot
+
+      // Fill custom 2D plot
+      ContainmentLength2D->Fill(mc_vars.TPCObj_mupiContained->at(0),mc_vars.TPCObj_muonLonger->at(0));
+   
    } // end loop over entries in tree
 
    evdinfo.close();
@@ -676,6 +689,10 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
 
    NDaughters->DrawStack(1.,c1);
    c1->Print("CC1pi_NDaughters.png");
+
+   ContainmentLength2D->Scale(1.0/ContainmentLength2D->Integral());
+   ContainmentLength2D->Draw("colz text");
+   c1->Print("ContainmentLength2D.png");
 
    delete c1;
 

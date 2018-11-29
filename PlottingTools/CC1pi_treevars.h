@@ -158,6 +158,8 @@ struct treevars{
    std::vector<double> *TPCObj_dEdx_truncmean_MIPdiff_mupi;
    std::vector<double> *TPCObj_dEdx_truncmean_MIPdiff_muproton;
    std::vector<double> *TPCObj_dEdx_truncmean_MIPdiff_other;
+   std::vector<double> *TPCObj_mupiContained;
+   std::vector<double> *TPCObj_muonLonger;
 
    int TPCObj_LeadingMIPtrackIndex;
    int TPCObj_SecondMIPtrackIndex;

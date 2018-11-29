@@ -244,6 +244,13 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader_contained, TMVA::Reader *fRe
 
    vars->TPCObj_NDaughterPFPs = new std::vector<double>(1,-9999);
 
+   vars->TPCObj_mupiContained = new std::vector<double>(1,-9999);
+   vars->TPCObj_muonLonger = new std::vector<double>(1,-9999);
+   double muon_contained = -9999;
+   double pion_contained = -9999;
+   double muon_length = -9999;
+   double pion_length = -9999;
+
    // Just use collection plane for now
    int i_pl = 2;
 
@@ -542,6 +549,17 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader_contained, TMVA::Reader *fRe
       double BDTscore_uncontained_cut = 0.3;
       vars->TPCObj_PFP_track_BDTscore_combined->at(i_track) = (double)((vars->TPCObj_PFP_track_isContained->at(i_track) && vars->TPCObj_PFP_track_BDTscore_contained->at(i_track) > BDTscore_contained_cut) || (!(vars->TPCObj_PFP_track_isContained->at(i_track)) && vars->TPCObj_PFP_track_BDTscore_uncontained->at(i_track) > BDTscore_uncontained_cut));
 
+      // Containment study
+      if (vars->Truth_topology == kCC1piplus0p || vars->Truth_topology == kCC1piplus1p || vars->Truth_topology == kCC1piplusNp){
+         if(vars->TPCObj_PFP_isDaughter->at(i_track) && vars->TPCObj_PFP_truePDG->at(i_track)==13) {
+            muon_contained = vars->TPCObj_PFP_track_isContained->at(i_track);
+            muon_length = vars->TPCObj_PFP_track_length->at(i_track);
+         }
+         else if(vars->TPCObj_PFP_isDaughter->at(i_track) && vars->TPCObj_PFP_truePDG->at(i_track)==211) {
+            pion_contained = vars->TPCObj_PFP_track_isContained->at(i_track);
+            pion_length = vars->TPCObj_PFP_track_length->at(i_track);
+         }
+      }
 
       // Evaluate MIP cut (i.e. whether we want to class this track as a MIP). Cut algorithm defined in CC1pi_cuts.cxx and the variables that go into the decision are defined in CC1pi_cuts.h
       vars->TPCObj_PFP_track_passesMIPcut->at(i_track) = (double)EvalMIPCut(vars,i_track,MIPCutVars);
@@ -683,6 +701,21 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader_contained, TMVA::Reader *fRe
       else {
          vars->TPCObj_dEdx_truncmean_MIPdiff_other->at(0) = dEdx_truncmean_MIPdiff;
       }
+   }
+
+
+   // Containment study
+   if (vars->Truth_topology == kCC1piplus0p || vars->Truth_topology == kCC1piplus1p || vars->Truth_topology == kCC1piplusNp){
+      if(muon_contained) {
+         if(pion_contained) vars->TPCObj_mupiContained->at(0) = 3;
+         else vars->TPCObj_mupiContained->at(0) = 1;
+      }
+      else {
+         if(pion_contained) vars->TPCObj_mupiContained->at(0) = 2;
+         else vars->TPCObj_mupiContained->at(0) = 0;
+      }
+
+      if(muon_length!=-9999 && pion_length!=-9999) vars->TPCObj_muonLonger->at(0) = (double)(muon_length > pion_length);
    }
 
 
