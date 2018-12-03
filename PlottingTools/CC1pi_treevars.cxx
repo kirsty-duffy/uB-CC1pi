@@ -251,12 +251,12 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
 
    vars->containment1_pass = new std::vector<double>(1,-9999);
    vars->containment2_pass = new std::vector<double>(1,-9999);
-   containment0_muoncandidatePDG = -9999;
-   containment0_pioncandidatePDG = -9999;
-   containment1_muoncandidatePDG = -9999;
-   containment1_pioncandidatePDG = -9999;
-   containment2_muoncandidatePDG = -9999;
-   containment2_pioncandidatePDG = -9999;
+   vars->containment0_muoncandidatePDG = -9999;
+   vars->containment0_pioncandidatePDG = -9999;
+   vars->containment1_muoncandidatePDG = -9999;
+   vars->containment1_pioncandidatePDG = -9999;
+   vars->containment2_muoncandidatePDG = -9999;
+   vars->containment2_pioncandidatePDG = -9999;
 
    // Just use collection plane for now
    int i_pl = 2;
@@ -717,32 +717,32 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
    if (vars->TPCObj_LeadingMIPtrackIndex>=0 && vars->TPCObj_SecondMIPtrackIndex>=0)
    {
       // Test no containment idea: The shorter track is the pion. No containment requirement at all.
-      containment0_muoncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_LeadingMIPtrackIndex);
-      containment0_pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_SecondMIPtrackIndex);
+      vars->containment0_muoncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_LeadingMIPtrackIndex);
+      vars->containment0_pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_SecondMIPtrackIndex);
 
       // Test containment idea 1: The shorter track must be contained and that is the pion
       if(vars->TPCObj_PFP_track_isContained->at(vars->TPCObj_SecondMIPtrackIndex)) {
-         containment1_pass->at(0) = 1;
-         containment1_muoncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_LeadingMIPtrackIndex);
-         containment1_pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_SecondMIPtrackIndex);
-         else {
-            containment1_pass->at(0) = 0;
-         }
+         vars->containment1_pass->at(0) = 1;
+         vars->containment1_muoncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_LeadingMIPtrackIndex);
+         vars->containment1_pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_SecondMIPtrackIndex);
+      }
+      else {
+         vars->containment1_pass->at(0) = 0;
       }
 
       // Test containment idea 2: At least one track must be contained. If one track is contained, it's the pion. If both are contained, it's the shorter track.
       if(vars->TPCObj_PFP_track_isContained->at(vars->TPCObj_SecondMIPtrackIndex)) {
-         containment2_pass->at(0) = 1;
-         containment2_muoncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_LeadingMIPtrackIndex);
-         containment2_pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_SecondMIPtrackIndex);
+         vars->containment2_pass->at(0) = 1;
+         vars->containment2_muoncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_LeadingMIPtrackIndex);
+         vars->containment2_pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_SecondMIPtrackIndex);
       }
       else if (vars->TPCObj_PFP_track_isContained->at(vars->TPCObj_LeadingMIPtrackIndex)){
-         containment2_pass->at(0) = 1;
-         containment2_muoncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_SecondMIPtrackIndex);
-         containment2_pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_LeadingMIPtrackIndex);
+         vars->containment2_pass->at(0) = 1;
+         vars->containment2_muoncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_SecondMIPtrackIndex);
+         vars->containment2_pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_LeadingMIPtrackIndex);
       }
       else {
-         containment2_pass->at(0) = 0;
+         vars->containment2_pass->at(0) = 0;
       }
    }
 

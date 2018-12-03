@@ -161,12 +161,12 @@ struct treevars{
    std::vector<double> *containment1_pass;
    std::vector<double> *containment2_pass;
 
-   NuIntTopology containment0_muoncandidatePDG;
-   NuIntTopology containment0_pioncandidatePDG;
-   NuIntTopology containment1_muoncandidatePDG;
-   NuIntTopology containment1_pioncandidatePDG;
-   NuIntTopology containment2_muoncandidatePDG;
-   NuIntTopology containment2_pioncandidatePDG;
+   int containment0_muoncandidatePDG;
+   int containment0_pioncandidatePDG;
+   int containment1_muoncandidatePDG;
+   int containment1_pioncandidatePDG;
+   int containment2_muoncandidatePDG;
+   int containment2_pioncandidatePDG;
 
    int TPCObj_LeadingMIPtrackIndex;
    int TPCObj_SecondMIPtrackIndex;
