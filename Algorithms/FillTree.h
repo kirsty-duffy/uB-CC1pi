@@ -146,6 +146,7 @@ struct cc1pianavars{
   std::vector<std::vector<int>> TPCObj_PFP_daughterids;
   std::vector<int> TPCObj_PFP_id;
   std::vector<double> TPCObj_reco_vtx;
+  std::vector<double> TPCObj_reco_vtx_nospacecharge;
 
   // PFP true variables
   std::vector<int> TPCObj_PFP_MCPid;

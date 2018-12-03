@@ -104,6 +104,7 @@ void cc1pianavars::Clear(){
    TPCObj_PFP_daughterids.clear();
    TPCObj_PFP_id.clear();
    TPCObj_reco_vtx.clear();
+   TPCObj_reco_vtx_nospacecharge.clear();
 
    // PFP true variables
    TPCObj_PFP_MCPid.clear();
@@ -831,9 +832,15 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       recob::Vertex TPCObj_nu_vtx = TPCObj_candidate->GetVertex();
       double reco_nu_vtx[3];
       TPCObj_nu_vtx.XYZ(reco_nu_vtx);
-      TPCObj_reco_vtx = {reco_nu_vtx[0], reco_nu_vtx[1], reco_nu_vtx[2]};
-      // We eventually need to correct for X position (time offset) and space charge
-      // See issues #8 and #10 on github
+      TPCObj_reco_vtx_nospacecharge = {reco_nu_vtx[0], reco_nu_vtx[1], reco_nu_vtx[2]};
+
+      // Space Charge correction
+      auto const* SCE = lar::providerFrom<spacecharge::SpaceChargeService>();
+      std::vector<double> sce_corr = SCE->GetPosOffsets(reco_nu_vtx[0], reco_nu_vtx[1], reco_nu_vtx[2]);
+      TPCObj_reco_vtx = {reco_nu_vtx[0] + sce_corr.at(0), reco_nu_vtx[1] - sce_corr.at(1), reco_nu_vtx[2] - sce_corr.at(2)};
+
+      // We eventually need to correct for X position (time offset)
+      // See issue #8 on github
 
    } // if selected
 
@@ -1020,6 +1027,7 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("TPCObj_PFP_daughterids", &(vars->TPCObj_PFP_daughterids));
    t -> Branch("TPCObj_PFP_id", &(vars->TPCObj_PFP_id));
    t -> Branch("TPCObj_reco_vtx", &(vars->TPCObj_reco_vtx));
+   t -> Branch("TPCObj_reco_vtx_nospacecharge", &(vars->TPCObj_reco_vtx_nospacecharge));
 
    t -> Branch("TPCObj_PFP_MCPid", &(vars->TPCObj_PFP_MCPid));
    t -> Branch("TPCObj_PFP_truePDG", &(vars->TPCObj_PFP_truePDG));
