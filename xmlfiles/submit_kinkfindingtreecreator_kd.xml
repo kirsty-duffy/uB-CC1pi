@@ -1,9 +1,9 @@
 <!-- Project details -->
 <!DOCTYPE project [
-<!ENTITY release "v06_26_01_13">
-<!ENTITY name "pionreco">
+<!ENTITY release "v06_26_01_22">
+<!ENTITY name "kinkfinding">
 <!ENTITY user "kduffy">
-<!ENTITY version "v06_26_01_13_PionReco_v2">
+<!ENTITY version "v06_26_01_22_KinkFinding">
 ]>
 
 <project name="&name;">
@@ -31,11 +31,11 @@
   <resource>OFFSITE</resource>
 
   <!-- Stages -->
-  <stage name = "PionReco">
+  <stage name = "KinkFinding">
      <maxfilesperjob>2</maxfilesperjob>
      <inputlist>/uboone/data/users/kduffy/CC1pi/book/v06_26_01_13_alister_v0/files_out1.list</inputlist>
      <!-- <inputdef>alister1_ubxsectruthfilter_devsample</inputdef> -->
-     <fcl>run_PionRecoValidation.fcl</fcl>
+     <fcl>run_KinkFindingTreeCreator.fcl</fcl>
      <outdir>/pnfs/uboone/persistent/users/kduffy/CC1pi/&version;/</outdir>
      <logdir>/pnfs/uboone/persistent/users/kduffy/CC1pi/&version;/</logdir>
      <workdir>/pnfs/uboone/resilient/users/kduffy/CC1pi/work/&version;/</workdir>
