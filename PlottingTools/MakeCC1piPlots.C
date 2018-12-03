@@ -88,8 +88,7 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       ,Var_TPCObj_dEdx_truncmean_MIPdiff_muproton(vars)
       ,Var_TPCObj_dEdx_truncmean_MIPdiff_other(vars)
       ,Var_TPCObj_PFP_track_dEdx_nhits(vars)
-      //,Var_TPCObj_PFP_track_BDTscore_contained(vars)
-      //,Var_TPCObj_PFP_track_BDTscore_uncontained(vars)
+      ,Var_TPCObj_PFP_track_BDTscore(vars)
       ,Var_TPCObj_PFP_track_passesMIPcut(vars)
       //,Var_TPCObj_NDaughterPFPs(vars)
    };
@@ -162,71 +161,48 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    treevars mc_vars;
    settreevars(t_bnbcos,&mc_vars);
 
-   std::string containedBookMVAType = "BDTG";
-   std::string containedBookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_contained/weights/TMVAClassification_BDTG.weights.xml";
-   std::string uncontainedBookMVAType = "BDTG";
-   std::string uncontainedBookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_uncontained/weights/TMVAClassification_BDTG.weights.xml";
+   std::string BookMVAType = "BDTG";
+   std::string BookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_newdEdx/weights/TMVAClassification_BDTG.weights.xml";
 
-   TMVA::Reader fReader_contained("");
-   fReader_contained.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
-   fReader_contained.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
-   fReader_contained.AddVariable("nhits", &(mc_vars.float_nhits));
-   fReader_contained.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
-   fReader_contained.BookMVA(containedBookMVAType.c_str(), containedBookMVALoc.c_str());
-
-   TMVA::Reader fReader_uncontained("");
-   fReader_uncontained.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
-   fReader_uncontained.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
-   fReader_uncontained.AddVariable("nhits", &(mc_vars.float_nhits));
-   fReader_uncontained.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
-   fReader_uncontained.BookMVA(uncontainedBookMVAType.c_str(), uncontainedBookMVALoc.c_str());
+   TMVA::Reader fReader("");
+   fReader.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
+   fReader.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
+   fReader.AddVariable("nhits", &(mc_vars.float_nhits));
+   fReader.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
+   fReader.BookMVA(BookMVAType.c_str(), BookMVALoc.c_str());
 
    TFile *f_onbeam=nullptr;
    TTree *t_onbeam=nullptr;
    treevars onbeam_vars;
-   TMVA::Reader fReader_onbeam_contained("");
-   TMVA::Reader fReader_onbeam_uncontained("");
+   TMVA::Reader fReader_onbeam("");
    if (onbeamdatafile!=""){
      std::cout << "Making data-MC comparisons" << std::endl;
      f_onbeam = new TFile(onbeamdatafile.c_str(), "read");
      t_onbeam = (TTree*)f_onbeam->Get("cc1piselec/outtree");
      settreevars(t_onbeam,&onbeam_vars);
 
-     fReader_onbeam_contained.AddVariable("dEdx_truncmean_start", &(onbeam_vars.float_dEdx_truncmean_start));
-     fReader_onbeam_contained.AddVariable("VtxTrackDist", &(onbeam_vars.float_VtxTrackDist));
-     fReader_onbeam_contained.AddVariable("nhits", &(onbeam_vars.float_nhits));
-     fReader_onbeam_contained.AddVariable("lnLmipoverp", &(onbeam_vars.float_lnLmipoverp));
-     fReader_onbeam_contained.BookMVA(containedBookMVAType.c_str(), containedBookMVALoc.c_str());
-
-     fReader_onbeam_uncontained.AddVariable("dEdx_truncmean_start", &(onbeam_vars.float_dEdx_truncmean_start));
-     fReader_onbeam_uncontained.AddVariable("VtxTrackDist", &(onbeam_vars.float_VtxTrackDist));
-     fReader_onbeam_uncontained.AddVariable("nhits", &(onbeam_vars.float_nhits));
-     fReader_onbeam_uncontained.AddVariable("lnLmipoverp", &(onbeam_vars.float_lnLmipoverp));
-     fReader_onbeam_uncontained.BookMVA(uncontainedBookMVAType.c_str(), uncontainedBookMVALoc.c_str());
+     fReader_onbeam.AddVariable("dEdx_truncmean_start", &(onbeam_vars.float_dEdx_truncmean_start));
+     fReader_onbeam.AddVariable("VtxTrackDist", &(onbeam_vars.float_VtxTrackDist));
+     fReader_onbeam.AddVariable("nhits", &(onbeam_vars.float_nhits));
+     fReader_onbeam.AddVariable("lnLmipoverp", &(onbeam_vars.float_lnLmipoverp));
+     fReader_onbeam.BookMVA(BookMVAType.c_str(), BookMVALoc.c_str());
    }
 
    TFile *f_offbeam=nullptr;
    TTree *t_offbeam=nullptr;
    treevars offbeam_vars;
-   TMVA::Reader fReader_offbeam_contained("");
-   TMVA::Reader fReader_offbeam_uncontained("");
+   TMVA::Reader fReader_offbeam("");
    if (offbeamdatafile!=""){
      std::cout << "Making data-MC comparisons" << std::endl;
      f_offbeam = new TFile(offbeamdatafile.c_str(), "read");
      t_offbeam = (TTree*)f_offbeam->Get("cc1piselec/outtree");
      settreevars(t_offbeam,&offbeam_vars);
 
-     fReader_offbeam_contained.AddVariable("dEdx_truncmean_start", &(offbeam_vars.float_dEdx_truncmean_start));
-     fReader_offbeam_contained.AddVariable("VtxTrackDist", &(offbeam_vars.float_VtxTrackDist));
-     fReader_offbeam_contained.AddVariable("nhits", &(offbeam_vars.float_nhits));
-     fReader_offbeam_contained.AddVariable("lnLmipoverp", &(offbeam_vars.float_lnLmipoverp));
-     fReader_offbeam_contained.BookMVA(containedBookMVAType.c_str(), containedBookMVALoc.c_str());
-
-     fReader_offbeam_uncontained.AddVariable("dEdx_truncmean_start", &(offbeam_vars.float_dEdx_truncmean_start));
-     fReader_offbeam_uncontained.AddVariable("VtxTrackDist", &(offbeam_vars.float_VtxTrackDist));
-     fReader_offbeam_uncontained.AddVariable("nhits", &(offbeam_vars.float_nhits));
-     fReader_offbeam_uncontained.AddVariable("lnLmipoverp", &(offbeam_vars.float_lnLmipoverp));
-     fReader_offbeam_uncontained.BookMVA(uncontainedBookMVAType.c_str(), uncontainedBookMVALoc.c_str());
+     fReader_offbeam.AddVariable("dEdx_truncmean_start", &(offbeam_vars.float_dEdx_truncmean_start));
+     fReader_offbeam.AddVariable("VtxTrackDist", &(offbeam_vars.float_VtxTrackDist));
+     fReader_offbeam.AddVariable("nhits", &(offbeam_vars.float_nhits));
+     fReader_offbeam.AddVariable("lnLmipoverp", &(offbeam_vars.float_lnLmipoverp));
+     fReader_offbeam.BookMVA(BookMVAType.c_str(), BookMVALoc.c_str());
    }
 
    ofstream evdinfo;
@@ -234,7 +210,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
 
    // Sanity check: the plot vectors should be the same size
    t_bnbcos->GetEntry(0);
-   Calcvars(&mc_vars, &fReader_contained, &fReader_uncontained);
+   Calcvars(&mc_vars, &fReader);
    std::vector<CC1piPlotVars> varstoplot_dummy = GetVarstoplot(&mc_vars);
    std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> varstoplot2D_dummy = GetVarstoplot2D(&mc_vars);
    std::vector<CC1piPlotVars> cutvars_dummy = GetCutVars(&mc_vars);
@@ -354,7 +330,7 @@ ContainmentLength2D->GetYaxis()->SetBinLabel(2,"#mu^{-}");
      if (i%1000==0) std::cout << "MC: " << i << "/" << t_bnbcos->GetEntries() << std::endl;
       t_bnbcos->GetEntry(i);
 
-      Calcvars(&mc_vars, &fReader_contained, &fReader_uncontained);
+      Calcvars(&mc_vars, &fReader);
       MakeMVATrees(muon, pion, background, MVA_vars, &mc_vars);
       std::vector<CC1piPlotVars> Varstoplot = GetVarstoplot(&mc_vars);
       std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> Varstoplot2D = GetVarstoplot2D(&mc_vars);
@@ -502,7 +478,7 @@ ContainmentLength2D->GetYaxis()->SetBinLabel(2,"#mu^{-}");
      for (int i = 0; i < t_onbeam->GetEntries(); i++){
        if (i%1000==0) std::cout << "Onbeam: " << i << "/" << t_onbeam->GetEntries() << std::endl;
         t_onbeam->GetEntry(i);
-        Calcvars(&onbeam_vars, &fReader_onbeam_contained, &fReader_onbeam_uncontained);
+        Calcvars(&onbeam_vars, &fReader_onbeam);
         std::vector<CC1piPlotVars> Varstoplot = GetVarstoplot(&onbeam_vars);
 
         bool isSelected = IsEventSelected(&onbeam_vars);
@@ -586,7 +562,7 @@ ContainmentLength2D->GetYaxis()->SetBinLabel(2,"#mu^{-}");
     for (int i = 0; i < t_offbeam->GetEntries(); i++){
       if (i%1000==0) std::cout << "Offbeam: " << i << "/" << t_offbeam->GetEntries() << std::endl;
       t_offbeam->GetEntry(i);
-      Calcvars(&offbeam_vars, &fReader_offbeam_contained, &fReader_offbeam_uncontained);
+      Calcvars(&offbeam_vars, &fReader_offbeam);
       std::vector<CC1piPlotVars> Varstoplot = GetVarstoplot(&offbeam_vars);
 
       bool isSelected = IsEventSelected(&offbeam_vars);

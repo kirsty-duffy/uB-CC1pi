@@ -131,9 +131,7 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_MCP_numdaughters_notphotons;
    std::vector<double> *TPCObj_PFP_MCP_motherIDeq0;
    std::vector<double> *TPCObj_PFP_MCP_PDG_mTruePDG;
-   std::vector<double> *TPCObj_PFP_track_BDTscore_contained;
-   std::vector<double> *TPCObj_PFP_track_BDTscore_uncontained;
-   std::vector<double> *TPCObj_PFP_track_BDTscore_combined;
+   std::vector<double> *TPCObj_PFP_track_BDTscore;
    std::vector<double> *TPCObj_NDaughterPFPs;
 
    std::vector<std::vector<std::vector<double>>> *TPCObj_PFP_track_SpacepointsXYZ_Ordered;

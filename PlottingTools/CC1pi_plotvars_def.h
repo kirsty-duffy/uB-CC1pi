@@ -1238,7 +1238,7 @@ CC1piPlotVars Var_TPCObj_dEdx_truncmean_MIPdiff_other(treevars *vars){
   tmp.PlotOnlyContained = false;
   return tmp;
 }
-/*
+
 // BDT score
 CC1piPlotVars Var_TPCObj_PFP_track_BDTscore(treevars *vars){
   CC1piPlotVars tmp;
@@ -1251,21 +1251,6 @@ CC1piPlotVars Var_TPCObj_PFP_track_BDTscore(treevars *vars){
   tmp.bins = {25,-1,1};
   tmp.histtitle = ";BDT score;";
   tmp.histname = "BDTscore";
-  return tmp;
-}
-*/
-
-CC1piPlotVars Var_TPCObj_PFP_track_BDTscore_combined(treevars *vars){
-  CC1piPlotVars tmp;
-  tmp.Var = vars->TPCObj_PFP_track_BDTscore_combined;
-  tmp.KeepBelowCut = false;
-//  tmp.OnlyDaughters = true;
-//  tmp.TracksNeeded = "exactlytwo";
-  tmp.isMIPcut = true;
-  tmp.CutValue = 0.5;
-  tmp.bins = {2,0,2};
-  tmp.histtitle = ";BDT score (combined);";
-  tmp.histname = "BDTscore_combined";
   return tmp;
 }
 

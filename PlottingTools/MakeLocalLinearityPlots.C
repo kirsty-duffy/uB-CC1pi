@@ -265,22 +265,15 @@ void MakeLocalLinearityPlots(std::string inputfile="/uboone/app/users/kduffy/CC1
 
   // Dummy, just to stop segfaults
 
-  std::string containedBookMVAType = "BDTG";
-  std::string containedBookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_contained/weights/TMVAClassification_BDTG.weights.xml";
-  std::string uncontainedBookMVAType = "BDTG";
-  std::string uncontainedBookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_uncontained/weights/TMVAClassification_BDTG.weights.xml";
+  std::string BookMVAType = "BDTG";
+  std::string BookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_newdEdx/weights/TMVAClassification_BDTG.weights.xml";
   TMVA::Reader fReader_contained("");
-  fReader_contained.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
-  fReader_contained.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
-  fReader_contained.AddVariable("nhits", &(mc_vars.float_nhits));
-  fReader_contained.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
-  fReader_contained.BookMVA(containedBookMVAType.c_str(), containedBookMVALoc.c_str());
-  TMVA::Reader fReader_uncontained("");
-  fReader_uncontained.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
-  fReader_uncontained.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
-  fReader_uncontained.AddVariable("nhits", &(mc_vars.float_nhits));
-  fReader_uncontained.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
-  fReader_uncontained.BookMVA(uncontainedBookMVAType.c_str(), uncontainedBookMVALoc.c_str());
+  TMVA::Reader fReader("");
+  fReader.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
+  fReader.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
+  fReader.AddVariable("nhits", &(mc_vars.float_nhits));
+  fReader.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
+  fReader.BookMVA(BookMVAType.c_str(), BookMVALoc.c_str());
 
   TCanvas *c1 = new TCanvas("c1","",400,500);
 
@@ -288,7 +281,7 @@ void MakeLocalLinearityPlots(std::string inputfile="/uboone/app/users/kduffy/CC1
   for (int i_evt=0; i_evt<tr->GetEntries(); i_evt++){
     tr->GetEntry(i_evt);
 
-    Calcvars(&mc_vars, &fReader_contained, &fReader_uncontained);
+    Calcvars(&mc_vars, &fReader);
 
     for (int i_track=0; i_track<mc_vars.TPCObj_PFP_isDaughter->size(); i_track++){
 
