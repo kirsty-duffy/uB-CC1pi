@@ -163,8 +163,8 @@ struct treevars{
 
    NuIntTopology containment0_muoncandidatePDG;
    NuIntTopology containment0_pioncandidatePDG;
-   NuIntTopology containment0_muoncandidatePDG;
-   NuIntTopology containment0_pioncandidatePDG;
+   NuIntTopology containment1_muoncandidatePDG;
+   NuIntTopology containment1_pioncandidatePDG;
    NuIntTopology containment2_muoncandidatePDG;
    NuIntTopology containment2_pioncandidatePDG;
 
