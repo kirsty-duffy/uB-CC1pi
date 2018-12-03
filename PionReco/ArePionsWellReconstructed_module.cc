@@ -39,6 +39,7 @@
 
 #include "TTree.h"
 #include "TVector3.h"
+#include "TLorentzVector.h"
 
 class ArePionsWellReconstructed;
 
@@ -87,6 +88,11 @@ private:
   std::vector<double> PiPlusHierarchy_MCP_trueStartE;
   std::vector<double> PiPlusHierarchy_MCP_trueStartP;
   std::vector<int> PiPlusHierarchy_LogicalPion_MCPids;
+  std::vector<std::vector<double>> PiPlusHierarchy_MCP_Px_eachpoint;
+  std::vector<std::vector<double>> PiPlusHierarchy_MCP_Py_eachpoint;
+  std::vector<std::vector<double>> PiPlusHierarchy_MCP_Pz_eachpoint;
+  std::vector<std::vector<double>> PiPlusHierarchy_MCP_StartXYZ;
+  std::vector<std::vector<double>> PiPlusHierarchy_MCP_EndXYZ;
 
   int n_PFPs;
   std::vector<int> PFP_ID;
@@ -100,6 +106,8 @@ private:
   std::vector<double> PFP_track_length;
   std::vector<std::vector<double>> PFP_track_start;
   std::vector<std::vector<double>> PFP_track_end;
+  std::vector<double> PFP_track_theta;
+  std::vector<double> PFP_track_phi;
 
 };
 
@@ -131,6 +139,11 @@ ArePionsWellReconstructed::ArePionsWellReconstructed(fhicl::ParameterSet const &
   _outtree->Branch("PiPlusHierarchy_MCP_trueStartE",&PiPlusHierarchy_MCP_trueStartE);
   _outtree->Branch("PiPlusHierarchy_MCP_trueStartP",&PiPlusHierarchy_MCP_trueStartP);
   _outtree->Branch("PiPlusHierarchy_LogicalPion_MCPids",&PiPlusHierarchy_LogicalPion_MCPids);
+  _outtree->Branch("PiPlusHierarchy_MCP_Px_eachpoint",&PiPlusHierarchy_MCP_Px_eachpoint);
+  _outtree->Branch("PiPlusHierarchy_MCP_Py_eachpoint",&PiPlusHierarchy_MCP_Py_eachpoint);
+  _outtree->Branch("PiPlusHierarchy_MCP_Pz_eachpoint",&PiPlusHierarchy_MCP_Pz_eachpoint);
+  _outtree->Branch("PiPlusHierarchy_MCP_StartXYZ",&PiPlusHierarchy_MCP_StartXYZ);
+  _outtree->Branch("PiPlusHierarchy_MCP_EndXYZ",&PiPlusHierarchy_MCP_EndXYZ);
 
   _outtree->Branch("n_PFPs",&n_PFPs);
   _outtree->Branch("PFP_ID",&PFP_ID);
@@ -144,6 +157,8 @@ ArePionsWellReconstructed::ArePionsWellReconstructed(fhicl::ParameterSet const &
   _outtree->Branch("PFP_track_length",&PFP_track_length);
   _outtree->Branch("PFP_track_start",&PFP_track_start);
   _outtree->Branch("PFP_track_end",&PFP_track_end);
+  _outtree->Branch("PFP_track_theta",&PFP_track_theta);
+  _outtree->Branch("PFP_track_phi",&PFP_track_phi);
 }
 
 void ArePionsWellReconstructed::analyze(art::Event const & evt)
@@ -165,6 +180,7 @@ void ArePionsWellReconstructed::analyze(art::Event const & evt)
 
     if (fUseMuonsInstead && (PDGCode(mcpar->PdgCode()) != kMuMinus)) continue;
     if (!fUseMuonsInstead && (PDGCode(mcpar->PdgCode()) != kPiPlus)) continue;
+
     primary_piplusmcps.push_back(mcpar);
   }
 
@@ -259,6 +275,9 @@ void ArePionsWellReconstructed::analyze(art::Event const & evt)
     PiPlusHierarchy_MCP_trueStartE.clear();
     PiPlusHierarchy_MCP_trueStartP.clear();
     PiPlusHierarchy_LogicalPion_MCPids.clear();
+    PiPlusHierarchy_MCP_Px_eachpoint.clear();
+    PiPlusHierarchy_MCP_Py_eachpoint.clear();
+    PiPlusHierarchy_MCP_Pz_eachpoint.clear();
 
     n_PFPs = 0;
     PFP_ID.clear();
@@ -269,6 +288,8 @@ void ArePionsWellReconstructed::analyze(art::Event const & evt)
     PFP_primaryPFPid.clear();
     PFP_spacepoints_XYZ.clear();
     PFP_trajpoints_XYZ.clear();
+    PFP_track_theta.clear();
+    PFP_track_phi.clear();
 
 
     // Now get true MCP hierarchy from primary pi+
@@ -277,6 +298,7 @@ void ArePionsWellReconstructed::analyze(art::Event const & evt)
     // Fill variables for all MCPs in hierarchy
     PiPlusHierarchy_nMCPs = hierarchy.size();
     for (auto mcp : hierarchy){
+
       PiPlusHierarchy_MCP_ID.push_back(mcp->TrackId());
       PiPlusHierarchy_MCP_MotherID.push_back(mcp->Mother());
       PiPlusHierarchy_MCP_PDGcode.push_back(mcp->PdgCode());
@@ -284,11 +306,29 @@ void ArePionsWellReconstructed::analyze(art::Event const & evt)
       PiPlusHierarchy_MCP_trueStartE.push_back(mcp->E());
       PiPlusHierarchy_MCP_trueStartP.push_back(mcp->P());
 
+      std::vector<double> px, py, pz;
+      for (size_t i_traj=0; i_traj<mcp->NumberTrajectoryPoints(); i_traj++){
+        px.push_back(mcp->Px(i_traj));
+        py.push_back(mcp->Py(i_traj));
+        pz.push_back(mcp->Pz(i_traj));
+      }
+      PiPlusHierarchy_MCP_Px_eachpoint.push_back(px);
+      PiPlusHierarchy_MCP_Py_eachpoint.push_back(py);
+      PiPlusHierarchy_MCP_Pz_eachpoint.push_back(pz);
+
       std::vector<int> daughters;
       for (int i_d=0; i_d<mcp->NumberDaughters(); i_d++){
         daughters.push_back(mcp->Daughter(i_d));
       }
       PiPlusHierarchy_MCP_DaughterIDs.push_back(daughters);
+
+      TLorentzVector start = mcp->Position();
+      std::vector<double> startxyz{start.X(),start.Y(),start.Z()};
+      PiPlusHierarchy_MCP_StartXYZ.push_back(startxyz);
+
+      TLorentzVector end = mcp->EndPosition();
+      std::vector<double> endxyz{end.X(),end.Y(),end.Z()};
+      PiPlusHierarchy_MCP_EndXYZ.push_back(endxyz);
 
       // Get true deposited energy by MCParticle from truth-matching information
       std::vector<art::Ptr<recob::Hit>> hit_vec;
@@ -380,6 +420,8 @@ void ArePionsWellReconstructed::analyze(art::Event const & evt)
       // Get track from PFP (if it exists)
       std::vector<art::Ptr<recob::Track>> tracks_pfp = tracks_from_pfps.at(pfp.key());
       double track_length = -999;
+      double track_theta = -999;
+      double track_phi = -999;
       std::vector<double> track_start = {-999,-999,-999};
       std::vector<double> track_end = {-999,-999,-999};
       std::vector<std::vector<double>> tr_tvector_vec;
@@ -389,6 +431,8 @@ void ArePionsWellReconstructed::analyze(art::Event const & evt)
       }
       for (auto track : tracks_pfp){
          track_length = track -> Length();
+         track_theta = track -> Theta();
+         track_phi = track -> Phi();
          auto start = track -> Start();
          track_start = {start.X(),start.Y(),start.Z()};
          auto end = track -> End();
@@ -408,6 +452,8 @@ void ArePionsWellReconstructed::analyze(art::Event const & evt)
       PFP_track_length.push_back(track_length);
       PFP_track_start.push_back(track_start);
       PFP_track_end.push_back(track_end);
+      PFP_track_theta.push_back(track_theta);
+      PFP_track_phi.push_back(track_phi);
 
 
     } // end loop over PFPs
