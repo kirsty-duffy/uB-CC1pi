@@ -3,7 +3,7 @@
 <!ENTITY release "v06_26_01_22">
 <!ENTITY name "combined_sel_extdata">
 <!ENTITY user "kduffy">
-<!ENTITY version "v06_26_01_22_cc1pionly_extdata_v0a">
+<!ENTITY version "v06_26_01_22_cc1pionly_extdata_v0b">
 ]>
 
 <project name="&name;">
@@ -27,6 +27,8 @@
     <!-- qual>e10:prof</qual -->
     <local>/pnfs/uboone/resilient/users/kduffy/tars/pid_test.tar</local>
   </larsoft>
+
+  <resource>OFFSITE</resource>
 
   <!-- Stages -->
   <stage name = "Selection">
