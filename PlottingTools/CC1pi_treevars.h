@@ -158,6 +158,15 @@ struct treevars{
    std::vector<double> *TPCObj_dEdx_truncmean_MIPdiff_other;
    std::vector<double> *TPCObj_mupiContained;
    std::vector<double> *TPCObj_muonLonger;
+   std::vector<double> *containment1_pass;
+   std::vector<double> *containment2_pass;
+
+   NuIntTopology containment0_muoncandidatePDG;
+   NuIntTopology containment0_pioncandidatePDG;
+   NuIntTopology containment0_muoncandidatePDG;
+   NuIntTopology containment0_pioncandidatePDG;
+   NuIntTopology containment2_muoncandidatePDG;
+   NuIntTopology containment2_pioncandidatePDG;
 
    int TPCObj_LeadingMIPtrackIndex;
    int TPCObj_SecondMIPtrackIndex;
