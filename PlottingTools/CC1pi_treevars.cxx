@@ -764,14 +764,11 @@ void MakeMVATrees(TTree *muon_tree, TTree *pion_tree, TTree *background_tree, MV
             || vars->TPCObj_PFP_track_dEdx_nhits->at(i_track)==-9999
             || vars->TPCObj_PFP_lnLmipoverp->at(i_track) == -9999) continue;
 
-      // Try playing with variable ranges (cut out ridiculous high values that affect the binning)
-      //if(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) > 100) continue;
-
-      //Have two different samples for contained and uncontained tracks
-      //if((vars->TPCObj_PFP_track_isContained->at(i_track))) continue;
-
       // Only train on neutrino-induced particles
       if(vars->Truth_topology == kCosmic || vars->Truth_topology == kMixed || vars->Truth_topology == kUnknown) continue;
+
+      // Quality pre-cut: tracks parallel to collection plane have bad dE/dx
+      if(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) < 1) continue;
 
       MVA_vars->dEdx_truncmean_start = vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track);
       MVA_vars->VtxTrackDist = vars->TPCObj_PFP_VtxTrackDist->at(i_track);
