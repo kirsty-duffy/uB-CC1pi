@@ -167,6 +167,8 @@ struct treevars{
    int containment1_pioncandidatePDG;
    int containment2_muoncandidatePDG;
    int containment2_pioncandidatePDG;
+   int BDT_muoncandidatePDG;
+   int BDT_pioncandidatePDG;
 
    int TPCObj_LeadingMIPtrackIndex;
    int TPCObj_SecondMIPtrackIndex;

@@ -162,7 +162,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    settreevars(t_bnbcos,&mc_vars);
 
    std::string BookMVAType = "BDTG";
-   std::string BookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_newdEdx/weights/TMVAClassification_BDTG.weights.xml";
+   std::string BookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_spacecharge/weights/TMVAClassification_BDT.weights.xml";
 
    TMVA::Reader fReader("");
    fReader.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
@@ -273,6 +273,18 @@ for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
    selMIPs2D->GetYaxis()->SetBinLabel(i_bin,PDGenum2str(MIPpdgs.at(i_bin-1)).c_str());
 }
 
+// Custom 2D histograms: muon candidate vs pion candidate true PDG
+TH2D *selMIPsPID2D = new TH2D("selMIPsPID2D","Selected MIP-like tracks;Muon Candidate; Pion Candidate",nMIPpdgs,0,nMIPpdgs,nMIPpdgs,0,nMIPpdgs);
+for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
+   if (i_bin==nMIPpdgs){
+      selMIPsPID2D->GetXaxis()->SetBinLabel(i_bin,"Other");
+      selMIPsPID2D->GetYaxis()->SetBinLabel(i_bin,"Other");
+      continue;
+   }
+   selMIPsPID2D->GetXaxis()->SetBinLabel(i_bin,PDGenum2str(MIPpdgs.at(i_bin-1)).c_str());
+   selMIPsPID2D->GetYaxis()->SetBinLabel(i_bin,PDGenum2str(MIPpdgs.at(i_bin-1)).c_str());
+}
+
 // Custom 2D histogram: containment vs length for muons and pions from true signal events
 TH2D *ContainmentLength2D = new TH2D("ContainmentLength2D","True CC1#pi^{+} events;Contained;Longer",4,0,4,2,0,2);
 ContainmentLength2D->GetXaxis()->SetBinLabel(1,"neither");
@@ -373,6 +385,18 @@ ContainmentLength2D->GetYaxis()->SetBinLabel(2,"#mu^{-}");
             if (MIPpdgs.at(i_bin) == SecondMIPpdg) SecondMIPbin = i_bin+1;
          }
          selMIPs2D->Fill((double)LeadingMIPbin-0.5,(double)SecondMIPbin-0.5);
+
+
+         PDGCode MuonCandpdg = PDGCode(mc_vars.BDT_muoncandidatePDG);
+         PDGCode PionCandpdg = PDGCode(mc_vars.BDT_pioncandidatePDG);
+
+         int MuonCandbin = nMIPpdgs;
+         int PionCandbin = nMIPpdgs;
+         for (int i_bin=0; i_bin<MIPpdgs.size(); i_bin++){
+            if (MIPpdgs.at(i_bin) == MuonCandpdg) MuonCandbin = i_bin+1;
+            if (MIPpdgs.at(i_bin) == PionCandpdg) PionCandbin = i_bin+1;
+         }
+         selMIPsPID2D->Fill((double)MuonCandbin-0.5,(double)PionCandbin-0.5);
 
 
 
@@ -656,6 +680,10 @@ ContainmentLength2D->GetYaxis()->SetBinLabel(2,"#mu^{-}");
    selMIPs2D->Scale(1.0/selMIPs2D->Integral());
    selMIPs2D->Draw("colz text");
    c1->Print("CC1pi_selMIPs2D.png");
+
+   selMIPsPID2D->Scale(1.0/selMIPsPID2D->Integral());
+   selMIPsPID2D->Draw("colz text");
+   c1->Print("CC1pi_selMIPsPID2D.png");
 
    SelectedEvents->DrawStack(1.,c1);
    c1->Print("CC1pi_SelectedEvents.png");

@@ -257,6 +257,8 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
    vars->containment1_pioncandidatePDG = -9999;
    vars->containment2_muoncandidatePDG = -9999;
    vars->containment2_pioncandidatePDG = -9999;
+   vars->BDT_muoncandidatePDG = -9999;
+   vars->BDT_pioncandidatePDG = -9999;
 
    // Just use collection plane for now
    int i_pl = 2;
@@ -744,6 +746,16 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
       else {
          vars->containment2_pass->at(0) = 0;
       }
+
+      // Test BDT PID idea
+//      if(vars->TPCObj_PFP_track_BDTscore->at(vars->TPCObj_LeadingMIPtrackIndex) > vars->TPCObj_PFP_track_BDTscore->at(vars->TPCObj_SecondMIPtrackIndex)) {
+         vars->BDT_muoncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_LeadingMIPtrackIndex);
+         vars->BDT_pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_SecondMIPtrackIndex);
+//      }
+//      else {
+//         vars->BDT_muoncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_SecondMIPtrackIndex);
+//         vars->BDT_pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_LeadingMIPtrackIndex);
+//      }
    }
 
 
@@ -766,7 +778,7 @@ void MakeMVATrees(TTree *muon_tree, TTree *pion_tree, TTree *background_tree, MV
       //if(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) > 100) continue;
 
       //Have two different samples for contained and uncontained tracks
-      if((vars->TPCObj_PFP_track_isContained->at(i_track))) continue;
+      //if((vars->TPCObj_PFP_track_isContained->at(i_track))) continue;
 
 
       MVA_vars->dEdx_truncmean_start = vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track);
