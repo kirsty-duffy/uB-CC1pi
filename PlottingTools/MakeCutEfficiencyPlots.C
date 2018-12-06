@@ -25,6 +25,7 @@ void MakeCutEfficiencyPlots(std::string mcfile){
 
    TFile *f_bnbcos = new TFile(mcfile.c_str(), "read");
    TTree *t_bnbcos = (TTree*)f_bnbcos->Get("cc1piselec/outtree");
+   /*
    TTree *t_bnbcos_friend = (TTree*)f_bnbcos->Get("StoppingParticleTagger/StoppingTaggerTree");
 
     if (!t_bnbcos){
@@ -40,7 +41,7 @@ void MakeCutEfficiencyPlots(std::string mcfile){
      return;
    }
    t_bnbcos->AddFriend(t_bnbcos_friend);
-
+   */
    treevars mc_vars;
    settreevars(t_bnbcos,&mc_vars);
 
@@ -49,7 +50,7 @@ void MakeCutEfficiencyPlots(std::string mcfile){
    fReader.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
    fReader.AddVariable("nhits", &(mc_vars.float_nhits));
    fReader.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
-   fReader.BookMVA("BDTG", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_newdEdx/weights/TMVAClassification_BDTG.weights.xml");
+   fReader.BookMVA("BDTG", "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_NeutrinoOnly/weights/TMVAClassification_BDTG.weights.xml");
 
    // Get vector of cuts we want to plot
    // We want both the "normal" cut vars and the ones that define a MIP
@@ -100,12 +101,12 @@ void MakeCutEfficiencyPlots(std::string mcfile){
       if (i%1000==0 || i==t_bnbcos->GetEntries()-1) std::cout << i << "/" << t_bnbcos->GetEntries() << std::endl;
       t_bnbcos->GetEntry(i);
       Calcvars(&mc_vars, &fReader);
-/*
+
        for (size_t i_h = 0; i_h < nplots; i_h++){
           // std::cout << i_h << std::endl;
           FillCC1piEffPurHist(mc_hists_cc1pieffpur[i_h], &mc_vars, &fReader, (int)i_h);
        }
-*/
+
       // Now fill histograms for N-1 plots
       FillNminus1EffPurHist(Nminus1plots,&mc_vars,&fReader);
 
@@ -113,7 +114,7 @@ void MakeCutEfficiencyPlots(std::string mcfile){
 
    // -------------------- Now make all the plots
    std::cout << "Drawing plots..." << std::endl;
-   /*
+   
     for (size_t i_h=0; i_h < nplots; i_h++){
        TCanvas *c1 = new TCanvas("c1","c1");
    
@@ -123,7 +124,7 @@ void MakeCutEfficiencyPlots(std::string mcfile){
    
        delete c1;
     }
-    */
+    
    TCanvas *c1 = new TCanvas("c1","c1");
    DrawCC1piMCEffPur(c1, Nminus1plots,"hist",true);
    c1->Print("Nminus1plots.png");
