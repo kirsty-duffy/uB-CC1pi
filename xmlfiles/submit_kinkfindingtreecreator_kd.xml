@@ -1,9 +1,9 @@
 <!-- Project details -->
 <!DOCTYPE project [
 <!ENTITY release "v06_26_01_22">
-<!ENTITY name "combined_sel_extdata">
+<!ENTITY name "kinkfinding">
 <!ENTITY user "kduffy">
-<!ENTITY version "v06_26_01_22_cc1pionly_extdata_v0b">
+<!ENTITY version "v06_26_01_22_KinkFinding">
 ]>
 
 <project name="&name;">
@@ -13,10 +13,10 @@
 
   <!-- Project size (numevents is an upper limit) -->
   <numevents>50000</numevents>
-  <numjobs>1080</numjobs>
+  <numjobs>600</numjobs>
 
   <!-- Where to look for fcl files (in addition to $FHICL_FILE_PATH) -->
-  <!-- <fcldir>/uboone/app/users/kduffy/CC1pi/CC1pi_uboonecode/localProducts_larsoft_v06_26_01_10_e10_prof/uboonecode/v06_26_01_13/job/</fcldir> -->
+  <!-- fcldir>/pnfs/uboone/persistent/users/ddevitt/fcl/</fcldir -->
 
   <!-- Batch OS -->
   <os>SL6</os>
@@ -31,16 +31,17 @@
   <resource>OFFSITE</resource>
 
   <!-- Stages -->
-  <stage name = "Selection">
-     <maxfilesperjob>1</maxfilesperjob>
-     <inputdef>alister1_ubxsec_offbeam</inputdef> <!-- contains 1080 files -->
-     <fcl>run_CC1pionly_data_extbnb.fcl</fcl>
+  <stage name = "KinkFinding">
+     <maxfilesperjob>2</maxfilesperjob>
+     <inputlist>/uboone/data/users/kduffy/CC1pi/book/v06_26_01_13_alister_v0/files_out1.list</inputlist>
+     <!-- <inputdef>alister1_ubxsectruthfilter_devsample</inputdef> -->
+     <fcl>run_KinkFindingTreeCreator.fcl</fcl>
      <outdir>/pnfs/uboone/persistent/users/kduffy/CC1pi/&version;/</outdir>
      <logdir>/pnfs/uboone/persistent/users/kduffy/CC1pi/&version;/</logdir>
      <workdir>/pnfs/uboone/resilient/users/kduffy/CC1pi/work/&version;/</workdir>
      <bookdir>/uboone/data/users/kduffy/CC1pi/book/&version;/</bookdir>
      <schema>root</schema>
      <!-- requested memory, in MB -->
-     <memory>4000</memory>
+     <memory>5000</memory>
   </stage>
 </project>

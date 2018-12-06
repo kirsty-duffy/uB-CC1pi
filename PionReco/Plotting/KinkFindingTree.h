@@ -32,27 +32,26 @@ std::vector<int> GetAllPrimaryPFPIDs(std::vector<int> *PFP_primaryPFPid, std::ve
     return all_primary_PFP_IDs;
 }
 
-struct PiRecoTree{
+struct KinkFindingTree{
   // Variables to fill from tree
-  int PiPlusHierarchy_nMCPs=0;
-  std::vector<int> *PiPlusHierarchy_MCP_ID=nullptr;
-  std::vector<int> *PiPlusHierarchy_MCP_MotherID=nullptr;
-  std::vector<std::vector<int>> *PiPlusHierarchy_MCP_DaughterIDs=nullptr;
-  std::vector<int> *PiPlusHierarchy_MCP_PDGcode=nullptr;
-  std::vector<std::string> *PiPlusHierarchy_MCP_EndProcess=nullptr;
-  std::vector<int> *PiPlusHierarchy_MCP_nMatchedPFPs=nullptr;
-  std::vector<double> *PiPlusHierarchy_MCP_totaldepE=nullptr;
-  std::vector<std::vector<int>> *PiPlusHierarchy_MCP_matchedPFP_ID=nullptr;
-  std::vector<std::vector<double>> *PiPlusHierarchy_MCP_matchedPFP_matchedE=nullptr;
-  std::vector<double> *PiPlusHierarchy_MCP_trueStartE=nullptr;
-  std::vector<double> *PiPlusHierarchy_MCP_trueStartP=nullptr;
-  std::vector<int> *PiPlusHierarchy_LogicalPion_MCPids=nullptr;
+  int nMCPs=0;
+  std::vector<int> *MCP_ID=nullptr;
+  std::vector<int> *MCP_MotherID=nullptr;
+  std::vector<std::vector<int>> *MCP_DaughterIDs=nullptr;
+  std::vector<int> *MCP_PDGcode=nullptr;
+  std::vector<std::string> *MCP_EndProcess=nullptr;
+  std::vector<int> *MCP_nMatchedPFPs=nullptr;
+  std::vector<double> *MCP_totaldepE=nullptr;
+  std::vector<std::vector<int>> *MCP_matchedPFP_ID=nullptr;
+  std::vector<std::vector<double>> *MCP_matchedPFP_matchedE=nullptr;
+  std::vector<double> *MCP_trueStartE=nullptr;
+  std::vector<double> *MCP_trueStartP=nullptr;
   int n_PFPs=0;
-  std::vector<std::vector<double>> *PiPlusHierarchy_MCP_Px_eachpoint=nullptr;
-  std::vector<std::vector<double>> *PiPlusHierarchy_MCP_Py_eachpoint=nullptr;
-  std::vector<std::vector<double>> *PiPlusHierarchy_MCP_Pz_eachpoint=nullptr;
-  std::vector<std::vector<double>> *PiPlusHierarchy_MCP_StartXYZ=nullptr;
-  std::vector<std::vector<double>> *PiPlusHierarchy_MCP_EndXYZ=nullptr;
+  std::vector<std::vector<double>> *MCP_Px_eachpoint=nullptr;
+  std::vector<std::vector<double>> *MCP_Py_eachpoint=nullptr;
+  std::vector<std::vector<double>> *MCP_Pz_eachpoint=nullptr;
+  std::vector<std::vector<double>> *MCP_StartXYZ=nullptr;
+  std::vector<std::vector<double>> *MCP_EndXYZ=nullptr;
   std::vector<int> *PFP_ID=nullptr;
   std::vector<int> *PFP_TrackShowerPdg=nullptr;
   std::vector<bool> *PFP_IsPrimary=nullptr;
@@ -87,13 +86,10 @@ struct PiRecoTree{
   // TH1D *h_mincosth;
 
   // constructor
-  PiRecoTree();
+  KinkFindingTree();
 
   // Get maps and do truth selection on depE
   bool Setup();
-
-  // Get variables relating to logical pion
-  void CalcLogicalPionVars();
 
   // Get variables relating to best-match PFP hierarchy
   void GetPFPHierarchy();
@@ -110,33 +106,32 @@ struct PiRecoTree{
   std::vector<int> FindRecoKinks_byangle(int pfp_idx, double mincosth, int evtnum, double kinkcosth, int _slider_window);
 };
 
-PiRecoTree::PiRecoTree(){
+KinkFindingTree::KinkFindingTree(){
   PFP_isInNuSlice = nullptr;
   verbose = false;
   pidepE = 0;
   // h_mincosth = new TH1D("h_mincosth",";Min(cos(#theta))",100,-1,1);
 };
 
-void SetPiRecoTreeVariables(PiRecoTree *vars, TTree *tr){
+void SetKinkFindingTreeVariables(KinkFindingTree *vars, TTree *tr){
   // Set branch addresses
-  tr->SetBranchAddress("PiPlusHierarchy_nMCPs",&(vars->PiPlusHierarchy_nMCPs));
-  tr->SetBranchAddress("PiPlusHierarchy_MCP_ID",&(vars->PiPlusHierarchy_MCP_ID));
-  tr->SetBranchAddress("PiPlusHierarchy_MCP_MotherID",&(vars->PiPlusHierarchy_MCP_MotherID));
-  tr->SetBranchAddress("PiPlusHierarchy_MCP_DaughterIDs",&(vars->PiPlusHierarchy_MCP_DaughterIDs));
-  tr->SetBranchAddress("PiPlusHierarchy_MCP_PDGcode",&(vars->PiPlusHierarchy_MCP_PDGcode));
-  tr->SetBranchAddress("PiPlusHierarchy_MCP_EndProcess",&(vars->PiPlusHierarchy_MCP_EndProcess));
-  tr->SetBranchAddress("PiPlusHierarchy_MCP_nMatchedPFPs",&(vars->PiPlusHierarchy_MCP_nMatchedPFPs));
-  tr->SetBranchAddress("PiPlusHierarchy_MCP_totaldepE",&(vars->PiPlusHierarchy_MCP_totaldepE));
-  tr->SetBranchAddress("PiPlusHierarchy_MCP_matchedPFP_ID",&(vars->PiPlusHierarchy_MCP_matchedPFP_ID));
-  tr->SetBranchAddress("PiPlusHierarchy_MCP_matchedPFP_matchedE",&(vars->PiPlusHierarchy_MCP_matchedPFP_matchedE));
-  tr->SetBranchAddress("PiPlusHierarchy_MCP_trueStartE",&(vars->PiPlusHierarchy_MCP_trueStartE));
-  tr->SetBranchAddress("PiPlusHierarchy_MCP_trueStartP",&(vars->PiPlusHierarchy_MCP_trueStartP));
-  tr->SetBranchAddress("PiPlusHierarchy_LogicalPion_MCPids",&(vars->PiPlusHierarchy_LogicalPion_MCPids));
-  tr->SetBranchAddress("PiPlusHierarchy_MCP_Px_eachpoint",&(vars->PiPlusHierarchy_MCP_Px_eachpoint));
-  tr->SetBranchAddress("PiPlusHierarchy_MCP_Py_eachpoint",&(vars->PiPlusHierarchy_MCP_Py_eachpoint));
-  tr->SetBranchAddress("PiPlusHierarchy_MCP_Pz_eachpoint",&(vars->PiPlusHierarchy_MCP_Pz_eachpoint));
-  tr->SetBranchAddress("PiPlusHierarchy_MCP_StartXYZ",&(vars->PiPlusHierarchy_MCP_StartXYZ));
-  tr->SetBranchAddress("PiPlusHierarchy_MCP_EndXYZ",&(vars->PiPlusHierarchy_MCP_EndXYZ));
+  tr->SetBranchAddress("nMCPs",&(vars->nMCPs));
+  tr->SetBranchAddress("MCP_ID",&(vars->MCP_ID));
+  tr->SetBranchAddress("MCP_MotherID",&(vars->MCP_MotherID));
+  tr->SetBranchAddress("MCP_DaughterIDs",&(vars->MCP_DaughterIDs));
+  tr->SetBranchAddress("MCP_PDGcode",&(vars->MCP_PDGcode));
+  tr->SetBranchAddress("MCP_EndProcess",&(vars->MCP_EndProcess));
+  tr->SetBranchAddress("MCP_nMatchedPFPs",&(vars->MCP_nMatchedPFPs));
+  tr->SetBranchAddress("MCP_totaldepE",&(vars->MCP_totaldepE));
+  tr->SetBranchAddress("MCP_matchedPFP_ID",&(vars->MCP_matchedPFP_ID));
+  tr->SetBranchAddress("MCP_matchedPFP_matchedE",&(vars->MCP_matchedPFP_matchedE));
+  tr->SetBranchAddress("MCP_trueStartE",&(vars->MCP_trueStartE));
+  tr->SetBranchAddress("MCP_trueStartP",&(vars->MCP_trueStartP));
+  tr->SetBranchAddress("MCP_Px_eachpoint",&(vars->MCP_Px_eachpoint));
+  tr->SetBranchAddress("MCP_Py_eachpoint",&(vars->MCP_Py_eachpoint));
+  tr->SetBranchAddress("MCP_Pz_eachpoint",&(vars->MCP_Pz_eachpoint));
+  tr->SetBranchAddress("MCP_StartXYZ",&(vars->MCP_StartXYZ));
+  tr->SetBranchAddress("MCP_EndXYZ",&(vars->MCP_EndXYZ));
   tr->SetBranchAddress("n_PFPs",&(vars->n_PFPs));
   tr->SetBranchAddress("PFP_ID",&(vars->PFP_ID));
   tr->SetBranchAddress("PFP_TrackShowerPdg",&(vars->PFP_TrackShowerPdg));
@@ -154,60 +149,21 @@ void SetPiRecoTreeVariables(PiRecoTree *vars, TTree *tr){
   tr->SetBranchAddress("PFP_track_phi",&(vars->PFP_track_phi));
 };
 
-bool PiRecoTree::Setup(){
+bool KinkFindingTree::Setup(){
   // Make some maps that will help us later
   MCP_ID_to_vectorpos.clear();
   PFP_ID_to_vectorpos.clear();
-  for (int i_mcp=0; i_mcp<PiPlusHierarchy_nMCPs; i_mcp++){
-      MCP_ID_to_vectorpos.insert(std::pair<int,int>(PiPlusHierarchy_MCP_ID->at(i_mcp), i_mcp));
+  for (int i_mcp=0; i_mcp<nMCPs; i_mcp++){
+      MCP_ID_to_vectorpos.insert(std::pair<int,int>(MCP_ID->at(i_mcp), i_mcp));
   }
   for (int i_pfp=0; i_pfp<n_PFPs; i_pfp++){
       PFP_ID_to_vectorpos.insert(std::pair<int,int>(PFP_ID->at(i_pfp),i_pfp));
   }
 
-  // Truth selection: calculate total dep E from logical pion
-  // If it's 0 (actually <1e-12), move on to the next pi+
-  pidepE = 0;
-  for (size_t i_pi=0; i_pi<PiPlusHierarchy_LogicalPion_MCPids->size(); i_pi++){
-      int pi_mcp = MCP_ID_to_vectorpos.find(PiPlusHierarchy_LogicalPion_MCPids->at(i_pi))->second;
-      pidepE += PiPlusHierarchy_MCP_totaldepE->at(pi_mcp);
-  }
-  if (pidepE < 1e-12){
-      return false;
-  }
   return true;
 };
 
-void PiRecoTree::CalcLogicalPionVars(){
-  // --- Calculate variables relating to logical pion --- //
-
-  // No. true pi+ in logical pion
-  if (verbose) std::cout << PiPlusHierarchy_LogicalPion_MCPids->size() << " pi+ in 'logical pion'" << std::endl;
-
-  // No mu+ or p daughters of logical pion
-  int finalPi_MCPID = PiPlusHierarchy_LogicalPion_MCPids->at(PiPlusHierarchy_LogicalPion_MCPids->size()-1);
-  int lp_endmcp = MCP_ID_to_vectorpos.find(finalPi_MCPID)->second;
-  n_p = 0;
-  n_mu = 0;
-  n_visp = 0;
-  for (size_t i_d=0; i_d < PiPlusHierarchy_MCP_DaughterIDs->at(lp_endmcp).size(); i_d++){
-    int daughter_mcp = MCP_ID_to_vectorpos.find(PiPlusHierarchy_MCP_DaughterIDs->at(lp_endmcp).at(i_d))->second;
-    if (PiPlusHierarchy_MCP_PDGcode->at(daughter_mcp) == 2212){
-        n_p++;
-        if (PiPlusHierarchy_MCP_trueStartP->at(daughter_mcp) > 0.3) n_visp++;
-    }
-    else if (PiPlusHierarchy_MCP_PDGcode->at(daughter_mcp) == -13){
-        n_mu++;
-    }
-  }
-  if (verbose){
-    std::cout << " --- " << n_p << " proton daughters (" << n_visp << " with p>300 MeV)" << std::endl;
-    std::cout << " --- " << n_mu << " mu+ daughters" << std::endl;
-  }
-
-};
-
-void PiRecoTree::GetPFPHierarchy(){
+void KinkFindingTree::GetPFPHierarchy(){
   // --- Calculate variables relating to PFP hierarchy --- //
   all_primary_PFP_IDs = GetAllPrimaryPFPIDs(PFP_primaryPFPid,PFP_isInNuSlice,PFP_ID_to_vectorpos);
 
@@ -223,7 +179,7 @@ void PiRecoTree::GetPFPHierarchy(){
       if (std::find(all_primary_PFP_IDs.begin(), all_primary_PFP_IDs.end(), pfp_id) == all_primary_PFP_IDs.end()) continue;
 
       int bestmatch_mcpid = PFP_ID_to_bestmatchMCPid->at(i_p).second;
-      if (std::find(PiPlusHierarchy_MCP_ID->begin(), PiPlusHierarchy_MCP_ID->end(), bestmatch_mcpid) == PiPlusHierarchy_MCP_ID->end()) continue;
+      if (std::find(MCP_ID->begin(), MCP_ID->end(), bestmatch_mcpid) == MCP_ID->end()) continue;
 
       primary_PFP_idxs.push_back(i_p);
   }
@@ -244,16 +200,16 @@ void PiRecoTree::GetPFPHierarchy(){
       // Now match energy between MCP hierarchy and PFP hierarchy
       double hierarchy_pfphierarchy_matchedE = 0;
       // Loop through MCP hierarchy and add matched energy if it comes from a PFP in our PFP hierarchy
-      for (int mcp_idx=0; mcp_idx<PiPlusHierarchy_nMCPs; mcp_idx++){
-          for (int pfp_matchidx=0; pfp_matchidx<PiPlusHierarchy_MCP_nMatchedPFPs->at(mcp_idx); pfp_matchidx++){
+      for (int mcp_idx=0; mcp_idx<nMCPs; mcp_idx++){
+          for (int pfp_matchidx=0; pfp_matchidx<MCP_nMatchedPFPs->at(mcp_idx); pfp_matchidx++){
               // If the matched PFP is not in the PFP hierarchy, continue
-              int pfp_match_id = PiPlusHierarchy_MCP_matchedPFP_ID->at(mcp_idx).at(pfp_matchidx);
+              int pfp_match_id = MCP_matchedPFP_ID->at(mcp_idx).at(pfp_matchidx);
               int pfp_match_trueidx = PFP_ID_to_vectorpos.find(pfp_match_id)->second;
               if (std::find(PFP_hierarchy_idxs.begin(), PFP_hierarchy_idxs.end(), pfp_match_trueidx) == PFP_hierarchy_idxs.end())
                   continue;
 
               // Now sum up matched energy
-              hierarchy_pfphierarchy_matchedE += PiPlusHierarchy_MCP_matchedPFP_matchedE->at(mcp_idx).at(pfp_matchidx);
+              hierarchy_pfphierarchy_matchedE += MCP_matchedPFP_matchedE->at(mcp_idx).at(pfp_matchidx);
           }
       }
 
@@ -266,17 +222,17 @@ void PiRecoTree::GetPFPHierarchy(){
   if (bestmatch_PFP_hierarchy_idxs.size()>0 && verbose){
       int matched_mcpid = PFP_ID_to_bestmatchMCPid->at(bestmatch_PFP_hierarchy_idxs.at(0)).second;
       int matched_mcp_idx = MCP_ID_to_vectorpos.find(matched_mcpid)->second;
-      std::cout << "Primary PFP matched to PDG code " << PiPlusHierarchy_MCP_PDGcode->at(matched_mcp_idx) << std::endl;
-      primarypfp_pdgcode = PiPlusHierarchy_MCP_PDGcode->at(matched_mcp_idx);
+      std::cout << "Primary PFP matched to PDG code " << MCP_PDGcode->at(matched_mcp_idx) << std::endl;
+      primarypfp_pdgcode = MCP_PDGcode->at(matched_mcp_idx);
   }
 };
 
-std::vector<int> PiRecoTree::GetGoodRecoMCPsfromPFP(int pfpid){
+std::vector<int> KinkFindingTree::GetGoodRecoMCPsfromPFP(int pfpid){
   // For a given PFP, find all MCPs associated to it
   // Of those, find all MCPs that have > 90% (tuneable) of their energy in this PFP
   // Final requirement for this to be "good" reco: these MCPs have to account for >90% of the PFP energy (also tuneable)
 
-  // Return a vector of good MCP IDs (where "ID" means position in the vector PiPlusHierarchy_MCP_blah)
+  // Return a vector of good MCP IDs (where "ID" means position in the vector MCP_blah)
   // If the vector is empty, then this PFP did not have "good" reco matches
   std::vector<int> MCP_vectorpos;
 
@@ -286,26 +242,26 @@ std::vector<int> PiRecoTree::GetGoodRecoMCPsfromPFP(int pfpid){
   // The tree saves MCP->all matched PFP mapping but not the other way around, so loop through all MCPs and ask if they match this PFP
   double matchedE = 0;
 
-  for (int i_mcp=0; i_mcp<PiPlusHierarchy_nMCPs; i_mcp++){
-    for (int i_matchpfp=0; i_matchpfp<PiPlusHierarchy_MCP_nMatchedPFPs->at(i_mcp); i_matchpfp++){
+  for (int i_mcp=0; i_mcp<nMCPs; i_mcp++){
+    for (int i_matchpfp=0; i_matchpfp<MCP_nMatchedPFPs->at(i_mcp); i_matchpfp++){
 
       // Are we looking at the PFP we want? If not, move on to the next one
-      if (PiPlusHierarchy_MCP_matchedPFP_ID->at(i_mcp).at(i_matchpfp)!=pfpid) continue;
+      if (MCP_matchedPFP_ID->at(i_mcp).at(i_matchpfp)!=pfpid) continue;
 
       // If we have the right PFP, does the matched energy constitute more than 90% of the MCP energy? If not, move on
-      if (PiPlusHierarchy_MCP_matchedPFP_matchedE->at(i_mcp).at(i_matchpfp) < 0.9*PiPlusHierarchy_MCP_totaldepE->at(i_mcp)) continue;
+      if (MCP_matchedPFP_matchedE->at(i_mcp).at(i_matchpfp) < 0.9*MCP_totaldepE->at(i_mcp)) continue;
 
       // Check that this MCP accounts for at least 5% of the PFP energy
-      if (PiPlusHierarchy_MCP_matchedPFP_matchedE->at(i_mcp).at(i_matchpfp) < 0.1*PFP_totaldepE->at(pfp_idx)) continue;
+      if (MCP_matchedPFP_matchedE->at(i_mcp).at(i_matchpfp) < 0.1*PFP_totaldepE->at(pfp_idx)) continue;
 
       // Don't use electrons because they make terrible tracks
-      if (TMath::Abs(PiPlusHierarchy_MCP_PDGcode->at(i_mcp))==11) continue;
+      if (TMath::Abs(MCP_PDGcode->at(i_mcp))==11) continue;
 
       // If those conditions are passed, put this MCP vectorpos in the vector
       MCP_vectorpos.push_back(i_mcp);
 
       // Also add the matched energy (we'll use this in the final check)
-      matchedE += PiPlusHierarchy_MCP_matchedPFP_matchedE->at(i_mcp).at(i_matchpfp);
+      matchedE += MCP_matchedPFP_matchedE->at(i_mcp).at(i_matchpfp);
     } // end loop over i_matchpfp
   } // end loop over i_mcp
 
@@ -318,7 +274,7 @@ std::vector<int> PiRecoTree::GetGoodRecoMCPsfromPFP(int pfpid){
   return MCP_vectorpos;
 }; // end function
 
-double PiRecoTree::IsTrueKink(std::vector<int> MCP_vectorposes, double threshold){
+double KinkFindingTree::IsTrueKink(std::vector<int> MCP_vectorposes, double threshold){
   if (MCP_vectorposes.size()>1){
     std::cout << "Assuming true kink because PFP contains " << MCP_vectorposes.size() << " MCPs" << std::endl;
 
@@ -327,12 +283,12 @@ double PiRecoTree::IsTrueKink(std::vector<int> MCP_vectorposes, double threshold
     for (int i_m=0; i_m<MCP_vectorposes.size()-1; i_m++){
       int mcp_1 = MCP_vectorposes.at(i_m);
       int mcp_2 = MCP_vectorposes.at(i_m+1);
-      std::vector<double> Px_1 = PiPlusHierarchy_MCP_Px_eachpoint->at(mcp_1);
-      std::vector<double> Py_1 = PiPlusHierarchy_MCP_Py_eachpoint->at(mcp_1);
-      std::vector<double> Pz_1 = PiPlusHierarchy_MCP_Pz_eachpoint->at(mcp_1);
-      std::vector<double> Px_2 = PiPlusHierarchy_MCP_Px_eachpoint->at(mcp_2);
-      std::vector<double> Py_2 = PiPlusHierarchy_MCP_Py_eachpoint->at(mcp_2);
-      std::vector<double> Pz_2 = PiPlusHierarchy_MCP_Pz_eachpoint->at(mcp_2);
+      std::vector<double> Px_1 = MCP_Px_eachpoint->at(mcp_1);
+      std::vector<double> Py_1 = MCP_Py_eachpoint->at(mcp_1);
+      std::vector<double> Pz_1 = MCP_Pz_eachpoint->at(mcp_1);
+      std::vector<double> Px_2 = MCP_Px_eachpoint->at(mcp_2);
+      std::vector<double> Py_2 = MCP_Py_eachpoint->at(mcp_2);
+      std::vector<double> Pz_2 = MCP_Pz_eachpoint->at(mcp_2);
 
       // Find last non-(0,0,0) momentum in MCP 1
       double vec1_x=0, vec1_y=0, vec1_z=0;
@@ -357,9 +313,9 @@ double PiRecoTree::IsTrueKink(std::vector<int> MCP_vectorposes, double threshold
   } // end if (MCP_vectorposes.size()>1)
 
   int mcp_idx = MCP_vectorposes.at(0);
-  std::vector<double> Px = PiPlusHierarchy_MCP_Px_eachpoint->at(mcp_idx);
-  std::vector<double> Py = PiPlusHierarchy_MCP_Py_eachpoint->at(mcp_idx);
-  std::vector<double> Pz = PiPlusHierarchy_MCP_Pz_eachpoint->at(mcp_idx);
+  std::vector<double> Px = MCP_Px_eachpoint->at(mcp_idx);
+  std::vector<double> Py = MCP_Py_eachpoint->at(mcp_idx);
+  std::vector<double> Pz = MCP_Pz_eachpoint->at(mcp_idx);
 
   double mincosth = 1.0;
 
@@ -398,7 +354,7 @@ double PiRecoTree::IsTrueKink(std::vector<int> MCP_vectorposes, double threshold
 };
 
 
-std::vector<int> PiRecoTree::FindRecoKinks(int pfp_idx, double mincosth, int evtnum){
+std::vector<int> KinkFindingTree::FindRecoKinks(int pfp_idx, double mincosth, int evtnum){
 
   // Order spacepoints (by closest to reco track start)
   std::vector<std::pair<std::vector<double>,int>> ordered_spacepoints_pair_origidx;
@@ -435,7 +391,7 @@ std::vector<int> PiRecoTree::FindRecoKinks(int pfp_idx, double mincosth, int evt
 };
 
 
-std::vector<int> PiRecoTree::FindRecoKinks_byangle(int pfp_idx, double mincosth, int evtnum, double kinkcosth, int _slider_window=20){
+std::vector<int> KinkFindingTree::FindRecoKinks_byangle(int pfp_idx, double mincosth, int evtnum, double kinkcosth, int _slider_window=20){
 
   // Order spacepoints (by closest to reco track start)
   std::vector<std::pair<std::vector<double>,int>> ordered_spacepoints_pair_origidx;

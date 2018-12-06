@@ -210,6 +210,7 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
    vars->TPCObj_PFP_MCP_numdaughters_notphotons = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_MCP_motherIDeq0 = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_MCP_PDG_mTruePDG = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_MCP_trueOrigPDG = new std::vector<double>(vecsize,-9999);
 
    vars->TPCObj_PFP_track_SpacepointsXYZ_Ordered = new std::vector<std::vector<std::vector<double>>>(vecsize);
    vars->TPCObj_PFP_track_SpacepointsQPlane2_Ordered = new std::vector<std::vector<double>>(vecsize);
@@ -269,12 +270,14 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
 
       // Get variables related to MCP by looping through MCPs and matching MCPid
       vars->TPCObj_PFP_MCP_motherIDeq0->at(i_track) = 0;
+      vars->TPCObj_PFP_MCP_trueOrigPDG->at(i_track) = vars->TPCObj_PFP_truePDG->at(i_track);
+
       for (size_t i_MCP=0; i_MCP < vars->MCP_ID->size(); i_MCP++){
          if (vars->TPCObj_PFP_MCPid->at(i_track) == vars->MCP_ID->at(i_MCP)){
             vars->TPCObj_PFP_MCP_PDG->at(i_track) = vars->MCP_PDG->at(i_MCP);
             vars->TPCObj_PFP_MCP_numdaughters->at(i_track) = vars->MCP_numdaughters->at(i_MCP);
 
-            // Loop through mothers and find mother PDG
+            // Is mother ID 0?
             int motherID = vars->MCP_MotherID->at(i_MCP);
             if (motherID==0){
                vars->TPCObj_PFP_MCP_motherIDeq0->at(i_track) = 1.0;
@@ -282,14 +285,20 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
             else{
                vars->TPCObj_PFP_MCP_motherIDeq0->at(i_track) = 0.0;
             }
-            // std::cout << "MCP ID: " << vars->TPCObj_PFP_MCPid->at(i_track) << ", mother ID = " << motherID;
-            // for (size_t i_motherMCP=0; i_motherMCP < vars->MCP_ID->size(); i_motherMCP++){
-            //    if (vars->MCP_ID->at(i_motherMCP) == motherID){
-            //       vars->TPCObj_PFP_MCP_motherPDG->at(i_track) = vars->MCP_PDG->at(i_motherMCP);
-            //       // std::cout << ", mother PDG = " << vars->TPCObj_PFP_MCP_motherPDG->at(i_track) << std::endl;
-            //       break;
-            //    }
-            // }
+
+            // Loop through MCPs to find "original" MCP (i.e. the first one after the neutrino)
+            int currentidx = i_MCP;
+            while (motherID!=0){
+            // std::cout << vars->MCP_PDG->at(currentidx) << "(" << currentidx << ") from  " << "(" << motherID << ")" << std::endl;
+              // "mother" of previous MCP is now the one we are studying
+              for (size_t i_MCP2=0; i_MCP2 < vars->MCP_ID->size(); i_MCP2++){
+                if (motherID == vars->MCP_ID->at(i_MCP2)){
+                  currentidx = i_MCP2;
+                }
+              }
+              motherID = vars->MCP_MotherID->at(currentidx);
+            }
+            vars->TPCObj_PFP_MCP_trueOrigPDG->at(i_track)=vars->MCP_PDG->at(currentidx);
 
 
             // Loop through daughters and find daughter PDGs
