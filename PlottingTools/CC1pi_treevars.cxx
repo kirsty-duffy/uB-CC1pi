@@ -211,6 +211,7 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
    vars->TPCObj_PFP_MCP_motherIDeq0 = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_MCP_PDG_mTruePDG = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_MCP_trueOrigPDG = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_distance_to_wall = new std::vector<double>(vecsize,-9999);
 
    vars->TPCObj_PFP_track_SpacepointsXYZ_Ordered = new std::vector<std::vector<std::vector<double>>>(vecsize);
    vars->TPCObj_PFP_track_SpacepointsQPlane2_Ordered = new std::vector<std::vector<double>>(vecsize);
@@ -255,6 +256,7 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
    vars->pioncandidatePDG = -9999;
    vars->BDT_muoncandidatePDG = -9999;
    vars->BDT_pioncandidatePDG = -9999;
+
 
    // Just use collection plane for now
    int i_pl = 2;
@@ -350,6 +352,7 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
          vars->TPCObj_PFP_track_MCS_p_meanScatter->at(i_track) = -9999.;
          vars->TPCObj_PFP_track_passesMIPcut->at(i_track) = -9999.;
          vars->TPCObj_PFP_track_passesPioncut->at(i_track) = -9999.;
+         vars->TPCObj_PFP_distance_to_wall->at(i_track) = -9999.;
 
          continue;
       }
@@ -536,6 +539,23 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
       }
 
 
+      // Find distance to nearest TPC boundary
+      std::vector<double> dists;
+      dists.emplace_back(std::abs(vars->TPCObj_PFP_track_start->at(i_track).at(0) - 0));       //xmin
+      dists.emplace_back(std::abs(vars->TPCObj_PFP_track_start->at(i_track).at(0) - 256.35));  //xmax
+      dists.emplace_back(std::abs(vars->TPCObj_PFP_track_start->at(i_track).at(1) - -115.53)); //ymin
+      dists.emplace_back(std::abs(vars->TPCObj_PFP_track_start->at(i_track).at(1) - 117.47));  //ymax
+      dists.emplace_back(std::abs(vars->TPCObj_PFP_track_start->at(i_track).at(2) - 0.1));     //zmin
+      dists.emplace_back(std::abs(vars->TPCObj_PFP_track_start->at(i_track).at(2) - 1036.9));  //zmax
+      dists.emplace_back(std::abs(vars->TPCObj_PFP_track_end->at(i_track).at(0) - 0));       //xmin
+      dists.emplace_back(std::abs(vars->TPCObj_PFP_track_end->at(i_track).at(0) - 256.35));  //xmax
+      dists.emplace_back(std::abs(vars->TPCObj_PFP_track_end->at(i_track).at(1) - -115.53)); //ymin
+      dists.emplace_back(std::abs(vars->TPCObj_PFP_track_end->at(i_track).at(1) - 117.47));  //ymax
+      dists.emplace_back(std::abs(vars->TPCObj_PFP_track_end->at(i_track).at(2) - 0.1));     //zmin
+      dists.emplace_back(std::abs(vars->TPCObj_PFP_track_end->at(i_track).at(2) - 1036.9));  //zmax
+      vars->TPCObj_PFP_distance_to_wall->at(i_track) = *std::min_element(dists.begin(),dists.end());
+
+
 
 
       // Calculate BDT score
@@ -543,7 +563,8 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
       vars->float_VtxTrackDist = (float)(vars->TPCObj_PFP_VtxTrackDist->at(i_track));
       vars->float_nhits = (float)(vars->TPCObj_PFP_track_dEdx_nhits->at(i_track));
       vars->float_lnLmipoverp = (float)(vars->TPCObj_PFP_lnLmipoverp->at(i_track));
-      if(vars->float_dEdx_truncmean_start==-9999 || vars->float_VtxTrackDist==-9999 || vars->float_nhits==-9999 || vars->float_lnLmipoverp==-9999) {
+      vars->float_distance_to_wall = (float)(vars->TPCObj_PFP_distance_to_wall->at(i_track));
+      if(vars->float_dEdx_truncmean_start==-9999 || vars->float_VtxTrackDist==-9999 || vars->float_nhits==-9999 || vars->float_lnLmipoverp==-9999 || vars->float_distance_to_wall == -9999) {
          vars->TPCObj_PFP_track_BDTscore->at(i_track) = -9999;
       }
       else {
@@ -561,6 +582,7 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
             pion_length = vars->TPCObj_PFP_track_length->at(i_track);
          }
       }
+
 
       // Evaluate MIP cut (i.e. whether we want to class this track as a MIP). Cut algorithm defined in CC1pi_cuts.cxx and the variables that go into the decision are defined in CC1pi_cuts.h
       vars->TPCObj_PFP_track_passesMIPcut->at(i_track) = (double)EvalMIPCut(vars,i_track,MIPCutVars);
@@ -755,14 +777,15 @@ void MakeMVATrees(TTree *muon_tree, TTree *pion_tree, TTree *background_tree, MV
 
    for(int i_track=0; i_track < vars->TPCObj_PFP_truePDG->size(); i_track++){
 
-      //Only daughter get considered as possible MIP candidates, so also only train with them
+      //Only daughters get considered as possible MIP candidates, so also only train with them
       if(!(vars->TPCObj_PFP_isDaughter->at(i_track))) continue;
 
       //Don't train on bogus values (though also, we should probably try to understand why there are bogus values)
       if(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track)==-9999
             || vars->TPCObj_PFP_VtxTrackDist->at(i_track)==-9999
             || vars->TPCObj_PFP_track_dEdx_nhits->at(i_track)==-9999
-            || vars->TPCObj_PFP_lnLmipoverp->at(i_track) == -9999) continue;
+            || vars->TPCObj_PFP_lnLmipoverp->at(i_track) == -9999
+            || vars->TPCObj_PFP_distance_to_wall->at(i_track) == -9999) continue;
 
       // Only train on neutrino-induced particles
       if(vars->Truth_topology == kCosmic || vars->Truth_topology == kMixed || vars->Truth_topology == kUnknown) continue;
@@ -774,6 +797,7 @@ void MakeMVATrees(TTree *muon_tree, TTree *pion_tree, TTree *background_tree, MV
       MVA_vars->VtxTrackDist = vars->TPCObj_PFP_VtxTrackDist->at(i_track);
       MVA_vars->nhits = vars->TPCObj_PFP_track_dEdx_nhits->at(i_track);
       MVA_vars->lnLmipoverp = vars->TPCObj_PFP_lnLmipoverp->at(i_track);
+      MVA_vars->distance_to_wall = vars->TPCObj_PFP_distance_to_wall->at(i_track);
 
       if(vars->TPCObj_PFP_truePDG->at(i_track)==13) {
          muon_tree->Fill();

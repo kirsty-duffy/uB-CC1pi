@@ -134,6 +134,7 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_track_BDTscore;
    std::vector<double> *TPCObj_NDaughterPFPs;
    std::vector<double> *TPCObj_PFP_MCP_trueOrigPDG;
+   std::vector<double> *TPCObj_PFP_distance_to_wall;
 
    std::vector<std::vector<std::vector<double>>> *TPCObj_PFP_track_SpacepointsXYZ_Ordered;
    std::vector<std::vector<double>> *TPCObj_PFP_track_SpacepointsQPlane2_Ordered;
@@ -173,6 +174,7 @@ struct treevars{
    float float_VtxTrackDist;
    float float_nhits;
    float float_lnLmipoverp;
+   float float_distance_to_wall;
 
 };
 
@@ -182,6 +184,7 @@ struct MVAvars {
    double VtxTrackDist;
    double nhits;
    double lnLmipoverp;
+   double distance_to_wall;
 };
 
 #endif
