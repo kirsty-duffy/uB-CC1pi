@@ -180,7 +180,7 @@ void TMVAClassification( TString myMethodList = "" )
    // front of the "Silent" argument in the option string
    TMVA::Factory *factory = new TMVA::Factory( "TMVAClassification", outputFile,
                                                "!V:!Silent:Color:DrawProgressBar:Transformations=I;D;P;G,D:AnalysisType=Auto" );
-   TMVA::DataLoader *dataloader = new TMVA::DataLoader("dataset_dEdxprecut");
+   TMVA::DataLoader *dataloader = new TMVA::DataLoader("dataset_tighterbins");
 
    // If you wish to modify default settings
    // (please check "src/Config.h" to see all available global options)
@@ -329,7 +329,7 @@ void TMVAClassification( TString myMethodList = "" )
    // Apply additional cuts on the signal and background samples (can be different)
    // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
    // for example: TCut mycutb = "abs(var1)<0.5";
-   TCut mycuts = "dEdx_truncmean_start < 40 && VtxTrackDist < 50 && nhits < 1000 && lnLmipoverp > -20 && lnLmipoverp < 20";
+   TCut mycuts = "dEdx_truncmean_start < 25 && VtxTrackDist < 30 && nhits < 1000 && lnLmipoverp > -20 && lnLmipoverp < 20";
    TCut mycutb = mycuts; 
 
    
