@@ -135,17 +135,14 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    muon -> Branch("VtxTrackDist", &(MVA_vars->VtxTrackDist));
    muon -> Branch("nhits", &(MVA_vars->nhits));
    muon -> Branch("lnLmipoverp", &(MVA_vars->lnLmipoverp));
-   muon -> Branch("distance_to_wall", &(MVA_vars->distance_to_wall));
    pion -> Branch("dEdx_truncmean_start", &(MVA_vars->dEdx_truncmean_start));
    pion -> Branch("VtxTrackDist", &(MVA_vars->VtxTrackDist));
    pion -> Branch("nhits", &(MVA_vars->nhits));
    pion -> Branch("lnLmipoverp", &(MVA_vars->lnLmipoverp));
-   pion -> Branch("distance_to_wall", &(MVA_vars->distance_to_wall));
    background -> Branch("dEdx_truncmean_start", &(MVA_vars->dEdx_truncmean_start));
    background -> Branch("VtxTrackDist", &(MVA_vars->VtxTrackDist));
    background -> Branch("nhits", &(MVA_vars->nhits));
    background -> Branch("lnLmipoverp", &(MVA_vars->lnLmipoverp));
-   background -> Branch("distance_to_wall", &(MVA_vars->distance_to_wall));
 
    gStyle->SetTitleX(0.5);
    gStyle->SetTitleAlign(23);
@@ -165,14 +162,13 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    settreevars(t_bnbcos,&mc_vars);
 
    std::string BookMVAType = "BDTG";
-   std::string BookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_nonbooleanContainment/weights/TMVAClassification_BDTG.weights.xml";
+   std::string BookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_dEdxprecut/weights/TMVAClassification_BDTG.weights.xml";
 
    TMVA::Reader fReader("");
    fReader.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
    fReader.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
    fReader.AddVariable("nhits", &(mc_vars.float_nhits));
    fReader.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
-   fReader.AddVariable("distance_to_wall", &(mc_vars.float_distance_to_wall));
    fReader.BookMVA(BookMVAType.c_str(), BookMVALoc.c_str());
 
    TFile *f_onbeam=nullptr;
@@ -189,7 +185,6 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
      fReader_onbeam.AddVariable("VtxTrackDist", &(onbeam_vars.float_VtxTrackDist));
      fReader_onbeam.AddVariable("nhits", &(onbeam_vars.float_nhits));
      fReader_onbeam.AddVariable("lnLmipoverp", &(onbeam_vars.float_lnLmipoverp));
-     fReader_onbeam.AddVariable("distance_to_wall", &(onbeam_vars.float_distance_to_wall));
      fReader_onbeam.BookMVA(BookMVAType.c_str(), BookMVALoc.c_str());
    }
 
@@ -207,7 +202,6 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
      fReader_offbeam.AddVariable("VtxTrackDist", &(offbeam_vars.float_VtxTrackDist));
      fReader_offbeam.AddVariable("nhits", &(offbeam_vars.float_nhits));
      fReader_offbeam.AddVariable("lnLmipoverp", &(offbeam_vars.float_lnLmipoverp));
-     fReader_offbeam.AddVariable("distance_to_wall", &(offbeam_vars.float_distance_to_wall));
      fReader_offbeam.BookMVA(BookMVAType.c_str(), BookMVALoc.c_str());
    }
 
