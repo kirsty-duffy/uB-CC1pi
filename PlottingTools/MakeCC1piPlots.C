@@ -10,87 +10,45 @@
 #include "ProtondEdxrrPlots.h"
 #include "getSimPot.C"
 #include "MakeLocalLinearityPlots.C"
+#include "CC1pi_EffPurHists.h"
 
 #include <boost/algorithm/string.hpp>
 
 // What variables do we want these plots as a function of?
 std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
    std::vector<CC1piPlotVars> varstoplot = {
-      Var_TPCObj_PFP_lnLmipoverp(vars)
-      ,Var_TPCObj_PFP_lnLmipoverp_SecondMIP(vars)
-      ,Var_TPCObj_PFP_Lmumipovermumipp(vars)
-      ,Var_TPCObj_PFP_lnLmipoverp_SecondMIPcont(vars)
-      // ,Var_TPCObj_PFP_Lmumipovermumipp_cont(vars)
-      // ,Var_TPCObj_PFP_BrokenTrackAngle(vars)
-      // ,Var_TPCObj_PFP_track_residual_mean_low(vars)
-      // ,Var_TPCObj_PFP_track_residual_mean_high(vars)
-      // ,Var_TPCObj_PFP_track_residual_std_low(vars)
-      // ,Var_TPCObj_PFP_track_residual_std_high(vars)
-      ,Var_TPCObj_PFP_track_Chi2Proton_SecondMIP(vars)
-      ,Var_TPCObj_PFP_track_Chi2Proton_SecondMIPcont(vars)
+      Var_TPCObj_PFP_track_BDTscore(vars)
+      ,Var_TPCObj_PFP_track_BDTscore_IsMIP(vars)
+      ,Var_TPCObj_PFP_track_BDTscore_NotMIP(vars)
+      ,Var_TPCObj_PFP_track_BDTscore_MuMuPairs(vars)
       ,Var_TPCObj_AngleBetweenMIPs(vars)
-      ,Var_TPCObj_PFP_track_perc_used_hits(vars)
-      ,Var_TPCObj_PFP_track_perc_used_hits_SecondMIP(vars)
-      ,Var_TPCObj_PFP_VtxTrackDist(vars)
-      ,Var_TPCObj_PFP_VtxTrackDist_SecondMIP(vars)
       ,Var_TPCObj_AngleBetweenMIPs_mumupairs(vars)
+      ,Var_TPCObj_PFP_track_dEdx_truncmean_start_IsMIP(vars)
+      ,Var_TPCObj_PFP_track_dEdx_truncmean_start_NotMIP(vars)
+      ,Var_TPCObj_PFP_track_dEdx_truncmean_start_mumupairs(vars)
+      ,Var_TPCObj_PFP_VtxTrackDist_IsMIP(vars)
+      ,Var_TPCObj_PFP_VtxTrackDist_NotMIP(vars)
       ,Var_TPCObj_PFP_VtxTrackDist_mumupairs(vars)
-      ,Var_TPCObj_PFP_VtxTrackDist_SecondMIP_mumupairs(vars)
+      ,Var_TPCObj_PFP_track_dedx_grminhits_IsMIP(vars)
+      ,Var_TPCObj_PFP_track_dedx_grminhits_NotMIP(vars)
+      ,Var_TPCObj_PFP_track_dedx_grminhits_mumupairs(vars)
+      ,Var_TPCObj_PFP_lnLmipoverp_IsMIP(vars)
+      ,Var_TPCObj_PFP_lnLmipoverp_NotMIP(vars)
+      ,Var_TPCObj_PFP_lnLmipoverp_mumupairs(vars)
+      ,Var_TPCObj_BDTscore_MIPdiv(vars)
+      ,Var_TPCObj_BDTscore_MIPdiff(vars)
+      ,Var_TPCObj_PFP_trueKE_selMIPs(vars)
+      ,Var_TPCObj_PFP_trueEndP_selMIPs(vars)
+      ,Var_TPCObj_PFP_track_theta_selMIPs(vars)
+      ,Var_TPCObj_PFP_track_phi_selMIPs(vars)
+      ,Var_TPCObj_PFP_track_nhits_LeadingMIP(vars)
+      ,Var_TPCObj_PFP_track_nhits_SecondMIP(vars)
       ,Var_TPCObj_PFP_track_length_LeadingMIP_mumupairs(vars)
       ,Var_TPCObj_PFP_track_length_SecondMIP_mumupairs(vars)
-      ,Var_TPCObj_PFP_track_theta_SecondMIP(vars)
-      ,Var_TPCObj_PFP_track_phi_SecondMIP(vars)
-      ,Var_TPCObj_PFP_track_dEdx_stddev_SecondMIP(vars)
-      ,Var_TPCObj_PFP_track_dEdx_stddev_start_SecondMIP(vars)
-      ,Var_TPCObj_PFP_track_dEdx_mean_start_SecondMIP(vars)
-      ,Var_TPCObj_PFP_track_dEdx_truncmoverm_start_SecondMIP(vars)
-      // ,Var_TPCObj_PFP_isContained(vars)
-      ,Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)
-      // ,Var_TPCObj_DaughterTracks_Order_dEdxtr(vars)
-      // ,Var_TPCObj_DaughterTracks_Order_dEdxtr_selMIPs(vars)
-      // ,Var_TPCObj_DaughterTracks_Order_trklen_selMIPs(vars)
-
-      // Var_TPCObj_PFP_MCSLLpiMinusLLp_LeadingMIP(vars)
-      ,Var_TPCObj_PFP_MCSLLpiMinusLLp_SecondMIP(vars)
-      // ,Var_TPCObj_PFP_MCSLLpiMinusLLp_NotPion(vars)
-      // ,Var_TPCObj_PFP_MCSLLpiMinusLLp_LeadingMIPcont(vars)
-      ,Var_TPCObj_PFP_MCSLLpiMinusLLp_SecondMIPcont(vars)
-      // ,Var_TPCObj_PFP_MCSLLpiMinusLLp_NotPioncont(vars)
-      // ,Var_TPCObj_PFP_track_MomRangeMinusMCS_p_LeadingMIPcont(vars)
-      ,Var_TPCObj_PFP_track_MomRangeMinusMCS_p_SecondMIPcont(vars)
-      // ,Var_TPCObj_PFP_track_MomRangeMinusMCS_p_NotPioncont(vars)
-      // ,Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_LeadingMIPcont(vars)
-      // ,Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_SecondMIPcont(vars)
-      // ,Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_SecondMIPcont_mumupairs(vars)
-      // ,Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_NotPioncont(vars)
-      // ,Var_TPCObj_PFP_track_nhits_LeadingMIP(vars)
-      // ,Var_TPCObj_PFP_track_nhits_SecondMIP(vars)
-      ,Var_TPCObj_PFP_track_MCSpi_maxScatter_SecondMIP(vars)
-      ,Var_TPCObj_PFP_track_MCSp_maxScatter_SecondMIP(vars)
-      ,Var_TPCObj_PFP_track_MCSpi_meanScatter_SecondMIP(vars)
-      ,Var_TPCObj_PFP_track_MCSp_meanScatter_SecondMIP(vars)
-      ,Var_TPCObj_PFP_track_MCSpi_maxScatter_SecondMIP_mumupairs(vars)
-      ,Var_TPCObj_PFP_track_MCSp_maxScatter_SecondMIP_mumupairs(vars)
-      ,Var_TPCObj_PFP_track_MCSpi_meanScatter_SecondMIP_mumupairs(vars)
-      ,Var_TPCObj_PFP_track_MCSp_meanScatter_SecondMIP_mumupairs(vars)
-      // ,Var_TPCObj_LeadingMIP_PandoraClassedAsTrack(vars)
-      // ,Var_TPCObj_PFP_trueKE_selMIPs(vars)
-      // ,Var_TPCObj_PFP_trueKE_SecondMIP(vars)
-      ,Var_TPCObj_PFP_trueEndP_SecondMIP(vars)
-      // ,Var_TPCObj_NotMIPs_isContained(vars)
-      // ,Var_TPCObj_PFP_ndaughters_SecondMIP(vars)
-      // ,Var_TPCObj_PFP_ndaughters_SecondMIP_mumupairs(vars)
-      // ,Var_TPCObj_PFP_MCP_PDG_mTruePDG(vars)
-      // ,Var_TPCObj_PFP_MCP_numdaughters_SecondMIP(vars)
-      ,Var_TPCObj_PFP_MCP_motherIDeq0_SecondMIP(vars)
-      ,Var_TPCObj_dEdx_truncmean_MIPdiff(vars)
-      ,Var_TPCObj_dEdx_truncmean_MIPdiff_mupi(vars)
-      ,Var_TPCObj_dEdx_truncmean_MIPdiff_muproton(vars)
-      ,Var_TPCObj_dEdx_truncmean_MIPdiff_other(vars)
-      ,Var_TPCObj_PFP_track_dEdx_nhits(vars)
-      ,Var_TPCObj_PFP_track_BDTscore(vars)
-      ,Var_TPCObj_PFP_track_passesMIPcut(vars)
-      //,Var_TPCObj_NDaughterPFPs(vars)
+      ,Var_TPCObj_PFP_track_length_LeadingMIP(vars)
+      ,Var_TPCObj_PFP_track_length_SecondMIP(vars)
+      ,Var_TPCObj_PFP_track_length(vars)
+      ,Var_TPCObj_PFP_lnLmipovermu(vars)
    };
    return varstoplot;
 }
@@ -104,6 +62,9 @@ std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> GetVarstoplot2D(treevars *va
       // ,{Var_TPCObj_PFP_track_dEdx_stddev_start_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
       // ,{Var_TPCObj_PFP_track_theta_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
       {Var_TPCObj_PFP_track_theta(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
+      ,{Var_TPCObj_PFP_track_theta(vars),Var_TPCObj_PFP_track_BDTscore(vars)}
+      // ,{Var_TPCObj_PFP_track_phi(vars),Var_TPCObj_PFP_track_BDTscore(vars)}
+      ,{Var_TPCObj_AngleBetweenMIPs(vars),Var_TPCObj_PFP_track_BDTscore(vars)}
       // {Var_TPCObj_PFP_VtxTrackDist_mumupairs(vars),Var_TPCObj_PFP_VtxTrackDist_SecondMIP_mumupairs(vars)}
       // {Var_TPCObj_PFP_MCSLLpiMinusLLp_NotPion(vars),Var_TPCObj_PFP_track_length(vars)}
       // ,{Var_TPCObj_PFP_MCSLLpiMinusLLp_NotPioncont(vars),Var_TPCObj_PFP_track_length(vars)}
@@ -257,42 +218,42 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
 
     mc_hists2D_cc1pi_pdg_aftercuts[i_h] = new StackedHistPDGCode(std::string("hCC1pi2D_PDG_aftercuts_")+histname_x+histname_y,std::string(";")+scratch_x.at(1)+std::string(";")+scratch_y.at(1),bins_x.at(0),bins_x.at(1),bins_x.at(2),bins_y.at(0),bins_y.at(1),bins_y.at(2));
     // mc_hists2D_cc1pi_top_aftercuts[i_h] = new StackedHistTopology(std::string("hCC1pi2D_Top_aftercuts_")+histname_x+histname_y,std::string(";")+scratch_x.at(1)+std::string(";")+scratch_y.at(1),bins_x.at(0),bins_x.at(1),bins_x.at(2),bins_y.at(0),bins_y.at(1),bins_y.at(2));
-}
-
-// Custom 2D histograms: leading vs second MIP true PDG
-std::vector<PDGCode> MIPpdgs = {kMuMinus, kMuPlus, kPiMinus, kPiPlus, kProton};
-int nMIPpdgs = MIPpdgs.size()+1;
-TH2D *selMIPs2D = new TH2D("selMIPs2D","Selected MIP-like tracks;Leading MIP; Second MIP",nMIPpdgs,0,nMIPpdgs,nMIPpdgs,0,nMIPpdgs);
-for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
-   if (i_bin==nMIPpdgs){
-      selMIPs2D->GetXaxis()->SetBinLabel(i_bin,"Other");
-      selMIPs2D->GetYaxis()->SetBinLabel(i_bin,"Other");
-      continue;
    }
-   selMIPs2D->GetXaxis()->SetBinLabel(i_bin,PDGenum2str(MIPpdgs.at(i_bin-1)).c_str());
-   selMIPs2D->GetYaxis()->SetBinLabel(i_bin,PDGenum2str(MIPpdgs.at(i_bin-1)).c_str());
-}
 
-// Custom 2D histograms: muon candidate vs pion candidate true PDG
-TH2D *selMIPsPID2D = new TH2D("selMIPsPID2D","Selected MIP-like tracks;Muon Candidate; Pion Candidate",nMIPpdgs,0,nMIPpdgs,nMIPpdgs,0,nMIPpdgs);
-for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
-   if (i_bin==nMIPpdgs){
-      selMIPsPID2D->GetXaxis()->SetBinLabel(i_bin,"Other");
-      selMIPsPID2D->GetYaxis()->SetBinLabel(i_bin,"Other");
-      continue;
+   // Custom 2D histograms: leading vs second MIP true PDG
+   std::vector<PDGCode> MIPpdgs = {kMuMinus, kMuPlus, kPiMinus, kPiPlus, kProton};
+   int nMIPpdgs = MIPpdgs.size()+1;
+   TH2D *selMIPs2D = new TH2D("selMIPs2D","Selected MIP-like tracks;Leading MIP; Second MIP",nMIPpdgs,0,nMIPpdgs,nMIPpdgs,0,nMIPpdgs);
+   for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
+      if (i_bin==nMIPpdgs){
+         selMIPs2D->GetXaxis()->SetBinLabel(i_bin,"Other");
+         selMIPs2D->GetYaxis()->SetBinLabel(i_bin,"Other");
+         continue;
+      }
+      selMIPs2D->GetXaxis()->SetBinLabel(i_bin,PDGenum2str(MIPpdgs.at(i_bin-1)).c_str());
+      selMIPs2D->GetYaxis()->SetBinLabel(i_bin,PDGenum2str(MIPpdgs.at(i_bin-1)).c_str());
    }
-   selMIPsPID2D->GetXaxis()->SetBinLabel(i_bin,PDGenum2str(MIPpdgs.at(i_bin-1)).c_str());
-   selMIPsPID2D->GetYaxis()->SetBinLabel(i_bin,PDGenum2str(MIPpdgs.at(i_bin-1)).c_str());
-}
 
-// Custom 2D histogram: containment vs length for muons and pions from true signal events
-TH2D *ContainmentLength2D = new TH2D("ContainmentLength2D","True CC1#pi^{+} events;Contained;Longer",4,0,4,2,0,2);
-ContainmentLength2D->GetXaxis()->SetBinLabel(1,"neither");
-ContainmentLength2D->GetXaxis()->SetBinLabel(2,"muon only");
-ContainmentLength2D->GetXaxis()->SetBinLabel(3,"pion only");
-ContainmentLength2D->GetXaxis()->SetBinLabel(4,"both");
-ContainmentLength2D->GetYaxis()->SetBinLabel(1,"#pi^{+}");
-ContainmentLength2D->GetYaxis()->SetBinLabel(2,"#mu^{-}");
+   // Custom 2D histograms: muon candidate vs pion candidate true PDG
+   TH2D *selMIPsPID2D = new TH2D("selMIPsPID2D","Selected MIP-like tracks;Muon Candidate; Pion Candidate",nMIPpdgs,0,nMIPpdgs,nMIPpdgs,0,nMIPpdgs);
+   for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
+      if (i_bin==nMIPpdgs){
+         selMIPsPID2D->GetXaxis()->SetBinLabel(i_bin,"Other");
+         selMIPsPID2D->GetYaxis()->SetBinLabel(i_bin,"Other");
+         continue;
+      }
+      selMIPsPID2D->GetXaxis()->SetBinLabel(i_bin,PDGenum2str(MIPpdgs.at(i_bin-1)).c_str());
+      selMIPsPID2D->GetYaxis()->SetBinLabel(i_bin,PDGenum2str(MIPpdgs.at(i_bin-1)).c_str());
+   }
+
+   // Custom 2D histogram: containment vs length for muons and pions from true signal events
+   TH2D *ContainmentLength2D = new TH2D("ContainmentLength2D","True CC1#pi^{+} events;Contained;Longer",4,0,4,2,0,2);
+   ContainmentLength2D->GetXaxis()->SetBinLabel(1,"neither");
+   ContainmentLength2D->GetXaxis()->SetBinLabel(2,"muon only");
+   ContainmentLength2D->GetXaxis()->SetBinLabel(3,"pion only");
+   ContainmentLength2D->GetXaxis()->SetBinLabel(4,"both");
+   ContainmentLength2D->GetYaxis()->SetBinLabel(1,"#pi^{+}");
+   ContainmentLength2D->GetYaxis()->SetBinLabel(2,"#mu^{-}");
 
    std::cout << std::endl << "--- Considering the following 1D variables --- " << std::endl;
    for (size_t i_var=0; i_var < nplots; i_var++){
@@ -335,11 +296,27 @@ ContainmentLength2D->GetYaxis()->SetBinLabel(2,"#mu^{-}");
    StackedHistTopology *AllEvents = new StackedHistTopology("AllEvents",";;",1,0,1);
    StackedHistTopology *NDaughters = new StackedHistTopology("NDaughters",";Number of #nu daughter PFPs in selected TPCObject;",9,1,10);
 
+   // Standard efficiency plots as a function of kinematic variables
+   // True mu P, true mu theta, true mu phi
+   // True pi P, true pi theta, true pi phi
+   // True mu-pi opening angle
+   histCC1piselEffPur *mc_effpur_truemuP = new histCC1piselEffPur("mc_effpur_truemuP","CC1pi selection efficiency;True muon momentum (GeV/c);CC1pi Selection Efficiency",50,0,1);
+   histCC1piselEffPur *mc_effpur_truemuTheta = new histCC1piselEffPur("mc_effpur_truemuTheta","CC1pi selection efficiency;True muon theta;CC1pi Selection Efficiency",32,0,3.2);
+   histCC1piselEffPur *mc_effpur_truemuPhi = new histCC1piselEffPur("mc_effpur_truemuPhi","CC1pi selection efficiency;True muon phi;CC1pi Selection Efficiency",32,-3.2,3.2);
+   histCC1piselEffPur *mc_effpur_truepiP = new histCC1piselEffPur("mc_effpur_truepiP","CC1pi selection efficiency;True pion momentum (GeV/c);CC1pi Selection Efficiency",50,0,1);
+   histCC1piselEffPur *mc_effpur_truepiTheta = new histCC1piselEffPur("mc_effpur_truepiTheta","CC1pi selection efficiency;True pion theta;CC1pi Selection Efficiency",32,0,3.2);
+   histCC1piselEffPur *mc_effpur_truepiPhi = new histCC1piselEffPur("mc_effpur_truepiPhi","CC1pi selection efficiency;True pion phi;CC1pi Selection Efficiency",32,-3.2,3.2);
+   histCC1piselEffPur *mc_effpur_truemupiOpeningAngle = new histCC1piselEffPur("mc_effpur_truemupiOpeningAngle","CC1pi selection efficiency;True muon-pion opening angle;CC1pi Selection Efficiency",16,0,3.2);
+   histCC1piselEffPur *mc_effpur_trueQ2 = new histCC1piselEffPur("mc_effpur_trueQ2","CC1pi selection efficiency;True Q^{2} (GeV^{2});CC1pi Selection Efficiency",50,0,2);
+   histCC1piselEffPur *mc_effpur_trueW = new histCC1piselEffPur("mc_effpur_trueW","CC1pi selection efficiency;True W (GeV);CC1pi Selection Efficiency",100,0,4);
+
+
    int protonplotsmade=0;
 
    // Loop through MC tree and fill plots
    for (int i = 0; i < t_bnbcos->GetEntries(); i++){
      if (i%1000==0) std::cout << "MC: " << i << "/" << t_bnbcos->GetEntries() << std::endl;
+
       t_bnbcos->GetEntry(i);
 
       Calcvars(&mc_vars, &fReader);
@@ -351,6 +328,73 @@ ContainmentLength2D->GetYaxis()->SetBinLabel(2,"#mu^{-}");
       NDaughters->Fill((NuIntTopology)mc_vars.Truth_topology,mc_vars.TPCObj_NDaughterPFPs->at(0));
 
       bool isSelected = IsEventSelected(&mc_vars);
+
+      // Fill efficiency plots
+      if ((NuIntTopology)mc_vars.Truth_topology == kCC1piplus0p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplus1p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplusNp){
+         double true_mu_P=-9999, true_mu_theta=-9999, true_mu_phi=-9999, true_mu_E=-9999, true_pi_P=-9999, true_pi_theta=-9999, true_pi_phi=-9999, true_opening_angle=-9999;
+         TVector3 true_mu_startdir(1,1,1);
+         TVector3 true_pi_startdir(1,1,1);
+
+         for (size_t i_mcp=0; i_mcp<mc_vars.MCP_ID->size(); i_mcp++){
+            // Skip not-neutrino-daughters
+            if (mc_vars.MCP_MotherID->at(i_mcp)!=0) continue;
+
+            // True muon
+            if ((PDGCode)mc_vars.MCP_PDG->at(i_mcp)==kMuMinus){
+               true_mu_E = mc_vars.MCP_E->at(i_mcp);
+               true_mu_P = mc_vars.MCP_P->at(i_mcp);
+               true_mu_startdir.SetXYZ(mc_vars.MCP_Px->at(i_mcp),mc_vars.MCP_Py->at(i_mcp),mc_vars.MCP_Pz->at(i_mcp));
+               true_mu_theta = true_mu_startdir.Theta();
+               true_mu_phi = true_mu_startdir.Phi();
+            }
+
+            // True pion
+            if ((PDGCode)mc_vars.MCP_PDG->at(i_mcp)==kPiPlus){
+               true_pi_P = mc_vars.MCP_P->at(i_mcp);
+               true_pi_startdir.SetXYZ(mc_vars.MCP_Px->at(i_mcp),mc_vars.MCP_Py->at(i_mcp),mc_vars.MCP_Pz->at(i_mcp));
+               true_pi_theta = true_pi_startdir.Theta();
+               true_pi_phi = true_pi_startdir.Phi();
+            }
+         }
+
+         true_mu_startdir.SetMag(1);
+         true_pi_startdir.SetMag(1);
+         true_opening_angle = TMath::ACos(true_mu_startdir.Dot(true_pi_startdir));
+
+         double true_nu_E=mc_vars.nu_E;
+         // Calculate true W and Q2 as in MINERvA: https://arxiv.org/pdf/1406.6415.pdf
+         // Q^2 = 2Enu(Emu − |pmu| cos(thetamu)) − m_mu^2
+         // W^2 = M_p^2 − Q^2 + 2M_p*E_recoil
+         // where E_recoil = Enu − Emu
+         double Q2 = 2*true_nu_E*(true_mu_E - TMath::Abs(true_mu_P)*TMath::Cos(true_mu_theta)) - 0.105658*0.105658;
+         double E_recoil = true_nu_E - true_mu_E;
+         double W2 = 0.938272*0.938272 - Q2 + 2*0.938272*E_recoil;
+
+         // std::cout << "true_nu_E = " << true_nu_E << ", true_mu_E = " << true_mu_E << ", true_mu_P = " << true_mu_P << ", Q2 = " << Q2 << ", Erecoil = " << E_recoil << ", W = " << TMath::Sqrt(W2) << std::endl;
+
+         if (isSelected){
+            mc_effpur_truemuP->h_cc1pi_sel->Fill(true_mu_P);
+            mc_effpur_truemuTheta->h_cc1pi_sel->Fill(true_mu_theta);
+            mc_effpur_truemuPhi->h_cc1pi_sel->Fill(true_mu_phi);
+            mc_effpur_truepiP->h_cc1pi_sel->Fill(true_pi_P);
+            mc_effpur_truepiTheta->h_cc1pi_sel->Fill(true_pi_theta);
+            mc_effpur_truepiPhi->h_cc1pi_sel->Fill(true_pi_phi);
+            mc_effpur_truemupiOpeningAngle->h_cc1pi_sel->Fill(true_opening_angle);
+            mc_effpur_trueQ2->h_cc1pi_sel->Fill(Q2);
+            mc_effpur_trueW->h_cc1pi_sel->Fill(TMath::Sqrt(W2));
+         }
+         else{
+            mc_effpur_truemuP->h_cc1pi_notsel->Fill(true_mu_P);
+            mc_effpur_truemuTheta->h_cc1pi_notsel->Fill(true_mu_theta);
+            mc_effpur_truemuPhi->h_cc1pi_notsel->Fill(true_mu_phi);
+            mc_effpur_truepiP->h_cc1pi_notsel->Fill(true_pi_P);
+            mc_effpur_truepiTheta->h_cc1pi_notsel->Fill(true_pi_theta);
+            mc_effpur_truepiPhi->h_cc1pi_notsel->Fill(true_pi_phi);
+            mc_effpur_truemupiOpeningAngle->h_cc1pi_notsel->Fill(true_opening_angle);
+            mc_effpur_trueQ2->h_cc1pi_notsel->Fill(Q2);
+            mc_effpur_trueW->h_cc1pi_notsel->Fill(TMath::Sqrt(W2));
+         }
+      }
 
 
       // For all events, make hit dQds and local linearity plots for true pi+ and mu tracks
@@ -373,6 +417,8 @@ ContainmentLength2D->GetYaxis()->SetBinLabel(2,"#mu^{-}");
       }
 
       if(isSelected){
+         // std::cout << i << " " << mc_vars.TPCObj_LeadingMIPtrackIndex << " " << mc_vars.TPCObj_SecondMIPtrackIndex << std::endl;
+
          SelectedEvents->Fill((NuIntTopology)mc_vars.Truth_topology,0.5);
 
          PDGCode LeadingMIPpdg = PDGCode(mc_vars.TPCObj_PFP_truePDG->at(mc_vars.TPCObj_LeadingMIPtrackIndex));
@@ -437,7 +483,9 @@ ContainmentLength2D->GetYaxis()->SetBinLabel(2,"#mu^{-}");
          // Loop over tracks
          for (size_t i_tr = 0; i_tr < vartoplot.size(); i_tr++){
 
-            // if (!(mc_vars.TPCObj_PFP_isDaughter->at(i_tr) && bool(mc_vars.TPCObj_PFP_track_passesMIPcut->at(i_tr)))) continue;
+            // Hack: fill plots for selected MIPs only (for diagnosing issues with MIP selection)
+            // if (!(mc_vars.TPCObj_PFP_isDaughter->at(i_tr))) continue;
+            // if (EvalMIPCut(&mc_vars,i_tr,nullptr)<1) continue;
 
             if (!(FillPlotForTrack(&(Varstoplot.at(i_h)), &mc_vars, i_tr))) continue;
 
@@ -474,7 +522,7 @@ ContainmentLength2D->GetYaxis()->SetBinLabel(2,"#mu^{-}");
 
       // Fill custom 2D plot
       ContainmentLength2D->Fill(mc_vars.TPCObj_mupiContained->at(0),mc_vars.TPCObj_muonLonger->at(0));
-   
+
    } // end loop over entries in tree
 
    evdinfo.close();
@@ -699,6 +747,25 @@ ContainmentLength2D->GetYaxis()->SetBinLabel(2,"#mu^{-}");
    ContainmentLength2D->Scale(1.0/ContainmentLength2D->Integral());
    ContainmentLength2D->Draw("colz text");
    c1->Print("ContainmentLength2D.png");
+
+   DrawCC1piMCEffOnly(c1,mc_effpur_truemuP);
+   c1->Print("Efficiency_truemuP.png");
+   DrawCC1piMCEffOnly(c1,mc_effpur_truemuTheta);
+   c1->Print("Efficiency_truemuTheta.png");
+   DrawCC1piMCEffOnly(c1,mc_effpur_truemuPhi);
+   c1->Print("Efficiency_truemuPhi.png");
+   DrawCC1piMCEffOnly(c1,mc_effpur_truepiP);
+   c1->Print("Efficiency_truepiP.png");
+   DrawCC1piMCEffOnly(c1,mc_effpur_truepiTheta);
+   c1->Print("Efficiency_truepiTheta.png");
+   DrawCC1piMCEffOnly(c1,mc_effpur_truepiPhi);
+   c1->Print("Efficiency_truepiPhi.png");
+   DrawCC1piMCEffOnly(c1,mc_effpur_truemupiOpeningAngle);
+   c1->Print("Efficiency_trueOpeningAngle.png");
+   DrawCC1piMCEffOnly(c1,mc_effpur_trueQ2);
+   c1->Print("Efficiency_trueQ2.png");
+   DrawCC1piMCEffOnly(c1,mc_effpur_trueW);
+   c1->Print("Efficiency_trueW.png");
 
    delete c1;
 
