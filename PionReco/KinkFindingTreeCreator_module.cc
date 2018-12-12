@@ -540,7 +540,7 @@ void KinkFindingTreeCreator::analyze(art::Event const & evt)
 
   } // end loop over PFPs
 
-  _outtree->Fill();
+  if (PFP_IsPrimary.size()>0) _outtree->Fill();
 
 }
 
