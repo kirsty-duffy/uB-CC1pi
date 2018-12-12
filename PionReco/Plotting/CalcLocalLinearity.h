@@ -97,7 +97,7 @@ double stdev(const std::vector<double>& data)
     }
   }
   return R;
-};*/
+}*/
 
 // Another approach to "local linearity": calculate the dot product between the average vector from point to point before the point you're interested in and after that point. If linear, it should be about 1.
 std::vector<double> GetLocalLinearityVec(std::vector<std::pair<std::vector<double>,int>> spacepoints, int _slider_window){
@@ -158,7 +158,7 @@ std::vector<double> GetLocalLinearityVec(std::vector<std::pair<std::vector<doubl
     }
   }
   return R;
-};
+}
 
 // For each spacepoint, calculate angle between track start direction and the direction at this space point (i.e. the direction of the vector between this spacepoint and the next)
 std::vector<double> GetSPDirVec(std::vector<std::pair<std::vector<double>,int>> spacepoints, double track_theta=-9999, double track_phi=-9999){
@@ -182,21 +182,38 @@ std::vector<double> GetSPDirVec(std::vector<std::pair<std::vector<double>,int>> 
       // Won't work for the last point, so for that one just store the same as the previous one
 
       // First get the vector betwen this point and the next one
-      TVector3 vec0(spacepoints.at(i_pos).first.at(0),spacepoints.at(i_pos).first.at(1),spacepoints.at(i_pos).first.at(2));
-      TVector3 vec1(spacepoints.at(i_pos+1).first.at(0),spacepoints.at(i_pos+1).first.at(1),spacepoints.at(i_pos+1).first.at(2));
+      // TVector3 vec0(spacepoints.at(i_pos).first.at(0),spacepoints.at(i_pos).first.at(1),spacepoints.at(i_pos).first.at(2));
+      // TVector3 vec1(spacepoints.at(i_pos+1).first.at(0),spacepoints.at(i_pos+1).first.at(1),spacepoints.at(i_pos+1).first.at(2));
+      //
+      // TVector3 diff = vec1-vec0;
+      // diff.SetMag(1.0);
 
-      TVector3 diff = vec1-vec0;
-      diff.SetMag(1.0);
+      // Test smoothing: average direction over this point, the one before, and the one after
+      TVector3 diff(0,0,0);
+      int n_beforeafter=3;
+      for (size_t i=i_pos-n_beforeafter; i<=i_pos+n_beforeafter; i++){
+        if (i<0) continue;
+        if (i+1>=spacepoints.size()) continue;
+
+        TVector3 vec0(spacepoints.at(i).first.at(0),spacepoints.at(i).first.at(1),spacepoints.at(i).first.at(2));
+        TVector3 vec1(spacepoints.at(i+1).first.at(0),spacepoints.at(i+1).first.at(1),spacepoints.at(i+1).first.at(2));
+
+        diff += (vec1-vec0);
+        // if (i==i_pos) std::cout << TMath::ACos(beam_dir.Dot(vec1-vec0)) << std::endl;
+      }
+    if (diff.Mag()>0) diff.SetMag(1.0);
+    // std::cout << "Average diff: " << TMath::ACos(beam_dir.Dot(diff)) << std::endl;
 
       // Calculate vector direction (direction w.r.t. the beam, which I assume is a vector (0,0,1)) for every point before the point we're interested in
       dir.push_back(TMath::ACos(beam_dir.Dot(diff)));
-      }
+      // dir.push_back(beam_dir.Dot(diff));
+    }
 
-      // Last point: repeat second-last point
-      dir.push_back(dir.at(dir.size()-1));
+    // Last point: repeat second-last point
+    dir.push_back(dir.at(dir.size()-1));
 
   return dir;
-};
+}
 
 // For each spacepoint, calculate angle between track start direction and the direction at this space point (i.e. the direction of the vector between this spacepoint and the next)
 std::vector<double> GetCuSumVec(std::vector<double> dirs){
@@ -214,7 +231,7 @@ std::vector<double> GetCuSumVec(std::vector<double> dirs){
   }
 
   return cs;
-};
+}
 
 // Try calculating Welch's t-test, following https://www.nature.com/articles/nature03528.pdf and equation in https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2134886/ and https://en.wikipedia.org/wiki/Welch%27s_t-test
 std::vector<double> GetWelchttestVec(std::vector<double> dirs, int _slider_window=0){
@@ -283,7 +300,7 @@ std::vector<double> GetWelchttestVec(std::vector<double> dirs, int _slider_windo
   }
 
   return R;
-};
+}
 
 
 
@@ -417,7 +434,9 @@ std::vector<std::pair<std::vector<double>,int>> OrderSpacepoints(std::vector<std
   }
 
   return ordered_spacepoints;
-};
+}
+
+
 
 int FindKinkIdx(std::vector<double> *dirs, std::vector<double> *cusum=nullptr, std::vector<double> *ttest=nullptr){
   // If cusum and ttest vectors are not given, calculate them!
@@ -445,19 +464,19 @@ int FindKinkIdx(std::vector<double> *dirs, std::vector<double> *cusum=nullptr, s
   int n_near=10;
   int i_low = 0, i_high=ttest->size()-1;
   if (cusum_absmax_idx>=n_near) i_low = cusum_absmax_idx-n_near;
-  if (cusum_absmax_idx+n_near<ttest->size()) i_high = cusum_absmax_idx+n_near;
+  if (cusum_absmax_idx+n_near<(int)ttest->size()) i_high = cusum_absmax_idx+n_near;
   std::vector<double>::iterator ttest_max_it = std::max_element(ttest->begin()+i_low,ttest->begin()+i_high);
 
   // Check: is this maximum t-test value greater than threshold? If not, end the function as we have not found a decent kink
   // Threshold is tuneable! 5 for now
-  if (*ttest_max_it<10){
+  if (*ttest_max_it<3){
     return -9999;
   }
 
   // If maximum t-test value is greater than threshold, we have a kink! Return its index so we can split vectors in two
   return std::distance(ttest->begin(),ttest_max_it);
 
-};
+}
 
 std::vector<int>* SplitTracks(std::vector<double> dirs, std::vector<double> cusum = std::vector<double>(), std::vector<double> ttest = std::vector<double>()){
   // If cusum and ttest vectors are not given, calculate them!
@@ -494,7 +513,7 @@ std::vector<int>* SplitTracks(std::vector<double> dirs, std::vector<double> cusu
 
     int kink_indices_size_before=kink_indices->size();
 
-    for (int i=0; i<dirs_vec.size(); i++){
+    for (size_t i=0; i<dirs_vec.size(); i++){
       // if (dirs_vec.at(i).size()<5) continue;
 
       int kinkidx = -9999;
@@ -502,7 +521,9 @@ std::vector<int>* SplitTracks(std::vector<double> dirs, std::vector<double> cusu
         kinkidx = FindKinkIdx(&(dirs_vec.at(i)),&(cusum_vec.at(i)),&(ttest_vec.at(i)));
       }
       else{
-        kinkidx = FindKinkIdx(&(dirs_vec.at(i)));
+        // hack: if we're only using N spacepoints either side, don't need to recalculate ttest vec every time
+        // Should code the number of spacepoints either side somewhere better - also use for limit on how close to the end of the track a kink can be.
+        kinkidx = FindKinkIdx(&(dirs_vec.at(i)),nullptr,&(ttest_vec.at(i)));
       }
 
       // Don't accept invalid kink indices
@@ -521,7 +542,7 @@ std::vector<int>* SplitTracks(std::vector<double> dirs, std::vector<double> cusu
     }
 
     // if kink_indices has the same size as it was before we did the loop above, we found no kinks and should quit
-    if (kink_indices->size()==kink_indices_size_before){
+    if ((int)kink_indices->size()==kink_indices_size_before){
       nrpts=10;
       break;
     }
@@ -530,7 +551,7 @@ std::vector<int>* SplitTracks(std::vector<double> dirs, std::vector<double> cusu
     dirs_vec.clear();
     cusum_vec.clear();
     ttest_vec.clear();
-    for (int ivec=0; ivec<dirs_vec_tmp.size(); ivec++){
+    for (size_t ivec=0; ivec<dirs_vec_tmp.size(); ivec++){
       dirs_vec.push_back(dirs_vec_tmp.at(ivec));
       cusum_vec.push_back(cusum_vec_tmp.at(ivec));
       ttest_vec.push_back(ttest_vec_tmp.at(ivec));
@@ -541,6 +562,6 @@ std::vector<int>* SplitTracks(std::vector<double> dirs, std::vector<double> cusu
 
   return kink_indices;
 
-};
+}
 
 #endif
