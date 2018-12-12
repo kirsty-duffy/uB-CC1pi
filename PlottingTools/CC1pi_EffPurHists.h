@@ -341,4 +341,39 @@ void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists, std::string drawop
 
 }
 
+void DrawCC1piMCEffOnly(TCanvas *c, histCC1piselEffPur *hists, std::string drawopt="lp"){
+   TH1D *heff = (TH1D*)hists->h_cc1pi_sel->Clone("heff");
+   heff->GetYaxis()->SetTitle("CC1pi Selection Efficiency");
+
+   heff->Clear();
+
+   for (int i_bin=1; i_bin < heff->GetXaxis()->GetNbins()+1; i_bin++){
+      double selected_cc1pi = hists->h_cc1pi_sel->GetBinContent(i_bin);
+      double total_cc1pi = hists->h_cc1pi_sel->GetBinContent(i_bin)+hists->h_cc1pi_notsel->GetBinContent(i_bin);
+
+      double eff = selected_cc1pi/total_cc1pi;
+      if (selected_cc1pi==0 && total_cc1pi==0) eff = 0;
+
+      heff->SetBinContent(i_bin,eff);
+   }
+
+   heff->SetLineColor(kRed);
+   heff->SetMarkerColor(kRed);
+   heff->SetMarkerStyle(20);
+   heff->SetMarkerSize(.3);
+
+   heff->GetYaxis()->SetRangeUser(0,1);
+
+   gStyle->SetOptStat(0); // No stats box
+
+   c->cd();
+   c->SetTopMargin(0.07);
+   heff->Draw(drawopt.c_str());
+
+   c->Draw();
+   c->Modified();
+   c->Update();
+
+}
+
 #endif
