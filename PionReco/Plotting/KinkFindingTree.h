@@ -66,6 +66,8 @@ struct KinkFindingTree{
   std::vector<std::vector<double>> *PFP_track_end=nullptr;
   std::vector<double> *PFP_track_theta=nullptr;
   std::vector<double> *PFP_track_phi=nullptr;
+  std::vector<std::vector<std::vector<double>>> *PFP_ordered_spacepoints=nullptr;
+  std::vector<std::vector<int>> *PFP_ordered_spacepoints_origidx=nullptr;
 
   bool verbose;
 
@@ -102,8 +104,10 @@ struct KinkFindingTree{
 
   // Find reco kinks
   std::vector<int> FindRecoKinks(int pfp_idx, double mincosth, int evtnum);
+  std::vector<int> FindRecoKinks_orderedsp(int pfp_idx, double mincosth, int evtnum, std::vector<std::vector<double>>);
 
   std::vector<int> FindRecoKinks_byangle(int pfp_idx, double mincosth, int evtnum, double kinkcosth, int _slider_window);
+  std::vector<int> FindRecoKinks_byangle_orderedsp(int pfp_idx, double mincosth, int evtnum, double kinkcosth, int _slider_window, std::vector<std::vector<double>>);
 };
 
 KinkFindingTree::KinkFindingTree(){
@@ -147,6 +151,153 @@ void SetKinkFindingTreeVariables(KinkFindingTree *vars, TTree *tr){
   tr->SetBranchAddress("PFP_track_end",&(vars->PFP_track_end));
   tr->SetBranchAddress("PFP_track_theta",&(vars->PFP_track_theta));
   tr->SetBranchAddress("PFP_track_phi",&(vars->PFP_track_phi));
+  tr->SetBranchAddress("PFP_ordered_spacepoints",&(vars->PFP_ordered_spacepoints));
+  tr->SetBranchAddress("PFP_ordered_spacepoints_origidx",&(vars->PFP_ordered_spacepoints_origidx));
+};
+
+void SetKinkFindingTreeBranches(KinkFindingTree *vars, TTree *tr){
+  // Set branch addresses
+  tr->Branch("nMCPs",&(vars->nMCPs));
+  tr->Branch("MCP_ID",&(vars->MCP_ID));
+  tr->Branch("MCP_MotherID",&(vars->MCP_MotherID));
+  tr->Branch("MCP_DaughterIDs",&(vars->MCP_DaughterIDs));
+  tr->Branch("MCP_PDGcode",&(vars->MCP_PDGcode));
+  tr->Branch("MCP_EndProcess",&(vars->MCP_EndProcess));
+  tr->Branch("MCP_nMatchedPFPs",&(vars->MCP_nMatchedPFPs));
+  tr->Branch("MCP_totaldepE",&(vars->MCP_totaldepE));
+  tr->Branch("MCP_matchedPFP_ID",&(vars->MCP_matchedPFP_ID));
+  tr->Branch("MCP_matchedPFP_matchedE",&(vars->MCP_matchedPFP_matchedE));
+  tr->Branch("MCP_trueStartE",&(vars->MCP_trueStartE));
+  tr->Branch("MCP_trueStartP",&(vars->MCP_trueStartP));
+  tr->Branch("MCP_Px_eachpoint",&(vars->MCP_Px_eachpoint));
+  tr->Branch("MCP_Py_eachpoint",&(vars->MCP_Py_eachpoint));
+  tr->Branch("MCP_Pz_eachpoint",&(vars->MCP_Pz_eachpoint));
+  tr->Branch("MCP_StartXYZ",&(vars->MCP_StartXYZ));
+  tr->Branch("MCP_EndXYZ",&(vars->MCP_EndXYZ));
+  tr->Branch("n_PFPs",&(vars->n_PFPs));
+  tr->Branch("PFP_ID",&(vars->PFP_ID));
+  tr->Branch("PFP_TrackShowerPdg",&(vars->PFP_TrackShowerPdg));
+  tr->Branch("PFP_IsPrimary",&(vars->PFP_IsPrimary));
+  tr->Branch("PFP_ID_to_bestmatchMCPid",&(vars->PFP_ID_to_bestmatchMCPid));
+  tr->Branch("PFP_totaldepE",&(vars->PFP_totaldepE));
+  tr->Branch("PFP_primaryPFPid",&(vars->PFP_primaryPFPid));
+  tr->Branch("PFP_isInNuSlice",&(vars->PFP_isInNuSlice));
+  tr->Branch("PFP_spacepoints_XYZ",&(vars->PFP_spacepoints_XYZ));
+  tr->Branch("PFP_trajpoints_XYZ",&(vars->PFP_trajpoints_XYZ));
+  tr->Branch("PFP_track_length",&(vars->PFP_track_length));
+  tr->Branch("PFP_track_start",&(vars->PFP_track_start));
+  tr->Branch("PFP_track_end",&(vars->PFP_track_end));
+  tr->Branch("PFP_track_theta",&(vars->PFP_track_theta));
+  tr->Branch("PFP_track_phi",&(vars->PFP_track_phi));
+};
+
+void SetupKinkFindingTreeForReading(KinkFindingTree *tr){
+  tr->nMCPs=0;
+  tr->MCP_ID=nullptr;
+  tr->MCP_MotherID=nullptr;
+  tr->MCP_DaughterIDs=nullptr;
+  tr->MCP_PDGcode=nullptr;
+  tr->MCP_EndProcess=nullptr;
+  tr->MCP_nMatchedPFPs=nullptr;
+  tr->MCP_totaldepE=nullptr;
+  tr->MCP_matchedPFP_ID=nullptr;
+  tr->MCP_matchedPFP_matchedE=nullptr;
+  tr->MCP_trueStartE=nullptr;
+  tr->MCP_trueStartP=nullptr;
+  tr->n_PFPs=0;
+  tr->MCP_Px_eachpoint=nullptr;
+  tr->MCP_Py_eachpoint=nullptr;
+  tr->MCP_Pz_eachpoint=nullptr;
+  tr->MCP_StartXYZ=nullptr;
+  tr->MCP_EndXYZ=nullptr;
+  tr->PFP_ID=nullptr;
+  tr->PFP_TrackShowerPdg=nullptr;
+  tr->PFP_IsPrimary=nullptr;
+  tr->PFP_ID_to_bestmatchMCPid=nullptr;
+  tr->PFP_totaldepE=nullptr;
+  tr->PFP_primaryPFPid=nullptr;
+  tr->PFP_isInNuSlice=nullptr;
+  tr->PFP_spacepoints_XYZ=nullptr;
+  tr->PFP_trajpoints_XYZ=nullptr;
+  tr->PFP_track_length=nullptr;
+  tr->PFP_track_start=nullptr;
+  tr->PFP_track_end=nullptr;
+  tr->PFP_track_theta=nullptr;
+  tr->PFP_track_phi=nullptr;
+};
+
+void ClearKinkFindingTree(KinkFindingTree *tr){
+  tr->nMCPs=0;
+  tr->MCP_ID->clear();
+  tr->MCP_MotherID->clear();
+  tr->MCP_DaughterIDs->clear();
+  tr->MCP_PDGcode->clear();
+  tr->MCP_EndProcess->clear();
+  tr->MCP_nMatchedPFPs->clear();
+  tr->MCP_totaldepE->clear();
+  tr->MCP_matchedPFP_ID->clear();
+  tr->MCP_matchedPFP_matchedE->clear();
+  tr->MCP_trueStartE->clear();
+  tr->MCP_trueStartP->clear();
+  tr->n_PFPs=0;
+  tr->MCP_Px_eachpoint->clear();
+  tr->MCP_Py_eachpoint->clear();
+  tr->MCP_Pz_eachpoint->clear();
+  tr->MCP_StartXYZ->clear();
+  tr->MCP_EndXYZ->clear();
+  tr->PFP_ID->clear();
+  tr->PFP_TrackShowerPdg->clear();
+  tr->PFP_IsPrimary->clear();
+  tr->PFP_ID_to_bestmatchMCPid->clear();
+  tr->PFP_totaldepE->clear();
+  tr->PFP_primaryPFPid->clear();
+  tr->PFP_isInNuSlice->clear();
+  tr->PFP_spacepoints_XYZ->clear();
+  tr->PFP_trajpoints_XYZ->clear();
+  tr->PFP_track_length->clear();
+  tr->PFP_track_start->clear();
+  tr->PFP_track_end->clear();
+  tr->PFP_track_theta->clear();
+  tr->PFP_track_phi->clear();
+};
+
+void CopyMCPs(KinkFindingTree *originaltree, KinkFindingTree *newtree){
+  newtree->nMCPs = originaltree->nMCPs;
+  *(newtree->MCP_ID) = *(originaltree->MCP_ID);
+  *(newtree->MCP_MotherID) = *(originaltree->MCP_MotherID);
+  *(newtree->MCP_DaughterIDs) = *(originaltree->MCP_DaughterIDs);
+  *(newtree->MCP_PDGcode) = *(originaltree->MCP_PDGcode);
+  *(newtree->MCP_EndProcess) = *(originaltree->MCP_EndProcess);
+  *(newtree->MCP_nMatchedPFPs) = *(originaltree->MCP_nMatchedPFPs);
+  *(newtree->MCP_totaldepE) = *(originaltree->MCP_totaldepE);
+  *(newtree->MCP_matchedPFP_ID) = *(originaltree->MCP_matchedPFP_ID);
+  *(newtree->MCP_matchedPFP_matchedE) = *(originaltree->MCP_matchedPFP_matchedE);
+  *(newtree->MCP_trueStartE) = *(originaltree->MCP_trueStartE);
+  *(newtree->MCP_trueStartP) = *(originaltree->MCP_trueStartP);
+  *(newtree->MCP_Px_eachpoint) = *(originaltree->MCP_Px_eachpoint);
+  *(newtree->MCP_Py_eachpoint) = *(originaltree->MCP_Py_eachpoint);
+  *(newtree->MCP_Pz_eachpoint) = *(originaltree->MCP_Pz_eachpoint);
+  *(newtree->MCP_StartXYZ) = *(originaltree->MCP_StartXYZ);
+  *(newtree->MCP_EndXYZ) = *(originaltree->MCP_EndXYZ);
+};
+
+void CopyPFP(int i_pfp, KinkFindingTree *originaltree, KinkFindingTree *newtree){
+  newtree->PFP_ID->push_back(originaltree->PFP_ID->at(i_pfp));
+  newtree->PFP_TrackShowerPdg->push_back(originaltree->PFP_TrackShowerPdg->at(i_pfp));
+  newtree->PFP_IsPrimary->push_back(originaltree->PFP_IsPrimary->at(i_pfp));
+  newtree->PFP_ID_to_bestmatchMCPid->push_back(originaltree->PFP_ID_to_bestmatchMCPid->at(i_pfp));
+  newtree->PFP_totaldepE->push_back(originaltree->PFP_totaldepE->at(i_pfp));
+  newtree->PFP_primaryPFPid->push_back(originaltree->PFP_primaryPFPid->at(i_pfp));
+  newtree->PFP_spacepoints_XYZ->push_back(originaltree->PFP_spacepoints_XYZ->at(i_pfp));
+  newtree->PFP_trajpoints_XYZ->push_back(originaltree->PFP_trajpoints_XYZ->at(i_pfp));
+  newtree->PFP_track_length->push_back(originaltree->PFP_track_length->at(i_pfp));
+  newtree->PFP_track_start->push_back(originaltree->PFP_track_start->at(i_pfp));
+  newtree->PFP_track_end->push_back(originaltree->PFP_track_end->at(i_pfp));
+  newtree->PFP_track_theta->push_back(originaltree->PFP_track_theta->at(i_pfp));
+  newtree->PFP_track_phi->push_back(originaltree->PFP_track_phi->at(i_pfp));
+  if (originaltree->PFP_isInNuSlice){
+    newtree->PFP_isInNuSlice->push_back(originaltree->PFP_isInNuSlice->at(i_pfp));
+  }
 };
 
 bool KinkFindingTree::Setup(){
@@ -159,7 +310,6 @@ bool KinkFindingTree::Setup(){
   for (int i_pfp=0; i_pfp<n_PFPs; i_pfp++){
       PFP_ID_to_vectorpos.insert(std::pair<int,int>(PFP_ID->at(i_pfp),i_pfp));
   }
-
   return true;
 };
 
@@ -276,7 +426,7 @@ std::vector<int> KinkFindingTree::GetGoodRecoMCPsfromPFP(int pfpid){
 
 double KinkFindingTree::IsTrueKink(std::vector<int> MCP_vectorposes, double threshold){
   if (MCP_vectorposes.size()>1){
-    std::cout << "Assuming true kink because PFP contains " << MCP_vectorposes.size() << " MCPs" << std::endl;
+    //std::cout << "Assuming true kink because PFP contains " << MCP_vectorposes.size() << " MCPs" << std::endl;
 
     double mincostheta_twomcps=1.0;
 
@@ -383,8 +533,34 @@ std::vector<int> KinkFindingTree::FindRecoKinks(int pfp_idx, double mincosth, in
   }
   PFP_spacepoints_XYZ->at(pfp_idx) = ordered_spacepoints;
 
-  // if (mincosth>0.9 && kinkidxs.size()>0){
-    // PlotLocalLinearityDetails(ordered_spacepoints,proj1d,cusum,ttest,kinkidxs,pfp_idx,PFP_track_start->at(pfp_idx),mincosth,evtnum);
+  return kinkidxs;
+};
+
+
+std::vector<int> KinkFindingTree::FindRecoKinks_orderedsp(int pfp_idx, double mincosth, int evtnum, std::vector<std::vector<double>> truekinks=std::vector<std::vector<double>>()){
+
+  // Order spacepoints (by closest to reco track start)
+  std::vector<std::pair<std::vector<double>,int>> ordered_spacepoints_pair_origidx;
+  for (int i=0; i<PFP_ordered_spacepoints->at(pfp_idx).size();i++){
+    std::vector<double> spacepoints_i = PFP_ordered_spacepoints->at(pfp_idx).at(i);
+    int idx = PFP_ordered_spacepoints_origidx->at(pfp_idx).at(i);
+    ordered_spacepoints_pair_origidx.push_back(std::make_pair(spacepoints_i,idx));
+  }
+
+  // Get 1D projection onto track direction
+  std::vector<double> proj1d = GetSPDirVec(ordered_spacepoints_pair_origidx,PFP_track_theta->at(pfp_idx),PFP_track_phi->at(pfp_idx));
+
+  // Get vector of cumulative summed distance from mean
+  std::vector<double> cusum = GetCuSumVec(proj1d);
+
+  // Get vector of Welch's t-test
+  std::vector<double> ttest = GetWelchttestVec(proj1d,10);
+
+  // Find kinks
+  std::vector<int> kinkidxs = *(SplitTracks(proj1d,cusum,ttest));
+
+  // if (kinkidxs.size()>0){
+    PlotLocalLinearityDetails(PFP_ordered_spacepoints->at(pfp_idx),proj1d,cusum,ttest,kinkidxs,pfp_idx,PFP_ordered_spacepoints->at(pfp_idx).at(0),truekinks,mincosth,evtnum);
   // }
 
   return kinkidxs;
@@ -420,6 +596,35 @@ std::vector<int> KinkFindingTree::FindRecoKinks_byangle(int pfp_idx, double minc
 
   // if (mincosth>0.9 && kinkidxs.size()>0){
     // PlotLocalLinearityDetails(ordered_spacepoints,proj1d,cusum,ttest,kinkidxs,pfp_idx,PFP_track_start->at(pfp_idx),mincosth,evtnum);
+  // }
+
+  return kinkidxs;
+};
+
+
+std::vector<int> KinkFindingTree::FindRecoKinks_byangle_orderedsp(int pfp_idx, double mincosth, int evtnum, double kinkcosth, int _slider_window=20,std::vector<std::vector<double>> truekinks=std::vector<std::vector<double>>()){
+
+  // Order spacepoints (by closest to reco track start)
+  std::vector<std::pair<std::vector<double>,int>> ordered_spacepoints_pair_origidx;
+  for (int i=0; i<PFP_ordered_spacepoints->at(pfp_idx).size();i++){
+    std::vector<double> spacepoints_i = PFP_ordered_spacepoints->at(pfp_idx).at(i);
+    int idx = PFP_ordered_spacepoints_origidx->at(pfp_idx).at(i);
+    ordered_spacepoints_pair_origidx.push_back(std::make_pair(spacepoints_i,idx));
+  }
+
+  // Get vector of local linearity based on angle between consecutive points
+  std::vector<double> locallin_vec = GetLocalLinearityVec(ordered_spacepoints_pair_origidx, _slider_window);
+
+  // Find kinks
+  std::vector<int> kinkidxs;
+  for (int i=0; i<locallin_vec.size(); i++){
+    if (locallin_vec.at(i)<kinkcosth){
+      kinkidxs.push_back(i);
+    }
+  }
+
+  // if (kinkidxs.size()>0){
+    PlotLocalLinearityDetails_byangle(PFP_ordered_spacepoints->at(pfp_idx),locallin_vec,kinkidxs,pfp_idx,PFP_ordered_spacepoints->at(pfp_idx).at(0),truekinks,mincosth,evtnum);
   // }
 
   return kinkidxs;
