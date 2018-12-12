@@ -145,6 +145,8 @@ void StackedHistTopology::DrawStack(double mc_scaling, TCanvas *c1, bool coarse=
   double underflow_total = 0.;
   double overflow_total = 0.;
 
+  if (mc_scaling==0) mc_scaling = 1.0;
+
   for (int i_hist = 0; i_hist < nHists; i_hist++){
     hists[i_hist]->Scale(mc_scaling);
   }
