@@ -180,7 +180,7 @@ void TMVAClassification( TString myMethodList = "" )
    // front of the "Silent" argument in the option string
    TMVA::Factory *factory = new TMVA::Factory( "TMVAClassification", outputFile,
                                                "!V:!Silent:Color:DrawProgressBar:Transformations=I;D;P;G,D:AnalysisType=Auto" );
-   TMVA::DataLoader *dataloader = new TMVA::DataLoader("dataset_tightercuts");
+   TMVA::DataLoader *dataloader = new TMVA::DataLoader("dataset_tighterbins");
 
    // If you wish to modify default settings
    // (please check "src/Config.h" to see all available global options)
