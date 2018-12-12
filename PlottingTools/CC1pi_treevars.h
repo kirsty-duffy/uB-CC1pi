@@ -40,6 +40,7 @@ struct treevars{
    std::vector<bool> *TPCObj_PFP_track_isContained = nullptr;
    std::vector<int> *TPCObj_PFP_truePDG = nullptr;
    std::vector<double> *TPCObj_PFP_trueKE = nullptr;
+   std::vector<double> *TPCObj_PFP_trueE = nullptr;
    std::vector<double> *TPCObj_PFP_trueEndP = nullptr;
    std::vector<double> *TPCObj_PFP_track_length = nullptr;
    std::vector<int> *TPCObj_PFP_MCPid = nullptr;
@@ -48,6 +49,12 @@ struct treevars{
    std::vector<int> *MCP_MotherID = nullptr;
    std::vector<int> *MCP_ID = nullptr;
    std::vector<std::vector<int>> *MCP_DaughterIDs = nullptr;
+   std::vector<double> *MCP_E = nullptr;
+   std::vector<double> *MCP_P = nullptr;
+   std::vector<double> *MCP_Px = nullptr;
+   std::vector<double> *MCP_Py = nullptr;
+   std::vector<double> *MCP_Pz = nullptr;
+   double nu_E;
 
    std::vector<std::vector<std::vector<double>>> *TPCObj_PFP_track_dedx_perhit=nullptr;
    std::vector<std::vector<std::vector<double>>> *TPCObj_PFP_track_resrange_perhit=nullptr;
@@ -103,6 +110,7 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_LH_mip;
    std::vector<double> *TPCObj_PFP_Lmipoverp;
    std::vector<double> *TPCObj_PFP_lnLmipoverp;
+   std::vector<double> *TPCObj_PFP_lnLmipovermu;
    std::vector<double> *TPCObj_PFP_Lmumipovermumipp;
    std::vector<double> *TPCObj_PFP_track_Chi2Proton_plane2;
    std::vector<double> *TPCObj_PFP_BrokenTrackAngle;
@@ -160,6 +168,12 @@ struct treevars{
    std::vector<double> *TPCObj_mupiContained;
    std::vector<double> *TPCObj_muonLonger;
    std::vector<double> *MIP_containment;
+   std::vector<double> *TPCObj_BDTscore_MIPdiff;
+   std::vector<double> *TPCObj_BDTscore_MIPdiv;
+
+   std::vector<double> *TPCObj_PFP_track_trueTheta;
+   std::vector<double> *TPCObj_PFP_track_truePhi;
+   std::vector<double> *TPCObj_PFP_track_trueStartP;
 
    int muoncandidatePDG;
    int pioncandidatePDG;
