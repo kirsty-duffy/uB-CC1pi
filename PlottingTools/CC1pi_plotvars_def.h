@@ -27,6 +27,8 @@ struct CC1piPlotVars{
   bool PlotNotPionCandidate;
   bool PlotOnlyMuMuPairs;
 
+  bool InvertCut;
+
   // Default initialisation of plotting bools only
   CC1piPlotVars(){
     isMIPcut = false;
@@ -44,6 +46,8 @@ struct CC1piPlotVars{
     PlotOnlyPionCandidate = false;
     PlotNotPionCandidate = false;
     PlotOnlyMuMuPairs = false;
+
+    InvertCut = false;
   }
 };
 
@@ -166,10 +170,38 @@ CC1piPlotVars Var_TPCObj_PFP_VtxTrackDist(treevars *vars){
   tmp.KeepBelowCut = true;
   tmp.isMIPcut = true;
   tmp.CutValue = 5.;
-  tmp.bins = {20,0,20};
+  tmp.bins = {50,0,50};
   tmp.histtitle = ";Track start distance from reconstructed vertex [cm];";
   tmp.histname = "VtxTrackDist";
   tmp.PlotOnlyDaughters = true;
+  return tmp;
+}
+
+// TPCObj_PFP_VtxTrackDist
+CC1piPlotVars Var_TPCObj_PFP_VtxTrackDist_IsMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_VtxTrackDist;
+  tmp.KeepBelowCut = true;
+  tmp.isMIPcut = true;
+  tmp.CutValue = 5.;
+  tmp.bins = {50,0,50};
+  tmp.histtitle = ";Track start distance from reconstructed vertex (selected MIPs) [cm];";
+  tmp.histname = "VtxTrackDist_ismip";
+  tmp.PlotOnlyDaughterMIPs = true;
+  return tmp;
+}
+
+// TPCObj_PFP_VtxTrackDist
+CC1piPlotVars Var_TPCObj_PFP_VtxTrackDist_NotMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_VtxTrackDist;
+  tmp.KeepBelowCut = true;
+  tmp.isMIPcut = true;
+  tmp.CutValue = 5.;
+  tmp.bins = {20,0,20};
+  tmp.histtitle = ";Track start distance from reconstructed vertex (not selected as MIPs) [cm];";
+  tmp.histname = "VtxTrackDist_notmip";
+  tmp.PlotOnlyNotMIPDaughters = true;
   return tmp;
 }
 
@@ -212,10 +244,8 @@ CC1piPlotVars Var_TPCObj_PFP_VtxTrackDist_mumupairs(treevars *vars){
   tmp.TracksNeeded = "atleasttwo";
   tmp.CutValue = 15.;
   tmp.bins = {25,0,20};
-  tmp.histtitle = ";Track start distance from reconstructed vertex [cm] (Leading MIP, #mu^{-}#mu^{-} pairs only);";
-  tmp.histname = "VtxTrackDist_LeadingMIP_mumupairs";
-  tmp.PlotOnlyLeadingDaughterMIP = true;
-  tmp.PlotOnlyContained = false;
+  tmp.histtitle = ";Track start distance from reconstructed vertex [cm] (#mu^{-}#mu^{-} pairs only);";
+  tmp.histname = "VtxTrackDist_mumupairs";
   tmp.PlotOnlyMuMuPairs = true;
   return tmp;
 }
@@ -288,6 +318,48 @@ CC1piPlotVars Var_TPCObj_PFP_track_dEdx_truncmean_start_lowcut(treevars *vars){
   tmp.histtitle = ";Truncated Mean dE/dx at start of track;";
   tmp.histname = "dEdx_truncmean_atstart_lowcut";
   tmp.PlotOnlyDaughters = true;
+  return tmp;
+}
+
+// TPCObj_PFP_track_dEdx_truncmean_start
+CC1piPlotVars Var_TPCObj_PFP_track_dEdx_truncmean_start_IsMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_dEdx_truncmean_start;
+  tmp.KeepBelowCut = true;
+  tmp.isMIPcut = true;
+  tmp.CutValue = 2.2;
+  tmp.bins = {100,0,10.0};
+  tmp.histtitle = ";Truncated Mean dE/dx at start of track (selected MIPs) [MeV/cm];";
+  tmp.histname = "dEdx_truncmean_atstart_ismip";
+  tmp.PlotOnlyDaughterMIPs = true;
+  return tmp;
+}
+
+// TPCObj_PFP_track_dEdx_truncmean_start
+CC1piPlotVars Var_TPCObj_PFP_track_dEdx_truncmean_start_NotMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_dEdx_truncmean_start;
+  tmp.KeepBelowCut = true;
+  tmp.isMIPcut = true;
+  tmp.CutValue = 2.2;
+  tmp.bins = {25,0,2.2};
+  tmp.histtitle = ";Truncated Mean dE/dx at start of track (not selected as MIPs) [MeV/cm];";
+  tmp.histname = "dEdx_truncmean_atstart_notmip";
+  tmp.PlotOnlyNotMIPDaughters = true;
+  return tmp;
+}
+
+// TPCObj_PFP_track_dEdx_truncmean_start
+CC1piPlotVars Var_TPCObj_PFP_track_dEdx_truncmean_start_mumupairs(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_dEdx_truncmean_start;
+  tmp.KeepBelowCut = true;
+  tmp.isMIPcut = true;
+  tmp.CutValue = 2.2;
+  tmp.bins = {25,0,2.2};
+  tmp.histtitle = ";Truncated Mean dE/dx at start of track (mu-mu pairs) [MeV/cm];";
+  tmp.histname = "dEdx_truncmean_atstart_mumupairs";
+  tmp.PlotOnlyMuMuPairs = true;
   return tmp;
 }
 
@@ -443,6 +515,64 @@ CC1piPlotVars Var_TPCObj_PFP_lnLmipoverp(treevars *vars){
   tmp.histname = "lnLmipoverp";
   tmp.PlotOnlyDaughterMIPs = false;
   tmp.PlotOnlyContained = false;
+  tmp.PlotOnlyDaughters = true;
+  return tmp;
+}
+
+// TPCObj_PFP_lnLmipoverp
+CC1piPlotVars Var_TPCObj_PFP_lnLmipovermu(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_lnLmipovermu;
+  tmp.KeepBelowCut = false;
+  tmp.isMIPcut = true;
+  tmp.CutValue = -0.5;
+  tmp.bins = {60,-10,10};
+  tmp.histtitle = ";ln(L_{MIP})/(L_{mu}), contained tracks;";
+  tmp.histname = "lnLmipovermu_contained";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyContained = true;
+  return tmp;
+}
+
+// TPCObj_PFP_lnLmipoverp
+CC1piPlotVars Var_TPCObj_PFP_lnLmipoverp_IsMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_lnLmipoverp;
+  tmp.KeepBelowCut = false;
+  tmp.isMIPcut = true;
+  tmp.CutValue = -0.5;
+  tmp.bins = {60,-10,10};
+  tmp.histtitle = ";ln(L_{MIP})/(L_{p}) (selected MIPs);";
+  tmp.histname = "lnLmipoverp_ismip";
+  tmp.PlotOnlyDaughterMIPs = true;
+  return tmp;
+}
+
+// TPCObj_PFP_lnLmipoverp
+CC1piPlotVars Var_TPCObj_PFP_lnLmipoverp_NotMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_lnLmipoverp;
+  tmp.KeepBelowCut = false;
+  tmp.isMIPcut = true;
+  tmp.CutValue = -0.5;
+  tmp.bins = {60,-10,10};
+  tmp.histtitle = ";ln(L_{MIP})/(L_{p}) (not selected as MIPs);";
+  tmp.histname = "lnLmipoverp_notmip";
+  tmp.PlotOnlyNotMIPDaughters = true;
+  return tmp;
+}
+
+// TPCObj_PFP_lnLmipoverp
+CC1piPlotVars Var_TPCObj_PFP_lnLmipoverp_mumupairs(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_lnLmipoverp;
+  tmp.KeepBelowCut = false;
+  tmp.isMIPcut = true;
+  tmp.CutValue = -0.5;
+  tmp.bins = {60,-10,10};
+  tmp.histtitle = ";ln(L_{MIP})/(L_{p}) (mu-mu pairs);";
+  tmp.histname = "lnLmipoverp_mumupairs";
+  tmp.PlotOnlyMuMuPairs = true;
   tmp.PlotOnlyDaughters = true;
   return tmp;
 }
@@ -812,7 +942,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_length(treevars *vars){
 CC1piPlotVars Var_TPCObj_PFP_track_length_LeadingMIP_mumupairs(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_length;
-  tmp.bins = {10,0,140};
+  tmp.bins = {35,0,140};
   tmp.histtitle = ";Track length (Leading MIP, #mu^{-}#mu^{-} pairs only) [cm];";
   tmp.histname = "trklength_LeadingMIP_mumupairs";
   tmp.PlotOnlyMuMuPairs = true;
@@ -824,10 +954,32 @@ CC1piPlotVars Var_TPCObj_PFP_track_length_LeadingMIP_mumupairs(treevars *vars){
 CC1piPlotVars Var_TPCObj_PFP_track_length_SecondMIP_mumupairs(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_length;
-  tmp.bins = {10,0,140};
+  tmp.bins = {35,0,140};
   tmp.histtitle = ";Track length (Second MIP, #mu^{-}#mu^{-} pairs only) [cm];";
   tmp.histname = "trklength_SecondMIP_mumupairs";
   tmp.PlotOnlyMuMuPairs = true;
+  tmp.PlotOnlySecondDaughterMIP = true;
+  return tmp;
+}
+
+// TPCObj_PFP_track_length
+CC1piPlotVars Var_TPCObj_PFP_track_length_LeadingMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_length;
+  tmp.bins = {35,0,140};
+  tmp.histtitle = ";Track length (Leading MIP only) [cm];";
+  tmp.histname = "trklength_LeadingMIP";
+  tmp.PlotOnlyLeadingDaughterMIP = true;
+  return tmp;
+}
+
+// TPCObj_PFP_track_length
+CC1piPlotVars Var_TPCObj_PFP_track_length_SecondMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_length;
+  tmp.bins = {35,0,140};
+  tmp.histtitle = ";Track length (Second MIP only) [cm];";
+  tmp.histname = "trklength_SecondMIP";
   tmp.PlotOnlySecondDaughterMIP = true;
   return tmp;
 }
@@ -979,6 +1131,48 @@ CC1piPlotVars Var_TPCObj_PFP_track_dedx_grminhits(treevars *vars){
   tmp.histname = "grminhits";
   tmp.bins = {2,0,2};
   tmp.PlotOnlyDaughters = true;
+  return tmp;
+}
+
+// TPCObj_PFP_track_MCSpi_meanScatter
+CC1piPlotVars Var_TPCObj_PFP_track_dedx_grminhits_IsMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_dedx_grminhits;
+  tmp.KeepBelowCut = false;
+  tmp.isMIPcut = true;
+  tmp.CutValue = 0.5;
+  tmp.histtitle = ";Passes min. no. hits threshold for collection plane (selected MIPs);";
+  tmp.histname = "grminhits_ismip";
+  tmp.bins = {2,0,2};
+  tmp.PlotOnlyDaughterMIPs = true;
+  return tmp;
+}
+
+// TPCObj_PFP_track_MCSpi_meanScatter
+CC1piPlotVars Var_TPCObj_PFP_track_dedx_grminhits_NotMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_dedx_grminhits;
+  tmp.KeepBelowCut = false;
+  tmp.isMIPcut = true;
+  tmp.CutValue = 0.5;
+  tmp.histtitle = ";Passes min. no. hits threshold for collection plane (not selected as MIPs);";
+  tmp.histname = "grminhits_notmip";
+  tmp.bins = {2,0,2};
+  tmp.PlotOnlyNotMIPDaughters = true;
+  return tmp;
+}
+
+// TPCObj_PFP_track_MCSpi_meanScatter
+CC1piPlotVars Var_TPCObj_PFP_track_dedx_grminhits_mumupairs(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_dedx_grminhits;
+  tmp.KeepBelowCut = false;
+  tmp.isMIPcut = true;
+  tmp.CutValue = 0.5;
+  tmp.histtitle = ";Passes min. no. hits threshold for collection plane (mu-mu pairs);";
+  tmp.histname = "grminhits_mumupairs";
+  tmp.bins = {2,0,2};
+  tmp.PlotOnlyMuMuPairs = true;
   return tmp;
 }
 
@@ -1146,6 +1340,28 @@ CC1piPlotVars Var_TPCObj_PFP_track_theta(treevars *vars){
 }
 
 //
+CC1piPlotVars Var_TPCObj_PFP_track_theta_selMIPs(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_theta;
+  tmp.bins = {30,0,3.15};
+  tmp.histtitle = ";Track theta [rad] (MIP candidates only);";
+  tmp.histname = "Theta_selMIPs";
+  tmp.PlotOnlyDaughterMIPs = true;
+  return tmp;
+}
+
+//
+CC1piPlotVars Var_TPCObj_PFP_track_phi_selMIPs(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_phi;
+  tmp.bins = {63,-3.15,3.15};
+  tmp.histtitle = ";Track phi [rad] (MIP candidates only);";
+  tmp.histname = "Phi_selMIPs";
+  tmp.PlotOnlyDaughterMIPs = true;
+  return tmp;
+}
+
+//
 CC1piPlotVars Var_TPCObj_PFP_track_phi_SecondMIP(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_phi;
@@ -1185,6 +1401,26 @@ CC1piPlotVars Var_TPCObj_PFP_MCP_motherIDeq0_SecondMIP(treevars *vars){
   tmp.histtitle = ";MCP: mother ID=0? (1=yes, 0=no) (Second MIP only);";
   tmp.histname = "MCP_motherIDeq0_SecondMIP";
   tmp.PlotOnlySecondDaughterMIP = true;
+  return tmp;
+}
+
+// BDT difference for MIP candidates
+CC1piPlotVars Var_TPCObj_BDTscore_MIPdiff(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_BDTscore_MIPdiff;
+  tmp.bins = {50,0,1};
+  tmp.histtitle = ";Difference between MIP candidates' BDT score;";
+  tmp.histname = "BDTscore_MIPdiff";
+  return tmp;
+}
+
+// BDT difference for MIP candidates
+CC1piPlotVars Var_TPCObj_BDTscore_MIPdiv(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_BDTscore_MIPdiv;
+  tmp.bins = {100,0,2};
+  tmp.histtitle = ";Longest/Shortest MIP candidates' BDT score;";
+  tmp.histname = "BDTscore_MIPdiv";
   return tmp;
 }
 
@@ -1244,13 +1480,61 @@ CC1piPlotVars Var_TPCObj_PFP_track_BDTscore(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_BDTscore;
   tmp.KeepBelowCut = false;
-//  tmp.OnlyDaughters = true;
-//  tmp.TracksNeeded = "exactlytwo";
+ tmp.OnlyDaughters = true;
+ tmp.TracksNeeded = "exactlytwo";
   tmp.isMIPcut = true;
   tmp.CutValue = 0.7;
   tmp.bins = {25,-1,1};
   tmp.histtitle = ";BDT score;";
   tmp.histname = "BDTscore";
+  return tmp;
+}
+
+// BDT score
+CC1piPlotVars Var_TPCObj_PFP_track_BDTscore_IsMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_BDTscore;
+  tmp.KeepBelowCut = false;
+  tmp.PlotOnlyDaughterMIPs=true;
+//  tmp.OnlyDaughters = true;
+//  tmp.TracksNeeded = "exactlytwo";
+  tmp.isMIPcut = true;
+  tmp.CutValue = 0.7;
+  tmp.bins = {25,-1,1};
+  tmp.histtitle = ";BDT score (passes MIP cuts);";
+  tmp.histname = "BDTscore_mip";
+  return tmp;
+}
+
+// BDT score
+CC1piPlotVars Var_TPCObj_PFP_track_BDTscore_NotMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_BDTscore;
+  tmp.KeepBelowCut = false;
+  tmp.PlotOnlyNotMIPDaughters=true;
+//  tmp.OnlyDaughters = true;
+//  tmp.TracksNeeded = "exactlytwo";
+  tmp.isMIPcut = true;
+  tmp.CutValue = 0.7;
+  tmp.bins = {25,-1,1};
+  tmp.histtitle = ";BDT score (fails MIP cuts);";
+  tmp.histname = "BDTscore_notmip";
+  return tmp;
+}
+
+// BDT score
+CC1piPlotVars Var_TPCObj_PFP_track_BDTscore_MuMuPairs(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_BDTscore;
+  tmp.KeepBelowCut = false;
+  tmp.PlotOnlyMuMuPairs=true;
+//  tmp.OnlyDaughters = true;
+//  tmp.TracksNeeded = "exactlytwo";
+  tmp.isMIPcut = true;
+  tmp.CutValue = 0.7;
+  tmp.bins = {25,-1,1};
+  tmp.histtitle = ";BDT score (mu-mu pairs only);";
+  tmp.histname = "BDTscore_mumupairs";
   return tmp;
 }
 
@@ -1317,6 +1601,10 @@ bool FillPlotForTrack(CC1piPlotVars *plotvar, treevars *vars, int i_tr){
 
     if (!(vars->TPCObj_LeadingMIPtrackIndex>=0 && vars->TPCObj_SecondMIPtrackIndex>=0)) DoFillPlot = false;
     else if (!(vars->TPCObj_PFP_truePDG->at(vars->TPCObj_LeadingMIPtrackIndex)==13 && vars->TPCObj_PFP_truePDG->at(vars->TPCObj_SecondMIPtrackIndex)==13)) DoFillPlot = false;
+  }
+
+  if (plotvar->InvertCut){
+    DoFillPlot = !DoFillPlot;
   }
 
   return DoFillPlot;
