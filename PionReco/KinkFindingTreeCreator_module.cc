@@ -34,6 +34,7 @@
 
 #include "TruthMatchTracks.h"
 #include "TruthMatchTracks.cxx"
+#include "Plotting/CalcLocalLinearity.h"
 
 #include "TTree.h"
 #include "TVector3.h"
@@ -99,6 +100,10 @@ private:
   std::vector<double> PFP_totaldepE;
   std::vector<int> PFP_primaryPFPid;
   std::vector<std::vector<std::vector<double>>> PFP_spacepoints_XYZ;
+  std::vector<std::vector<std::vector<double>>> PFP_ordered_spacepoints;
+  std::vector<std::vector<int>> PFP_ordered_spacepoints_origidx;
+  std::vector<std::vector<int>> PFP_goodreco_MCPvectorposes;
+  std::vector<std::vector<double>> PFP_trueMCPend;
   std::vector<std::vector<std::vector<double>>> PFP_trajpoints_XYZ;
   std::vector<double> PFP_track_length;
   std::vector<std::vector<double>> PFP_track_start;
@@ -149,6 +154,10 @@ KinkFindingTreeCreator::KinkFindingTreeCreator(fhicl::ParameterSet const & p)
   _outtree->Branch("PFP_totaldepE",&PFP_totaldepE);
   _outtree->Branch("PFP_primaryPFPid",&PFP_primaryPFPid);
   _outtree->Branch("PFP_spacepoints_XYZ",&PFP_spacepoints_XYZ);
+  _outtree->Branch("PFP_ordered_spacepoints",&PFP_ordered_spacepoints);
+  _outtree->Branch("PFP_ordered_spacepoints_origidx",&PFP_ordered_spacepoints_origidx);
+  _outtree->Branch("PFP_goodreco_MCPvectorposes",&PFP_goodreco_MCPvectorposes);
+  _outtree->Branch("PFP_trueMCPend",&PFP_trueMCPend);
   _outtree->Branch("PFP_trajpoints_XYZ",&PFP_trajpoints_XYZ);
   _outtree->Branch("PFP_track_length",&PFP_track_length);
   _outtree->Branch("PFP_track_start",&PFP_track_start);
@@ -270,6 +279,7 @@ void KinkFindingTreeCreator::analyze(art::Event const & evt)
   PFP_track_phi.clear();
 
 
+
   // Fill variables for all MCPs
   nMCPs = mcp_v.size();
   for (auto mcp : mcp_v){
@@ -337,31 +347,108 @@ void KinkFindingTreeCreator::analyze(art::Event const & evt)
     MCP_matchedPFP_ID.push_back(matchedPFP_ID);
     MCP_matchedPFP_matchedE.push_back(matchedPFP_matchedE);
 
-  } // end loop over MCPs in hierarchy
+  }  // end loop over MCPs
 
 
   // Finally, fill variables related to PFPs in the event
   n_PFPs = pfpCollection.size();
   for (auto pfp : pfpCollection){
-    PFP_ID.push_back((int)pfp->Self());
-    PFP_TrackShowerPdg.push_back(pfp->PdgCode());
 
     // Is this a primary PFP? By that I mean, is its parent a neutrino PFP? (pfParticle->IsPrimary() means "is it a neutrino?" so that's not what we want)
     // Find the parent particle
+    bool isprimarypfp=false;
     const auto parentIterator = particleMap.find(pfp->Parent());
     if (parentIterator == particleMap.end()){
-      PFP_IsPrimary.push_back(false);
+      isprimarypfp = false;
     }
     else{
       // Check if the parent has a neutrino PDG code
       const int parentPDG = std::abs(parentIterator->second->PdgCode());
       if (parentIterator!=particleMap.end() && parentIterator->second->IsPrimary() && (parentPDG==pandora::NU_E || parentPDG==pandora::NU_MU || parentPDG==pandora::NU_TAU)){
-        PFP_IsPrimary.push_back(true);
+        isprimarypfp = true;
       }
       else {
-        PFP_IsPrimary.push_back(false);
+        isprimarypfp = false;
       }
     }
+
+
+    // Is this PFP a good kink candidate? That means: is it a primary PFP, does it come from a pi+, and is it truth-matched to two particles that are mother-daughter related with 90% completeness?
+    // If not, don't use it
+
+    // 1) is it primary?
+    if (!isprimarypfp) continue;
+
+    // 2) is it truth-matched to a pi+ from a neutrino?
+    auto search1 = pfpID_to_matchingData_BestMatch.find((int)pfp->Self());
+    if (search1 != pfpID_to_matchingData_BestMatch.end()){
+      if (PDGCode(search1->second.MCParticle_PDG) != kPiPlus) continue;
+
+      int mcpid=search1->second.MCParticle_ID;
+      art::Ptr<simb::MCParticle> matchedmcp;
+      for (auto mcp : mcp_v){
+        if (mcp->TrackId() == mcpid){
+          matchedmcp = mcp;
+          break;
+        }
+      }
+      if (matchedmcp->Mother() != nu_MCPID) continue;
+    }
+    else{
+      continue;
+    }
+
+    // 3) is it truth-matched to exactly two particles, of which it captures 90% of the energy?
+    std::vector<int> MatchedMCP_vectorposes;
+    // We have MCP->all matched PFP mapping but not the other way around, so loop through all MCPs and ask if they match this PFP
+    for (size_t i_mcp=0; i_mcp < mcp_v.size(); i_mcp++){
+      auto mcp_tmp = mcp_v.at(i_mcp);
+        std::map<int, std::vector<MatchingData>> MCPID_to_many_matchingData;
+      auto matchingdata_mcp_tmp = MCPID_to_many_matchingData.find((int)mcp_tmp->TrackId());
+      if (matchingdata_mcp_tmp==MCPID_to_many_matchingData.end()) continue;
+      for (size_t i_matchpfp=0; i_matchpfp<matchingdata_mcp_tmp->second.size(); i_matchpfp++){
+
+        auto matchingdat = matchingdata_mcp_tmp->second.at(i_matchpfp);
+
+        // Are we looking at the PFP we want? If not, move on to the next one
+        if (matchingdat.recoObject_ID != (int)pfp->Self()) continue;
+
+        // If we have the right PFP, does the matched energy constitute more than 90% of the MCP energy? If not, move on
+        if (matchingdat.MatchedEnergy > 0.9*MCP_totaldepE.at(i_mcp)) continue;
+
+        // If it passes all of these restrictions, save this MCP
+        MatchedMCP_vectorposes.push_back(i_mcp);
+
+      } // end loop over i_matchpfp
+    } // end loop over i_mcp
+
+    if (MatchedMCP_vectorposes.size() != 2) continue;
+
+
+    // 4) Are those two particles mother-daughter related?
+    int mcp_vecpos_1 = MatchedMCP_vectorposes.at(0);
+    int mcp_vecpos_2 = MatchedMCP_vectorposes.at(1);
+    std::vector<double> trueendxyz{-999,-999,-999};
+    if (mcp_v.at(mcp_vecpos_1)->Mother() == mcp_v.at(mcp_vecpos_2)->TrackId()){
+      TLorentzVector end = mcp_v.at(mcp_vecpos_2)->EndPosition();
+      trueendxyz = std::vector<double> {end.X(),end.Y(),end.Z()};
+      // do nothing
+    }
+    else if (mcp_v.at(mcp_vecpos_2)->Mother() == mcp_v.at(mcp_vecpos_1)->TrackId()){
+      TLorentzVector end = mcp_v.at(mcp_vecpos_1)->EndPosition();
+      trueendxyz = std::vector<double> {end.X(),end.Y(),end.Z()};
+      // do nothing
+    }
+    else{
+      continue;
+    }
+
+    // If it passed all these requirements, save the PFP!
+    PFP_IsPrimary.push_back(isprimarypfp);
+    PFP_ID.push_back((int)pfp->Self());
+    PFP_TrackShowerPdg.push_back(pfp->PdgCode());
+    PFP_goodreco_MCPvectorposes.push_back(MatchedMCP_vectorposes);
+    PFP_trueMCPend.push_back(trueendxyz);
 
 
     // Use LArPandoraHelper functions to get primary PFP
@@ -400,6 +487,17 @@ void KinkFindingTreeCreator::analyze(art::Event const & evt)
       sp_tvector_vec.push_back(dummytvec);
     } // end loop over spacepoints
     PFP_spacepoints_XYZ.push_back(sp_tvector_vec);
+
+    // Save ordered spacepoints
+    std::vector<std::pair<std::vector<double>,int>> ordered_spacepoints_pair_origidx =  OrderSpacepoints(sp_tvector_vec);
+    std::vector<std::vector<double>> ordered_spacepoints;
+    std::vector<int> ordered_spacepoints_origidx;
+    for (size_t i_sp=0; i_sp<ordered_spacepoints_pair_origidx.size(); i_sp++){
+      ordered_spacepoints.push_back(ordered_spacepoints_pair_origidx.at(i_sp).first);
+      ordered_spacepoints_origidx.push_back(ordered_spacepoints_pair_origidx.at(i_sp).second);
+    }
+    PFP_ordered_spacepoints.push_back(ordered_spacepoints);
+    PFP_ordered_spacepoints_origidx.push_back(ordered_spacepoints_origidx);
 
     // Get track from PFP (if it exists)
     std::vector<art::Ptr<recob::Track>> tracks_pfp = tracks_from_pfps.at(pfp.key());
@@ -442,7 +540,8 @@ void KinkFindingTreeCreator::analyze(art::Event const & evt)
 
   } // end loop over PFPs
 
-    _outtree->Fill();
+  _outtree->Fill();
+
 }
 
 DEFINE_ART_MODULE(KinkFindingTreeCreator)
