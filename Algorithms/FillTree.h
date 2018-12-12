@@ -202,6 +202,8 @@ struct cc1pianavars{
   int nu_PDG;
   double nu_E;
   int nu_MCPID;
+  double nuint_W;
+  double nuint_Qsq;
 
 
   fhicl::ParameterSet pset;

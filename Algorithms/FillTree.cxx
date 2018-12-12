@@ -158,6 +158,8 @@ void cc1pianavars::Clear(){
    nu_isCC = false;
    nu_PDG = -9999;
    nu_E = -9999;
+   nuint_W = -9999;
+   nuint_Qsq = -9999;
 
 }
 
@@ -927,6 +929,9 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
             nu_E = neutrino.E();
 
+            nuint_W = nu.W();
+            nuint_Qsq = nu.QSqr();
+
             const TLorentzVector& vertex = neutrino.Position(0);
             double MC_vertex[4];
             vertex.GetXYZT(MC_vertex);
@@ -1079,6 +1084,8 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("nu_PDG", &(vars->nu_PDG));
    t -> Branch("nu_E", &(vars->nu_E));
    t -> Branch("nu_MCPID", &(vars->nu_MCPID));
+   t -> Branch("nuint_W", &(vars->nuint_W));
+   t -> Branch("nuint_Qsq", &(vars->nuint_Qsq));
 
 }
 
