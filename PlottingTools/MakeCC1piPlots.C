@@ -246,6 +246,20 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
       selMIPsPID2D->GetYaxis()->SetBinLabel(i_bin,PDGenum2str(MIPpdgs.at(i_bin-1)).c_str());
    }
 
+   // Custom 2D histograms: leading vs second MIP true PDG for signal events only
+   TH2D *selMIPs2D_signal = new TH2D("selMIPs2D_signal","Selected MIP-like tracks from true signal events;Muon Candidate; Pion Candidate",nMIPpdgs+1,0,nMIPpdgs+1,nMIPpdgs+1,0,nMIPpdgs+1);
+   for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
+      if (i_bin==nMIPpdgs){
+         selMIPs2D_signal->GetXaxis()->SetBinLabel(i_bin,"Other");
+         selMIPs2D_signal->GetYaxis()->SetBinLabel(i_bin,"Other");
+         selMIPs2D_signal->GetXaxis()->SetBinLabel(i_bin+1,"Row Sums");
+         selMIPs2D_signal->GetYaxis()->SetBinLabel(i_bin+1,"Col Sums");
+         continue;
+      }
+      selMIPs2D_signal->GetXaxis()->SetBinLabel(i_bin,PDGenum2str(MIPpdgs.at(i_bin-1)).c_str());
+      selMIPs2D_signal->GetYaxis()->SetBinLabel(i_bin,PDGenum2str(MIPpdgs.at(i_bin-1)).c_str());
+   }
+
    // Custom 2D histogram: containment vs length for muons and pions from true signal events
    TH2D *ContainmentLength2D = new TH2D("ContainmentLength2D","True CC1#pi^{+} events;Contained;Longer",4,0,4,2,0,2);
    ContainmentLength2D->GetXaxis()->SetBinLabel(1,"neither");
@@ -431,6 +445,8 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
             if (MIPpdgs.at(i_bin) == SecondMIPpdg) SecondMIPbin = i_bin+1;
          }
          selMIPs2D->Fill((double)LeadingMIPbin-0.5,(double)SecondMIPbin-0.5);
+         if ((NuIntTopology)mc_vars.Truth_topology == kCC1piplus0p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplus1p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplusNp)
+            selMIPs2D_signal->Fill((double)LeadingMIPbin-0.5,(double)SecondMIPbin-0.5);
 
 
          //PDGCode MuonCandpdg = PDGCode(mc_vars.muoncandidatePDG);
@@ -730,6 +746,24 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    selMIPs2D->Scale(1.0/selMIPs2D->Integral());
    selMIPs2D->Draw("colz text");
    c1->Print("CC1pi_selMIPs2D.png");
+
+   selMIPs2D_signal->Scale(1.0/selMIPs2D_signal->Integral());
+   for (size_t x_bin=1; x_bin<nMIPpdgs+1; x_bin++){
+      float total = 0;
+      for (size_t y_bin=1; y_bin<nMIPpdgs+1; y_bin++){
+         total+=selMIPs2D_signal->GetBinContent(x_bin,y_bin);
+      }
+      selMIPs2D_signal->SetBinContent(x_bin,nMIPpdgs+1,total);
+   }
+   for (size_t y_bin=1; y_bin<nMIPpdgs+1; y_bin++){
+      float total = 0;
+      for (size_t x_bin=1; x_bin<nMIPpdgs+1; x_bin++){
+         total+=selMIPs2D_signal->GetBinContent(x_bin,y_bin);
+      }
+      selMIPs2D_signal->SetBinContent(nMIPpdgs+1,y_bin,total);
+   }
+   selMIPs2D_signal->Draw("colz text");
+   c1->Print("CC1pi_selMIPs2D_signal.png");
 
    selMIPsPID2D->Scale(1.0/selMIPsPID2D->Integral());
    selMIPsPID2D->Draw("colz text");
