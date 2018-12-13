@@ -41,7 +41,6 @@ std::vector<CC1piPlotVars> GetMIPCutVars(treevars *vars) {
    //Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)
    Var_TPCObj_PFP_track_dEdx_truncmean_start_lowcut(vars)
    ,Var_TPCObj_PFP_VtxTrackDist(vars)
-   // ,Var_TPCObj_PFP_track_perc_used_hits(vars)
    //,Var_TPCObj_PFP_track_dedx_grminhits(vars)
    //,Var_TPCObj_PFP_lnLmipoverp(vars)
    ,Var_TPCObj_PFP_track_BDTscore(vars)
