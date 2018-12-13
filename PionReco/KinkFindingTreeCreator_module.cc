@@ -265,6 +265,8 @@ void KinkFindingTreeCreator::analyze(art::Event const & evt)
   MCP_Px_eachpoint.clear();
   MCP_Py_eachpoint.clear();
   MCP_Pz_eachpoint.clear();
+  MCP_StartXYZ.clear();
+  MCP_EndXYZ.clear();
 
   n_PFPs = 0;
   PFP_ID.clear();
@@ -273,8 +275,13 @@ void KinkFindingTreeCreator::analyze(art::Event const & evt)
   PFP_ID_to_bestmatchMCPid.clear();
   PFP_totaldepE.clear();
   PFP_primaryPFPid.clear();
-  PFP_spacepoints_XYZ.clear();
+  PFP_spacepoints_XYZ.clear();  PFP_ordered_spacepoints.clear();    PFP_ordered_spacepoints_origidx.clear();
+  PFP_goodreco_MCPvectorposes.clear();
+  PFP_trueMCPend.clear();
   PFP_trajpoints_XYZ.clear();
+  PFP_track_length.clear();
+  PFP_track_start.clear();
+  PFP_track_end.clear();
   PFP_track_theta.clear();
   PFP_track_phi.clear();
 
@@ -380,11 +387,12 @@ void KinkFindingTreeCreator::analyze(art::Event const & evt)
     if (!isprimarypfp) continue;
 
     // 2) is it truth-matched to a pi+ from a neutrino?
+    int mcpid=-999;
     auto search1 = pfpID_to_matchingData_BestMatch.find((int)pfp->Self());
     if (search1 != pfpID_to_matchingData_BestMatch.end()){
       if (PDGCode(search1->second.MCParticle_PDG) != kPiPlus) continue;
 
-      int mcpid=search1->second.MCParticle_ID;
+      mcpid=search1->second.MCParticle_ID;
       art::Ptr<simb::MCParticle> matchedmcp;
       for (auto mcp : mcp_v){
         if (mcp->TrackId() == mcpid){
@@ -403,7 +411,6 @@ void KinkFindingTreeCreator::analyze(art::Event const & evt)
     // We have MCP->all matched PFP mapping but not the other way around, so loop through all MCPs and ask if they match this PFP
     for (size_t i_mcp=0; i_mcp < mcp_v.size(); i_mcp++){
       auto mcp_tmp = mcp_v.at(i_mcp);
-        std::map<int, std::vector<MatchingData>> MCPID_to_many_matchingData;
       auto matchingdata_mcp_tmp = MCPID_to_many_matchingData.find((int)mcp_tmp->TrackId());
       if (matchingdata_mcp_tmp==MCPID_to_many_matchingData.end()) continue;
       for (size_t i_matchpfp=0; i_matchpfp<matchingdata_mcp_tmp->second.size(); i_matchpfp++){
@@ -413,15 +420,23 @@ void KinkFindingTreeCreator::analyze(art::Event const & evt)
         // Are we looking at the PFP we want? If not, move on to the next one
         if (matchingdat.recoObject_ID != (int)pfp->Self()) continue;
 
-        // If we have the right PFP, does the matched energy constitute more than 90% of the MCP energy? If not, move on
-        if (matchingdat.MatchedEnergy > 0.9*MCP_totaldepE.at(i_mcp)) continue;
+        // std::cout << "PFP " << pfp->Self() << ": MCP with PDG " << MCP_PDGcode.at(i_mcp) << " with matched energy " << matchingdat.MatchedEnergy << ". True daughter? " << bool(MCP_MotherID.at(i_mcp)==mcpid) << " Is primary pi+? " << bool(MCP_ID.at(i_mcp)==mcpid) << std::endl;
 
-        // If it passes all of these restrictions, save this MCP
+        // If we have the right PFP, does the matched energy constitute more than 90% of the MCP energy? If not, move on
+        if (matchingdat.MatchedEnergy < 0.9*MCP_totaldepE.at(i_mcp)) continue;
+
+        // Only want MCPs that are true muons/pions/protons(with p>30GeV) and daughters of original pi+ (or the original pi+)
+        if (!(MCP_MotherID.at(i_mcp)==mcpid || MCP_ID.at(i_mcp)==mcpid)) continue;
+        if (!(PDGCode(MCP_PDGcode.at(i_mcp))==kMuMinus || PDGCode(MCP_PDGcode.at(i_mcp))==kPiPlus || (PDGCode(MCP_PDGcode.at(i_mcp))==kProton && MCP_trueStartP.at(i_mcp)>0.03) )) continue;
+
+        // std::cout << "  -- keep" << std::endl;
+
         MatchedMCP_vectorposes.push_back(i_mcp);
 
       } // end loop over i_matchpfp
     } // end loop over i_mcp
 
+    // std::cout << " -- Matched " << MatchedMCP_vectorposes.size() << " MCParticles -- " << std::endl;
     if (MatchedMCP_vectorposes.size() != 2) continue;
 
 
