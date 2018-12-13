@@ -192,7 +192,7 @@ std::vector<double> GetSPDirVec(std::vector<std::pair<std::vector<double>,int>> 
       TVector3 diff(0,0,0);
       int n_beforeafter=3;
       for (size_t i=i_pos-n_beforeafter; i<=i_pos+n_beforeafter; i++){
-        if (i<0) continue;
+        // if (i<0) continue;
         if (i+1>=spacepoints.size()) continue;
 
         TVector3 vec0(spacepoints.at(i).first.at(0),spacepoints.at(i).first.at(1),spacepoints.at(i).first.at(2));
