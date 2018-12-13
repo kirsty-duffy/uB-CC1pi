@@ -35,6 +35,7 @@ std::vector<int> GetAllPrimaryPFPIDs(std::vector<int> *PFP_primaryPFPid, std::ve
 struct KinkFindingTree{
   // Variables to fill from tree
   int nMCPs=0;
+  int nu_MCPID=0;
   std::vector<int> *MCP_ID=nullptr;
   std::vector<int> *MCP_MotherID=nullptr;
   std::vector<std::vector<int>> *MCP_DaughterIDs=nullptr;
@@ -46,12 +47,13 @@ struct KinkFindingTree{
   std::vector<std::vector<double>> *MCP_matchedPFP_matchedE=nullptr;
   std::vector<double> *MCP_trueStartE=nullptr;
   std::vector<double> *MCP_trueStartP=nullptr;
-  int n_PFPs=0;
   std::vector<std::vector<double>> *MCP_Px_eachpoint=nullptr;
   std::vector<std::vector<double>> *MCP_Py_eachpoint=nullptr;
   std::vector<std::vector<double>> *MCP_Pz_eachpoint=nullptr;
   std::vector<std::vector<double>> *MCP_StartXYZ=nullptr;
   std::vector<std::vector<double>> *MCP_EndXYZ=nullptr;
+
+  int n_PFPs=0;
   std::vector<int> *PFP_ID=nullptr;
   std::vector<int> *PFP_TrackShowerPdg=nullptr;
   std::vector<bool> *PFP_IsPrimary=nullptr;
@@ -68,6 +70,8 @@ struct KinkFindingTree{
   std::vector<double> *PFP_track_phi=nullptr;
   std::vector<std::vector<std::vector<double>>> *PFP_ordered_spacepoints=nullptr;
   std::vector<std::vector<int>> *PFP_ordered_spacepoints_origidx=nullptr;
+  std::vector<std::vector<int>> *PFP_goodreco_MCPvectorposes=nullptr;
+  std::vector<std::vector<double>> *PFP_trueMCPend=nullptr;
 
   bool verbose;
 
@@ -120,6 +124,7 @@ KinkFindingTree::KinkFindingTree(){
 void SetKinkFindingTreeVariables(KinkFindingTree *vars, TTree *tr){
   // Set branch addresses
   tr->SetBranchAddress("nMCPs",&(vars->nMCPs));
+  tr->SetBranchAddress("nu_MCPID",&(vars->nu_MCPID));
   tr->SetBranchAddress("MCP_ID",&(vars->MCP_ID));
   tr->SetBranchAddress("MCP_MotherID",&(vars->MCP_MotherID));
   tr->SetBranchAddress("MCP_DaughterIDs",&(vars->MCP_DaughterIDs));
@@ -153,6 +158,8 @@ void SetKinkFindingTreeVariables(KinkFindingTree *vars, TTree *tr){
   tr->SetBranchAddress("PFP_track_phi",&(vars->PFP_track_phi));
   tr->SetBranchAddress("PFP_ordered_spacepoints",&(vars->PFP_ordered_spacepoints));
   tr->SetBranchAddress("PFP_ordered_spacepoints_origidx",&(vars->PFP_ordered_spacepoints_origidx));
+  tr->SetBranchAddress("PFP_trueMCPend",&(vars->PFP_trueMCPend));
+  tr->SetBranchAddress("PFP_goodreco_MCPvectorposes",&(vars->PFP_goodreco_MCPvectorposes));
 };
 
 void SetKinkFindingTreeBranches(KinkFindingTree *vars, TTree *tr){
@@ -193,6 +200,7 @@ void SetKinkFindingTreeBranches(KinkFindingTree *vars, TTree *tr){
 
 void SetupKinkFindingTreeForReading(KinkFindingTree *tr){
   tr->nMCPs=0;
+  tr->nu_MCPID=0;
   tr->MCP_ID=nullptr;
   tr->MCP_MotherID=nullptr;
   tr->MCP_DaughterIDs=nullptr;
@@ -224,10 +232,13 @@ void SetupKinkFindingTreeForReading(KinkFindingTree *tr){
   tr->PFP_track_end=nullptr;
   tr->PFP_track_theta=nullptr;
   tr->PFP_track_phi=nullptr;
+  tr->PFP_goodreco_MCPvectorposes=nullptr;
+  tr->PFP_trueMCPend=nullptr;
 };
 
 void ClearKinkFindingTree(KinkFindingTree *tr){
   tr->nMCPs=0;
+  tr->nu_MCPID=0;
   tr->MCP_ID->clear();
   tr->MCP_MotherID->clear();
   tr->MCP_DaughterIDs->clear();
@@ -259,6 +270,8 @@ void ClearKinkFindingTree(KinkFindingTree *tr){
   tr->PFP_track_end->clear();
   tr->PFP_track_theta->clear();
   tr->PFP_track_phi->clear();
+  tr->PFP_trueMCPend->clear();
+  tr->PFP_goodreco_MCPvectorposes->clear();
 };
 
 void CopyMCPs(KinkFindingTree *originaltree, KinkFindingTree *newtree){
@@ -301,6 +314,9 @@ void CopyPFP(int i_pfp, KinkFindingTree *originaltree, KinkFindingTree *newtree)
 };
 
 bool KinkFindingTree::Setup(){
+  // Hack because I messed up in the module
+  n_PFPs = PFP_ID->size();
+
   // Make some maps that will help us later
   MCP_ID_to_vectorpos.clear();
   PFP_ID_to_vectorpos.clear();
