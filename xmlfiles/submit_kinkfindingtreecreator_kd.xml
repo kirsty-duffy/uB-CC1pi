@@ -33,8 +33,8 @@
   <!-- Stages -->
   <stage name = "KinkFinding">
      <maxfilesperjob>2</maxfilesperjob>
-     <inputlist>/uboone/data/users/kduffy/CC1pi/book/v06_26_01_13_alister_v0/files_out1.list</inputlist>
-     <!-- <inputdef>alister1_ubxsectruthfilter_devsample</inputdef> -->
+     <inputlist>/uboone/app/users/kduffy/CC1pi/CC1pi_uboonecode/srcs/uboonecode/uboone/CC1pi/ignore/2018-12-03_kinkfinding/inputfiles.list</inputlist>
+     <!-- <inputdef>alister1_ubxsec_bnbcosmic_truthfiltered_dev</inputdef> --> <!-- contains 975 files -->
      <fcl>run_KinkFindingTreeCreator.fcl</fcl>
      <outdir>/pnfs/uboone/persistent/users/kduffy/CC1pi/&version;/</outdir>
      <logdir>/pnfs/uboone/persistent/users/kduffy/CC1pi/&version;/</logdir>
