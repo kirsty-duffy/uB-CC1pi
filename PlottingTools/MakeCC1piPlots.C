@@ -94,15 +94,15 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    TTree *background = new TTree("background","background");
    muon -> Branch("dEdx_truncmean_start", &(MVA_vars->dEdx_truncmean_start));
    muon -> Branch("VtxTrackDist", &(MVA_vars->VtxTrackDist));
-   muon -> Branch("nhits", &(MVA_vars->nhits));
+//   muon -> Branch("nhits", &(MVA_vars->nhits));
    muon -> Branch("lnLmipoverp", &(MVA_vars->lnLmipoverp));
    pion -> Branch("dEdx_truncmean_start", &(MVA_vars->dEdx_truncmean_start));
    pion -> Branch("VtxTrackDist", &(MVA_vars->VtxTrackDist));
-   pion -> Branch("nhits", &(MVA_vars->nhits));
+//   pion -> Branch("nhits", &(MVA_vars->nhits));
    pion -> Branch("lnLmipoverp", &(MVA_vars->lnLmipoverp));
    background -> Branch("dEdx_truncmean_start", &(MVA_vars->dEdx_truncmean_start));
    background -> Branch("VtxTrackDist", &(MVA_vars->VtxTrackDist));
-   background -> Branch("nhits", &(MVA_vars->nhits));
+//   background -> Branch("nhits", &(MVA_vars->nhits));
    background -> Branch("lnLmipoverp", &(MVA_vars->lnLmipoverp));
 
    gStyle->SetTitleX(0.5);
@@ -123,12 +123,12 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    settreevars(t_bnbcos,&mc_vars);
 
    std::string BookMVAType = "BDTG";
-   std::string BookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_vtxtrackprecut/weights/TMVAClassification_BDTG.weights.xml";
+   std::string BookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_noNhits/weights/TMVAClassification_BDTG.weights.xml";
 
    TMVA::Reader fReader("");
    fReader.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
 //   fReader.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
-   fReader.AddVariable("nhits", &(mc_vars.float_nhits));
+//   fReader.AddVariable("nhits", &(mc_vars.float_nhits));
    fReader.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
    fReader.BookMVA(BookMVAType.c_str(), BookMVALoc.c_str());
 

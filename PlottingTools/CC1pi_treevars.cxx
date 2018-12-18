@@ -811,6 +811,9 @@ void MakeMVATrees(TTree *muon_tree, TTree *pion_tree, TTree *background_tree, MV
       // Quality pre-cut: tracks further than 5 cm away from the vertex are typically misreconstructed (or background)
       if(vars->TPCObj_PFP_VtxTrackDist->at(i_track) > 5) continue;
 
+      // Quality pre-cut: need at least 4 hits for truncated mean dE/dx calculation
+      if(vars->TPCObj_PFP_track_dEdx_nhits->at(i_track) < 4) continue;
+
       MVA_vars->dEdx_truncmean_start = vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track);
       MVA_vars->VtxTrackDist = vars->TPCObj_PFP_VtxTrackDist->at(i_track);
       MVA_vars->nhits = vars->TPCObj_PFP_track_dEdx_nhits->at(i_track);
