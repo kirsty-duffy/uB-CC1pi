@@ -142,6 +142,9 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_track_BDTscore;
    std::vector<double> *TPCObj_NDaughterPFPs;
    std::vector<double> *TPCObj_PFP_MCP_trueOrigPDG;
+   std::vector<double> *TPCObj_PFP_track_theta_lowdEdx;
+   std::vector<double> *TPCObj_PFP_track_theta_highdEdx;
+   std::vector<double> *TPCObj_PFP_track_theta_notparallel;
 
    std::vector<std::vector<std::vector<double>>> *TPCObj_PFP_track_SpacepointsXYZ_Ordered;
    std::vector<std::vector<double>> *TPCObj_PFP_track_SpacepointsQPlane2_Ordered;

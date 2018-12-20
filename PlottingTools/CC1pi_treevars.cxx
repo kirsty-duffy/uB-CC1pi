@@ -279,6 +279,10 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
    vars->BDT_muoncandidatePDG = -9999;
    vars->BDT_pioncandidatePDG = -9999;
 
+   vars->TPCObj_PFP_track_theta_lowdEdx = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_theta_highdEdx = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_theta_notparallel = new std::vector<double>(vecsize,-9999);
+
    // Just use collection plane for now
    int i_pl = 2;
 
@@ -379,6 +383,9 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
          vars->TPCObj_PFP_track_MCS_p_meanScatter->at(i_track) = -9999.;
          vars->TPCObj_PFP_track_passesMIPcut->at(i_track) = -9999.;
          vars->TPCObj_PFP_track_passesPioncut->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_theta_lowdEdx->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_theta_highdEdx->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_theta_notparallel->at(i_track) = -9999.;
 
          continue;
       }
@@ -519,6 +526,20 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
       if (dedx_m!=0){
          vars->TPCObj_PFP_track_dEdx_truncmoverm_start->at(i_track) = tmpval/dedx_m;
       }
+
+      //Record theta seperately for high and low dE/dx, to help determine a theta pre-cut
+      if(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) < 1 && vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track)!=-9999) {
+         vars->TPCObj_PFP_track_theta_lowdEdx->at(i_track) = vars->TPCObj_PFP_track_theta->at(i_track);
+         vars->TPCObj_PFP_track_theta_highdEdx->at(i_track) = -9999;
+      }
+      else if(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) >= 1){
+         vars->TPCObj_PFP_track_theta_lowdEdx->at(i_track) = -9999;
+         vars->TPCObj_PFP_track_theta_highdEdx->at(i_track) = vars->TPCObj_PFP_track_theta->at(i_track);
+      }
+
+      //Record whether track is parallel to collection plane (since currently we don't have support to directly cut out a middle region)
+      if(vars->TPCObj_PFP_track_theta->at(i_track) > 1.37 && vars->TPCObj_PFP_track_theta->at(i_track) < 1.77) vars->TPCObj_PFP_track_theta_notparallel->at(i_track) = 0.;
+      else vars->TPCObj_PFP_track_theta_notparallel->at(i_track) = 1.;
 
       // Make pair for ordering tracks by Length
       pair_trklen_index->at(i_track) = std::make_pair(vars->TPCObj_PFP_track_length->at(i_track),i_track);
@@ -806,7 +827,10 @@ void MakeMVATrees(TTree *muon_tree, TTree *pion_tree, TTree *background_tree, MV
       if(vars->Truth_topology == kCosmic || vars->Truth_topology == kMixed || vars->Truth_topology == kUnknown) continue;
 
       // Quality pre-cut: tracks parallel to collection plane have bad dE/dx
-      if(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) < 1) continue;
+      //if(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) < 1) continue;
+
+      // Quality pre-cut: tracks parallel to collection plane have bad dE/dx
+      if(vars->TPCObj_PFP_track_theta->at(i_track) > 1.32 && vars->TPCObj_PFP_track_theta->at(i_track) < 1.82) continue;
 
       // Quality pre-cut: tracks further than 5 cm away from the vertex are typically misreconstructed (or background)
       if(vars->TPCObj_PFP_VtxTrackDist->at(i_track) > 5) continue;

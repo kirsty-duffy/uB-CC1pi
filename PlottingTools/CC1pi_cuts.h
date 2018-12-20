@@ -39,11 +39,12 @@ std::vector<CC1piPlotVars> GetCutVars(treevars *vars) {
 std::vector<CC1piPlotVars> GetMIPCutVars(treevars *vars) {
    std::vector<CC1piPlotVars> cut_vars = {
    //Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)
-   Var_TPCObj_PFP_track_dEdx_truncmean_start_lowcut(vars)
-   ,Var_TPCObj_PFP_VtxTrackDist(vars)
+   //Var_TPCObj_PFP_track_dEdx_truncmean_start_lowcut(vars)
+   Var_TPCObj_PFP_VtxTrackDist(vars)
    //,Var_TPCObj_PFP_track_dedx_grminhits(vars)
    //,Var_TPCObj_PFP_lnLmipoverp(vars)
    ,Var_TPCObj_PFP_track_BDTscore(vars)
+   ,Var_TPCObj_PFP_track_theta_notparallel(vars)
    };
    return cut_vars;
 };
