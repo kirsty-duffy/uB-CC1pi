@@ -1494,7 +1494,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_BDTscore(treevars *vars){
  tmp.OnlyDaughters = true;
  tmp.TracksNeeded = "exactlytwo";
   tmp.isMIPcut = true;
-  tmp.CutValue = 0.42;
+  tmp.CutValue = 0.50;
   tmp.bins = {25,-1,1};
   tmp.histtitle = ";BDT score;";
   tmp.histname = "BDTscore";

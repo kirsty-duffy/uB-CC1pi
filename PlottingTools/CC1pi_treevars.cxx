@@ -574,8 +574,7 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
       vars->float_VtxTrackDist = (float)(vars->TPCObj_PFP_VtxTrackDist->at(i_track));
       vars->float_nhits = (float)(vars->TPCObj_PFP_track_dEdx_nhits->at(i_track));
       vars->float_lnLmipoverp = (float)(vars->TPCObj_PFP_lnLmipoverp->at(i_track));
-      vars->float_trklength = (float)(vars->TPCObj_PFP_track_length->at(i_track));
-      if(vars->float_dEdx_truncmean_start==-9999 || vars->float_VtxTrackDist==-9999 || vars->float_nhits==-9999 || vars->float_lnLmipoverp==-9999 || vars->float_trklength==-9999) {
+      if(vars->float_dEdx_truncmean_start==-9999 || vars->float_VtxTrackDist==-9999 || vars->float_nhits==-9999 || vars->float_lnLmipoverp==-9999) {
          vars->TPCObj_PFP_track_BDTscore->at(i_track) = -9999;
       }
       else {
@@ -801,15 +800,13 @@ void MakeMVATrees(TTree *muon_tree, TTree *pion_tree, TTree *background_tree, MV
       if(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track)==-9999
             || vars->TPCObj_PFP_VtxTrackDist->at(i_track)==-9999
             || vars->TPCObj_PFP_track_dEdx_nhits->at(i_track)==-9999
-            || vars->TPCObj_PFP_lnLmipoverp->at(i_track) == -9999
-            || vars->TPCObj_PFP_track_length->at(i_track) == -9999
-            ) continue;
+            || vars->TPCObj_PFP_lnLmipoverp->at(i_track) == -9999) continue;
 
       // Only train on neutrino-induced particles
       if(vars->Truth_topology == kCosmic || vars->Truth_topology == kMixed || vars->Truth_topology == kUnknown) continue;
 
       // Quality pre-cut: tracks parallel to collection plane have bad dE/dx
-     if(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) < 1) continue;
+      if(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) < 1) continue;
 
       // Quality pre-cut: tracks further than 5 cm away from the vertex are typically misreconstructed (or background)
       if(vars->TPCObj_PFP_VtxTrackDist->at(i_track) > 5) continue;
@@ -818,7 +815,6 @@ void MakeMVATrees(TTree *muon_tree, TTree *pion_tree, TTree *background_tree, MV
       MVA_vars->VtxTrackDist = vars->TPCObj_PFP_VtxTrackDist->at(i_track);
       MVA_vars->nhits = vars->TPCObj_PFP_track_dEdx_nhits->at(i_track);
       MVA_vars->lnLmipoverp = vars->TPCObj_PFP_lnLmipoverp->at(i_track);
-      MVA_vars->trklength = vars->TPCObj_PFP_track_length->at(i_track);
 
       if(vars->TPCObj_PFP_truePDG->at(i_track)==13) {
          muon_tree->Fill();
