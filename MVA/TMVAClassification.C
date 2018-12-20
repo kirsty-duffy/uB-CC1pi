@@ -180,7 +180,7 @@ void TMVAClassification( TString myMethodList = "" )
    // front of the "Silent" argument in the option string
    TMVA::Factory *factory = new TMVA::Factory( "TMVAClassification", outputFile,
                                                "!V:!Silent:Color:DrawProgressBar:Transformations=I;D;P;G,D:AnalysisType=Auto" );
-   TMVA::DataLoader *dataloader = new TMVA::DataLoader("dataset_noNhits");
+   TMVA::DataLoader *dataloader = new TMVA::DataLoader("dataset_vtxtrackprecut");
 
    // If you wish to modify default settings
    // (please check "src/Config.h" to see all available global options)
@@ -194,7 +194,7 @@ void TMVAClassification( TString myMethodList = "" )
    // branch, name, unit, type
    dataloader->AddVariable("dEdx_truncmean_start","dEdx_truncmean_start","",'D');
 //   dataloader->AddVariable("VtxTrackDist","VtxTrackDist","",'D');
-//   dataloader->AddVariable("nhits","nhits","",'D');
+   dataloader->AddVariable("nhits","nhits","",'D');
    dataloader->AddVariable("lnLmipoverp","lnLmipoverp","",'D');
 //   dataloader->AddVariable("isContained","isContained","",'D');
 
@@ -240,7 +240,7 @@ void TMVAClassification( TString myMethodList = "" )
 //   if (gSystem->AccessPathName( fname ))  // file does not exist in local directory
 //      gSystem->Exec("wget http://root.cern.ch/files/tmva_class_example.root");
    
-   TFile *input = TFile::Open("/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/PlottingTools/MVA_Trees/MVA_Trees_noNhits.root");
+   TFile *input = TFile::Open("/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/PlottingTools/MVA_Trees/MVA_Trees_vtxtrackprecut.root");
 
 
    
@@ -329,7 +329,7 @@ void TMVAClassification( TString myMethodList = "" )
    // Apply additional cuts on the signal and background samples (can be different)
    // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
    // for example: TCut mycutb = "abs(var1)<0.5";
-   TCut mycuts = "dEdx_truncmean_start < 25 && lnLmipoverp > -20 && lnLmipoverp < 20";
+   TCut mycuts = "dEdx_truncmean_start < 25 && nhits < 1000 && lnLmipoverp > -20 && lnLmipoverp < 20";
    TCut mycutb = mycuts; 
 
    
