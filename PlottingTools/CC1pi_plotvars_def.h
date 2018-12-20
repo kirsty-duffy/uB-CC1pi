@@ -840,6 +840,17 @@ CC1piPlotVars Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_NotPioncont(treevars *var
   return tmp;
 }
 
+// TPCObj_PFP_track_nhits
+CC1piPlotVars Var_TPCObj_PFP_track_nhits(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_nhits;
+  tmp.bins = {400,0,1000};
+  tmp.histtitle = ";No. hits in track;";
+  tmp.histname = "trknhits";
+  tmp.PlotOnlyDaughters = true;
+  return tmp;
+}
+
 // TPCObj_PFP_track_length_LeadingMIP
 CC1piPlotVars Var_TPCObj_PFP_track_nhits_LeadingMIP(treevars *vars){
   CC1piPlotVars tmp;

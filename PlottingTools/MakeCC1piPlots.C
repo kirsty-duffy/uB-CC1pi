@@ -74,6 +74,7 @@ std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> GetVarstoplot2D(treevars *va
       // ,{Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_NotPioncont(vars),Var_TPCObj_PFP_track_length(vars)}
       // ,{Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean_NotPioncont(vars),Var_TPCObj_PFP_track_length(vars)}
       // ,{Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_NotPioncont(vars),Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum_NotPioncont(vars)}
+      ,{Var_TPCObj_PFP_track_length(vars),Var_TPCObj_PFP_track_nhits(vars)}
    };
    return varstoplot2D;
 }
