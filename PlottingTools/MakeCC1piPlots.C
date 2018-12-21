@@ -51,7 +51,7 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       ,Var_TPCObj_PFP_lnLmipovermu(vars)
       ,Var_TPCObj_PFP_track_theta_lowdEdx(vars)
       ,Var_TPCObj_PFP_track_theta_highdEdx(vars)
-      ,Var_TPCObj_PFP_track_theta_notparallel(vars)
+      ,Var_TPCObj_PFP_track_theta_parallel(vars)
    };
    return varstoplot;
 }

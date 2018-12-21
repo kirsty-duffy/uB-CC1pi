@@ -281,7 +281,7 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
 
    vars->TPCObj_PFP_track_theta_lowdEdx = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_track_theta_highdEdx = new std::vector<double>(vecsize,-9999);
-   vars->TPCObj_PFP_track_theta_notparallel = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_theta_parallel = new std::vector<double>(vecsize,-9999);
 
    // Just use collection plane for now
    int i_pl = 2;
@@ -385,7 +385,7 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
          vars->TPCObj_PFP_track_passesPioncut->at(i_track) = -9999.;
          vars->TPCObj_PFP_track_theta_lowdEdx->at(i_track) = -9999.;
          vars->TPCObj_PFP_track_theta_highdEdx->at(i_track) = -9999.;
-         vars->TPCObj_PFP_track_theta_notparallel->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_theta_parallel->at(i_track) = -9999.;
 
          continue;
       }
@@ -538,8 +538,8 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
       }
 
       //Record whether track is parallel to collection plane (since currently we don't have support to directly cut out a middle region)
-      if(vars->TPCObj_PFP_track_theta->at(i_track) > 1.37 && vars->TPCObj_PFP_track_theta->at(i_track) < 1.77) vars->TPCObj_PFP_track_theta_notparallel->at(i_track) = 0.;
-      else vars->TPCObj_PFP_track_theta_notparallel->at(i_track) = 1.;
+      if(vars->TPCObj_PFP_track_theta->at(i_track) > 1.37 && vars->TPCObj_PFP_track_theta->at(i_track) < 1.77) vars->TPCObj_PFP_track_theta_parallel->at(i_track) = 1;
+      else vars->TPCObj_PFP_track_theta_parallel->at(i_track) = 0;
 
       // Make pair for ordering tracks by Length
       pair_trklen_index->at(i_track) = std::make_pair(vars->TPCObj_PFP_track_length->at(i_track),i_track);

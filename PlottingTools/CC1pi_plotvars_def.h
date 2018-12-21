@@ -1350,15 +1350,15 @@ CC1piPlotVars Var_TPCObj_PFP_track_theta(treevars *vars){
   return tmp;
 }
 
-CC1piPlotVars Var_TPCObj_PFP_track_theta_notparallel(treevars *vars){
+CC1piPlotVars Var_TPCObj_PFP_track_theta_parallel(treevars *vars){
   CC1piPlotVars tmp;
-  tmp.Var = vars->TPCObj_PFP_track_theta_notparallel;
-  tmp.KeepBelowCut = false;
+  tmp.Var = vars->TPCObj_PFP_track_theta_parallel;
+  tmp.KeepBelowCut = true;
   tmp.isMIPcut = true;
   tmp.CutValue = 0.5;
   tmp.bins = {2,0,2};
-  tmp.histtitle = ";Track theta not parallel to collection plane?;";
-  tmp.histname = "Theta_notparallel";
+  tmp.histtitle = ";Track theta parallel to collection plane?;";
+  tmp.histname = "Theta_parallel";
   tmp.PlotOnlyDaughters = true;
   return tmp;
 }
