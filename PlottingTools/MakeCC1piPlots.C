@@ -127,7 +127,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    settreevars(t_bnbcos,&mc_vars);
 
    std::string BookMVAType = "BDTG";
-   std::string BookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_thetaprecut/weights/TMVAClassification_BDTG.weights.xml";
+   std::string BookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_inputvartune/weights/TMVAClassification_BDTG.weights.xml";
 
    TMVA::Reader fReader("");
    fReader.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));

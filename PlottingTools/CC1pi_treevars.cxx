@@ -830,7 +830,7 @@ void MakeMVATrees(TTree *muon_tree, TTree *pion_tree, TTree *background_tree, MV
       //if(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) < 1) continue;
 
       // Quality pre-cut: tracks parallel to collection plane have bad dE/dx
-      if(vars->TPCObj_PFP_track_theta->at(i_track) > 1.32 && vars->TPCObj_PFP_track_theta->at(i_track) < 1.82) continue;
+      if(vars->TPCObj_PFP_track_theta->at(i_track) > 1.37 && vars->TPCObj_PFP_track_theta->at(i_track) < 1.77) continue;
 
       // Quality pre-cut: tracks further than 5 cm away from the vertex are typically misreconstructed (or background)
       if(vars->TPCObj_PFP_VtxTrackDist->at(i_track) > 5) continue;
