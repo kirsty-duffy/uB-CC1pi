@@ -147,7 +147,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
      settreevars(t_onbeam,&onbeam_vars);
 
      fReader_onbeam.AddVariable("dEdx_truncmean_start", &(onbeam_vars.float_dEdx_truncmean_start));
-     fReader_onbeam.AddVariable("VtxTrackDist", &(onbeam_vars.float_VtxTrackDist));
+//     fReader_onbeam.AddVariable("VtxTrackDist", &(onbeam_vars.float_VtxTrackDist));
      fReader_onbeam.AddVariable("nhits", &(onbeam_vars.float_nhits));
      fReader_onbeam.AddVariable("lnLmipoverp", &(onbeam_vars.float_lnLmipoverp));
      fReader_onbeam.BookMVA(BookMVAType.c_str(), BookMVALoc.c_str());
@@ -164,7 +164,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
      settreevars(t_offbeam,&offbeam_vars);
 
      fReader_offbeam.AddVariable("dEdx_truncmean_start", &(offbeam_vars.float_dEdx_truncmean_start));
-     fReader_offbeam.AddVariable("VtxTrackDist", &(offbeam_vars.float_VtxTrackDist));
+//     fReader_offbeam.AddVariable("VtxTrackDist", &(offbeam_vars.float_VtxTrackDist));
      fReader_offbeam.AddVariable("nhits", &(offbeam_vars.float_nhits));
      fReader_offbeam.AddVariable("lnLmipoverp", &(offbeam_vars.float_lnLmipoverp));
      fReader_offbeam.BookMVA(BookMVAType.c_str(), BookMVALoc.c_str());
