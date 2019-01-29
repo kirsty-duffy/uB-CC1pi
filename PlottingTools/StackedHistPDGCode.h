@@ -217,17 +217,24 @@ void StackedHistPDGCode::DrawStack(double mc_scaling, TCanvas *c1, TString optio
     topPad->Draw();
     bottomPad->Draw();
 
+    double maxrange = std::max(stack->GetMaximum(),datatodraw->GetMaximum());
+    stack->SetMaximum(maxrange);
+    datatodraw->SetMaximum(maxrange);
+
     topPad->cd();
     stack->Draw("hist"+option);
     stack->GetXaxis()->SetTitleSize(0);
     stack->GetXaxis()->SetLabelSize(0);
     datatodraw->Draw("same p E1");
+
     leg->Draw();
     pt->Draw();
 
     bottomPad->cd();
     TH1* MCtotal = (TH1*)stack->GetStack()->Last()->Clone("MCtotal");
     TH1* dataratio = (TH1*)datatodraw->Clone("dataratio");
+    dataratio->SetMinimum(0);
+    dataratio->SetMaximum(2);
     dataratio->Divide(MCtotal);
     dataratio->GetXaxis()->SetTitle(hists[0]->GetXaxis()->GetTitle());
     dataratio->GetYaxis()->SetTitle("Data/MC ratio");

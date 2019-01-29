@@ -67,6 +67,9 @@ StackedHistTopology::StackedHistTopology(std::string histname, std::string title
   hist_order.push_back(kOutFV);
   hist_order.push_back(kCosmic);
   hist_order.push_back(kMixed);
+  hist_order.push_back(kCC1piplusBroken);
+  hist_order.push_back(kCC1piplusPionParallel);
+  hist_order.push_back(kCC1piplusMuonParallel);
   hist_order.push_back(kUnknown);
 
   nHists = hist_order.size();
@@ -295,7 +298,10 @@ void StackedHistTopology::StyleHists()
   hists[18]->SetFillColor(kBlue-5); // outFV
   hists[19]->SetFillColor(kGray); // Cosmic
   hists[20]->SetFillColor(kGray+2); // Mixed
-  hists[21]->SetFillColor(kBlack); // Unknown
+  hists[21]->SetFillColor(kMagenta-4); // Broken
+  hists[22]->SetFillColor(kMagenta-7); // Pion Parallel
+  hists[23]->SetFillColor(kMagenta-9); // Muon Parallel
+  hists[24]->SetFillColor(kBlack); // Unknown
 }
 
 
