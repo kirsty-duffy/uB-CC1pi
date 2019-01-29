@@ -17,43 +17,64 @@
 // What variables do we want these plots as a function of?
 std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
    std::vector<CC1piPlotVars> varstoplot = {
-     Var_TPCObj_PFP_track_mupiBDTscore(vars)
-     ,Var_TPCObj_PFP_track_mupiBDTscore_secondMIP(vars)
-     ,Var_TPCObj_PFP_track_mupiBDTscore_leadingOversecondMIP(vars)
-     ,Var_TPCObj_PFP_track_mupiBDTscore_leadingMinussecondMIP(vars)
-      // Var_TPCObj_PFP_track_BDTscore(vars)
-      // ,Var_TPCObj_PFP_track_BDTscore_IsMIP(vars)
-      // ,Var_TPCObj_PFP_track_BDTscore_NotMIP(vars)
-      // ,Var_TPCObj_PFP_track_BDTscore_MuMuPairs(vars)
-      // ,Var_TPCObj_AngleBetweenMIPs(vars)
-      // ,Var_TPCObj_AngleBetweenMIPs_mumupairs(vars)
-      // ,Var_TPCObj_PFP_track_dEdx_truncmean_start_IsMIP(vars)
-      // ,Var_TPCObj_PFP_track_dEdx_truncmean_start_NotMIP(vars)
-      // ,Var_TPCObj_PFP_track_dEdx_truncmean_start_mumupairs(vars)
-      // ,Var_TPCObj_PFP_VtxTrackDist_IsMIP(vars)
-      // ,Var_TPCObj_PFP_VtxTrackDist_NotMIP(vars)
-      // ,Var_TPCObj_PFP_VtxTrackDist_mumupairs(vars)
-      // ,Var_TPCObj_PFP_track_dedx_grminhits_IsMIP(vars)
-      // ,Var_TPCObj_PFP_track_dedx_grminhits_NotMIP(vars)
-      // ,Var_TPCObj_PFP_track_dedx_grminhits_mumupairs(vars)
-      // ,Var_TPCObj_PFP_lnLmipoverp_IsMIP(vars)
-      // ,Var_TPCObj_PFP_lnLmipoverp_NotMIP(vars)
-      // ,Var_TPCObj_PFP_lnLmipoverp_mumupairs(vars)
-      // ,Var_TPCObj_BDTscore_MIPdiv(vars)
-      // ,Var_TPCObj_BDTscore_MIPdiff(vars)
-      // ,Var_TPCObj_PFP_trueKE_selMIPs(vars)
-      // ,Var_TPCObj_PFP_trueEndP_selMIPs(vars)
-      // ,Var_TPCObj_PFP_track_theta_selMIPs(vars)
-      // ,Var_TPCObj_PFP_track_phi_selMIPs(vars)
-      // ,Var_TPCObj_PFP_track_nhits_LeadingMIP(vars)
-      // ,Var_TPCObj_PFP_track_nhits_SecondMIP(vars)
-      // ,Var_TPCObj_PFP_track_length_LeadingMIP_mumupairs(vars)
-      // ,Var_TPCObj_PFP_track_length_SecondMIP_mumupairs(vars)
-      // ,Var_TPCObj_PFP_track_length_LeadingMIP(vars)
-      // ,Var_TPCObj_PFP_track_length_SecondMIP(vars)
-      // ,Var_TPCObj_PFP_track_length(vars)
-      // ,Var_TPCObj_PFP_lnLmipovermu(vars)
-      // ,Var_TPCObj_MIPstartend_mindist(vars)
+      /*
+      Var_TPCObj_PFP_track_BDTscore(vars)
+      ,Var_TPCObj_PFP_track_BDTscore_IsMIP(vars)
+      ,Var_TPCObj_PFP_track_BDTscore_NotMIP(vars)
+      ,Var_TPCObj_PFP_track_BDTscore_MuMuPairs(vars)
+      ,Var_TPCObj_AngleBetweenMIPs(vars)
+      ,Var_TPCObj_AngleBetweenMIPs_mumupairs(vars)
+      ,Var_TPCObj_PFP_track_dEdx_truncmean_start_IsMIP(vars)
+      ,Var_TPCObj_PFP_track_dEdx_truncmean_start_NotMIP(vars)
+      ,Var_TPCObj_PFP_track_dEdx_truncmean_start_mumupairs(vars)
+      ,Var_TPCObj_PFP_VtxTrackDist(vars)
+      ,Var_TPCObj_PFP_VtxTrackDist_IsMIP(vars)
+      ,Var_TPCObj_PFP_VtxTrackDist_NotMIP(vars)
+      ,Var_TPCObj_PFP_VtxTrackDist_mumupairs(vars)
+      ,Var_TPCObj_PFP_track_dedx_grminhits_IsMIP(vars)
+      ,Var_TPCObj_PFP_track_dedx_grminhits_NotMIP(vars)
+      ,Var_TPCObj_PFP_track_dedx_grminhits_mumupairs(vars)
+      ,Var_TPCObj_PFP_lnLmipoverp_IsMIP(vars)
+      ,Var_TPCObj_PFP_lnLmipoverp_NotMIP(vars)
+      ,Var_TPCObj_PFP_lnLmipoverp_mumupairs(vars)
+      ,Var_TPCObj_BDTscore_MIPdiv(vars)
+      ,Var_TPCObj_BDTscore_MIPdiff(vars)
+      ,Var_TPCObj_PFP_trueKE_selMIPs(vars)
+      ,Var_TPCObj_PFP_trueEndP_selMIPs(vars)
+      ,Var_TPCObj_PFP_track_theta_selMIPs(vars)
+      ,Var_TPCObj_PFP_track_phi_selMIPs(vars)
+      ,Var_TPCObj_PFP_track_nhits_LeadingMIP(vars)
+      ,Var_TPCObj_PFP_track_nhits_SecondMIP(vars)
+      ,Var_TPCObj_PFP_track_length_LeadingMIP_mumupairs(vars)
+      ,Var_TPCObj_PFP_track_length_SecondMIP_mumupairs(vars)
+      ,Var_TPCObj_PFP_track_length_LeadingMIP(vars)
+      ,Var_TPCObj_PFP_track_length_SecondMIP(vars)
+      ,Var_TPCObj_PFP_track_length(vars)
+      ,Var_TPCObj_PFP_lnLmipovermu(vars)
+      ,Var_TPCObj_PFP_track_theta_lowdEdx(vars)
+      ,Var_TPCObj_PFP_track_theta_highdEdx(vars)
+      ,Var_TPCObj_PFP_track_theta_parallel(vars)
+      ,Var_TPCObj_PFP_track_theta(vars)
+      ,Var_MIP_containment(vars)
+      */
+
+      Var_TPCObj_PFP_track_theta(vars)
+      ,Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)
+      ,Var_TPCObj_PFP_track_nhits(vars)
+      ,Var_TPCObj_PFP_lnLmipoverp(vars)
+
+      ,Var_TPCObj_PFP_track_theta_LeadingMIP(vars)
+      ,Var_TPCObj_PFP_track_theta_SecondMIP(vars)
+      ,Var_TPCObj_PFP_track_phi_LeadingMIP(vars)
+      ,Var_TPCObj_PFP_track_phi_SecondMIP(vars)
+      ,Var_TPCObj_AngleBetweenMIPs(vars)
+      ,Var_TPCObj_PFP_track_MuonMomRange_LeadingMIP(vars)
+      ,Var_TPCObj_PFP_track_MuonMomMCS_LeadingMIP(vars)
+      ,Var_TPCObj_PFP_track_MuonMomCombined_LeadingMIP(vars)
+
+      ,Var_TPCObj_PFP_track_BDTscore(vars)
+      ,Var_TPCObj_PFP_VtxTrackDist(vars)
+      ,Var_MIP_containment(vars)
    };
    return varstoplot;
 }
@@ -68,10 +89,10 @@ std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> GetVarstoplot2D(treevars *va
       // ,{Var_TPCObj_PFP_track_dEdx_mean_start_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
       // ,{Var_TPCObj_PFP_track_dEdx_stddev_start_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
       // ,{Var_TPCObj_PFP_track_theta_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
-      // {Var_TPCObj_PFP_track_theta(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
-      // ,{Var_TPCObj_PFP_track_theta(vars),Var_TPCObj_PFP_track_BDTscore(vars)}
+      {Var_TPCObj_PFP_track_theta(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
+      //,{Var_TPCObj_PFP_track_theta(vars),Var_TPCObj_PFP_track_BDTscore(vars)}
       // ,{Var_TPCObj_PFP_track_phi(vars),Var_TPCObj_PFP_track_BDTscore(vars)}
-      // ,{Var_TPCObj_AngleBetweenMIPs(vars),Var_TPCObj_PFP_track_BDTscore(vars)}
+      //,{Var_TPCObj_AngleBetweenMIPs(vars),Var_TPCObj_PFP_track_BDTscore(vars)}
       // {Var_TPCObj_PFP_VtxTrackDist_mumupairs(vars),Var_TPCObj_PFP_VtxTrackDist_SecondMIP_mumupairs(vars)}
       // {Var_TPCObj_PFP_MCSLLpiMinusLLp_NotPion(vars),Var_TPCObj_PFP_track_length(vars)}
       // ,{Var_TPCObj_PFP_MCSLLpiMinusLLp_NotPioncont(vars),Var_TPCObj_PFP_track_length(vars)}
@@ -81,6 +102,7 @@ std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> GetVarstoplot2D(treevars *va
       // ,{Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_NotPioncont(vars),Var_TPCObj_PFP_track_length(vars)}
       // ,{Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean_NotPioncont(vars),Var_TPCObj_PFP_track_length(vars)}
       // ,{Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_NotPioncont(vars),Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum_NotPioncont(vars)}
+      //,{Var_TPCObj_PFP_track_length(vars),Var_TPCObj_PFP_track_nhits(vars)}
    };
    return varstoplot2D;
 }
@@ -92,6 +114,10 @@ std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> GetVarstoplot2D(treevars *va
 // ---------------------------------------------------- //
 
 void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeamdatafile="", std::string offbeamdatafile="", double offbeamscaling=0., bool onminusoffbeam=false, bool MakeKinkFindingPlots=false, bool MakeProtonPlots=false){
+
+  std::cout << "Using scaling: " << std::endl
+	    << " -- MC: " << POTscaling << std::endl
+	    << " -- Off-beam data: " << offbeamscaling << std::endl;
 
   // Note: MVA trees are made for MC only
    TFile f_MVA("MVA_Trees.root", "RECREATE");
@@ -130,7 +156,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    settreevars(t_bnbcos,&mc_vars);
 
    std::string BookMVAType = "BDTG";
-   std::string BookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_vtxtrackprecut/weights/TMVAClassification_BDTG.weights.xml";
+   std::string BookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_inputvartune/weights/TMVAClassification_BDTG.weights.xml";
 
    TMVA::Reader fReader("");
    fReader.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
@@ -150,7 +176,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
      settreevars(t_onbeam,&onbeam_vars);
 
      fReader_onbeam.AddVariable("dEdx_truncmean_start", &(onbeam_vars.float_dEdx_truncmean_start));
-     fReader_onbeam.AddVariable("VtxTrackDist", &(onbeam_vars.float_VtxTrackDist));
+//     fReader_onbeam.AddVariable("VtxTrackDist", &(onbeam_vars.float_VtxTrackDist));
      fReader_onbeam.AddVariable("nhits", &(onbeam_vars.float_nhits));
      fReader_onbeam.AddVariable("lnLmipoverp", &(onbeam_vars.float_lnLmipoverp));
      fReader_onbeam.BookMVA(BookMVAType.c_str(), BookMVALoc.c_str());
@@ -167,7 +193,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
      settreevars(t_offbeam,&offbeam_vars);
 
      fReader_offbeam.AddVariable("dEdx_truncmean_start", &(offbeam_vars.float_dEdx_truncmean_start));
-     fReader_offbeam.AddVariable("VtxTrackDist", &(offbeam_vars.float_VtxTrackDist));
+//     fReader_offbeam.AddVariable("VtxTrackDist", &(offbeam_vars.float_VtxTrackDist));
      fReader_offbeam.AddVariable("nhits", &(offbeam_vars.float_nhits));
      fReader_offbeam.AddVariable("lnLmipoverp", &(offbeam_vars.float_lnLmipoverp));
      fReader_offbeam.BookMVA(BookMVAType.c_str(), BookMVALoc.c_str());
@@ -581,6 +607,8 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    TH1F *onb_hists_cc1pi_top_beforecuts[nplots];
    TH1F *onb_hists_cc1pi_pdg_aftercuts[nplots];
    TH1F *onb_hists_cc1pi_top_aftercuts[nplots];
+   TH2D *onb_hists2D_cc1pi_beforecuts[nplots2D];
+   TH2D *onb_hists2D_cc1pi_aftercuts[nplots2D];
    if (t_onbeam){
       for (size_t i_h=0; i_h<nplots; i_h++){
         std::string histtitle_i = varstoplot_dummy.at(i_h).histtitle;
@@ -594,12 +622,32 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
          onb_hists_cc1pi_top_aftercuts[i_h] = new TH1F(TString::Format("hCC1pi_onbeam_Top_aftercuts_%s",histname_i.c_str()).Data(),histtitle_i.c_str(),bins_i.at(0),bins_i.at(1),bins_i.at(2));
      }
 
+
+      // Make 2Dhistograms to fill
+      for (size_t i_h=0; i_h<nplots2D; i_h++){
+	std::string histname_x = varstoplot2D_dummy.at(i_h).first.histname;
+	std::vector<double> bins_x = varstoplot2D_dummy.at(i_h).first.bins;
+	std::string histname_y = varstoplot2D_dummy.at(i_h).second.histname;
+	std::vector<double> bins_y = varstoplot2D_dummy.at(i_h).second.bins;
+
+	std::vector<std::string> scratch_x;
+	boost::split(scratch_x,varstoplot2D_dummy.at(i_h).first.histtitle,[](char c){return c == ';';});
+	std::vector<std::string> scratch_y;
+	boost::split(scratch_y,varstoplot2D_dummy.at(i_h).second.histtitle,[](char c){return c == ';';});
+
+        onb_hists2D_cc1pi_beforecuts[i_h] = new TH2D(std::string(std::string("hCC1pi2D_PDG_beforecuts_")+histname_x+histname_y).c_str(),std::string(std::string(";")+scratch_x.at(1)+std::string(";")+scratch_y.at(1)).c_str(),bins_x.at(0),bins_x.at(1),bins_x.at(2),bins_y.at(0),bins_y.at(1),bins_y.at(2));
+
+        onb_hists2D_cc1pi_aftercuts[i_h] = new TH2D(std::string(std::string("hCC1pi2D_PDG_aftercuts_")+histname_x+histname_y).c_str(),std::string(std::string(";")+scratch_x.at(1)+std::string(";")+scratch_y.at(1)).c_str(),bins_x.at(0),bins_x.at(1),bins_x.at(2),bins_y.at(0),bins_y.at(1),bins_y.at(2));
+      }
+
      // Loop through on-beam data tree and fill plots
      for (int i = 0; i < t_onbeam->GetEntries(); i++){
        if (i%1000==0) std::cout << "Onbeam: " << i << "/" << t_onbeam->GetEntries() << std::endl;
         t_onbeam->GetEntry(i);
         Calcvars(&onbeam_vars, &fReader_onbeam);
         std::vector<CC1piPlotVars> Varstoplot = GetVarstoplot(&onbeam_vars);
+	std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> Varstoplot2D = GetVarstoplot2D(&onbeam_vars);
+
 
         bool isSelected = IsEventSelected(&onbeam_vars);
 
@@ -644,6 +692,24 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
               } // end if(isSelected)
            } // end loop over tracks
         } // end loop over 1D Varstoplot
+
+      // Fill 2D plots
+      // Loop over Varstoplot2D
+      for (size_t i_h = 0; i_h < nplots2D; i_h++){
+        std::vector<double> vartoplot_x = *(Varstoplot2D.at(i_h).first.Var);
+	std::vector<double> vartoplot_y = *(Varstoplot2D.at(i_h).second.Var);
+         // Loop over tracks
+         for (size_t i_tr = 0; i_tr < vartoplot_x.size(); i_tr++){
+
+            if (!(FillPlotForTrack(&(Varstoplot2D.at(i_h).first), &onbeam_vars, i_tr) && FillPlotForTrack(&(Varstoplot2D.at(i_h).second), &onbeam_vars, i_tr))) continue;
+
+            onb_hists2D_cc1pi_beforecuts[i_h]->Fill(vartoplot_x.at(i_tr),vartoplot_y.at(i_tr));
+
+            if(isSelected) {
+               onb_hists2D_cc1pi_aftercuts[i_h]->Fill(vartoplot_x.at(i_tr),vartoplot_y.at(i_tr));
+            } // end if(isSelected)
+         } // end loop over tracks
+      } // end loop over 2D Varstoplot
 
      } // end loop over entries in tree
 
@@ -767,6 +833,18 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
 
       mc_hists2D_cc1pi_top_aftercuts[i_h]->Draw2D(c1);
       c1->Print(std::string(std::string("CC1pi2D_top_aftercuts")+printname).c_str());
+
+      onb_hists2D_cc1pi_beforecuts[i_h]->SetMarkerStyle(20);
+      onb_hists2D_cc1pi_beforecuts[i_h]->SetMarkerSize(0.5);
+      onb_hists2D_cc1pi_beforecuts[i_h]->Draw("scat");
+      c1->Print(std::string(std::string("CC1pi2D_data_beforecuts")+printname).c_str());
+      c1->Clear();
+
+      onb_hists2D_cc1pi_aftercuts[i_h]->SetMarkerStyle(20);
+      onb_hists2D_cc1pi_aftercuts[i_h]->SetMarkerSize(0.5);
+      onb_hists2D_cc1pi_aftercuts[i_h]->Draw("scat");
+      c1->Print(std::string(std::string("CC1pi2D_data_aftercuts")+printname).c_str());
+      c1->Clear();
 
       delete c1;
    }

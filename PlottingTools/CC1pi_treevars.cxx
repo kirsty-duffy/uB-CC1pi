@@ -310,11 +310,20 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
    double muon_length = -9999;
    double pion_length = -9999;
 
-   vars->MIP_containment = new std::vector<double>(1,-9999);
+   if (vecsize>0) vars->MIP_containment = new std::vector<double>(1,-9999);
+   else vars->MIP_containment = new std::vector<double>(0,-9999);
    vars->muoncandidatePDG = -9999;
    vars->pioncandidatePDG = -9999;
    vars->BDT_muoncandidatePDG = -9999;
    vars->BDT_pioncandidatePDG = -9999;
+
+   vars->TPCObj_PFP_track_theta_lowdEdx = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_theta_highdEdx = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_theta_parallel = new std::vector<double>(vecsize,-9999);
+
+   vars->TPCObj_PFP_track_MuonMomRange = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_MuonMomMCS = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_MuonMomCombined = new std::vector<double>(vecsize,-9999);
 
    // Just use collection plane for now
    int i_pl = 2;
@@ -417,6 +426,12 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
          vars->TPCObj_PFP_track_MCS_p_meanScatter->at(i_track) = -9999.;
          vars->TPCObj_PFP_track_passesMIPcut->at(i_track) = -9999.;
          vars->TPCObj_PFP_track_passesPioncut->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_theta_lowdEdx->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_theta_highdEdx->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_theta_parallel->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_MuonMomRange->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_MuonMomMCS->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_MuonMomCombined->at(i_track) = -9999.;
 
          continue;
       }
@@ -560,6 +575,20 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
          vars->TPCObj_PFP_track_dEdx_truncmoverm_start->at(i_track) = tmpval/dedx_m;
       }
 
+      //Record theta seperately for high and low dE/dx, to help determine a theta pre-cut
+      if(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) < 1 && vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track)!=-9999) {
+         vars->TPCObj_PFP_track_theta_lowdEdx->at(i_track) = vars->TPCObj_PFP_track_theta->at(i_track);
+         vars->TPCObj_PFP_track_theta_highdEdx->at(i_track) = -9999;
+      }
+      else if(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) >= 1){
+         vars->TPCObj_PFP_track_theta_lowdEdx->at(i_track) = -9999;
+         vars->TPCObj_PFP_track_theta_highdEdx->at(i_track) = vars->TPCObj_PFP_track_theta->at(i_track);
+      }
+
+      //Record whether track is parallel to collection plane (since currently we don't have support to directly cut out a middle region)
+      if(vars->TPCObj_PFP_track_theta->at(i_track) > 1.37 && vars->TPCObj_PFP_track_theta->at(i_track) < 1.77) vars->TPCObj_PFP_track_theta_parallel->at(i_track) = 1;
+      else vars->TPCObj_PFP_track_theta_parallel->at(i_track) = 0;
+
       // Make pair for ordering tracks by Length
       pair_trklen_index->at(i_track) = std::make_pair(vars->TPCObj_PFP_track_length->at(i_track),i_track);
 
@@ -590,8 +619,26 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
          double M_mu = 105.7;
          double MomRange_mu =  TMath::Sqrt((KE_mu*KE_mu)+(2*M_mu*KE_mu));
          vars->TPCObj_PFP_track_MomRangeMinusMCS_mu->at(i_track) = (MomRange_mu/1000.-vars->TPCObj_PFP_track_MCSmu_fwdMom->at(i_track))/(MomRange_mu/1000.);
-      }
+         if(vars->TPCObj_PFP_track_isContained->at(i_track)) {
+            vars->TPCObj_PFP_track_MuonMomRange->at(i_track) = MomRange_mu/1000.;
+            vars->TPCObj_PFP_track_MuonMomCombined->at(i_track) = vars->TPCObj_PFP_track_MuonMomRange->at(i_track);
+         }
+         else {
+            vars->TPCObj_PFP_track_MuonMomMCS->at(i_track) = vars->TPCObj_PFP_track_MCSmu_fwdMom->at(i_track);
+            vars->TPCObj_PFP_track_MuonMomCombined->at(i_track) = vars->TPCObj_PFP_track_MuonMomMCS->at(i_track);
+         }
 
+         //vars->TPCObj_PFP_track_MuonMomRange->at(i_track) = MomRange_mu;
+         //vars->TPCObj_PFP_track_MuonMomMCS->at(i_track) = vars->TPCObj_PFP_track_MCSmu_fwdMom->at(i_track);
+      }
+/*
+      if(vars->TPCObj_PFP_track_isContained->at(i_track)) {
+         vars->TPCObj_PFP_track_MuonMomCombined->at(i_track) = vars->TPCObj_PFP_track_MuonMomRange->at(i_track);
+      }
+      else {
+         vars->TPCObj_PFP_track_MuonMomCombined->at(i_track) = vars->TPCObj_PFP_track_MuonMomMCS->at(i_track);
+      }
+*/
       if(vars->TPCObj_PFP_track_MCSpi_scatterAngles->at(i_track).size()>0){
          vars->TPCObj_PFP_track_MCS_pi_maxScatter->at(i_track) = *max_element(vars->TPCObj_PFP_track_MCSpi_scatterAngles->at(i_track).begin(), vars->TPCObj_PFP_track_MCSpi_scatterAngles->at(i_track).end());
 
@@ -876,7 +923,10 @@ void MakeMVATrees(TTree *muon_tree, TTree *pion_tree, TTree *background_tree, MV
       if(vars->Truth_topology == kCosmic || vars->Truth_topology == kMixed || vars->Truth_topology == kUnknown) continue;
 
       // Quality pre-cut: tracks parallel to collection plane have bad dE/dx
-      if(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) < 1) continue;
+      //if(vars->TPCObj_PFP_track_dEdx_truncmean_start->at(i_track) < 1) continue;
+
+      // Quality pre-cut: tracks parallel to collection plane have bad dE/dx
+      if(vars->TPCObj_PFP_track_theta->at(i_track) > 1.37 && vars->TPCObj_PFP_track_theta->at(i_track) < 1.77) continue;
 
       // Quality pre-cut: tracks further than 5 cm away from the vertex are typically misreconstructed (or background)
       if(vars->TPCObj_PFP_VtxTrackDist->at(i_track) > 5) continue;

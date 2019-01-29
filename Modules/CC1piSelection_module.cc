@@ -76,6 +76,8 @@ class CC1piSelection : public art::EDProducer {
       // Other variables set in module
       bool _isData;
       double _sr_pot;
+      unsigned int _run_num;
+      unsigned int _subrun_num;
 
 };
 
@@ -101,6 +103,8 @@ CC1piSelection::CC1piSelection(fhicl::ParameterSet const & p)
 
    _pot_tree = tfs->make<TTree>("pottree","");
    _pot_tree->Branch("pot", &_sr_pot, "pot/D");
+   _pot_tree->Branch("run_num", &_run_num);
+   _pot_tree->Branch("subrun_num", &_subrun_num);
    _isData = false;
 }
 
@@ -188,15 +192,21 @@ void CC1piSelection::endSubRun(art::SubRun &sr) {
    // Note: the entire subrun's POT is recorded in the tree for every event.
    // You must only add it once per subrun to get the correct number.
 
-   //std::cout << "Hello I'm ending a subRun and setting POT" << std::endl;
+   _run_num = sr.run();
+   _subrun_num = sr.subRun();
+
+   std::cout << "Hello I'm ending a subRun and setting POT" << std::endl;
    art::Handle<sumdata::POTSummary> potsum_h;
 
    // MC
    if (!_isData) {
+      std::cout << "!_isData" << std::endl;
       if(sr.getByLabel("generator", potsum_h)) {
+         std::cout << "POT found: " << potsum_h->totpot << std::endl;
          _sr_pot = potsum_h->totpot;
       }
       else {
+         std::cout << "POT not found. Setting to 0." << std::endl;
          _sr_pot = 0.;
          //Should this raise an error?
       }
@@ -204,14 +214,18 @@ void CC1piSelection::endSubRun(art::SubRun &sr) {
 
    // Data
    else {
+      std::cout << "_isData" << std::endl;
       if(sr.getByLabel("beamdata", "bnbETOR860", potsum_h)){
+         std::cout << "POT found: " << potsum_h->totpot << std::endl;
          _sr_pot = potsum_h->totpot;
       }
       else {
+         std::cout << "POT not found. Setting to 0." << std::endl;
          _sr_pot = 0.;
       }
    }
 
+   std::cout << "Filling POT tree" << std::endl;
    _pot_tree->Fill();
 }
 

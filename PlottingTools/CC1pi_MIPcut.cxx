@@ -22,7 +22,7 @@ double doEvalMIPCut(std::vector<CC1piPlotVars> MIPCutVars, treevars *vars, int i
       if (value == -9999 || value == -999) {
          return -9999;
       }
-      else if (!std::isnormal(value)){
+      else if (!std::isnormal(value) && value!=0){
          // std::cout << "[WARNING :: CC1pi_MIPcut.cxx] not-normal value for " << MIPCutVars.at(i_mipcut).histtitle << std::endl;
          return -9999;
       }

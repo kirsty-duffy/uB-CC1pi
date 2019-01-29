@@ -85,7 +85,7 @@ CC1piPlotVars Var_TPCObj_AngleBetweenMIPs(treevars *vars){
   tmp.KeepBelowCut = false;
   tmp.TracksNeeded = "NA";
   tmp.CutValue = 0.1;
-  tmp.bins = {25,0,3.14};
+  tmp.bins = {15,0,3.14};
   tmp.histtitle = ";Angle between MIP candidates [rad];";
   tmp.histname = "AngleBetweenMIPs";
   tmp.PlotOnlyDaughterMIPs = true;
@@ -170,7 +170,7 @@ CC1piPlotVars Var_TPCObj_PFP_VtxTrackDist(treevars *vars){
   tmp.KeepBelowCut = true;
   tmp.isMIPcut = true;
   tmp.CutValue = 5.;
-  tmp.bins = {50,0,50};
+  tmp.bins = {20,0,20};
   tmp.histtitle = ";Track start distance from reconstructed vertex [cm];";
   tmp.histname = "VtxTrackDist";
   tmp.PlotOnlyDaughters = true;
@@ -298,7 +298,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_dEdx_truncmean_start(treevars *vars){
   tmp.KeepBelowCut = true;
   tmp.isMIPcut = true;
   tmp.CutValue = 2.2;
-  tmp.bins = {25,0,2.2};
+  tmp.bins = {25,0,3};
   tmp.histtitle = ";Truncated Mean dE/dx at start of track [MeV/cm];";
   tmp.histname = "dEdx_truncmean_atstart";
   tmp.PlotOnlyDaughterMIPs = false;
@@ -840,6 +840,17 @@ CC1piPlotVars Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_NotPioncont(treevars *var
   return tmp;
 }
 
+// TPCObj_PFP_track_nhits
+CC1piPlotVars Var_TPCObj_PFP_track_nhits(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_nhits;
+  tmp.bins = {20,0,1000};
+  tmp.histtitle = ";No. hits in track;";
+  tmp.histname = "trknhits";
+  tmp.PlotOnlyDaughters = true;
+  return tmp;
+}
+
 // TPCObj_PFP_track_length_LeadingMIP
 CC1piPlotVars Var_TPCObj_PFP_track_nhits_LeadingMIP(treevars *vars){
   CC1piPlotVars tmp;
@@ -1319,10 +1330,20 @@ CC1piPlotVars Var_TPCObj_PFP_trueEndP_SecondMIP(treevars *vars){
 }
 
 //
+CC1piPlotVars Var_TPCObj_PFP_track_theta_LeadingMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_theta;
+  tmp.bins = {20,0,3.15};
+  tmp.histtitle = ";Track theta (Leading MIP only);";
+  tmp.histname = "Theta_LeadingMIP";
+  tmp.PlotOnlyLeadingDaughterMIP = true;
+  return tmp;
+}
+
 CC1piPlotVars Var_TPCObj_PFP_track_theta_SecondMIP(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_theta;
-  tmp.bins = {30,0,3.15};
+  tmp.bins = {20,0,3.15};
   tmp.histtitle = ";Track theta (Second MIP only);";
   tmp.histname = "Theta_SecondMIP";
   tmp.PlotOnlySecondDaughterMIP = true;
@@ -1335,6 +1356,39 @@ CC1piPlotVars Var_TPCObj_PFP_track_theta(treevars *vars){
   tmp.bins = {30,0,3.15};
   tmp.histtitle = ";Track theta [rad];";
   tmp.histname = "Theta";
+  tmp.PlotOnlyDaughters = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_theta_parallel(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_theta_parallel;
+  tmp.KeepBelowCut = true;
+  tmp.isMIPcut = true;
+  tmp.CutValue = 0.5;
+  tmp.bins = {2,0,2};
+  tmp.histtitle = ";Track theta parallel to collection plane?;";
+  tmp.histname = "Theta_parallel";
+  tmp.PlotOnlyDaughters = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_theta_lowdEdx(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_theta_lowdEdx;
+  tmp.bins = {30,1.07,2.07};
+  tmp.histtitle = ";Track theta [rad] (low dE/dx);";
+  tmp.histname = "Theta_lowdEdx";
+  tmp.PlotOnlyDaughters = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_theta_highdEdx(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_theta_highdEdx;
+  tmp.bins = {30,1.07,2.07};
+  tmp.histtitle = ";Track theta [rad] (high dE/dx);";
+  tmp.histname = "Theta_highdEdx";
   tmp.PlotOnlyDaughters = true;
   return tmp;
 }
@@ -1362,10 +1416,20 @@ CC1piPlotVars Var_TPCObj_PFP_track_phi_selMIPs(treevars *vars){
 }
 
 //
+CC1piPlotVars Var_TPCObj_PFP_track_phi_LeadingMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_phi;
+  tmp.bins = {15,-3.15,3.15};
+  tmp.histtitle = ";Track phi (Leading MIP only);";
+  tmp.histname = "Phi_LeadingMIP";
+  tmp.PlotOnlyLeadingDaughterMIP = true;
+  return tmp;
+}
+
 CC1piPlotVars Var_TPCObj_PFP_track_phi_SecondMIP(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_phi;
-  tmp.bins = {60,-3.15,3.15};
+  tmp.bins = {15,-3.15,3.15};
   tmp.histtitle = ";Track phi (Second MIP only);";
   tmp.histname = "Phi_SecondMIP";
   tmp.PlotOnlySecondDaughterMIP = true;
@@ -1480,10 +1544,10 @@ CC1piPlotVars Var_TPCObj_PFP_track_BDTscore(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_BDTscore;
   tmp.KeepBelowCut = false;
- tmp.OnlyDaughters = true;
- tmp.TracksNeeded = "exactlytwo";
+  tmp.OnlyDaughters = true;
+  tmp.TracksNeeded = "exactlytwo";
   tmp.isMIPcut = true;
-  tmp.CutValue = 0.50;
+  tmp.CutValue = 0.55;
   tmp.bins = {25,-1,1};
   tmp.histtitle = ";BDT score;";
   tmp.histname = "BDTscore";
@@ -1573,6 +1637,7 @@ CC1piPlotVars Var_MIP_containment(treevars *vars){
   return tmp;
 }
 
+<<<<<<< HEAD
 CC1piPlotVars Var_TPCObj_MIPstartend_mindist(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_MIPstartend_mindist;
@@ -1639,6 +1704,35 @@ CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_leadingMinussecondMIP(treevars *
   tmp.bins = {50,-2,2};
   tmp.histtitle = ";Mu/pi BDT score: leading MIP-second MIP;";
   tmp.histname = "mupiBDT_leadingMinussecondmip";
+=======
+CC1piPlotVars Var_TPCObj_PFP_track_MuonMomRange_LeadingMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_MuonMomRange;
+  tmp.bins = {15,0,3};
+  tmp.histtitle = ";Muon candidate momentum by range (contained tracks only) [GeV];";
+  tmp.histname = "MuonMomRange";
+  tmp.PlotOnlyLeadingDaughterMIP = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_MuonMomMCS_LeadingMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_MuonMomMCS;
+  tmp.bins = {15,0,3};
+  tmp.histtitle = ";Muon candidate momentum by MCS (uncontained tracks only) [GeV];";
+  tmp.histname = "MuonMomMCS";
+  tmp.PlotOnlyLeadingDaughterMIP = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_MuonMomCombined_LeadingMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_MuonMomCombined;
+  tmp.bins = {15,0,3};
+  tmp.histtitle = ";Muon candidate momentum [GeV];";
+  tmp.histname = "MuonMomCombined";
+  tmp.PlotOnlyLeadingDaughterMIP = true;
+>>>>>>> 892635ec70e833c433df382ce864e702a1f28a73
   return tmp;
 }
 

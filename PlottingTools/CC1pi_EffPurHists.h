@@ -10,6 +10,7 @@
 #include "THStack.h"
 #include "TStyle.h"
 #include "TLine.h"
+#include "TGaxis.h"
 #include <vector>
 
 #include "CC1pi_treevars.h"
@@ -341,11 +342,14 @@ void DrawCC1piMCEffPur(TCanvas *c, histCC1piselEffPur *hists, std::string drawop
 
 }
 
-void DrawCC1piMCEffOnly(TCanvas *c, histCC1piselEffPur *hists, std::string drawopt="lp"){
+void DrawCC1piMCEffOnly(TCanvas *c, histCC1piselEffPur *hists){
    TH1D *heff = (TH1D*)hists->h_cc1pi_sel->Clone("heff");
-   heff->GetYaxis()->SetTitle("CC1pi Selection Efficiency");
-
    heff->Clear();
+
+   TH1D *htotal = (TH1D*)hists->h_cc1pi_sel->Clone("htotal");
+   htotal->GetYaxis()->SetTitle("True CC1pi events (pre-selection)");
+   htotal->Clear();
+   
 
    for (int i_bin=1; i_bin < heff->GetXaxis()->GetNbins()+1; i_bin++){
       double selected_cc1pi = hists->h_cc1pi_sel->GetBinContent(i_bin);
@@ -355,6 +359,7 @@ void DrawCC1piMCEffOnly(TCanvas *c, histCC1piselEffPur *hists, std::string drawo
       if (selected_cc1pi==0 && total_cc1pi==0) eff = 0;
 
       heff->SetBinContent(i_bin,eff);
+      htotal->SetBinContent(i_bin,total_cc1pi);
    }
 
    heff->SetLineColor(kRed);
@@ -362,13 +367,29 @@ void DrawCC1piMCEffOnly(TCanvas *c, histCC1piselEffPur *hists, std::string drawo
    heff->SetMarkerStyle(20);
    heff->SetMarkerSize(.3);
 
-   heff->GetYaxis()->SetRangeUser(0,1);
+   htotal->SetLineColor(kGray);
+   htotal->SetFillColor(kGray);
+   double yhigh = htotal->GetMaximum()*1.1;
+   htotal->GetYaxis()->SetRangeUser(0,yhigh);
 
    gStyle->SetOptStat(0); // No stats box
 
    c->cd();
    c->SetTopMargin(0.07);
-   heff->Draw(drawopt.c_str());
+   htotal->Draw("hist");
+
+   // Scale heff to the pad co-ordinates
+   // We want it to go from 0 to 1
+   heff->Scale(yhigh);
+   heff->Draw("same lp hist");
+
+   // Draw an efficiency axis on the right hand side
+   TGaxis *axis = new TGaxis(htotal->GetXaxis()->GetXmax(),htotal->GetYaxis()->GetXmin(),htotal->GetXaxis()->GetXmax(),yhigh,0,1,510,"+L");
+   axis->SetTitle("CC1pi Selection Efficiency");
+   axis->SetLineColor(kRed);
+   axis->SetLabelColor(kRed);
+   axis->SetTitleColor(kRed);
+   axis->Draw("same");
 
    c->Draw();
    c->Modified();

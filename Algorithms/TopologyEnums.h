@@ -28,7 +28,10 @@ enum NuIntTopology{
   kCosmic,
   kMixed,
   kOutFV,
-  kUnknown
+  kUnknown,
+  kCC1piplusBroken,
+  kCC1piplusPionParallel,
+  kCC1piplusMuonParallel
 };
 
 inline std::string topologyenum2str(NuIntTopology topology)
@@ -99,6 +102,15 @@ inline std::string topologyenum2str(NuIntTopology topology)
   case kOutFV:
     returnString = "Out of FV";
     break;
+  case kCC1piplusBroken:
+    returnString = "#nu_{#mu} CC 1#pi^{+} Broken";
+    break;
+  case kCC1piplusPionParallel:
+    returnString = "#nu_{#mu} CC 1#pi^{+} Parallel #pi^{+}";
+    break;
+  case kCC1piplusMuonParallel:
+    returnString = "#nu_{#mu} CC 1#pi^{+} Parallel #mu^{-}";
+    break;
   case kUnknown:
     returnString = "Unknown";
     break;
@@ -159,6 +171,11 @@ inline std::string topologyenum2str_coarse(NuIntTopology topology)
     break;
   case kOutFV:
     returnString = "Out of FV";
+    break;
+  case kCC1piplusBroken:
+  case kCC1piplusPionParallel:
+  case kCC1piplusMuonParallel:
+    returnString = "#nu_{#mu} CC 1#pi^{+} Bad Angle";
     break;
   case kUnknown:
     returnString = "Unknown";

@@ -266,11 +266,11 @@ void MakeLocalLinearityPlots(std::string inputfile="/uboone/app/users/kduffy/CC1
   // Dummy, just to stop segfaults
 
   std::string BookMVAType = "BDTG";
-  std::string BookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_NeutrinoOnly/weights/TMVAClassification_BDTG.weights.xml";
+  std::string BookMVALoc = "/uboone/app/users/ddevitt/LArSoft_v06_26_01_14_uboonecode_v06_26_01_22/srcs/uboonecode/uboone/CC1pi/MVA/dataset_inputvartune/weights/TMVAClassification_BDTG.weights.xml";
   TMVA::Reader fReader_contained("");
   TMVA::Reader fReader("");
   fReader.AddVariable("dEdx_truncmean_start", &(mc_vars.float_dEdx_truncmean_start));
-  fReader.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
+  //fReader.AddVariable("VtxTrackDist", &(mc_vars.float_VtxTrackDist));
   fReader.AddVariable("nhits", &(mc_vars.float_nhits));
   fReader.AddVariable("lnLmipoverp", &(mc_vars.float_lnLmipoverp));
   fReader.BookMVA(BookMVAType.c_str(), BookMVALoc.c_str());
