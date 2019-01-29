@@ -13,6 +13,7 @@ struct InputTags{
    art::InputTag fPIDProducer;
    art::InputTag fPFParticleProducer;
    art::InputTag fClusterProducer;
+   art::InputTag fHitProducer;
    art::InputTag fSpacePointProducer;
    art::InputTag fTPCObjectProducer;
    art::InputTag fMCSMuProducer;

@@ -8,6 +8,7 @@ InputTags::InputTags(fhicl::ParameterSet const &p){
    fPIDProducer          = p.get<std::string>("ParticleIdProducer","");
    fPFParticleProducer   = p.get<std::string>("PFParticleProducer","");
    fClusterProducer   = p.get<std::string>("ClusterProducer","");
+   fHitProducer   = p.get<std::string>("HitProducer","");
    fSpacePointProducer   = p.get<std::string>("SpacePointProducer","");
    fTPCObjectProducer    = p.get<std::string>("TPCObjectProducer","");
    fMCSMuProducer    = p.get<std::string>("MCSMuProducer","");
@@ -29,6 +30,7 @@ void InputTags::PrintConfig(){
      << "\t <<<< fPIDProducer = " << fPIDProducer << std::endl
      << "\t <<<< fPFParticleProducer = " << fPFParticleProducer  << std::endl
      << "\t <<<< fClusterProducer = " << fClusterProducer  << std::endl
+     << "\t <<<< fHitProducer = " << fHitProducer  << std::endl
      << "\t <<<< fSpacePointProducer = " << fSpacePointProducer << std::endl
      << "\t <<<< fTPCObjectProducer = " << fTPCObjectProducer << std::endl
      << "\t <<<< fMCSMuProducer = " << fMCSMuProducer << std::endl
