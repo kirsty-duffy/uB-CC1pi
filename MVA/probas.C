@@ -6,7 +6,7 @@
 
 // input: - Input file (result from TMVA)
 //        - use of TMVA plotting TStyle
-void probas( TString fin = "TMVA.root", Bool_t useTMVAStyle = kTRUE )
+void probas( TString fin = "TMVA.root", Bool_t useTMVAStyle = kTRUE, TString topLeveldir="" )
 {
    // set style and remove existing canvas'
    TMVAGlob::Initialize( useTMVAStyle );
@@ -16,12 +16,14 @@ void probas( TString fin = "TMVA.root", Bool_t useTMVAStyle = kTRUE )
    const Bool_t Save_Images     = kTRUE;
 
    // checks if file with name "fin" is already open, and if not opens one
-   TFile* file = TMVAGlob::OpenFile( fin );  
+   TFile* file = TMVAGlob::OpenFile( fin );
+
+   if (topLeveldir!="") file->cd(topLeveldir);
 
    // define Canvas layout here!
    Int_t xPad = 1; // no of plots in x
    Int_t yPad = 1; // no of plots in y
-   Int_t noPad = xPad * yPad ; 
+   Int_t noPad = xPad * yPad ;
    const Int_t width = 600;   // size of canvas
 
    // this defines how many canvases we need
@@ -60,7 +62,7 @@ void probas( TString fin = "TMVA.root", Bool_t useTMVAStyle = kTRUE )
       TIter nextTitle(&titles);
       TKey *instkey;
       TDirectory *instDir;
-      
+
       // iterate over all classifiers
       while ((instkey = (TKey *)nextTitle())) {
          instDir = (TDirectory *)instkey->ReadObj();
@@ -72,12 +74,12 @@ void probas( TString fin = "TMVA.root", Bool_t useTMVAStyle = kTRUE )
          TString methodTitle;
          TMVAGlob::GetMethodTitle(methodTitle,instDir);
          Bool_t found = kFALSE;
-         while (hkey = (TKey*)nextInDir()) {
+         while ((hkey = (TKey*)nextInDir())) {
             TH1 *th1 = (TH1*)hkey->ReadObj();
             TString hname= th1->GetName();
-            if (hname.Contains( suffixSig ) && !hname.Contains( "Cut") && 
+            if (hname.Contains( suffixSig ) && !hname.Contains( "Cut") &&
                 !hname.Contains("original") && !hname.Contains("smoothed")) {
-               // retrieve corresponding signal and background histograms   
+               // retrieve corresponding signal and background histograms
                TString hnameS = hname;
                TString hnameB = hname; hnameB.ReplaceAll("_S","_B");
 
@@ -91,11 +93,11 @@ void probas( TString fin = "TMVA.root", Bool_t useTMVAStyle = kTRUE )
 
                TH1* sigF(0);
                TH1* bkgF(0);
-               
+
                for (int i=0; i<= 5; i++) {
                   TString hspline = hnameS + Form("_smoothed_hist_from_spline%i",i);
                   sigF = (TH1*)instDir->Get( hspline );
-  	    
+
                   if (sigF) {
                      bkgF = (TH1*)instDir->Get( hspline.ReplaceAll("_tr_S","_tr_B") );
                      break;
@@ -104,12 +106,12 @@ void probas( TString fin = "TMVA.root", Bool_t useTMVAStyle = kTRUE )
                if (!sigF){
                   TString hspline = hnameS + TString("_smoothed_hist_from_KDE");
                   sigF = (TH1*)instDir->Get( hspline );
-                  
+
                   if (sigF) {
                      bkgF = (TH1*)instDir->Get( hspline.ReplaceAll("_tr_S","_tr_B") );
                   }
                }
-              
+
                if ((sigF == NULL || bkgF == NULL) &&!hname.Contains("hist") ) {
                   cout << "*** probas.C: big troubles - did not find probability histograms" << endl;
                   return;
@@ -119,49 +121,49 @@ void probas( TString fin = "TMVA.root", Bool_t useTMVAStyle = kTRUE )
 
                   // check that exist
                   if (NULL != sigF && NULL != bkgF && NULL!=sig && NULL!=bgd) {
-          
+
                      TString hname = sig->GetName();
                      found = kTRUE;
                      // chop off useless stuff
                      sig->SetTitle( TString("TMVA output for classifier: ") + methodTitle );
-            
+
                      // create new canvas
                      cout << "--- Book canvas no: " << countCanvas << endl;
                      char cn[20];
                      sprintf( cn, "canvas%d", countCanvas+1 );
-                     c = new TCanvas( cn, Form("TMVA Output Fit Variables %s",methodTitle.Data()), 
-                                      countCanvas*50+200, countCanvas*20, width, width*0.78 ); 
-            
+                     c = new TCanvas( cn, Form("TMVA Output Fit Variables %s",methodTitle.Data()),
+                                      countCanvas*50+200, countCanvas*20, width, width*0.78 );
+
                      // set the histogram style
                      TMVAGlob::SetSignalAndBackgroundStyle( sig, bgd );
                      TMVAGlob::SetSignalAndBackgroundStyle( sigF, bkgF );
-            
+
                      // frame limits (choose judicuous x range)
                      Float_t nrms = 4;
-                     Float_t xmin = TMath::Max( TMath::Min(sig->GetMean() - nrms*sig->GetRMS(), 
+                     Float_t xmin = TMath::Max( TMath::Min(sig->GetMean() - nrms*sig->GetRMS(),
                                                            bgd->GetMean() - nrms*bgd->GetRMS() ),
                                                 sig->GetXaxis()->GetXmin() );
-                     Float_t xmax = TMath::Min( TMath::Max(sig->GetMean() + nrms*sig->GetRMS(), 
+                     Float_t xmax = TMath::Min( TMath::Max(sig->GetMean() + nrms*sig->GetRMS(),
                                                            bgd->GetMean() + nrms*bgd->GetRMS() ),
                                                 sig->GetXaxis()->GetXmax() );
                      Float_t ymin = 0;
                      Float_t ymax = TMath::Max( sig->GetMaximum(), bgd->GetMaximum() )*1.5;
-            
-                     if (Draw_CFANN_Logy && mvaName[imva] == "CFANN") ymin = 0.01;
-            
+
+                     // if (Draw_CFANN_Logy && mvaName[imva] == "CFANN") ymin = 0.01;
+
                      // build a frame
                      Int_t nb = 500;
-                     TH2F* frame = new TH2F( TString("frame") + sig->GetName() + "_proba", sig->GetTitle(), 
+                     TH2F* frame = new TH2F( TString("frame") + sig->GetName() + "_proba", sig->GetTitle(),
                                              nb, xmin, xmax, nb, ymin, ymax );
                      frame->GetXaxis()->SetTitle(methodTitle);
                      frame->GetYaxis()->SetTitle("Normalized");
                      TMVAGlob::SetFrameStyle( frame );
-            
+
                      // eventually: draw the frame
-                     frame->Draw();  
-            
-                     if (Draw_CFANN_Logy && mvaName[imva] == "CFANN") c->SetLogy();
-            
+                     frame->Draw();
+
+                     // if (Draw_CFANN_Logy && mvaName[imva] == "CFANN") c->SetLogy();
+
                      // overlay signal and background histograms
                      sig->SetMarkerColor( TMVAGlob::c_SignalLine );
                      sig->SetMarkerSize( 0.7 );
@@ -175,17 +177,17 @@ void probas( TString fin = "TMVA.root", Bool_t useTMVAStyle = kTRUE )
 
                      sig->Draw("samee");
                      bgd->Draw("samee");
-            
+
                      sigF->SetFillStyle( 0 );
                      bkgF->SetFillStyle( 0 );
                      sigF->Draw("samehist");
                      bkgF->Draw("samehist");
-            
+
                      // redraw axes
                      frame->Draw("sameaxis");
-            
-                     // Draw legend               
-                     TLegend *legend= new TLegend( c->GetLeftMargin(), 1 - c->GetTopMargin() - 0.2, 
+
+                     // Draw legend
+                     TLegend *legend= new TLegend( c->GetLeftMargin(), 1 - c->GetTopMargin() - 0.2,
                                                    c->GetLeftMargin() + 0.4, 1 - c->GetTopMargin() );
                      legend->AddEntry(sig,"Signal data","P");
                      legend->AddEntry(sigF,"Signal PDF","L");
@@ -194,21 +196,23 @@ void probas( TString fin = "TMVA.root", Bool_t useTMVAStyle = kTRUE )
                      legend->Draw("same");
                      legend->SetBorderSize(1);
                      legend->SetMargin( 0.3 );
-            
+
                      // save canvas to file
                      c->Update();
                      TMVAGlob::plot_logo();
-                     sprintf( fname, "plots/mva_pdf_%s_c%i", methodTitle.Data(), countCanvas+1 );
+                     TString prepend = "plots";
+                     if (topLeveldir!="") prepend = topLeveldir+"/"+prepend;
+                     sprintf( fname, "%s/mva_pdf_%s_c%i", prepend.Data(), methodTitle.Data(), countCanvas+1 );
                      if (Save_Images) TMVAGlob::imgconv( c, fname );
                      countCanvas++;
                   }
                }
             }
-            
+
          }
          if(!found){
             cout << "--- No PDFs found for method " << methodTitle << ". Did you request \"CreateMVAPdfs\" in the option string?" << endl;
          }
-      }    
+      }
    }
 }

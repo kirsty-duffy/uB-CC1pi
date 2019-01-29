@@ -7,16 +7,18 @@
 //        - normal/decorrelated/PCA
 //        - use of TMVA plotting TStyle
 void variables( TString fin = "TMVA.root", TString dirName = "InputVariables_Id", TString title = "TMVA Input Variables",
-                Bool_t isRegression = kFALSE, Bool_t useTMVAStyle = kTRUE )
+                Bool_t isRegression = kFALSE, Bool_t useTMVAStyle = kTRUE, TString topLeveldir="" )
 {
+   std::cout << "Calling Kirsty's version of variables.C" << std::endl;
+
    TString outfname = dirName;
    outfname.ToLower(); outfname.ReplaceAll( "input", ""  );
 
    // set style and remove existing canvas'
    TMVAGlob::Initialize( useTMVAStyle );
 
-   // obtain shorter histogram title 
-   TString htitle = title; 
+   // obtain shorter histogram title
+   TString htitle = title;
    htitle.ReplaceAll("variables ","variable");
    htitle.ReplaceAll("and target(s)","");
    htitle.ReplaceAll("(training sample)","");
@@ -24,9 +26,15 @@ void variables( TString fin = "TMVA.root", TString dirName = "InputVariables_Id"
    // checks if file with name "fin" is already open, and if not opens one
    TFile* file = TMVAGlob::OpenFile( fin );
 
-   TDirectory* dir = (TDirectory*)file->Get( dirName );
+   // Check if we need to go down a directory
+   TString dirNametmp(dirName);
+   if (topLeveldir != ""){
+      dirNametmp = TString(topLeveldir+"/"+dirName);
+   }
+
+   TDirectory* dir = (TDirectory*)file->Get( dirNametmp );
    if (dir==0) {
-      cout << "No information about " << title << " available in directory " << dirName << " of file " << fin << endl;
+      cout << "No information about " << title << " available in directory " << dirNametmp << " of file " << fin << endl;
       return;
    }
    dir->cd();
@@ -71,7 +79,7 @@ void variables( TString fin = "TMVA.root", TString dirName = "InputVariables_Id"
    while ((key = (TKey*)next())) {
       if (key->GetCycle() != 1) continue;
 
-      if (!TString(key->GetName()).Contains("__Signal") && 
+      if (!TString(key->GetName()).Contains("__Signal") &&
           !(isRegression && TString(key->GetName()).Contains("__Regression"))) continue;
 
       // make sure, that we only look at histograms
@@ -90,7 +98,7 @@ void variables( TString fin = "TMVA.root", TString dirName = "InputVariables_Id"
       }
 
       TPad* cPad = (TPad*)canv->cd(countPad++%noPadPerCanv+1);
-      
+
       // find the corredponding backgrouns histo
       TString bgname = hname;
       bgname.ReplaceAll("__Signal","__Background");
@@ -101,7 +109,7 @@ void variables( TString fin = "TMVA.root", TString dirName = "InputVariables_Id"
       }
 
       // this is set but not stored during plot creation in MVA_Factory
-      TMVAGlob::SetSignalAndBackgroundStyle( sig, (isRegression ? 0 : bgd) );            
+      TMVAGlob::SetSignalAndBackgroundStyle( sig, (isRegression ? 0 : bgd) );
 
       sig->SetTitle( TString( htitle ) + ": " + sig->GetTitle() );
       TMVAGlob::SetFrameStyle( sig, 1.2 );
@@ -133,9 +141,9 @@ void variables( TString fin = "TMVA.root", TString dirName = "InputVariables_Id"
 
       // Draw legend
       if (countPad >= 1 && !isRegression) {
-         TLegend *legend= new TLegend( cPad->GetLeftMargin(), 
-                                       1-cPad->GetTopMargin()-.15, 
-                                       cPad->GetLeftMargin()+.4, 
+         TLegend *legend= new TLegend( cPad->GetLeftMargin(),
+                                       1-cPad->GetTopMargin()-.15,
+                                       cPad->GetLeftMargin()+.4,
                                        1-cPad->GetTopMargin() );
          legend->SetFillStyle(1);
          legend->AddEntry(sig,"Signal","F");
@@ -143,7 +151,7 @@ void variables( TString fin = "TMVA.root", TString dirName = "InputVariables_Id"
          legend->SetBorderSize(1);
          legend->SetMargin( 0.3 );
          legend->Draw("same");
-      } 
+      }
 
       // redraw axes
       sig->Draw("sameaxis");
@@ -154,24 +162,25 @@ void variables( TString fin = "TMVA.root", TString dirName = "InputVariables_Id"
       Double_t dxo  = sig->GetBinWidth(nbin+1);
       TString uoflow = "";
       if (isRegression) {
-         uoflow = Form( "U/O-flow: %.1f%% / %.1f%%", 
+         uoflow = Form( "U/O-flow: %.1f%% / %.1f%%",
                         sig->GetBinContent(0)*dxu*100, sig->GetBinContent(nbin+1)*dxo*100 );
       }
       else {
-         uoflow = Form( "U/O-flow (S,B): (%.1f, %.1f)%% / (%.1f, %.1f)%%", 
+         uoflow = Form( "U/O-flow (S,B): (%.1f, %.1f)%% / (%.1f, %.1f)%%",
                         sig->GetBinContent(0)*dxu*100, bgd->GetBinContent(0)*dxu*100,
                         sig->GetBinContent(nbin+1)*dxo*100, bgd->GetBinContent(nbin+1)*dxo*100 );
       }
-  
+
       TText* t = new TText( 0.98, 0.14, uoflow );
       t->SetNDC();
       t->SetTextSize( 0.040 );
       t->SetTextAngle( 90 );
-      t->AppendPad();    
+      t->AppendPad();
 
       // save canvas to file
       if (countPad%noPadPerCanv==0) {
          TString fname = Form( "plots/%s_c%i", outfname.Data(), countCanvas );
+         if (topLeveldir!="") fname = Form( "%s/plots/%s_c%i", topLeveldir.Data(), outfname.Data(), countCanvas );
          TMVAGlob::plot_logo();
          TMVAGlob::imgconv( canv, fname );
          createNewFig = kFALSE;
@@ -180,9 +189,10 @@ void variables( TString fin = "TMVA.root", TString dirName = "InputVariables_Id"
          createNewFig = kTRUE;
       }
    }
-   
+
    if (createNewFig) {
       TString fname = Form( "plots/%s_c%i", outfname.Data(), countCanvas );
+      if (topLeveldir!="") fname = Form( "%s/plots/%s_c%i", topLeveldir.Data(), outfname.Data(), countCanvas );
       TMVAGlob::plot_logo();
       TMVAGlob::imgconv( canv, fname );
       createNewFig = kFALSE;

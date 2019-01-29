@@ -1,6 +1,6 @@
 #include "tmvaglob.C"
 
-void plot_efficiencies( TFile* file, Int_t type = 2, TDirectory* BinDir)
+void plot_efficiencies( TFile* file, Int_t type, TDirectory* BinDir)
 {
    // input:   - Input file (result from TMVA),
    //          - type = 1 --> plot efficiency(B) versus eff(S)
@@ -70,12 +70,12 @@ void plot_efficiencies( TFile* file, Int_t type = 2, TDirectory* BinDir)
    TIter xnext(&xmethods);
    // loop over all methods
    TKey *xkey;
-   while (xkey = (TKey*)xnext()) {
+   while ((xkey = (TKey*)xnext())) {
       TDirectory * mDir = (TDirectory*)xkey->ReadObj();
       TList titles;
       UInt_t ninst = TMVAGlob::GetListOfTitles(mDir,titles);
       TIter nextTitle(&titles);
-      TKey *titkey;
+      TKey *titkey, *hkey;
       TDirectory *titDir;
       while ((titkey = TMVAGlob::NextKey(nextTitle,"TDirectory"))) {
          titDir = (TDirectory *)titkey->ReadObj();
@@ -113,7 +113,7 @@ void plot_efficiencies( TFile* file, Int_t type = 2, TDirectory* BinDir)
    TIter next(&methods);
 
    // loop over all methods
-   while (key = (TKey*)next()) {
+   while ((key = (TKey*)next())) {
       TDirectory * mDir = (TDirectory*)key->ReadObj();
       TList titles;
       UInt_t ninst = TMVAGlob::GetListOfTitles(mDir,titles);
@@ -184,6 +184,7 @@ void plot_efficiencies( TFile* file, Int_t type = 2, TDirectory* BinDir)
    c->Update();
 
    TString fname = "plots/" + hNameRef;
+   if (gDirectory->GetName()!="") fname = TString(gDirectory->GetName())+"/"+fname;
    if (TString(BinDir->GetName()).Contains("multicut")){
       TString fprepend(BinDir->GetName());
       fprepend.ReplaceAll("multicutMVA_","");
@@ -194,7 +195,7 @@ void plot_efficiencies( TFile* file, Int_t type = 2, TDirectory* BinDir)
    return;
 }
 
-void efficiencies( TString fin = "TMVA.root", Int_t type = 2, Bool_t useTMVAStyle = kTRUE )
+void efficiencies( TString fin = "TMVA.root", Int_t type = 2, Bool_t useTMVAStyle = kTRUE, TString topLeveldir="" )
 {
    // argument: type = 1 --> plot efficiency(B) versus eff(S)
    //           type = 2 --> plot rejection (B) versus efficiency (S)
@@ -221,8 +222,8 @@ void efficiencies( TString fin = "TMVA.root", Int_t type = 2, Bool_t useTMVAStyl
          plot_efficiencies( file, type, d );
       }
    }
+   if (topLeveldir!="") file->cd(topLeveldir);
    plot_efficiencies( file, type, gDirectory );
 
    return;
 }
-
