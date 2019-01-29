@@ -1573,6 +1573,75 @@ CC1piPlotVars Var_MIP_containment(treevars *vars){
   return tmp;
 }
 
+CC1piPlotVars Var_TPCObj_MIPstartend_mindist(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_MIPstartend_mindist;
+  tmp.KeepBelowCut = false;
+  tmp.TracksNeeded = "NA";
+  tmp.CutValue = 0.5;
+  tmp.bins = {50,0,100};
+  tmp.histtitle = ";Minimum distance between one MIP start and other MIP end (cm);";
+  tmp.histname = "MIP_startend_mindist";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyMuMuPairs = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore;
+  tmp.bins = {50,-1,1};
+  tmp.histtitle = ";Mu/pi BDT score (selected daughter MIPs only);";
+  tmp.histname = "mupiBDT_daughtermips";
+  tmp.PlotOnlyDaughterMIPs = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_all(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore;
+  tmp.bins = {50,-1,1};
+  tmp.histtitle = ";Mu/pi BDT score (all particles);";
+  tmp.histname = "mupiBDT_all";
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_longestMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore_leadingMIP;
+  tmp.bins = {50,-1,1};
+  tmp.histtitle = ";Mu/pi BDT score (longest daughter MIP only);";
+  tmp.histname = "mupiBDT_longestdaughtermip";
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_secondMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore_secondMIP;
+  tmp.bins = {50,-1,1};
+  tmp.histtitle = ";Mu/pi BDT score (second daughter MIP only);";
+  tmp.histname = "mupiBDT_seconddaughtermip";
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_leadingOversecondMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore_leadingOversecondMIP;
+  tmp.bins = {20,0,2};
+  tmp.histtitle = ";Mu/pi BDT score: leading MIP/second MIP;";
+  tmp.histname = "mupiBDT_leadingOversecondmip";
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_leadingMinussecondMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore_leadingMinussecondMIP;
+  tmp.bins = {50,-2,2};
+  tmp.histtitle = ";Mu/pi BDT score: leading MIP-second MIP;";
+  tmp.histname = "mupiBDT_leadingMinussecondmip";
+  return tmp;
+}
+
 // Decide whether to fill a plot for a given track. This is useful for e.g. plots with PlotOnlyDaughterMIPs=true
 bool FillPlotForTrack(CC1piPlotVars *plotvar, treevars *vars, int i_tr){
   bool DoFillPlot = true;
