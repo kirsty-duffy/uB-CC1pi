@@ -1637,7 +1637,6 @@ CC1piPlotVars Var_MIP_containment(treevars *vars){
   return tmp;
 }
 
-<<<<<<< HEAD
 CC1piPlotVars Var_TPCObj_MIPstartend_mindist(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_MIPstartend_mindist;
@@ -1704,7 +1703,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_leadingMinussecondMIP(treevars *
   tmp.bins = {50,-2,2};
   tmp.histtitle = ";Mu/pi BDT score: leading MIP-second MIP;";
   tmp.histname = "mupiBDT_leadingMinussecondmip";
-=======
+
 CC1piPlotVars Var_TPCObj_PFP_track_MuonMomRange_LeadingMIP(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_MuonMomRange;
@@ -1732,7 +1731,6 @@ CC1piPlotVars Var_TPCObj_PFP_track_MuonMomCombined_LeadingMIP(treevars *vars){
   tmp.histtitle = ";Muon candidate momentum [GeV];";
   tmp.histname = "MuonMomCombined";
   tmp.PlotOnlyLeadingDaughterMIP = true;
->>>>>>> 892635ec70e833c433df382ce864e702a1f28a73
   return tmp;
 }
 
