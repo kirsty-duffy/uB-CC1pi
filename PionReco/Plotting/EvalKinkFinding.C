@@ -48,6 +48,30 @@ void EvalKinkFinding(std::string inputfile="/uboone/data/users/kduffy/CC1pi/book
     bool goodevt = KinkFindingTree_haskink.Setup();
     if (!goodevt) continue;
 
+    std::vector<double> px_0 = KinkFindingTree_haskink.MCP_Px_eachpoint->at(0);
+    std::vector<double> py_0 = KinkFindingTree_haskink.MCP_Py_eachpoint->at(0);
+    std::vector<double> pz_0 = KinkFindingTree_haskink.MCP_Pz_eachpoint->at(0);
+    std::vector<double> px_1 = KinkFindingTree_haskink.MCP_Px_eachpoint->at(1);
+    std::vector<double> py_1 = KinkFindingTree_haskink.MCP_Py_eachpoint->at(1);
+    std::vector<double> pz_1 = KinkFindingTree_haskink.MCP_Pz_eachpoint->at(1);
+
+    // Find last non-(0,0,0) momentum in MCP 0
+    double vec0_x=0, vec0_y=0, vec0_z=0;
+    for (int i_p=0; i_p<px_0.size(); i_p++){
+      if (!(px_0.at(i_p)==0 && py_0.at(i_p) == 0 && pz_0.at(i_p) ==0)){
+        vec0_x = px_0.at(i_p);
+        vec0_y = py_0.at(i_p);
+        vec0_z = pz_0.at(i_p);
+      }
+    }
+
+    TVector3 vec0(vec0_x,vec0_y,vec0_z);
+    TVector3 vec1(px_1.at(0),py_1.at(0),pz_1.at(0));
+    vec0.SetMag(1);
+    vec1.SetMag(1);
+
+    std::cout << "Event " << i_evt << ": true cos(th) = " << vec0.Dot(vec1) << std::endl;
+
     for (size_t i_pfph=0; i_pfph<KinkFindingTree_haskink.n_PFPs; i_pfph++){
       int pfp_idx=i_pfph;
       int pfpid = KinkFindingTree_haskink.PFP_ID->at(pfp_idx);
@@ -56,10 +80,10 @@ void EvalKinkFinding(std::string inputfile="/uboone/data/users/kduffy/CC1pi/book
       truekinks.push_back(KinkFindingTree_haskink.PFP_trueMCPend->at(pfp_idx));
 
       // Now calculate local linearity variables to look for kinks
-      std::vector<int> kinkidxs = KinkFindingTree_haskink.FindRecoKinks_orderedsp(pfp_idx,-999,i_evt,truekinks);
+      std::vector<int> kinkidxs = KinkFindingTree_haskink.FindRecoKinks_orderedsp(pfp_idx,vec0.Dot(vec1),i_evt,truekinks);
 
       // Now look at kinks by angle betwen groups of spacepoints
-      std::vector<int> kinkidxs_byangle = KinkFindingTree_haskink.FindRecoKinks_byangle_orderedsp(pfp_idx,-999,i_evt,0,20,truekinks);
+      std::vector<int> kinkidxs_byangle = KinkFindingTree_haskink.FindRecoKinks_byangle_orderedsp(pfp_idx,vec0.Dot(vec1),i_evt,0,20,truekinks);
 
 
       // Fill plots!

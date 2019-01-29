@@ -50,6 +50,9 @@ struct KinkFindingTree{
   std::vector<std::vector<double>> *MCP_Px_eachpoint=nullptr;
   std::vector<std::vector<double>> *MCP_Py_eachpoint=nullptr;
   std::vector<std::vector<double>> *MCP_Pz_eachpoint=nullptr;
+  std::vector<std::vector<double>> *MCP_x_eachpoint=nullptr;
+  std::vector<std::vector<double>> *MCP_y_eachpoint=nullptr;
+  std::vector<std::vector<double>> *MCP_z_eachpoint=nullptr;
   std::vector<std::vector<double>> *MCP_StartXYZ=nullptr;
   std::vector<std::vector<double>> *MCP_EndXYZ=nullptr;
 
@@ -139,6 +142,9 @@ void SetKinkFindingTreeVariables(KinkFindingTree *vars, TTree *tr){
   tr->SetBranchAddress("MCP_Px_eachpoint",&(vars->MCP_Px_eachpoint));
   tr->SetBranchAddress("MCP_Py_eachpoint",&(vars->MCP_Py_eachpoint));
   tr->SetBranchAddress("MCP_Pz_eachpoint",&(vars->MCP_Pz_eachpoint));
+  tr->SetBranchAddress("MCP_x_eachpoint",&(vars->MCP_x_eachpoint));
+  tr->SetBranchAddress("MCP_y_eachpoint",&(vars->MCP_y_eachpoint));
+  tr->SetBranchAddress("MCP_z_eachpoint",&(vars->MCP_z_eachpoint));
   tr->SetBranchAddress("MCP_StartXYZ",&(vars->MCP_StartXYZ));
   tr->SetBranchAddress("MCP_EndXYZ",&(vars->MCP_EndXYZ));
   tr->SetBranchAddress("n_PFPs",&(vars->n_PFPs));
@@ -216,6 +222,9 @@ void SetupKinkFindingTreeForReading(KinkFindingTree *tr){
   tr->MCP_Px_eachpoint=nullptr;
   tr->MCP_Py_eachpoint=nullptr;
   tr->MCP_Pz_eachpoint=nullptr;
+  tr->MCP_x_eachpoint=nullptr;
+  tr->MCP_y_eachpoint=nullptr;
+  tr->MCP_z_eachpoint=nullptr;
   tr->MCP_StartXYZ=nullptr;
   tr->MCP_EndXYZ=nullptr;
   tr->PFP_ID=nullptr;
@@ -254,6 +263,9 @@ void ClearKinkFindingTree(KinkFindingTree *tr){
   tr->MCP_Px_eachpoint->clear();
   tr->MCP_Py_eachpoint->clear();
   tr->MCP_Pz_eachpoint->clear();
+  tr->MCP_x_eachpoint->clear();
+  tr->MCP_y_eachpoint->clear();
+  tr->MCP_z_eachpoint->clear();
   tr->MCP_StartXYZ->clear();
   tr->MCP_EndXYZ->clear();
   tr->PFP_ID->clear();
@@ -290,6 +302,9 @@ void CopyMCPs(KinkFindingTree *originaltree, KinkFindingTree *newtree){
   *(newtree->MCP_Px_eachpoint) = *(originaltree->MCP_Px_eachpoint);
   *(newtree->MCP_Py_eachpoint) = *(originaltree->MCP_Py_eachpoint);
   *(newtree->MCP_Pz_eachpoint) = *(originaltree->MCP_Pz_eachpoint);
+  *(newtree->MCP_x_eachpoint) = *(originaltree->MCP_x_eachpoint);
+  *(newtree->MCP_y_eachpoint) = *(originaltree->MCP_y_eachpoint);
+  *(newtree->MCP_z_eachpoint) = *(originaltree->MCP_z_eachpoint);
   *(newtree->MCP_StartXYZ) = *(originaltree->MCP_StartXYZ);
   *(newtree->MCP_EndXYZ) = *(originaltree->MCP_EndXYZ);
 };
@@ -570,13 +585,13 @@ std::vector<int> KinkFindingTree::FindRecoKinks_orderedsp(int pfp_idx, double mi
   std::vector<double> cusum = GetCuSumVec(proj1d);
 
   // Get vector of Welch's t-test
-  std::vector<double> ttest = GetWelchttestVec(proj1d,10);
+  std::vector<double> ttest = GetWelchttestVec(proj1d);
 
   // Find kinks
   std::vector<int> kinkidxs = *(SplitTracks(proj1d,cusum,ttest));
 
   // if (kinkidxs.size()>0){
-    PlotLocalLinearityDetails(PFP_ordered_spacepoints->at(pfp_idx),proj1d,cusum,ttest,kinkidxs,pfp_idx,PFP_ordered_spacepoints->at(pfp_idx).at(0),truekinks,mincosth,evtnum);
+    PlotLocalLinearityDetails(PFP_ordered_spacepoints->at(pfp_idx),proj1d,cusum,ttest,kinkidxs,pfp_idx,PFP_ordered_spacepoints->at(pfp_idx).at(0),truekinks,*MCP_x_eachpoint,*MCP_y_eachpoint,*MCP_z_eachpoint,mincosth,evtnum);
   // }
 
   return kinkidxs;
