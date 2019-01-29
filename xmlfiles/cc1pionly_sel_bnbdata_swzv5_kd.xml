@@ -1,9 +1,9 @@
 <!-- Project details -->
 <!DOCTYPE project [
 <!ENTITY release "v06_26_01_22">
-<!ENTITY name "cc1pi_sel">
+<!ENTITY name "combined_sel_bnbdata">
 <!ENTITY user "kduffy">
-<!ENTITY version "v06_26_01_22_cc1pionly_mc_v1">
+<!ENTITY version "v06_26_01_22_cc1pionly_bnbdata_swzv5_v1">
 ]>
 
 <project name="&name;">
@@ -13,10 +13,10 @@
 
   <!-- Project size (numevents is an upper limit) -->
   <numevents>50000</numevents>
-  <numjobs>1000</numjobs>
+  <numjobs>26</numjobs>
 
   <!-- Where to look for fcl files (in addition to $FHICL_FILE_PATH) -->
-  <!-- fcldir>/pnfs/uboone/persistent/users/ddevitt/fcl/</fcldir -->
+  <!-- <fcldir>/uboone/app/users/kduffy/CC1pi/CC1pi_uboonecode/localProducts_larsoft_v06_26_01_10_e10_prof/uboonecode/v06_26_01_13/job/</fcldir> -->
 
   <!-- Batch OS -->
   <os>SL6</os>
@@ -28,17 +28,19 @@
     <local>/pnfs/uboone/resilient/users/kduffy/tars/pid_test.tar</local>
   </larsoft>
 
+  <resource>OFFSITE</resource>
+
   <!-- Stages -->
   <stage name = "Selection">
      <maxfilesperjob>10</maxfilesperjob>
-     <inputdef>prodgenie_bnb_nu_cosmic_uboone_mcc8.7_reco2_mcc8.23_ccinfilter</inputdef> <!-- contains 36086 files -->
-     <fcl>run_CC1pionly_mc_bnbcosmic.fcl</fcl>
+     <inputdef>MCC8.23-CCinclusive_bnb_v5swizzle</inputdef> <!-- contains 257 files -->
+     <fcl>run_CC1pionly_data_bnbon.fcl</fcl>
      <outdir>/pnfs/uboone/persistent/users/kduffy/CC1pi/&version;/</outdir>
      <logdir>/pnfs/uboone/persistent/users/kduffy/CC1pi/&version;/</logdir>
      <workdir>/pnfs/uboone/resilient/users/kduffy/CC1pi/work/&version;/</workdir>
      <bookdir>/uboone/data/users/kduffy/CC1pi/book/&version;/</bookdir>
      <schema>root</schema>
      <!-- requested memory, in MB -->
-     <memory>5000</memory>
+     <memory>4000</memory>
   </stage>
 </project>
