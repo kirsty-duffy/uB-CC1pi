@@ -17,38 +17,43 @@
 // What variables do we want these plots as a function of?
 std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
    std::vector<CC1piPlotVars> varstoplot = {
-      Var_TPCObj_PFP_track_BDTscore(vars)
-      ,Var_TPCObj_PFP_track_BDTscore_IsMIP(vars)
-      ,Var_TPCObj_PFP_track_BDTscore_NotMIP(vars)
-      ,Var_TPCObj_PFP_track_BDTscore_MuMuPairs(vars)
-      ,Var_TPCObj_AngleBetweenMIPs(vars)
-      ,Var_TPCObj_AngleBetweenMIPs_mumupairs(vars)
-      ,Var_TPCObj_PFP_track_dEdx_truncmean_start_IsMIP(vars)
-      ,Var_TPCObj_PFP_track_dEdx_truncmean_start_NotMIP(vars)
-      ,Var_TPCObj_PFP_track_dEdx_truncmean_start_mumupairs(vars)
-      ,Var_TPCObj_PFP_VtxTrackDist_IsMIP(vars)
-      ,Var_TPCObj_PFP_VtxTrackDist_NotMIP(vars)
-      ,Var_TPCObj_PFP_VtxTrackDist_mumupairs(vars)
-      ,Var_TPCObj_PFP_track_dedx_grminhits_IsMIP(vars)
-      ,Var_TPCObj_PFP_track_dedx_grminhits_NotMIP(vars)
-      ,Var_TPCObj_PFP_track_dedx_grminhits_mumupairs(vars)
-      ,Var_TPCObj_PFP_lnLmipoverp_IsMIP(vars)
-      ,Var_TPCObj_PFP_lnLmipoverp_NotMIP(vars)
-      ,Var_TPCObj_PFP_lnLmipoverp_mumupairs(vars)
-      ,Var_TPCObj_BDTscore_MIPdiv(vars)
-      ,Var_TPCObj_BDTscore_MIPdiff(vars)
-      ,Var_TPCObj_PFP_trueKE_selMIPs(vars)
-      ,Var_TPCObj_PFP_trueEndP_selMIPs(vars)
-      ,Var_TPCObj_PFP_track_theta_selMIPs(vars)
-      ,Var_TPCObj_PFP_track_phi_selMIPs(vars)
-      ,Var_TPCObj_PFP_track_nhits_LeadingMIP(vars)
-      ,Var_TPCObj_PFP_track_nhits_SecondMIP(vars)
-      ,Var_TPCObj_PFP_track_length_LeadingMIP_mumupairs(vars)
-      ,Var_TPCObj_PFP_track_length_SecondMIP_mumupairs(vars)
-      ,Var_TPCObj_PFP_track_length_LeadingMIP(vars)
-      ,Var_TPCObj_PFP_track_length_SecondMIP(vars)
-      ,Var_TPCObj_PFP_track_length(vars)
-      ,Var_TPCObj_PFP_lnLmipovermu(vars)
+     Var_TPCObj_PFP_track_mupiBDTscore(vars)
+     ,Var_TPCObj_PFP_track_mupiBDTscore_secondMIP(vars)
+     ,Var_TPCObj_PFP_track_mupiBDTscore_leadingOversecondMIP(vars)
+     ,Var_TPCObj_PFP_track_mupiBDTscore_leadingMinussecondMIP(vars)
+      // Var_TPCObj_PFP_track_BDTscore(vars)
+      // ,Var_TPCObj_PFP_track_BDTscore_IsMIP(vars)
+      // ,Var_TPCObj_PFP_track_BDTscore_NotMIP(vars)
+      // ,Var_TPCObj_PFP_track_BDTscore_MuMuPairs(vars)
+      // ,Var_TPCObj_AngleBetweenMIPs(vars)
+      // ,Var_TPCObj_AngleBetweenMIPs_mumupairs(vars)
+      // ,Var_TPCObj_PFP_track_dEdx_truncmean_start_IsMIP(vars)
+      // ,Var_TPCObj_PFP_track_dEdx_truncmean_start_NotMIP(vars)
+      // ,Var_TPCObj_PFP_track_dEdx_truncmean_start_mumupairs(vars)
+      // ,Var_TPCObj_PFP_VtxTrackDist_IsMIP(vars)
+      // ,Var_TPCObj_PFP_VtxTrackDist_NotMIP(vars)
+      // ,Var_TPCObj_PFP_VtxTrackDist_mumupairs(vars)
+      // ,Var_TPCObj_PFP_track_dedx_grminhits_IsMIP(vars)
+      // ,Var_TPCObj_PFP_track_dedx_grminhits_NotMIP(vars)
+      // ,Var_TPCObj_PFP_track_dedx_grminhits_mumupairs(vars)
+      // ,Var_TPCObj_PFP_lnLmipoverp_IsMIP(vars)
+      // ,Var_TPCObj_PFP_lnLmipoverp_NotMIP(vars)
+      // ,Var_TPCObj_PFP_lnLmipoverp_mumupairs(vars)
+      // ,Var_TPCObj_BDTscore_MIPdiv(vars)
+      // ,Var_TPCObj_BDTscore_MIPdiff(vars)
+      // ,Var_TPCObj_PFP_trueKE_selMIPs(vars)
+      // ,Var_TPCObj_PFP_trueEndP_selMIPs(vars)
+      // ,Var_TPCObj_PFP_track_theta_selMIPs(vars)
+      // ,Var_TPCObj_PFP_track_phi_selMIPs(vars)
+      // ,Var_TPCObj_PFP_track_nhits_LeadingMIP(vars)
+      // ,Var_TPCObj_PFP_track_nhits_SecondMIP(vars)
+      // ,Var_TPCObj_PFP_track_length_LeadingMIP_mumupairs(vars)
+      // ,Var_TPCObj_PFP_track_length_SecondMIP_mumupairs(vars)
+      // ,Var_TPCObj_PFP_track_length_LeadingMIP(vars)
+      // ,Var_TPCObj_PFP_track_length_SecondMIP(vars)
+      // ,Var_TPCObj_PFP_track_length(vars)
+      // ,Var_TPCObj_PFP_lnLmipovermu(vars)
+      // ,Var_TPCObj_MIPstartend_mindist(vars)
    };
    return varstoplot;
 }
@@ -57,14 +62,16 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
 // What variables do we want these 2D plots as a function of?
 std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> GetVarstoplot2D(treevars *vars){
    std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> varstoplot2D = {
+      {Var_TPCObj_PFP_track_mupiBDTscore_longestMIP(vars),Var_TPCObj_PFP_track_mupiBDTscore_secondMIP(vars)}
+      ,{Var_TPCObj_PFP_track_mupiBDTscore_all(vars),Var_TPCObj_PFP_track_BDTscore(vars)}
       // {Var_TPCObj_PFP_track_dEdx_stddev_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
       // ,{Var_TPCObj_PFP_track_dEdx_mean_start_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
       // ,{Var_TPCObj_PFP_track_dEdx_stddev_start_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
       // ,{Var_TPCObj_PFP_track_theta_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
-      {Var_TPCObj_PFP_track_theta(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
-      ,{Var_TPCObj_PFP_track_theta(vars),Var_TPCObj_PFP_track_BDTscore(vars)}
+      // {Var_TPCObj_PFP_track_theta(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
+      // ,{Var_TPCObj_PFP_track_theta(vars),Var_TPCObj_PFP_track_BDTscore(vars)}
       // ,{Var_TPCObj_PFP_track_phi(vars),Var_TPCObj_PFP_track_BDTscore(vars)}
-      ,{Var_TPCObj_AngleBetweenMIPs(vars),Var_TPCObj_PFP_track_BDTscore(vars)}
+      // ,{Var_TPCObj_AngleBetweenMIPs(vars),Var_TPCObj_PFP_track_BDTscore(vars)}
       // {Var_TPCObj_PFP_VtxTrackDist_mumupairs(vars),Var_TPCObj_PFP_VtxTrackDist_SecondMIP_mumupairs(vars)}
       // {Var_TPCObj_PFP_MCSLLpiMinusLLp_NotPion(vars),Var_TPCObj_PFP_track_length(vars)}
       // ,{Var_TPCObj_PFP_MCSLLpiMinusLLp_NotPioncont(vars),Var_TPCObj_PFP_track_length(vars)}
@@ -214,10 +221,10 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
     boost::split(scratch_y,varstoplot2D_dummy.at(i_h).second.histtitle,[](char c){return c == ';';});
 
     mc_hists2D_cc1pi_pdg_beforecuts[i_h] = new StackedHistPDGCode(std::string("hCC1pi2D_PDG_beforecuts_")+histname_x+histname_y,std::string(";")+scratch_x.at(1)+std::string(";")+scratch_y.at(1),bins_x.at(0),bins_x.at(1),bins_x.at(2),bins_y.at(0),bins_y.at(1),bins_y.at(2));
-    // mc_hists2D_cc1pi_top_beforecuts[i_h] = new StackedHistTopology(std::string("hCC1pi2D_Top_beforecuts_")+histname_x+histname_y,std::string(";")+scratch_x.at(1)+std::string(";")+scratch_y.at(1),bins_x.at(0),bins_x.at(1),bins_x.at(2),bins_y.at(0),bins_y.at(1),bins_y.at(2));
+    mc_hists2D_cc1pi_top_beforecuts[i_h] = new StackedHistTopology(std::string("hCC1pi2D_Top_beforecuts_")+histname_x+histname_y,std::string(";")+scratch_x.at(1)+std::string(";")+scratch_y.at(1),bins_x.at(0),bins_x.at(1),bins_x.at(2),bins_y.at(0),bins_y.at(1),bins_y.at(2));
 
     mc_hists2D_cc1pi_pdg_aftercuts[i_h] = new StackedHistPDGCode(std::string("hCC1pi2D_PDG_aftercuts_")+histname_x+histname_y,std::string(";")+scratch_x.at(1)+std::string(";")+scratch_y.at(1),bins_x.at(0),bins_x.at(1),bins_x.at(2),bins_y.at(0),bins_y.at(1),bins_y.at(2));
-    // mc_hists2D_cc1pi_top_aftercuts[i_h] = new StackedHistTopology(std::string("hCC1pi2D_Top_aftercuts_")+histname_x+histname_y,std::string(";")+scratch_x.at(1)+std::string(";")+scratch_y.at(1),bins_x.at(0),bins_x.at(1),bins_x.at(2),bins_y.at(0),bins_y.at(1),bins_y.at(2));
+    mc_hists2D_cc1pi_top_aftercuts[i_h] = new StackedHistTopology(std::string("hCC1pi2D_Top_aftercuts_")+histname_x+histname_y,std::string(";")+scratch_x.at(1)+std::string(";")+scratch_y.at(1),bins_x.at(0),bins_x.at(1),bins_x.at(2),bins_y.at(0),bins_y.at(1),bins_y.at(2));
    }
 
    // Custom 2D histograms: leading vs second MIP true PDG
@@ -324,6 +331,12 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    histCC1piselEffPur *mc_effpur_trueQ2 = new histCC1piselEffPur("mc_effpur_trueQ2","CC1pi selection efficiency;True Q^{2} (GeV^{2});CC1pi Selection Efficiency",50,0,2);
    histCC1piselEffPur *mc_effpur_trueW = new histCC1piselEffPur("mc_effpur_trueW","CC1pi selection efficiency;True W (GeV);CC1pi Selection Efficiency",100,0,4);
 
+   // A couple of 2D efficiency histograms
+   TH2D *mc_eff2D_truemuThetaPhi = new TH2D("mc_eff2D_truemuThetaPhi",";True muon Theta;True muon Phi",7,0,3.2,5,-3.2,3.2);
+   TH2D *mc_allsignal2D_truemuThetaPhi = (TH2D*)mc_eff2D_truemuThetaPhi->Clone("mc_allsignal2D_truemuThetaPhi");
+   TH2D *mc_eff2D_truepiThetaPhi = new TH2D("mc_eff2D_truepiThetaPhi",";True pion Theta;True pion Phi",7,0,3.2,5,-3.2,3.2);
+   TH2D *mc_allsignal2D_truepiThetaPhi = (TH2D*)mc_eff2D_truepiThetaPhi->Clone("mc_allsignal2D_truepiThetaPhi");
+
 
    int protonplotsmade=0;
 
@@ -396,6 +409,10 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
             mc_effpur_truemupiOpeningAngle->h_cc1pi_sel->Fill(true_opening_angle);
             mc_effpur_trueQ2->h_cc1pi_sel->Fill(Q2);
             mc_effpur_trueW->h_cc1pi_sel->Fill(TMath::Sqrt(W2));
+            mc_eff2D_truemuThetaPhi->Fill(true_mu_theta,true_mu_phi);
+            mc_eff2D_truepiThetaPhi->Fill(true_pi_theta,true_pi_phi);
+            mc_allsignal2D_truemuThetaPhi->Fill(true_mu_theta,true_mu_phi);
+            mc_allsignal2D_truepiThetaPhi->Fill(true_pi_theta,true_pi_phi);
          }
          else{
             mc_effpur_truemuP->h_cc1pi_notsel->Fill(true_mu_P);
@@ -407,6 +424,8 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
             mc_effpur_truemupiOpeningAngle->h_cc1pi_notsel->Fill(true_opening_angle);
             mc_effpur_trueQ2->h_cc1pi_notsel->Fill(Q2);
             mc_effpur_trueW->h_cc1pi_notsel->Fill(TMath::Sqrt(W2));
+            mc_allsignal2D_truemuThetaPhi->Fill(true_mu_theta,true_mu_phi);
+            mc_allsignal2D_truepiThetaPhi->Fill(true_pi_theta,true_pi_phi);
          }
       }
 
@@ -500,10 +519,20 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
          for (size_t i_tr = 0; i_tr < vartoplot.size(); i_tr++){
 
             // Hack: fill plots for selected MIPs only (for diagnosing issues with MIP selection)
-            // if (!(mc_vars.TPCObj_PFP_isDaughter->at(i_tr))) continue;
-            // if (EvalMIPCut(&mc_vars,i_tr,nullptr)<1) continue;
+            if (!(mc_vars.TPCObj_PFP_isDaughter->at(i_tr))) continue;
+            if (EvalMIPCut(&mc_vars,i_tr,nullptr)<1) continue;
 
-            if (!(FillPlotForTrack(&(Varstoplot.at(i_h)), &mc_vars, i_tr))) continue;
+            // Box cuts
+            if (mc_vars.TPCObj_PFP_track_dEdx_truncmean_start->at(i_tr)<2.2 && mc_vars.TPCObj_PFP_track_dedx_grminhits->at(i_tr)==1 && mc_vars.TPCObj_PFP_lnLmipoverp->at(i_tr)>-0.5) continue;
+
+            // BDT cut
+            // if (mc_vars.TPCObj_PFP_track_BDTscore->at(i_tr)>0.50) continue;
+
+            // Quality cuts
+            // if (mc_vars.TPCObj_PFP_track_dEdx_truncmean_start->at(i_tr)<1.0) continue;
+            // if (mc_vars.TPCObj_PFP_VtxTrackDist->at(i_tr)>5.0) continue;
+
+            // if (!(FillPlotForTrack(&(Varstoplot.at(i_h)), &mc_vars, i_tr))) continue;
 
             mc_hists_cc1pi_pdg_beforecuts[i_h]->Fill((PDGCode)mc_vars.TPCObj_PFP_truePDG->at(i_tr),vartoplot.at(i_tr));
             mc_hists_cc1pi_top_beforecuts[i_h]->Fill((NuIntTopology)mc_vars.Truth_topology,vartoplot.at(i_tr),1.0/vartoplot.size());
@@ -520,6 +549,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
       for (size_t i_h = 0; i_h < nplots2D; i_h++){
         std::vector<double> vartoplot_x = *(Varstoplot2D.at(i_h).first.Var);
          std::vector<double> vartoplot_y = *(Varstoplot2D.at(i_h).second.Var);
+
          // Loop over tracks
          for (size_t i_tr = 0; i_tr < vartoplot_x.size(); i_tr++){
             // if (!(mc_vars.TPCObj_PFP_isDaughter->at(i_tr) && bool(mc_vars.TPCObj_PFP_track_passesMIPcut->at(i_tr)))) continue;
@@ -527,11 +557,11 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
             if (!(FillPlotForTrack(&(Varstoplot2D.at(i_h).first), &mc_vars, i_tr) && FillPlotForTrack(&(Varstoplot2D.at(i_h).second), &mc_vars, i_tr))) continue;
 
             mc_hists2D_cc1pi_pdg_beforecuts[i_h]->Fill2D((PDGCode)mc_vars.TPCObj_PFP_truePDG->at(i_tr),vartoplot_x.at(i_tr),vartoplot_y.at(i_tr));
-            // mc_hists2D_cc1pi_top_beforecuts[i_h]->Fill2D((NuIntTopology)mc_vars.Truth_topology,vartoplot_x.at(i_tr),vartoplot_y.at(i_tr));
+            mc_hists2D_cc1pi_top_beforecuts[i_h]->Fill2D((NuIntTopology)mc_vars.Truth_topology,vartoplot_x.at(i_tr),vartoplot_y.at(i_tr));
 
             if(isSelected) {
                mc_hists2D_cc1pi_pdg_aftercuts[i_h]->Fill2D((PDGCode)mc_vars.TPCObj_PFP_truePDG->at(i_tr),vartoplot_x.at(i_tr),vartoplot_y.at(i_tr));
-               // mc_hists2D_cc1pi_top_aftercuts[i_h]->Fill2D((NuIntTopology)mc_vars.Truth_topology,vartoplot_x.at(i_tr),vartoplot_y.at(i_tr));
+               mc_hists2D_cc1pi_top_aftercuts[i_h]->Fill2D((NuIntTopology)mc_vars.Truth_topology,vartoplot_x.at(i_tr),vartoplot_y.at(i_tr));
             } // end if(isSelected)
          } // end loop over tracks
       } // end loop over 2D Varstoplot
@@ -727,16 +757,16 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
       c1->Print(std::string(std::string("CC1pi2D_pdg_beforecuts")+printname).c_str());
       c1->Clear();
 
-      // mc_hists2D_cc1pi_top_beforecuts[i_h]->Draw2D(c1,true);
-      // c1->Print(std::string(std::string("CC1pi2D_top_beforecuts")+printname).c_str());
-      // c1->Clear();
+      mc_hists2D_cc1pi_top_beforecuts[i_h]->Draw2D(c1,true);
+      c1->Print(std::string(std::string("CC1pi2D_top_beforecuts")+printname).c_str());
+      c1->Clear();
 
-      mc_hists2D_cc1pi_pdg_aftercuts[i_h]->Draw2D(c1);
+      mc_hists2D_cc1pi_pdg_aftercuts[i_h]->Draw2D(c1,true);
       c1->Print(std::string(std::string("CC1pi2D_pdg_aftercuts")+printname).c_str());
       c1->Clear();
 
-      // mc_hists2D_cc1pi_top_aftercuts[i_h]->Draw2D(c1,true);
-      // c1->Print(std::string(std::string("CC1pi2D_top_aftercuts")+printname).c_str());
+      mc_hists2D_cc1pi_top_aftercuts[i_h]->Draw2D(c1);
+      c1->Print(std::string(std::string("CC1pi2D_top_aftercuts")+printname).c_str());
 
       delete c1;
    }
@@ -800,6 +830,14 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    c1->Print("Efficiency_trueQ2.png");
    DrawCC1piMCEffOnly(c1,mc_effpur_trueW);
    c1->Print("Efficiency_trueW.png");
+
+
+   mc_eff2D_truemuThetaPhi->Divide(mc_allsignal2D_truemuThetaPhi);
+   mc_eff2D_truepiThetaPhi->Divide(mc_allsignal2D_truepiThetaPhi);
+   mc_eff2D_truemuThetaPhi->Draw("colz");
+   c1->Print("Efficiency_2D_truemuThetaPhi.png");
+   mc_eff2D_truepiThetaPhi->Draw("colz");
+   c1->Print("Efficiency_2D_truepiThetaPhi.png");
 
    delete c1;
 
