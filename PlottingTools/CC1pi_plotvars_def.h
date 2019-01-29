@@ -85,7 +85,7 @@ CC1piPlotVars Var_TPCObj_AngleBetweenMIPs(treevars *vars){
   tmp.KeepBelowCut = false;
   tmp.TracksNeeded = "NA";
   tmp.CutValue = 0.1;
-  tmp.bins = {25,0,3.14};
+  tmp.bins = {15,0,3.14};
   tmp.histtitle = ";Angle between MIP candidates [rad];";
   tmp.histname = "AngleBetweenMIPs";
   tmp.PlotOnlyDaughterMIPs = true;
@@ -170,7 +170,7 @@ CC1piPlotVars Var_TPCObj_PFP_VtxTrackDist(treevars *vars){
   tmp.KeepBelowCut = true;
   tmp.isMIPcut = true;
   tmp.CutValue = 5.;
-  tmp.bins = {50,0,50};
+  tmp.bins = {20,0,20};
   tmp.histtitle = ";Track start distance from reconstructed vertex [cm];";
   tmp.histname = "VtxTrackDist";
   tmp.PlotOnlyDaughters = true;
@@ -298,7 +298,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_dEdx_truncmean_start(treevars *vars){
   tmp.KeepBelowCut = true;
   tmp.isMIPcut = true;
   tmp.CutValue = 2.2;
-  tmp.bins = {25,0,2.2};
+  tmp.bins = {25,0,3};
   tmp.histtitle = ";Truncated Mean dE/dx at start of track [MeV/cm];";
   tmp.histname = "dEdx_truncmean_atstart";
   tmp.PlotOnlyDaughterMIPs = false;
@@ -844,7 +844,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_MomRangeMinusMCS_mu_NotPioncont(treevars *var
 CC1piPlotVars Var_TPCObj_PFP_track_nhits(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_nhits;
-  tmp.bins = {400,0,1000};
+  tmp.bins = {20,0,1000};
   tmp.histtitle = ";No. hits in track;";
   tmp.histname = "trknhits";
   tmp.PlotOnlyDaughters = true;
@@ -1330,10 +1330,20 @@ CC1piPlotVars Var_TPCObj_PFP_trueEndP_SecondMIP(treevars *vars){
 }
 
 //
+CC1piPlotVars Var_TPCObj_PFP_track_theta_LeadingMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_theta;
+  tmp.bins = {20,0,3.15};
+  tmp.histtitle = ";Track theta (Leading MIP only);";
+  tmp.histname = "Theta_LeadingMIP";
+  tmp.PlotOnlyLeadingDaughterMIP = true;
+  return tmp;
+}
+
 CC1piPlotVars Var_TPCObj_PFP_track_theta_SecondMIP(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_theta;
-  tmp.bins = {30,0,3.15};
+  tmp.bins = {20,0,3.15};
   tmp.histtitle = ";Track theta (Second MIP only);";
   tmp.histname = "Theta_SecondMIP";
   tmp.PlotOnlySecondDaughterMIP = true;
@@ -1406,10 +1416,20 @@ CC1piPlotVars Var_TPCObj_PFP_track_phi_selMIPs(treevars *vars){
 }
 
 //
+CC1piPlotVars Var_TPCObj_PFP_track_phi_LeadingMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_phi;
+  tmp.bins = {15,-3.15,3.15};
+  tmp.histtitle = ";Track phi (Leading MIP only);";
+  tmp.histname = "Phi_LeadingMIP";
+  tmp.PlotOnlyLeadingDaughterMIP = true;
+  return tmp;
+}
+
 CC1piPlotVars Var_TPCObj_PFP_track_phi_SecondMIP(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_phi;
-  tmp.bins = {60,-3.15,3.15};
+  tmp.bins = {15,-3.15,3.15};
   tmp.histtitle = ";Track phi (Second MIP only);";
   tmp.histname = "Phi_SecondMIP";
   tmp.PlotOnlySecondDaughterMIP = true;
@@ -1614,6 +1634,36 @@ CC1piPlotVars Var_MIP_containment(treevars *vars){
   tmp.histtitle = ";At least one MIP candidate contained?;";
   tmp.histname = "MIP_containment";
   tmp.PlotOnlyDaughterMIPs = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_MuonMomRange_LeadingMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_MuonMomRange;
+  tmp.bins = {15,0,3};
+  tmp.histtitle = ";Muon candidate momentum by range (contained tracks only) [GeV];";
+  tmp.histname = "MuonMomRange";
+  tmp.PlotOnlyLeadingDaughterMIP = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_MuonMomMCS_LeadingMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_MuonMomMCS;
+  tmp.bins = {15,0,3};
+  tmp.histtitle = ";Muon candidate momentum by MCS (uncontained tracks only) [GeV];";
+  tmp.histname = "MuonMomMCS";
+  tmp.PlotOnlyLeadingDaughterMIP = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_MuonMomCombined_LeadingMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_MuonMomCombined;
+  tmp.bins = {15,0,3};
+  tmp.histtitle = ";Muon candidate momentum [GeV];";
+  tmp.histname = "MuonMomCombined";
+  tmp.PlotOnlyLeadingDaughterMIP = true;
   return tmp;
 }
 

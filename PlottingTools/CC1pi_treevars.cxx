@@ -273,7 +273,8 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
    double muon_length = -9999;
    double pion_length = -9999;
 
-   vars->MIP_containment = new std::vector<double>(1,-9999);
+   if (vecsize>0) vars->MIP_containment = new std::vector<double>(1,-9999);
+   else vars->MIP_containment = new std::vector<double>(0,-9999);
    vars->muoncandidatePDG = -9999;
    vars->pioncandidatePDG = -9999;
    vars->BDT_muoncandidatePDG = -9999;
@@ -282,6 +283,10 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
    vars->TPCObj_PFP_track_theta_lowdEdx = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_track_theta_highdEdx = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_track_theta_parallel = new std::vector<double>(vecsize,-9999);
+
+   vars->TPCObj_PFP_track_MuonMomRange = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_MuonMomMCS = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_MuonMomCombined = new std::vector<double>(vecsize,-9999);
 
    // Just use collection plane for now
    int i_pl = 2;
@@ -386,6 +391,9 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
          vars->TPCObj_PFP_track_theta_lowdEdx->at(i_track) = -9999.;
          vars->TPCObj_PFP_track_theta_highdEdx->at(i_track) = -9999.;
          vars->TPCObj_PFP_track_theta_parallel->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_MuonMomRange->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_MuonMomMCS->at(i_track) = -9999.;
+         vars->TPCObj_PFP_track_MuonMomCombined->at(i_track) = -9999.;
 
          continue;
       }
@@ -571,8 +579,26 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
          double M_mu = 105.7;
          double MomRange_mu =  TMath::Sqrt((KE_mu*KE_mu)+(2*M_mu*KE_mu));
          vars->TPCObj_PFP_track_MomRangeMinusMCS_mu->at(i_track) = (MomRange_mu/1000.-vars->TPCObj_PFP_track_MCSmu_fwdMom->at(i_track))/(MomRange_mu/1000.);
-      }
+         if(vars->TPCObj_PFP_track_isContained->at(i_track)) {
+            vars->TPCObj_PFP_track_MuonMomRange->at(i_track) = MomRange_mu/1000.;
+            vars->TPCObj_PFP_track_MuonMomCombined->at(i_track) = vars->TPCObj_PFP_track_MuonMomRange->at(i_track);
+         }
+         else {
+            vars->TPCObj_PFP_track_MuonMomMCS->at(i_track) = vars->TPCObj_PFP_track_MCSmu_fwdMom->at(i_track);
+            vars->TPCObj_PFP_track_MuonMomCombined->at(i_track) = vars->TPCObj_PFP_track_MuonMomMCS->at(i_track);
+         }
 
+         //vars->TPCObj_PFP_track_MuonMomRange->at(i_track) = MomRange_mu;
+         //vars->TPCObj_PFP_track_MuonMomMCS->at(i_track) = vars->TPCObj_PFP_track_MCSmu_fwdMom->at(i_track);
+      }
+/*
+      if(vars->TPCObj_PFP_track_isContained->at(i_track)) {
+         vars->TPCObj_PFP_track_MuonMomCombined->at(i_track) = vars->TPCObj_PFP_track_MuonMomRange->at(i_track);
+      }
+      else {
+         vars->TPCObj_PFP_track_MuonMomCombined->at(i_track) = vars->TPCObj_PFP_track_MuonMomMCS->at(i_track);
+      }
+*/
       if(vars->TPCObj_PFP_track_MCSpi_scatterAngles->at(i_track).size()>0){
          vars->TPCObj_PFP_track_MCS_pi_maxScatter->at(i_track) = *max_element(vars->TPCObj_PFP_track_MCSpi_scatterAngles->at(i_track).begin(), vars->TPCObj_PFP_track_MCSpi_scatterAngles->at(i_track).end());
 
