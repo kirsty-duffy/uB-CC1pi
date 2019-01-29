@@ -11,6 +11,7 @@
 #include "CC1pi_MIPcut.cxx"
 #include "CC1pi_Pioncut.cxx"
 #include "CalcLocalLinearity.h"
+#include "mupiBDT.C"
 
 
 void settreevars(TTree *intree, treevars *varstoset){
@@ -174,6 +175,24 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("TPCObj_PFP_track_SpacepointsXYZ",&(varstoset->TPCObj_PFP_track_SpacepointsXYZ));
    intree->SetBranchStatus("TPCObj_PFP_track_SpacepointsQPlane2",1);
    intree->SetBranchAddress("TPCObj_PFP_track_SpacepointsQPlane2",&(varstoset->TPCObj_PFP_track_SpacepointsQPlane2));
+   intree->SetBranchStatus("TPCObj_PFP_track_unusedhits_charge_plane0",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_unusedhits_charge_plane0",&(varstoset->TPCObj_PFP_track_unusedhits_charge_plane0));
+   intree->SetBranchStatus("TPCObj_PFP_track_unusedhits_endwiredist_plane0",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_unusedhits_endwiredist_plane0",&(varstoset->TPCObj_PFP_track_unusedhits_endwiredist_plane0));
+   intree->SetBranchStatus("TPCObj_PFP_track_unusedhits_endtimedist_plane0",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_unusedhits_endtimedist_plane0",&(varstoset->TPCObj_PFP_track_unusedhits_endtimedist_plane0));
+   intree->SetBranchStatus("TPCObj_PFP_track_unusedhits_charge_plane1",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_unusedhits_charge_plane1",&(varstoset->TPCObj_PFP_track_unusedhits_charge_plane1));
+   intree->SetBranchStatus("TPCObj_PFP_track_unusedhits_endwiredist_plane1",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_unusedhits_endwiredist_plane1",&(varstoset->TPCObj_PFP_track_unusedhits_endwiredist_plane1));
+   intree->SetBranchStatus("TPCObj_PFP_track_unusedhits_endtimedist_plane1",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_unusedhits_endtimedist_plane1",&(varstoset->TPCObj_PFP_track_unusedhits_endtimedist_plane1));
+   intree->SetBranchStatus("TPCObj_PFP_track_unusedhits_charge_plane2",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_unusedhits_charge_plane2",&(varstoset->TPCObj_PFP_track_unusedhits_charge_plane2));
+   intree->SetBranchStatus("TPCObj_PFP_track_unusedhits_endwiredist_plane2",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_unusedhits_endwiredist_plane2",&(varstoset->TPCObj_PFP_track_unusedhits_endwiredist_plane2));
+   intree->SetBranchStatus("TPCObj_PFP_track_unusedhits_endtimedist_plane2",1);
+   intree->SetBranchAddress("TPCObj_PFP_track_unusedhits_endtimedist_plane2",&(varstoset->TPCObj_PFP_track_unusedhits_endtimedist_plane2));
    intree->SetBranchStatus("run_num",1);
    intree->SetBranchAddress("run_num",&(varstoset->run_num));
    intree->SetBranchStatus("subrun_num",1);
@@ -181,6 +200,8 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchStatus("event_num",1);
    intree->SetBranchAddress("event_num",&(varstoset->event_num));
 
+   // Also initialise BDT classes
+   varstoset->mupiBDT.initialise_BDT();
 }
 
 void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> *MIPCutVars=nullptr){
@@ -195,6 +216,7 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
    vars->TPCObj_PFP_Lmipoverp = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_lnLmipoverp = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_lnLmipovermu = new std::vector<double>(vecsize);
+   vars->TPCObj_PFP_lnLmipoverpi = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_Lmumipovermumipp = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_track_Chi2Proton_plane2 = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_BrokenTrackAngle = new std::vector<double>(vecsize);
@@ -254,11 +276,26 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
    if (vecsize>0) vars->TPCObj_dEdx_truncmean_MIPdiff_other = new std::vector<double>(1,-9999);
    else vars->TPCObj_dEdx_truncmean_MIPdiff_other = new std::vector<double>(0,-9999);
 
+   if (vecsize>0) vars->TPCObj_MIPstartend_mindist = new std::vector<double>(1,-9999);
+   else vars->TPCObj_MIPstartend_mindist = new std::vector<double>(0,-9999);
+
    vars->TPCObj_PFP_track_BDTscore = new std::vector<double>(vecsize,-9999);
-   if (vecsize>0) vars->TPCObj_BDTscore_MIPdiff = new std::vector<double>(1,-9999);
-   else vars->TPCObj_BDTscore_MIPdiff = new std::vector<double>(0,-9999);
-   if (vecsize>0) vars->TPCObj_BDTscore_MIPdiv = new std::vector<double>(1,-9999);
-   else vars->TPCObj_BDTscore_MIPdiv = new std::vector<double>(0,-9999);
+   vars->TPCObj_PFP_track_mupiBDTscore = new std::vector<double>(vecsize,-9999);
+   if (vecsize>0){
+      vars->TPCObj_PFP_track_mupiBDTscore_leadingMIP = new std::vector<double>(1,-9999); vars->TPCObj_PFP_track_mupiBDTscore_secondMIP = new std::vector<double>(1,-9999);
+      vars->TPCObj_PFP_track_mupiBDTscore_leadingOversecondMIP = new std::vector<double>(1,-9999);
+      vars->TPCObj_PFP_track_mupiBDTscore_leadingMinussecondMIP = new std::vector<double>(1,-9999);
+      vars->TPCObj_BDTscore_MIPdiff = new std::vector<double>(1,-9999);
+      vars->TPCObj_BDTscore_MIPdiv = new std::vector<double>(1,-9999);
+   }
+   else {
+      vars->TPCObj_PFP_track_mupiBDTscore_leadingMIP = new std::vector<double>(0);
+      vars->TPCObj_PFP_track_mupiBDTscore_secondMIP = new std::vector<double>(0);
+      vars->TPCObj_PFP_track_mupiBDTscore_leadingOversecondMIP = new std::vector<double>(0);
+      vars->TPCObj_PFP_track_mupiBDTscore_leadingMinussecondMIP = new std::vector<double>(0);
+      vars->TPCObj_BDTscore_MIPdiff = new std::vector<double>(0);
+      vars->TPCObj_BDTscore_MIPdiv = new std::vector<double>(0);
+   }
 
    vars->TPCObj_NDaughterPFPs = new std::vector<double>(1,-9999);
 
@@ -354,6 +391,7 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
          vars->TPCObj_PFP_Lmipoverp->at(i_track) = -9999;
          vars->TPCObj_PFP_lnLmipoverp->at(i_track) = -9999;
          vars->TPCObj_PFP_lnLmipovermu->at(i_track) = -9999;
+         vars->TPCObj_PFP_lnLmipoverpi->at(i_track) = -9999;
          vars->TPCObj_PFP_Lmumipovermumipp->at(i_track) = -9999;
          vars->TPCObj_PFP_track_Chi2Proton_plane2->at(i_track) = -9999;
          vars->TPCObj_PFP_VtxTrackDist->at(i_track) = -9999;
@@ -397,12 +435,14 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
       vars->TPCObj_PFP_Lmipoverp->at(i_track)=-9999;
       vars->TPCObj_PFP_lnLmipoverp->at(i_track)=-9999;
       vars->TPCObj_PFP_lnLmipovermu->at(i_track)=-9999;
+      vars->TPCObj_PFP_lnLmipoverpi->at(i_track)=-9999;
       vars->TPCObj_PFP_Lmumipovermumipp->at(i_track)=-9999;
       if (vars->TPCObj_PFP_LH_mip->at(i_track)>0 && vars->TPCObj_PFP_LH_p->at(i_track)>0){
          vars->TPCObj_PFP_Lmipoverp->at(i_track) = vars->TPCObj_PFP_LH_mip->at(i_track) / vars->TPCObj_PFP_LH_p->at(i_track);
          vars->TPCObj_PFP_lnLmipoverp->at(i_track) = TMath::Log(vars->TPCObj_PFP_Lmipoverp->at(i_track));
          if (vars->TPCObj_PFP_LH_mu->at(i_track)>=0){
             vars->TPCObj_PFP_lnLmipovermu->at(i_track) = TMath::Log(vars->TPCObj_PFP_LH_mip->at(i_track) / vars->TPCObj_PFP_LH_mu->at(i_track));
+            vars->TPCObj_PFP_lnLmipoverpi->at(i_track) = TMath::Log(vars->TPCObj_PFP_LH_mip->at(i_track) / vars->TPCObj_PFP_LH_pi->at(i_track));
             vars->TPCObj_PFP_Lmumipovermumipp->at(i_track) = (vars->TPCObj_PFP_LH_mu->at(i_track)+vars->TPCObj_PFP_LH_mip->at(i_track))/(vars->TPCObj_PFP_LH_mu->at(i_track)+vars->TPCObj_PFP_LH_mip->at(i_track)+vars->TPCObj_PFP_LH_p->at(i_track));
          }
       }
@@ -581,6 +621,15 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
          vars->TPCObj_PFP_track_BDTscore->at(i_track) = fReader->EvaluateMVA("BDTG");
       }
 
+      // Calculate mu-pi BDT score
+      SetMVAvars_mupiBDT(vars, i_track);
+      if (vars->mupiBDT.CheckMVAvars()){
+         vars->TPCObj_PFP_track_mupiBDTscore->at(i_track) = vars->mupiBDT.fReader->EvaluateMVA("BDTG");
+      }
+      else{
+         vars->TPCObj_PFP_track_mupiBDTscore->at(i_track) = -9999;
+      }
+
       // Containment study
       if (vars->Truth_topology == kCC1piplus0p || vars->Truth_topology == kCC1piplus1p || vars->Truth_topology == kCC1piplusNp){
          if(vars->TPCObj_PFP_isDaughter->at(i_track) && vars->TPCObj_PFP_truePDG->at(i_track)==13) {
@@ -709,6 +758,18 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
       v2.SetPhi(vars->TPCObj_PFP_track_phi->at(vars->TPCObj_SecondMIPtrackIndex));
 
       vars->TPCObj_AngleBetweenMIPs->at(0) = TMath::ACos(v1.Dot(v2));
+
+      // Also calculate smallest distance between the start of one MIP and the end of another
+      TVector3 start1(vars->TPCObj_PFP_track_start->at(vars->TPCObj_LeadingMIPtrackIndex).at(0),vars->TPCObj_PFP_track_start->at(vars->TPCObj_LeadingMIPtrackIndex).at(1),vars->TPCObj_PFP_track_start->at(vars->TPCObj_LeadingMIPtrackIndex).at(2));
+      TVector3 end1(vars->TPCObj_PFP_track_end->at(vars->TPCObj_LeadingMIPtrackIndex).at(0),vars->TPCObj_PFP_track_end->at(vars->TPCObj_LeadingMIPtrackIndex).at(1),vars->TPCObj_PFP_track_end->at(vars->TPCObj_LeadingMIPtrackIndex).at(2));
+
+      TVector3 start2(vars->TPCObj_PFP_track_start->at(vars->TPCObj_SecondMIPtrackIndex).at(0),vars->TPCObj_PFP_track_start->at(vars->TPCObj_SecondMIPtrackIndex).at(1),vars->TPCObj_PFP_track_start->at(vars->TPCObj_SecondMIPtrackIndex).at(2));
+      TVector3 end2(vars->TPCObj_PFP_track_end->at(vars->TPCObj_SecondMIPtrackIndex).at(0),vars->TPCObj_PFP_track_end->at(vars->TPCObj_SecondMIPtrackIndex).at(1),vars->TPCObj_PFP_track_end->at(vars->TPCObj_SecondMIPtrackIndex).at(2));
+
+      double dist1=(start1-end2).Mag();
+      double dist2=(start2-end1).Mag();
+
+      vars->TPCObj_MIPstartend_mindist->at(0) = std::min(dist1,dist2);
    }
 
    // Calculate Truncated mean dE/dx difference for MIP candidates
@@ -740,6 +801,15 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
       double BDT_MIPdiff = std::abs(LeadingMIP_BDTscore - SecondMIP_BDTscore);
       vars->TPCObj_BDTscore_MIPdiff->at(0) = BDT_MIPdiff;
       vars->TPCObj_BDTscore_MIPdiv->at(0) = LeadingMIP_BDTscore/SecondMIP_BDTscore;
+
+      // Store mu-pi BDT score for leading and second MIP
+      vars->TPCObj_PFP_track_mupiBDTscore_leadingMIP->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_LeadingMIPtrackIndex);
+
+      vars->TPCObj_PFP_track_mupiBDTscore_secondMIP->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_SecondMIPtrackIndex);
+
+      vars->TPCObj_PFP_track_mupiBDTscore_leadingOversecondMIP->at(0) = TMath::Abs(vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_LeadingMIPtrackIndex)/vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_SecondMIPtrackIndex));
+
+      vars->TPCObj_PFP_track_mupiBDTscore_leadingMinussecondMIP->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_LeadingMIPtrackIndex)-vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_SecondMIPtrackIndex);
    }
 
 
