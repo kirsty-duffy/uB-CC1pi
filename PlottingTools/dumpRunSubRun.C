@@ -9,7 +9,7 @@ void dumpRunSubRun(std::string inputfile){
   UInt_t sub_run;
 
   TFile *_file0 = new TFile(inputfile.c_str(),"read");
-  TTree* tree = (TTree*)_file0->Get("cc1piselec/outtree");
+  TTree* tree = (TTree*)_file0->Get("cc1piselec/pottree");
   // tree->Print();
 
   tree->SetBranchStatus("*",0);
