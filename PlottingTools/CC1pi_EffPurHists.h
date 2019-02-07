@@ -349,7 +349,9 @@ void DrawCC1piMCEffOnly(TCanvas *c, histCC1piselEffPur *hists){
    TH1D *htotal = (TH1D*)hists->h_cc1pi_sel->Clone("htotal");
    htotal->GetYaxis()->SetTitle("True CC1pi events (pre-selection)");
    htotal->Clear();
-   
+
+   TH1D *hsel = (TH1D*)hists->h_cc1pi_sel->Clone("hsel");
+
 
    for (int i_bin=1; i_bin < heff->GetXaxis()->GetNbins()+1; i_bin++){
       double selected_cc1pi = hists->h_cc1pi_sel->GetBinContent(i_bin);
@@ -372,11 +374,15 @@ void DrawCC1piMCEffOnly(TCanvas *c, histCC1piselEffPur *hists){
    double yhigh = htotal->GetMaximum()*1.1;
    htotal->GetYaxis()->SetRangeUser(0,yhigh);
 
+   hsel->SetLineColor(kGray+1);
+   hsel->SetFillColor(kGray+1);
+
    gStyle->SetOptStat(0); // No stats box
 
    c->cd();
    c->SetTopMargin(0.07);
    htotal->Draw("hist");
+   hsel->Draw("hist same");
 
    // Scale heff to the pad co-ordinates
    // We want it to go from 0 to 1
