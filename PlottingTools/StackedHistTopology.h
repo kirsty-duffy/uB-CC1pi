@@ -19,7 +19,7 @@ class StackedHistTopology{
   void Fill(NuIntTopology topology, double value, double weight);
   void Fill2D(NuIntTopology topology, double value_x, double value_y);
   void DrawStack(double mc_scaling, TCanvas *c1, bool coarse=true, TH1F *onbeam_h=nullptr, TH1F *offbeam_h=nullptr, double offbeam_scaling=1.0, bool onminusoffbeam=false);
-  void PrintHistIntegrals(bool coarse=true);
+  void PrintHistIntegrals(double mc_scaling, bool coarse=true, int nsel_onbeam=0, int nsel_offbeam=0, double offbeam_scaling=1.0);
   double GetCC1piIntegral();
   double GetTotalIntegral();
   void Draw2D(TCanvas *c1, bool coarse=true, TString option="");
@@ -567,20 +567,33 @@ NuIntTopology StackedHistTopology::GetTopologyFromHistN(unsigned int hist_n)
 }
 
 // ---------------------- Function to get histogram integrals ---------------------- //
-void StackedHistTopology::PrintHistIntegrals(bool coarse)
+void StackedHistTopology::PrintHistIntegrals(double mc_scaling=0, bool coarse=true, int nsel_onbeam=0, int nsel_offbeam=0, double offbeam_scaling=1.0)
 {
   // Calculate and print out relative integrals (percentage of events that are each topology)
    if (coarse) {
      StackedHistTopology::GenerateCoarseHistos();
 
-    double total_integral = 0.;
+   double total_integral = 0.;
    for (std::pair<std::string, TH1F *> ch : coarse_histos) {
      total_integral += ch.second->Integral();
    }
+   double total_integral_mconly = total_integral;
 
+   // If data histograms are given, deal with them here
+   if (nsel_offbeam>0 && mc_scaling>0){
+     total_integral += (double)nsel_offbeam*offbeam_scaling/mc_scaling;
+   } // end if (data histograms)
+
+   if (nsel_offbeam>0) std::cout << std::endl << "Purity: MC+EXT (MC only)" << std::endl;
    for (std::pair<std::string, TH1F *> ch : coarse_histos) {
-     std::cout << "Integral for topology " << ch.first.c_str() << ": " << ch.second->Integral()/total_integral << std::endl;
+     std::cout << "Integral for topology " << ch.first.c_str() << ": " << ch.second->Integral()/total_integral;
+     if (nsel_offbeam>0) std::cout << " (" << ch.second->Integral()/total_integral_mconly << ")";
+     std::cout << std::endl;
    }
+
+   if (nsel_offbeam>0) std::cout << "Integral for EXT data: " << (double)nsel_offbeam*(offbeam_scaling)/(total_integral*mc_scaling) << std::endl;
+
+   if (nsel_onbeam>0) std::cout << std::endl << "Integral for BNB data: " << nsel_onbeam << " (" << (double)nsel_onbeam/(total_integral*mc_scaling) << " x MC+EXT)" << std::endl << std::endl;
  }
  else{
    // Compute total integral
