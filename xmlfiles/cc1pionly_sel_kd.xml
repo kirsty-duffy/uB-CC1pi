@@ -3,7 +3,7 @@
 <!ENTITY release "v06_26_01_22">
 <!ENTITY name "cc1pi_sel">
 <!ENTITY user "kduffy">
-<!ENTITY version "v06_26_01_22_cc1pionly_mc_v1">
+<!ENTITY version "v06_26_01_22_cc1pionly_mc_v2">
 ]>
 
 <project name="&name;">
@@ -13,7 +13,7 @@
 
   <!-- Project size (numevents is an upper limit) -->
   <numevents>50000</numevents>
-  <numjobs>1000</numjobs>
+  <numjobs>250</numjobs>
 
   <!-- Where to look for fcl files (in addition to $FHICL_FILE_PATH) -->
   <!-- fcldir>/pnfs/uboone/persistent/users/ddevitt/fcl/</fcldir -->
@@ -30,8 +30,11 @@
 
   <!-- Stages -->
   <stage name = "Selection">
-     <maxfilesperjob>10</maxfilesperjob>
+     <maxfilesperjob>4</maxfilesperjob>
      <inputdef>prodgenie_bnb_nu_cosmic_uboone_mcc8.7_reco2_mcc8.23_ccinfilter</inputdef> <!-- contains 36086 files -->
+     <recurdef>kduffy_bnbcosmic_mcc8.7_reco2_mcc8.23_ccincfilter_recur</recurdef>
+     <recurtype>snapshot</recurtype>
+     <recurlimit>1000</recurlimit>
      <fcl>run_CC1pionly_mc_bnbcosmic.fcl</fcl>
      <outdir>/pnfs/uboone/persistent/users/kduffy/CC1pi/&version;/</outdir>
      <logdir>/pnfs/uboone/persistent/users/kduffy/CC1pi/&version;/</logdir>
