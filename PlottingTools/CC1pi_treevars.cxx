@@ -201,7 +201,8 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("event_num",&(varstoset->event_num));
 
    // Also initialise BDT classes
-   varstoset->mupiBDT.initialise_BDT();
+   varstoset->mupiBDT.initialise_BDT_contained();
+   varstoset->mupiBDT.initialise_BDT_exiting();
 }
 
 void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> *MIPCutVars=nullptr){
@@ -279,20 +280,27 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
    if (vecsize>0) vars->TPCObj_MIPstartend_mindist = new std::vector<double>(1,-9999);
    else vars->TPCObj_MIPstartend_mindist = new std::vector<double>(0,-9999);
 
+   vars->TPCObj_PFP_track_length_over_startend = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_length_over_longestMIP = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_n_unused_hits_nearend = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_unmatched_charge_nearend_plane2 = new std::vector<double>(vecsize,-9999);
+
    vars->TPCObj_PFP_track_BDTscore = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_track_mupiBDTscore = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_mupiBDTscore_cont = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_mupiBDTscore_exit = new std::vector<double>(vecsize,-9999);
    if (vecsize>0){
       vars->TPCObj_PFP_track_mupiBDTscore_leadingMIP = new std::vector<double>(1,-9999); vars->TPCObj_PFP_track_mupiBDTscore_secondMIP = new std::vector<double>(1,-9999);
-      vars->TPCObj_PFP_track_mupiBDTscore_leadingOversecondMIP = new std::vector<double>(1,-9999);
-      vars->TPCObj_PFP_track_mupiBDTscore_leadingMinussecondMIP = new std::vector<double>(1,-9999);
+      vars->TPCObj_PFP_track_mupiBDTscore_highestOverlowestMIP = new std::vector<double>(1,-9999);
+      vars->TPCObj_PFP_track_mupiBDTscore_highestMinuslowestMIP = new std::vector<double>(1,-9999);
       vars->TPCObj_BDTscore_MIPdiff = new std::vector<double>(1,-9999);
       vars->TPCObj_BDTscore_MIPdiv = new std::vector<double>(1,-9999);
    }
    else {
       vars->TPCObj_PFP_track_mupiBDTscore_leadingMIP = new std::vector<double>(0);
       vars->TPCObj_PFP_track_mupiBDTscore_secondMIP = new std::vector<double>(0);
-      vars->TPCObj_PFP_track_mupiBDTscore_leadingOversecondMIP = new std::vector<double>(0);
-      vars->TPCObj_PFP_track_mupiBDTscore_leadingMinussecondMIP = new std::vector<double>(0);
+      vars->TPCObj_PFP_track_mupiBDTscore_highestOverlowestMIP = new std::vector<double>(0);
+      vars->TPCObj_PFP_track_mupiBDTscore_highestMinuslowestMIP = new std::vector<double>(0);
       vars->TPCObj_BDTscore_MIPdiff = new std::vector<double>(0);
       vars->TPCObj_BDTscore_MIPdiv = new std::vector<double>(0);
    }
@@ -336,7 +344,6 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
 
    // Now calculate the values for all variables
    for (int i_track=0; i_track < vecsize; i_track++){
-
       // Get variables related to MCP by looping through MCPs and matching MCPid
       vars->TPCObj_PFP_MCP_motherIDeq0->at(i_track) = 0;
       vars->TPCObj_PFP_MCP_trueOrigPDG->at(i_track) = vars->TPCObj_PFP_truePDG->at(i_track);
@@ -668,15 +675,6 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
          vars->TPCObj_PFP_track_BDTscore->at(i_track) = fReader->EvaluateMVA("BDTG");
       }
 
-      // Calculate mu-pi BDT score
-      SetMVAvars_mupiBDT(vars, i_track);
-      if (vars->mupiBDT.CheckMVAvars()){
-         vars->TPCObj_PFP_track_mupiBDTscore->at(i_track) = vars->mupiBDT.fReader->EvaluateMVA("BDTG");
-      }
-      else{
-         vars->TPCObj_PFP_track_mupiBDTscore->at(i_track) = -9999;
-      }
-
       // Containment study
       if (vars->Truth_topology == kCC1piplus0p || vars->Truth_topology == kCC1piplus1p || vars->Truth_topology == kCC1piplusNp){
          if(vars->TPCObj_PFP_isDaughter->at(i_track) && vars->TPCObj_PFP_truePDG->at(i_track)==13) {
@@ -691,9 +689,6 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
 
       // Evaluate MIP cut (i.e. whether we want to class this track as a MIP). Cut algorithm defined in CC1pi_cuts.cxx and the variables that go into the decision are defined in CC1pi_cuts.h
       vars->TPCObj_PFP_track_passesMIPcut->at(i_track) = (double)EvalMIPCut(vars,i_track,MIPCutVars);
-
-      // Evaluate pion cut (i.e. whether we want to class this track as a pion). Cut algorithm defined in CC1pi_cuts.cxx and the variables that go into the decision are defined in CC1pi_cuts.h
-      vars->TPCObj_PFP_track_passesPioncut->at(i_track) = EvalPionCut(vars,i_track);
 
 
 
@@ -819,6 +814,41 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
       vars->TPCObj_MIPstartend_mindist->at(0) = std::min(dist1,dist2);
    }
 
+   // Calculate mu-pi BDT score
+   if (vars->TPCObj_LeadingMIPtrackIndex>=0){
+      for (int i_track=0; i_track < vecsize; i_track++){
+         SetMVAvars_mupiBDT(vars, i_track);
+
+         vars->TPCObj_PFP_track_length_over_startend->at(i_track) = vars->mupiBDT.length_over_startend;
+         vars->TPCObj_PFP_track_length_over_longestMIP->at(i_track) = vars->mupiBDT.track_length_over_longest;
+         vars->TPCObj_PFP_track_n_unused_hits_nearend->at(i_track) = vars->mupiBDT.n_unused_hits_nearend;
+         vars->TPCObj_PFP_track_unmatched_charge_nearend_plane2->at(i_track) = vars->mupiBDT.unmatched_charge_nearend_plane2;
+
+         if (vars->mupiBDT.CheckMVAvars()){
+            // std::cout << "Mu/pi BDT score: " << vars->mupiBDT.fReader_contained->EvaluateMVA("BDTG") << " (contained), " << vars->mupiBDT.fReader_exiting->EvaluateMVA("BDTG") << " (exiting)" << std::endl;
+            // Contained BDT
+            vars->TPCObj_PFP_track_mupiBDTscore_cont->at(i_track) = vars->mupiBDT.fReader_contained->EvaluateMVA("BDTG");
+
+            // Exiting BDT
+            vars->TPCObj_PFP_track_mupiBDTscore_exit->at(i_track) = vars->mupiBDT.fReader_exiting->EvaluateMVA("BDTG");
+
+            // Work out whether track is contained or exiting and apply the correct BDT
+            if (vars->TPCObj_PFP_track_isContained->at(i_track)){
+               vars->TPCObj_PFP_track_mupiBDTscore->at(i_track) = vars->mupiBDT.fReader_contained->EvaluateMVA("BDTG");
+            }
+            else{
+               vars->TPCObj_PFP_track_mupiBDTscore->at(i_track) = vars->mupiBDT.fReader_exiting->EvaluateMVA("BDTG");
+            }
+
+         }
+
+         // Evaluate pion cut (i.e. whether we want to class this track as a pion). Cut algorithm defined in CC1pi_cuts.cxx
+         vars->TPCObj_PFP_track_passesPioncut->at(i_track) = EvalPionCut(vars,i_track);
+      } // end loop over tracks in TPCObj (i_track)
+   }
+
+
+
    // Calculate Truncated mean dE/dx difference for MIP candidates
    if (vars->TPCObj_LeadingMIPtrackIndex>=0 && vars->TPCObj_SecondMIPtrackIndex>=0)
    {
@@ -854,9 +884,20 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
 
       vars->TPCObj_PFP_track_mupiBDTscore_secondMIP->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_SecondMIPtrackIndex);
 
-      vars->TPCObj_PFP_track_mupiBDTscore_leadingOversecondMIP->at(0) = TMath::Abs(vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_LeadingMIPtrackIndex)/vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_SecondMIPtrackIndex));
+      double highscore=0;
+      double lowscore=0;
+      if (vars->TPCObj_PFP_track_mupiBDTscore_leadingMIP->at(0)>vars->TPCObj_PFP_track_mupiBDTscore_secondMIP->at(0)){
+         highscore = vars->TPCObj_PFP_track_mupiBDTscore_leadingMIP->at(0);
+         lowscore = vars->TPCObj_PFP_track_mupiBDTscore_secondMIP->at(0);
+      }
+      else{
+         highscore = vars->TPCObj_PFP_track_mupiBDTscore_secondMIP->at(0);
+         lowscore = vars->TPCObj_PFP_track_mupiBDTscore_leadingMIP->at(0);
+      }
 
-      vars->TPCObj_PFP_track_mupiBDTscore_leadingMinussecondMIP->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_LeadingMIPtrackIndex)-vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_SecondMIPtrackIndex);
+      vars->TPCObj_PFP_track_mupiBDTscore_highestOverlowestMIP->at(0) = TMath::Abs(highscore/lowscore);
+
+      vars->TPCObj_PFP_track_mupiBDTscore_highestMinuslowestMIP->at(0) = highscore-lowscore;
    }
 
 
@@ -892,8 +933,8 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
          vars->MIP_containment->at(0) = 0;
       }
 
-      // Test BDT PID idea
-      if(vars->TPCObj_PFP_track_BDTscore->at(vars->TPCObj_LeadingMIPtrackIndex) > vars->TPCObj_PFP_track_BDTscore->at(vars->TPCObj_SecondMIPtrackIndex)) {
+      // Test mu-pi BDT PID idea
+      if(vars->TPCObj_PFP_track_passesPioncut->at(vars->TPCObj_SecondMIPtrackIndex)) {
          vars->BDT_muoncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_LeadingMIPtrackIndex);
          vars->BDT_pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_SecondMIPtrackIndex);
       }
@@ -902,7 +943,6 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
          vars->BDT_pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_LeadingMIPtrackIndex);
       }
    }
-
 
 }
 

@@ -13,28 +13,57 @@ double EvalPionCut(treevars *vars, int i_tr){
 
    double isPion=1;
 
-   // Get Pion cuts
-   std::vector<CC1piPlotVars> PionCutVars = GetPionCutVars(vars);
+   // std::cout << "isdaughter = " << vars->TPCObj_PFP_isDaughter->at(i_tr) << std::endl;
+   // std::cout << "ismip = " << vars->TPCObj_PFP_track_passesMIPcut->at(i_tr) << std::endl;
+   // std::cout << "iscontained = " << vars->TPCObj_PFP_track_isContained->at(i_tr) << std::endl;
 
-   // Loop over Pion cuts and apply each one to the track
-   for (size_t i_cut=0; i_cut < PionCutVars.size(); i_cut++){
-      double value = PionCutVars.at(i_cut).Var->at(i_tr);
-      double cutval = PionCutVars.at(i_cut).CutValue;
-      bool Pionlow = PionCutVars.at(i_cut).KeepBelowCut;
+   // Must be a reconstructed daughter of the Neutrino
+   double isdaughter = vars->TPCObj_PFP_isDaughter->at(i_tr);
+   if (isdaughter == -9999 || isdaughter == -999){
+     return -9999;
+   }
+   else if (isdaughter==0){
+      return 0;
+   }
 
-      if (value == -9999 || value == -999) {
-         isPion=-9999;
-         break;
+   // Must be selected as a MIP
+   double ismip = vars->TPCObj_PFP_track_passesMIPcut->at(i_tr);
+   if (ismip == -9999 || ismip == -999){
+     return -9999;
+   }
+   else if (ismip==0){
+     return 0;
+   }
+
+   // Mu-pi BDT cut
+   if (vars->TPCObj_PFP_track_isContained->at(i_tr)){
+      // Contained BDT cut
+
+      double mupibdt = vars->TPCObj_PFP_track_mupiBDTscore_cont->at(i_tr);
+
+      // std::cout << "mupibdt = " << mupibdt << std::endl;
+
+      if (mupibdt == -9999 || mupibdt == -999){
+        return -9999;
       }
-      else if (Pionlow && (value > cutval)){
-         isPion=0;
-         break;
-      }
-      else if (!Pionlow && (value < cutval)){
-         isPion=0;
-         break;
+      else if (mupibdt <= 0.2){
+         return 0;
       }
    }
+   else{
+      // Exiting BDT cut
+      double mupibdt = vars->TPCObj_PFP_track_mupiBDTscore_exit->at(i_tr);
+
+      // std::cout << "mupibdt = " << mupibdt << std::endl;
+
+      if (mupibdt == -9999 || mupibdt == -999){
+        return -9999;
+      }
+      else if (mupibdt <= 0.8){
+         return 0;
+      }
+   }
+
    return isPion;
 };
 

@@ -151,11 +151,19 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_MCP_motherIDeq0;
    std::vector<double> *TPCObj_PFP_MCP_PDG_mTruePDG;
    std::vector<double> *TPCObj_PFP_track_BDTscore;
+
    std::vector<double> *TPCObj_PFP_track_mupiBDTscore;
    std::vector<double> *TPCObj_PFP_track_mupiBDTscore_leadingMIP;
    std::vector<double> *TPCObj_PFP_track_mupiBDTscore_secondMIP;
-   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_leadingOversecondMIP;
-   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_leadingMinussecondMIP;
+   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_highestOverlowestMIP;
+   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_highestMinuslowestMIP;
+   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_cont;
+   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_exit;
+   std::vector<double> *TPCObj_PFP_track_length_over_startend;
+   std::vector<double> *TPCObj_PFP_track_length_over_longestMIP;
+   std::vector<double> *TPCObj_PFP_track_n_unused_hits_nearend;
+   std::vector<double> *TPCObj_PFP_track_unmatched_charge_nearend_plane2;
+
    std::vector<double> *TPCObj_NDaughterPFPs;
    std::vector<double> *TPCObj_PFP_MCP_trueOrigPDG;
    std::vector<double> *TPCObj_PFP_track_theta_lowdEdx;
