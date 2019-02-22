@@ -57,24 +57,25 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       ,Var_TPCObj_PFP_track_theta(vars)
       ,Var_MIP_containment(vars)
       */
+/*
+      ,Var_TPCObj_PFP_track_theta_LeadingMIP(vars)
+      ,Var_TPCObj_PFP_track_theta_SecondMIP(vars)
+      ,Var_TPCObj_PFP_track_phi_LeadingMIP(vars)
+      ,Var_TPCObj_PFP_track_phi_SecondMIP(vars)
+      ,Var_TPCObj_PFP_track_MuonMomRange_LeadingMIP(vars)
+      ,Var_TPCObj_PFP_track_MuonMomMCS_LeadingMIP(vars)
+      ,Var_TPCObj_PFP_track_MuonMomCombined_LeadingMIP(vars)
+*/
 
       Var_TPCObj_PFP_track_theta(vars)
       ,Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)
       ,Var_TPCObj_PFP_track_nhits(vars)
       ,Var_TPCObj_PFP_lnLmipoverp(vars)
-
-      ,Var_TPCObj_PFP_track_theta_LeadingMIP(vars)
-      ,Var_TPCObj_PFP_track_theta_SecondMIP(vars)
-      ,Var_TPCObj_PFP_track_phi_LeadingMIP(vars)
-      ,Var_TPCObj_PFP_track_phi_SecondMIP(vars)
       ,Var_TPCObj_AngleBetweenMIPs(vars)
-      ,Var_TPCObj_PFP_track_MuonMomRange_LeadingMIP(vars)
-      ,Var_TPCObj_PFP_track_MuonMomMCS_LeadingMIP(vars)
-      ,Var_TPCObj_PFP_track_MuonMomCombined_LeadingMIP(vars)
-
       ,Var_TPCObj_PFP_track_BDTscore(vars)
       ,Var_TPCObj_PFP_VtxTrackDist(vars)
       ,Var_MIP_containment(vars)
+
    };
    return varstoplot;
 }
@@ -87,7 +88,7 @@ std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> GetVarstoplot2D(treevars *va
       // ,{Var_TPCObj_PFP_track_dEdx_mean_start_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
       // ,{Var_TPCObj_PFP_track_dEdx_stddev_start_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
       // ,{Var_TPCObj_PFP_track_theta_SecondMIP(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
-      {Var_TPCObj_PFP_track_theta(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
+//      {Var_TPCObj_PFP_track_theta(vars),Var_TPCObj_PFP_track_dEdx_truncmean_start(vars)}
       //,{Var_TPCObj_PFP_track_theta(vars),Var_TPCObj_PFP_track_BDTscore(vars)}
       // ,{Var_TPCObj_PFP_track_phi(vars),Var_TPCObj_PFP_track_BDTscore(vars)}
       //,{Var_TPCObj_AngleBetweenMIPs(vars),Var_TPCObj_PFP_track_BDTscore(vars)}
@@ -506,7 +507,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
             }
          }
 
-
+/*
          //Record info for event displays
          if(SecondMIPpdg==kProton) {
             evdinfo << "Run/Subrun/Event: " << mc_vars.run_num << " " << mc_vars.subrun_num << " " << mc_vars.event_num << std::endl;
@@ -520,7 +521,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
             }
             evdinfo << std::endl;
          }
-
+*/
       } // end if (isSelected)
 
       // Fill 1D plots

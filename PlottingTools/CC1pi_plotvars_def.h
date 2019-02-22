@@ -169,6 +169,8 @@ CC1piPlotVars Var_TPCObj_PFP_VtxTrackDist(treevars *vars){
   tmp.Var = vars->TPCObj_PFP_VtxTrackDist;
   tmp.KeepBelowCut = true;
   tmp.isMIPcut = true;
+//  tmp.OnlyDaughters = true;
+//  tmp.TracksNeeded = "all";
   tmp.CutValue = 5.;
   tmp.bins = {20,0,20};
   tmp.histtitle = ";Track start distance from reconstructed vertex [cm];";
@@ -298,7 +300,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_dEdx_truncmean_start(treevars *vars){
   tmp.KeepBelowCut = true;
   tmp.isMIPcut = true;
   tmp.CutValue = 2.2;
-  tmp.bins = {25,0,3};
+  tmp.bins = {25,0,5};
   tmp.histtitle = ";Truncated Mean dE/dx at start of track [MeV/cm];";
   tmp.histname = "dEdx_truncmean_atstart";
   tmp.PlotOnlyDaughterMIPs = false;
@@ -1551,6 +1553,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_BDTscore(treevars *vars){
   tmp.bins = {25,-1,1};
   tmp.histtitle = ";BDT score;";
   tmp.histname = "BDTscore";
+  tmp.PlotOnlyDaughters = true;
   return tmp;
 }
 
