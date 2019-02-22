@@ -7,36 +7,74 @@
 
 // input: - Input file (result from TMVA),
 //        - use of TMVA plotting TStyle
-void bdtcontrolplots(TDirectory *);
+void bdtcontrolplots(TDirectory *, TString);
 
-void BDTControlPlots( TString fin = "TMVA.root", Bool_t useTMVAStyle = kTRUE )
+void BDTControlPlots( TString fin = "TMVA.root", Bool_t useTMVAStyle = kTRUE, TString topLeveldir="" )
 {
    // set style and remove existing canvas'
    TMVAGlob::Initialize( useTMVAStyle );
-  
+
    // checks if file with name "fin" is already open, and if not opens one
    TFile* file;
-   file = TMVAGlob::OpenFile( fin );  
+   file = TMVAGlob::OpenFile( fin );
 
-   // get all titles of the method BDT
-   TList titles;
-   TString methodName = "Method_BDT";
-   UInt_t ninst = TMVAGlob::GetListOfTitles(methodName,titles);
-   if (ninst==0) {
-      cout << "Could not locate directory 'Method_BDT' in file " << fin << endl;
+    if (topLeveldir!="") file->cd(topLeveldir);
+
+   // // get all titles of the method BDT
+   // TList titles;
+   // TString methodName = "Method_BDT";
+   // UInt_t ninst = TMVAGlob::GetListOfTitles(methodName,titles);
+   // if (ninst==0) {
+   //    cout << "Could not locate directory 'Method_BDT' in file " << fin << endl;
+   //    return;
+   // }
+   // // loop over all titles
+   // TIter keyIter(&titles);
+   // TDirectory *bdtdir;
+   // TKey *key;
+   // while ((key = TMVAGlob::NextKey(keyIter,"TDirectory"))) {
+   //    bdtdir = (TDirectory *)key->ReadObj();
+   //    bdtcontrolplots( bdtdir );
+   // }
+
+   // search for the right histograms in full list of keys
+   TList methods;
+   UInt_t nmethods = TMVAGlob::GetListOfMethods( methods );
+   if (nmethods==0) {
+      cout << "--- BDTControl.C: no methods found!" << endl;
       return;
    }
-   // loop over all titles
-   TIter keyIter(&titles);
-   TDirectory *bdtdir;
-   TKey *key;
-   while ((key = TMVAGlob::NextKey(keyIter,"TDirectory"))) {
-      bdtdir = (TDirectory *)key->ReadObj();
-      bdtcontrolplots( bdtdir );
+   TIter next(&methods);
+   TKey *key, *hkey;
+   char fname[200];
+   TH1* sig(0);
+   TH1* bgd(0);
+   while ((key = (TKey*)next())) {
+      TDirectory * mDir = (TDirectory*)key->ReadObj();
+      TList titles;
+      UInt_t ni = TMVAGlob::GetListOfTitles( mDir, titles );
+      TString methodName;
+      TMVAGlob::GetMethodName(methodName,key);
+      if (ni==0) {
+         cout << "+++ No titles found for classifier: " << methodName << endl;
+         return;
+      }
+      // Only make these plots for BDTs
+      if (!methodName.Contains("BDT")) continue;
+
+      TIter nextTitle(&titles);
+      TKey *instkey;
+      TDirectory *bdtdir;
+      while ((instkey = TMVAGlob::NextKey(nextTitle,"TDirectory"))) {
+         bdtdir = (TDirectory *)instkey->ReadObj();
+         bdtcontrolplots( bdtdir, topLeveldir );
+      }
    }
+
 }
 
-void bdtcontrolplots( TDirectory *bdtdir ) {
+void bdtcontrolplots( TDirectory *bdtdir, TString topLeveldir) {
+   std::cout << bdtdir->GetPath() << std::endl;
 
    const Int_t nPlots = 6;
 
@@ -46,7 +84,7 @@ void bdtcontrolplots( TDirectory *bdtdir ) {
    const TString titName = bdtdir->GetName();
    sprintf( cn, "cv_%s", titName.Data() );
    TCanvas *c = new TCanvas( cn,  Form( "%s Control Plots", titName.Data() ),
-                             width, height ); 
+                             width, height );
    c->Divide(3,2);
 
 
@@ -57,11 +95,11 @@ void bdtcontrolplots( TDirectory *bdtdir ) {
    Bool_t BoostMonitorIsDone=kFALSE;
 
    for (Int_t i=0; i<nPlots; i++){
-      Int_t color = 4; 
+      Int_t color = 4;
       TPad * cPad;
       cPad = (TPad*)c->cd(i+1);
       TH1 *h = (TH1*) bdtdir->Get(hname[i]);
-      
+
       if (h){
          h->SetMaximum(h->GetMaximum()*1.3);
          h->SetMinimum( 0 );
@@ -90,25 +128,25 @@ void bdtcontrolplots( TDirectory *bdtdir ) {
          c->Update();
       }
    }
-   
-   
+
+
    TCanvas *c2 = NULL;
    if (BoostMonitorIsDone){
       sprintf( cn2, "cv2_%s", titName.Data() );
       c2 = new TCanvas( cn2,  Form( "%s BoostWeights", titName.Data() ),
-                                 1200, 1200 ); 
+                                 1200, 1200 );
       c2->Divide(5,5);
       Int_t ipad=1;
-      
+
       TIter keys( bdtdir->GetListOfKeys() );
       TKey *key;
       //      gDirectory->ls();
       while ( (key = (TKey*)keys.Next()) && ipad < 26) {
          TObject *obj=key->ReadObj();
-         if (obj->IsA()->InheritsFrom(TH1::Class())){   
+         if (obj->IsA()->InheritsFrom(TH1::Class())){
             TH1F *hx = (TH1F*)obj;
             TString hname(Form("%s",obj->GetTitle()));
-            if (hname.Contains("BoostWeightsInTreeB")){ 
+            if (hname.Contains("BoostWeightsInTreeB")){
                c2->cd(ipad++);
                hx->SetLineColor(4);
                hx->Draw();
@@ -122,15 +160,17 @@ void bdtcontrolplots( TDirectory *bdtdir ) {
             c2->Update();
          }
       }
-               
+
    }
 
    // write to file
    TString fname = Form( "plots/%s_ControlPlots", titName.Data() );
+   if (topLeveldir!="") fname = topLeveldir+"/"+fname;
    TMVAGlob::imgconv( c, fname );
-   
+
    if (c2){
       fname = Form( "plots/%s_ControlPlots2", titName.Data() );
+      if (topLeveldir!="") fname = topLeveldir+"/"+fname;
       TMVAGlob::imgconv( c2, fname );
    }
 
@@ -138,19 +178,19 @@ void bdtcontrolplots( TDirectory *bdtdir ) {
    if (BoostMonitorIsDone){
       sprintf( cn2, "cv3_%s", titName.Data() );
       c3 = new TCanvas( cn2,  Form( "%s Variables", titName.Data() ),
-                        1200, 1200 ); 
+                        1200, 1200 );
       c3->Divide(5,5);
       Int_t ipad=1;
-      
+
       TIter keys( bdtdir->GetListOfKeys() );
       TKey *key;
       //      gDirectory->ls();
       while ( (key = (TKey*)keys.Next()) && ipad < 26) {
          TObject *obj=key->ReadObj();
-         if (obj->IsA()->InheritsFrom(TH1::Class())){   
+         if (obj->IsA()->InheritsFrom(TH1::Class())){
             TH1F *hx = (TH1F*)obj;
             TString hname(Form("%s",obj->GetTitle()));
-            if (hname.Contains("SigVar0AtTree")){ 
+            if (hname.Contains("SigVar0AtTree")){
                c3->cd(ipad++);
                hx->SetLineColor(4);
                hx->Draw();
@@ -164,10 +204,8 @@ void bdtcontrolplots( TDirectory *bdtdir ) {
             c3->Update();
          }
       }
-               
+
    }
 
 
 }
-
-

@@ -54,6 +54,7 @@ physics.producers.cc1piselec.SelectionLabel:      "UBXSec::UBXSec"
 physics.producers.cc1piselec.ParticleIdChi2Label: "pandoraNupid::UBXSec"
 physics.producers.cc1piselec.PFParticleProducer:          "pandoraNu::UBXSec"
 physics.producers.cc1piselec.ClusterProducer:          "pandoraNu::UBXSec"
+physics.producers.cc1piselec.HitProducer:          "pandoraCosmicHitRemoval::UBXSec"
 physics.producers.cc1piselec.SpacePointProducer:          "pandoraNu::UBXSec"
 physics.producers.cc1piselec.TPCObjectProducer:          "TPCObjectMaker::UBXSec"
 

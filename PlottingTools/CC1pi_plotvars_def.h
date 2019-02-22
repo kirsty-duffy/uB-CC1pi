@@ -21,6 +21,7 @@ struct CC1piPlotVars{
   bool PlotOnlyDaughterMIPs;
   bool PlotOnlyNotMIPDaughters;
   bool PlotOnlyContained;
+  bool PlotOnlyExiting;
   bool PlotOnlyLeadingDaughterMIP;
   bool PlotOnlySecondDaughterMIP;
   bool PlotOnlyPionCandidate;
@@ -41,6 +42,7 @@ struct CC1piPlotVars{
     PlotOnlyDaughterMIPs = false;
     PlotOnlyNotMIPDaughters = false;
     PlotOnlyContained = false;
+    PlotOnlyExiting = false;
     PlotOnlyLeadingDaughterMIP = false;
     PlotOnlySecondDaughterMIP = false;
     PlotOnlyPionCandidate = false;
@@ -425,6 +427,19 @@ CC1piPlotVars Var_TPCObj_PFP_track_passesMIPcut(treevars *vars){
   return tmp;
 }
 
+// Reconstructed neutrino daughters
+CC1piPlotVars Var_TPCObj_PFP_track_passesPioncut(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_passesPioncut;
+  tmp.KeepBelowCut = false;
+  tmp.CutValue = 0.5;
+  tmp.bins = {2,0,2};
+  tmp.TracksNeeded = "exactlyone";
+  tmp.histtitle = ";Is Pion Candidate?;";
+  tmp.histname = "IsPionCand";
+  return tmp;
+}
+
 // TPCObj_PFP_track_residual_mean_low
 CC1piPlotVars Var_TPCObj_PFP_track_residual_mean_low(treevars *vars){
   CC1piPlotVars tmp;
@@ -528,7 +543,7 @@ CC1piPlotVars Var_TPCObj_PFP_lnLmipovermu(treevars *vars){
   tmp.KeepBelowCut = false;
   tmp.isMIPcut = true;
   tmp.CutValue = -0.5;
-  tmp.bins = {60,-10,10};
+  tmp.bins = {24,-3,3};
   tmp.histtitle = ";ln(L_{MIP})/(L_{mu}), contained tracks;";
   tmp.histname = "lnLmipovermu_contained";
   tmp.PlotOnlyDaughterMIPs = true;
@@ -1001,7 +1016,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_length_SecondMIP(treevars *vars){
 CC1piPlotVars Var_TPCObj_PFP_track_MCSpi_maxScatter(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_MCS_pi_maxScatter;
-  tmp.bins = {50,0,1000};
+  tmp.bins = {20,0,500};
   tmp.histtitle = ";Max. MCS scatter angle [mrad.] (#pi assumption);";
   tmp.histname = "trkMCSpi_maxScatter";
   tmp.PlotOnlyDaughterMIPs = true;
@@ -1012,7 +1027,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_MCSpi_maxScatter(treevars *vars){
 CC1piPlotVars Var_TPCObj_PFP_track_MCSpi_maxScatter_SecondMIP(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_MCS_pi_maxScatter;
-  tmp.bins = {50,0,1000};
+  tmp.bins = {20,0,500};
   tmp.histtitle = ";Max. MCS scatter angle [mrad.] (#pi assumption, Second MIP only);";
   tmp.histname = "trkMCSpi_maxScatter_SecondMIP";
   tmp.PlotOnlySecondDaughterMIP = true;
@@ -1023,7 +1038,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_MCSpi_maxScatter_SecondMIP(treevars *vars){
 CC1piPlotVars Var_TPCObj_PFP_track_MCSpi_maxScatter_SecondMIP_mumupairs(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_MCS_pi_maxScatter;
-  tmp.bins = {50,0,1000};
+  tmp.bins = {20,0,500};
   tmp.histtitle = ";Max. MCS scatter angle [mrad.] (#pi assumption, Second MIP, #mu^{-}#mu^{-} pairs only);";
   tmp.histname = "trkMCSpi_maxScatter_SecondMIP_mumupairs";
   tmp.PlotOnlySecondDaughterMIP = true;
@@ -1035,7 +1050,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_MCSpi_maxScatter_SecondMIP_mumupairs(treevars
 CC1piPlotVars Var_TPCObj_PFP_track_MCSp_maxScatter(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_MCS_p_maxScatter;
-  tmp.bins = {50,0,1000};
+  tmp.bins = {20,0,500};
   tmp.histtitle = ";Max. MCS scatter angle [mrad.] (p assumption);";
   tmp.histname = "trkMCSp_maxScatter";
   tmp.PlotOnlyDaughterMIPs = true;
@@ -1069,7 +1084,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_MCSp_maxScatter_SecondMIP_mumupairs(treevars 
 CC1piPlotVars Var_TPCObj_PFP_track_MCSpi_meanScatter(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_MCS_pi_meanScatter;
-  tmp.bins = {50,0,1000};
+  tmp.bins = {20,0,500};
   tmp.histtitle = ";Mean MCS scatter angle [mrad.] (#pi assumption);";
   tmp.histname = "trkMCSpi_meanScatter";
   tmp.PlotOnlyDaughterMIPs = true;
@@ -1640,6 +1655,117 @@ CC1piPlotVars Var_MIP_containment(treevars *vars){
   return tmp;
 }
 
+CC1piPlotVars Var_TPCObj_MIPstartend_mindist(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_MIPstartend_mindist;
+  tmp.KeepBelowCut = false;
+  tmp.TracksNeeded = "NA";
+  tmp.CutValue = 0.5;
+  tmp.bins = {50,0,100};
+  tmp.histtitle = ";Minimum distance between one MIP start and other MIP end (cm);";
+  tmp.histname = "MIP_startend_mindist";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyMuMuPairs = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore;
+  tmp.bins = {30,-1,1};
+  tmp.histtitle = ";Mu/pi BDT score (selected daughter MIPs only, combined contained and exiting);";
+  tmp.histname = "mupiBDT_daughtermips";
+  tmp.PlotOnlyDaughterMIPs = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_ContmupiBDTscore(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore_cont;
+  tmp.bins = {30,-1,1};
+  tmp.histtitle = ";Contained Mu/pi BDT score (selected daughter MIPs only, not just contained);";
+  tmp.histname = "contmupiBDT_daughtermips";
+  tmp.PlotOnlyDaughterMIPs = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_ExitmupiBDTscore(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore_exit;
+  tmp.bins = {30,-1,1};
+  tmp.histtitle = ";Exiting Mu/pi BDT score (selected daughter MIPs only, not just exiting);";
+  tmp.histname = "exitmupiBDT_daughtermips";
+  tmp.PlotOnlyDaughterMIPs = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_containedonly(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore;
+  tmp.bins = {30,-1,1};
+  tmp.histtitle = ";Contained Mu/pi BDT score (selected contained daughter MIPs only);";
+  tmp.histname = "mupiBDT_daughtermips_contonly";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyContained = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_exitingonly(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore;
+  tmp.bins = {30,-1,1};
+  tmp.histtitle = ";Exiting Mu/pi BDT score (selected exiting daughter MIPs only);";
+  tmp.histname = "mupiBDT_daughtermips_exitonly";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyExiting = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_all(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore;
+  tmp.bins = {30,-1,1};
+  tmp.histtitle = ";Mu/pi BDT score (all particles);";
+  tmp.histname = "mupiBDT_all";
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_longestMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore_leadingMIP;
+  tmp.bins = {30,-1,1};
+  tmp.histtitle = ";Mu/pi BDT score (longest daughter MIP only);";
+  tmp.histname = "mupiBDT_longestdaughtermip";
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_secondMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore_secondMIP;
+  tmp.bins = {30,-1,1};
+  tmp.histtitle = ";Mu/pi BDT score (second daughter MIP only);";
+  tmp.histname = "mupiBDT_seconddaughtermip";
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_highestOverlowestMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore_highestOverlowestMIP;
+  tmp.bins = {15,0,2};
+  tmp.histtitle = ";Mu/pi BDT score: high-scoring MIP/low scoring MIP;";
+  tmp.histname = "mupiBDT_highestOverlowestmip";
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_highestMinuslowestMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore_highestMinuslowestMIP;
+  tmp.bins = {15,0,2};
+  tmp.histtitle = ";Mu/pi BDT score: high-scoring MIP-low-scoring MIP;";
+  tmp.histname = "mupiBDT_highestMinuslowestmip";
+  return tmp;
+}
+
 CC1piPlotVars Var_TPCObj_PFP_track_MuonMomRange_LeadingMIP(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_MuonMomRange;
@@ -1670,6 +1796,67 @@ CC1piPlotVars Var_TPCObj_PFP_track_MuonMomCombined_LeadingMIP(treevars *vars){
   return tmp;
 }
 
+CC1piPlotVars Var_TPCObj_PFP_track_length_over_startend(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_length_over_startend;
+  tmp.bins = {20,0.9,1.1};
+  tmp.histtitle = ";Track length/start-end distance (selected MIPs only);";
+  tmp.histname = "trklen_over_startend";
+  tmp.PlotOnlyDaughterMIPs = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_length_over_longestMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_length_over_longestMIP;
+  tmp.bins = {22,0,1.1};
+  tmp.histtitle = ";Track length/track length of longest MIP (selected MIPs only);";
+  tmp.histname = "trklen_over_longest";
+  tmp.PlotOnlyDaughterMIPs = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_ndaughters(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_ndaughters;
+  tmp.bins = {4,0,4};
+  tmp.histtitle = ";No. reconstructed daughters (selected MIPs only);";
+  tmp.histname = "ndaughters";
+  tmp.PlotOnlyDaughterMIPs = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_n_unused_hits_nearend(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_n_unused_hits_nearend;
+  tmp.bins = {15,0,15};
+  tmp.histtitle = ";No. unmatched hits near track end (selected MIPs only);";
+  tmp.histname = "n_hits_nearend";
+  tmp.PlotOnlyDaughterMIPs = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_unmatched_charge_nearend_plane2(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_unmatched_charge_nearend_plane2;
+  tmp.bins = {50,0,500};
+  tmp.histtitle = ";Unmatched plane 2 charge near end (selected MIPs only);";
+  tmp.histname = "unmatched_charge_plane2";
+  tmp.PlotOnlyDaughterMIPs = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_unmatched_charge_nearend_plane2_nozero(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_unmatched_charge_nearend_plane2;
+  tmp.bins = {50,1,500};
+  tmp.histtitle = ";Unmatched plane 2 charge near end (selected MIPs only);";
+  tmp.histname = "unmatched_charge_plane2_notzero";
+  tmp.PlotOnlyDaughterMIPs = true;
+  return tmp;
+}
+
+
 // Decide whether to fill a plot for a given track. This is useful for e.g. plots with PlotOnlyDaughterMIPs=true
 bool FillPlotForTrack(CC1piPlotVars *plotvar, treevars *vars, int i_tr){
   bool DoFillPlot = true;
@@ -1679,6 +1866,8 @@ bool FillPlotForTrack(CC1piPlotVars *plotvar, treevars *vars, int i_tr){
   if (plotvar->PlotOnlyDaughterMIPs && !(vars->TPCObj_PFP_isDaughter->at(i_tr) && vars->TPCObj_PFP_track_passesMIPcut->at(i_tr))) DoFillPlot = false;
 
   if (plotvar->PlotOnlyContained && !(vars->TPCObj_PFP_track_isContained->at(i_tr))) DoFillPlot = false;
+
+  if (plotvar->PlotOnlyExiting && (vars->TPCObj_PFP_track_isContained->at(i_tr)==true)) DoFillPlot = false;
 
   if (plotvar->PlotOnlyLeadingDaughterMIP && !(i_tr == vars->TPCObj_LeadingMIPtrackIndex)) DoFillPlot = false;
 

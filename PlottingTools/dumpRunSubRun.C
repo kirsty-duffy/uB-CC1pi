@@ -21,6 +21,7 @@ void dumpRunSubRun(std::string inputfile){
   std::vector<std::pair<int, int>> rsr_pairs;
 
   for (int i = 0; i < tree->GetEntries(); i++){
+    if (i%1000==0) std::cout << i << "/" << tree->GetEntries() << std::endl;
 
     tree->GetEntry(i);
 
@@ -36,6 +37,7 @@ void dumpRunSubRun(std::string inputfile){
 
   std::vector<std::pair<int, int>> outvec;
   for (int i = 0; i < rsr_pairs.size(); i++){
+    if (i%1000==0) std::cout << "-- " << i << "/" << rsr_pairs.size() << std::endl;
 
     // get run subrun info
     int runt1 = rsr_pairs.at(i).first;
@@ -57,7 +59,7 @@ void dumpRunSubRun(std::string inputfile){
   }
 
   for (int i = 0; i < outvec.size(); i++){
-
+    if (i%1000==0) std::cout << i << "/" << outvec.size() << std::endl;
     ofs << outvec.at(i).first << " " << outvec.at(i).second << std::endl;
 
   }

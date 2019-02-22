@@ -43,6 +43,7 @@ physics.producers.cc1piselec:
   ParticleIdProducer:    "pid::CC1pi"
   PFParticleProducer:    "pandoraNu::CC1pi"
   ClusterProducer:       "pandoraNu::CC1pi"
+  HitProducer:           "pandoraCosmicHitRemoval::CC1pi"
   SpacePointProducer:    "pandoraNu::CC1pi"
   TPCObjectProducer:     "TPCObjectMaker::CC1pi"
   MCSMuProducer:         "CC1piMCSMu::CC1pi"

@@ -56,6 +56,7 @@
 #include "uboone/CC1pi/Algorithms/InputTags.h"
 #include "uboone/CC1pi/Algorithms/ShowerRejection.h"
 #include "uboone/CC1pi/Algorithms/MapBuilderUtility.h"
+#include "uboone/CC1pi/Algorithms/GetUnusedHitCharges.h"
 
 // Particle ID includes
 #include "uboone/ParticleID/Algorithms/Bragg_Likelihood_Estimator.h"
@@ -131,6 +132,15 @@ struct cc1pianavars{
   std::vector<std::vector<double>> TPCObj_PFP_track_MCSpi_scatterAngles;
   std::vector<std::vector<std::vector<double>>> TPCObj_PFP_track_SpacepointsXYZ;
   std::vector<std::vector<double>> TPCObj_PFP_track_SpacepointsQPlane2;
+  std::vector<std::vector<double>> TPCObj_PFP_track_unusedhits_charge_plane0;
+  std::vector<std::vector<int>> TPCObj_PFP_track_unusedhits_endwiredist_plane0;
+  std::vector<std::vector<double>> TPCObj_PFP_track_unusedhits_endtimedist_plane0;
+  std::vector<std::vector<double>> TPCObj_PFP_track_unusedhits_charge_plane1;
+  std::vector<std::vector<int>> TPCObj_PFP_track_unusedhits_endwiredist_plane1;
+  std::vector<std::vector<double>> TPCObj_PFP_track_unusedhits_endtimedist_plane1;
+  std::vector<std::vector<double>> TPCObj_PFP_track_unusedhits_charge_plane2;
+  std::vector<std::vector<int>> TPCObj_PFP_track_unusedhits_endwiredist_plane2;
+  std::vector<std::vector<double>> TPCObj_PFP_track_unusedhits_endtimedist_plane2;
 
   // Shower variables
   std::vector<double> TPCObj_PFP_shower_length;
@@ -202,6 +212,7 @@ struct cc1pianavars{
   int nu_PDG;
   double nu_E;
   int nu_MCPID;
+  int nuint_mode;
   double nuint_W;
   double nuint_Qsq;
 

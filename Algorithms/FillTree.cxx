@@ -89,6 +89,15 @@ void cc1pianavars::Clear(){
    TPCObj_PFP_track_MCSpi_scatterAngles.clear();
    TPCObj_PFP_track_SpacepointsXYZ.clear();
    TPCObj_PFP_track_SpacepointsQPlane2.clear();
+   TPCObj_PFP_track_unusedhits_charge_plane0.clear();
+   TPCObj_PFP_track_unusedhits_endwiredist_plane0.clear();
+   TPCObj_PFP_track_unusedhits_endtimedist_plane0.clear();
+   TPCObj_PFP_track_unusedhits_charge_plane1.clear();
+   TPCObj_PFP_track_unusedhits_endwiredist_plane1.clear();
+   TPCObj_PFP_track_unusedhits_endtimedist_plane1.clear();
+   TPCObj_PFP_track_unusedhits_charge_plane2.clear();
+   TPCObj_PFP_track_unusedhits_endwiredist_plane2.clear();
+   TPCObj_PFP_track_unusedhits_endtimedist_plane2.clear();
 
    // Shower variables
    TPCObj_PFP_shower_length.clear();
@@ -158,6 +167,7 @@ void cc1pianavars::Clear(){
    nu_isCC = false;
    nu_PDG = -9999;
    nu_E = -9999;
+   nuint_mode = -9999;
    nuint_W = -9999;
    nuint_Qsq = -9999;
 
@@ -420,6 +430,15 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          std::vector<double> MCSpi_scatterAngles(1,-9999.);
          std::vector<std::vector<double>> spacepoints_XYZ;
          std::vector<double> spacepoints_qplane2;
+         std::vector<double> unusedhits_charge_plane0;
+         std::vector<int> unusedhits_endwiredist_plane0;
+         std::vector<double> unusedhits_endtimedist_plane0;
+         std::vector<double> unusedhits_charge_plane1;
+         std::vector<int> unusedhits_endwiredist_plane1;
+         std::vector<double> unusedhits_endtimedist_plane1;
+         std::vector<double> unusedhits_charge_plane2;
+         std::vector<int> unusedhits_endwiredist_plane2;
+         std::vector<double> unusedhits_endtimedist_plane2;
 
 
          double shower_length = -9999;
@@ -660,6 +679,11 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
             MCSpi_segmentRadLengths = mcsFitResult->segmentRadLengths();
             MCSpi_scatterAngles = mcsFitResult->scatterAngles();
 
+            // Save information about unused hits
+            GetUnusedHitCharges(evt, CC1piInputTags, 0, track->End(), unusedhits_charge_plane0, unusedhits_endwiredist_plane0, unusedhits_endtimedist_plane0);
+            GetUnusedHitCharges(evt, CC1piInputTags, 1, track->End(), unusedhits_charge_plane1, unusedhits_endwiredist_plane1, unusedhits_endtimedist_plane1);
+            GetUnusedHitCharges(evt, CC1piInputTags, 2, track->End(), unusedhits_charge_plane2, unusedhits_endwiredist_plane2, unusedhits_endtimedist_plane2);
+
          } // end loop over tracks
 
          std::vector<art::Ptr<recob::Shower>> showers_pfp = showers_from_pfps.at(pfp.key());
@@ -743,6 +767,16 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
         TPCObj_PFP_track_MCSpi_bestLL.emplace_back(MCSpi_bestLL);
         TPCObj_PFP_track_MCSpi_segmentRadLengths.emplace_back(MCSpi_segmentRadLengths);
         TPCObj_PFP_track_MCSpi_scatterAngles.emplace_back(MCSpi_scatterAngles);
+
+        TPCObj_PFP_track_unusedhits_charge_plane0.emplace_back(unusedhits_charge_plane0);
+        TPCObj_PFP_track_unusedhits_endwiredist_plane0.emplace_back(unusedhits_endwiredist_plane0);
+        TPCObj_PFP_track_unusedhits_endtimedist_plane0.emplace_back(unusedhits_endtimedist_plane0);
+        TPCObj_PFP_track_unusedhits_charge_plane1.emplace_back(unusedhits_charge_plane1);
+        TPCObj_PFP_track_unusedhits_endwiredist_plane1.emplace_back(unusedhits_endwiredist_plane1);
+        TPCObj_PFP_track_unusedhits_endtimedist_plane1.emplace_back(unusedhits_endtimedist_plane1);
+        TPCObj_PFP_track_unusedhits_charge_plane2.emplace_back(unusedhits_charge_plane2);
+        TPCObj_PFP_track_unusedhits_endwiredist_plane2.emplace_back(unusedhits_endwiredist_plane2);
+        TPCObj_PFP_track_unusedhits_endtimedist_plane2.emplace_back(unusedhits_endtimedist_plane2);
 
 
          // Fill non-specific variables
@@ -929,6 +963,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
             nu_E = neutrino.E();
 
+            nuint_mode = nu.Mode();
             nuint_W = nu.W();
             nuint_Qsq = nu.QSqr();
 
@@ -1018,6 +1053,15 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("TPCObj_PFP_track_MCSpi_scatterAngles", &(vars->TPCObj_PFP_track_MCSpi_scatterAngles));
    t -> Branch("TPCObj_PFP_track_SpacepointsXYZ", &(vars->TPCObj_PFP_track_SpacepointsXYZ));
    t -> Branch("TPCObj_PFP_track_SpacepointsQPlane2", &(vars->TPCObj_PFP_track_SpacepointsQPlane2));
+   t -> Branch("TPCObj_PFP_track_unusedhits_charge_plane0", &(vars->TPCObj_PFP_track_unusedhits_charge_plane0));
+   t -> Branch("TPCObj_PFP_track_unusedhits_endwiredist_plane0", &(vars->TPCObj_PFP_track_unusedhits_endwiredist_plane0));
+   t -> Branch("TPCObj_PFP_track_unusedhits_endtimedist_plane0", &(vars->TPCObj_PFP_track_unusedhits_endtimedist_plane0));
+   t -> Branch("TPCObj_PFP_track_unusedhits_charge_plane1", &(vars->TPCObj_PFP_track_unusedhits_charge_plane1));
+   t -> Branch("TPCObj_PFP_track_unusedhits_endwiredist_plane1", &(vars->TPCObj_PFP_track_unusedhits_endwiredist_plane1));
+   t -> Branch("TPCObj_PFP_track_unusedhits_endtimedist_plane1", &(vars->TPCObj_PFP_track_unusedhits_endtimedist_plane1));
+   t -> Branch("TPCObj_PFP_track_unusedhits_charge_plane2", &(vars->TPCObj_PFP_track_unusedhits_charge_plane2));
+   t -> Branch("TPCObj_PFP_track_unusedhits_endwiredist_plane2", &(vars->TPCObj_PFP_track_unusedhits_endwiredist_plane2));
+   t -> Branch("TPCObj_PFP_track_unusedhits_endtimedist_plane2", &(vars->TPCObj_PFP_track_unusedhits_endtimedist_plane2));
 
 
    t -> Branch("TPCObj_PFP_shower_length", &(vars->TPCObj_PFP_shower_length));
@@ -1084,6 +1128,7 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("nu_PDG", &(vars->nu_PDG));
    t -> Branch("nu_E", &(vars->nu_E));
    t -> Branch("nu_MCPID", &(vars->nu_MCPID));
+   t -> Branch("nuint_mode", &(vars->nuint_mode));
    t -> Branch("nuint_W", &(vars->nuint_W));
    t -> Branch("nuint_Qsq", &(vars->nuint_Qsq));
 

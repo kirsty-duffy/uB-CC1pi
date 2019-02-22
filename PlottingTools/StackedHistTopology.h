@@ -14,12 +14,15 @@ class StackedHistTopology{
 
  public:
   StackedHistTopology(std::string histname, std::string title, int nbins, double lowlimit, double highlimit);// Constructor
+  StackedHistTopology(std::string histname, std::string title, int nbinsx, double lowx, double highx, int nbinsy, double lowy, double highy); // Overloaded constructor for 2D histograms
   void Fill(NuIntTopology topology, double value);
   void Fill(NuIntTopology topology, double value, double weight);
+  void Fill2D(NuIntTopology topology, double value_x, double value_y);
   void DrawStack(double mc_scaling, TCanvas *c1, bool coarse=true, TH1F *onbeam_h=nullptr, TH1F *offbeam_h=nullptr, double offbeam_scaling=1.0, bool onminusoffbeam=false);
-  void PrintHistIntegrals(bool coarse=true);
+  void PrintHistIntegrals(double mc_scaling, bool coarse=true, int nsel_onbeam=0, int nsel_offbeam=0, double offbeam_scaling=1.0);
   double GetCC1piIntegral();
   double GetTotalIntegral();
+  void Draw2D(TCanvas *c1, bool coarse=true, TString option="");
 
  protected:
   int nHists;
@@ -28,12 +31,20 @@ class StackedHistTopology{
 
   std::map<std::string, TH1F *> coarse_histos; // For keeping track of "coarse" topology histograms (e.g. CC1pi instead of CC1pi1p)
 
+  std::map<std::string, TH2F *> coarse_histos_2D; // For keeping track of "coarse" topology histograms (e.g. CC1pi instead of CC1pi1p)
+
   THStack *stack;
   TH1F *hists[25];
+  TH2F *hists2D[25];
 
-  double invalid_total;
+  bool is2Dhists;
 
-  void StyleHists();
+  double invalid_total_x;
+  double invalid_total_y;
+
+  void InstantiateHistOrder();
+  void StyleHistsStack();
+  void StyleHists2D();
   unsigned int GetHistN(NuIntTopology topology);
   NuIntTopology GetTopologyFromHistN(unsigned int hist_n);
   void GenerateCoarseHistos();
@@ -45,6 +56,40 @@ class StackedHistTopology{
 // Intended to be very general so you can make histograms of whatever you like
 StackedHistTopology::StackedHistTopology(std::string histname, std::string title, int nbins, double lowlimit, double highlimit)
 {
+  InstantiateHistOrder();
+  stack = new THStack(histname.c_str(),title.c_str());
+  for (int i_hist=0; i_hist < nHists; i_hist++){
+    std::string histname_i = std::string(histname)+std::string("_")+std::to_string(i_hist);
+    hists[i_hist] = new TH1F(histname_i.c_str(),"",nbins,lowlimit,highlimit);
+  }
+
+  // Style the histograms
+  StyleHistsStack();
+
+  is2Dhists = false;
+  invalid_total_x = 0.;
+}
+
+// -------------------------- Constructor for 2D hists -------------------------- //
+// Intended to be very general so you can make histograms of whatever you like
+StackedHistTopology::StackedHistTopology(std::string histname, std::string title, int nbinsx, double lowlimitx, double highlimitx, int nbinsy, double lowlimity, double highlimity)
+{
+  InstantiateHistOrder();
+  for (int i_hist=0; i_hist < nHists; i_hist++){
+    std::string histname_i = std::string(histname)+std::string("_")+std::to_string(i_hist);
+    hists2D[i_hist] = new TH2F(histname_i.c_str(),title.c_str(),nbinsx,lowlimitx,highlimitx,nbinsy,lowlimity,highlimity);
+  }
+
+  // Style the histograms
+  StyleHists2D();
+
+  is2Dhists = true;
+  invalid_total_x = 0.;
+  invalid_total_y = 0.;
+}
+
+// Set histogram order (moved to be in a separate function from the constructor to allow for overload of constructor for 1D or 2D histograms)
+void StackedHistTopology::InstantiateHistOrder(){
   // Topology categories for the histograms
   hist_order.push_back(kCC0pi0p);
   hist_order.push_back(kCC0pi1p);
@@ -73,26 +118,20 @@ StackedHistTopology::StackedHistTopology(std::string histname, std::string title
   hist_order.push_back(kUnknown);
 
   nHists = hist_order.size();
-
-  stack = new THStack(histname.c_str(),title.c_str());
-  for (int i_hist=0; i_hist < nHists; i_hist++){
-    std::string histname_i = std::string(histname)+std::string("_")+std::to_string(i_hist);
-    hists[i_hist] = new TH1F(histname_i.c_str(),"",nbins,lowlimit,highlimit);
-  }
-
-  // Style the histograms
-  StackedHistTopology::StyleHists();
-
-  invalid_total = 0.;
 }
 
 // -------------------------- Function to fill the correct histogram -------------------------- //
 void StackedHistTopology::Fill(NuIntTopology topology, double value)
 {
+  if (is2Dhists){
+    std::cout << "[StackedHistTopology] ERROR: cannot call Fill for 2D hists. Call Fill2D instead. Exiting..." << std::endl;
+    throw;
+  }
+
   unsigned int n_hist = StackedHistTopology::GetHistN(topology);
   hists[n_hist]->Fill(value);
 
-  if (value==-999 || value==-9999) invalid_total++;
+  if (value==-999 || value==-9999) invalid_total_x++;
 }
 
 // -------------------------- Function to fill the correct histogram -------------------------- //
@@ -102,28 +141,65 @@ void StackedHistTopology::Fill(NuIntTopology topology, double value, double weig
   unsigned int n_hist = StackedHistTopology::GetHistN(topology);
   hists[n_hist]->Fill(value, weight);
 
-  if (value==-999 || value==-9999) invalid_total++;
+  if (value==-999 || value==-9999) invalid_total_x++;
+}
+
+// -------------------------- Function to fill the correct histogram -------------------------- //
+// For 2D histograms
+void StackedHistTopology::Fill2D(NuIntTopology topology, double value_x, double value_y)
+{
+  if (!is2Dhists){
+    std::cout << "[StackedHistTopology] ERROR: cannot call Fill2D for 21D hists. Call Fill instead. Exiting..." << std::endl;
+    throw;
+  }
+
+  unsigned int n_hist = StackedHistTopology::GetHistN(topology);
+  hists2D[n_hist]->Fill(value_x, value_y);
+
+  if (value_x == -999 || value_x == -9999) invalid_total_x++;
+  if (value_y == -999 || value_y == -9999) invalid_total_y++;
 }
 
 // -------------------------- Function to collapse fine topo enums onto coarse topo names -------------------------- //
 void StackedHistTopology::GenerateCoarseHistos()
 {
-  // Clear coarse histos and remake
-  coarse_histos.clear();
+  if (!is2Dhists){
+    // Clear coarse histos and remake
+    coarse_histos.clear();
 
 
-  for (int i_hist = nHists-1; i_hist >=0; i_hist--) {
-    NuIntTopology topology_for_legend =
-        StackedHistTopology::GetTopologyFromHistN((unsigned int)i_hist);
-    std::string coarse_topo_legend_title =
-        topologyenum2str_coarse(topology_for_legend);
+    for (int i_hist = nHists-1; i_hist >=0; i_hist--) {
+      NuIntTopology topology_for_legend =
+          StackedHistTopology::GetTopologyFromHistN((unsigned int)i_hist);
+      std::string coarse_topo_legend_title =
+          topologyenum2str_coarse(topology_for_legend);
 
-    if (coarse_histos.find(coarse_topo_legend_title) ==
-        coarse_histos.end()) { // Haven't already got one in this coarse topo
-      coarse_histos[coarse_topo_legend_title] =
-          static_cast<TH1F *>(hists[i_hist]->Clone());
-    } else { // Already have one of this topo, so just add it
-      coarse_histos[coarse_topo_legend_title]->Add(hists[i_hist]);
+      if (coarse_histos.find(coarse_topo_legend_title) ==
+          coarse_histos.end()) { // Haven't already got one in this coarse topo
+        coarse_histos[coarse_topo_legend_title] =
+            static_cast<TH1F *>(hists[i_hist]->Clone());
+      } else { // Already have one of this topo, so just add it
+        coarse_histos[coarse_topo_legend_title]->Add(hists[i_hist]);
+      }
+    }
+  }
+  else{
+    // Clear coarse histos and remake
+    coarse_histos_2D.clear();
+
+    for (int i_hist = nHists-1; i_hist >=0; i_hist--) {
+      NuIntTopology topology_for_legend =
+          StackedHistTopology::GetTopologyFromHistN((unsigned int)i_hist);
+      std::string coarse_topo_legend_title =
+          topologyenum2str_coarse(topology_for_legend);
+
+      if (coarse_histos_2D.find(coarse_topo_legend_title) ==
+          coarse_histos_2D.end()) { // Haven't already got one in this coarse topo
+        coarse_histos_2D[coarse_topo_legend_title] =
+            static_cast<TH2F *>(hists2D[i_hist]->Clone());
+      } else { // Already have one of this topo, so just add it
+        coarse_histos_2D[coarse_topo_legend_title]->Add(hists2D[i_hist]);
+      }
     }
   }
 };
@@ -184,7 +260,7 @@ else { // fine
   }
 } // end if coarse/fine
 
-  pt->AddText(TString::Format("Underflow (Invalid): %.2f (%.2f)",underflow_total,invalid_total).Data());
+  pt->AddText(TString::Format("Underflow (Invalid): %.2f (%.2f)",underflow_total,invalid_total_x).Data());
   pt->AddText(TString::Format("Overflow: %.2f",overflow_total).Data());
 
   // If data histograms are given, deal with them here
@@ -272,9 +348,106 @@ else{
   // std::cout << "------------------------------------------" << std::endl;
 }
 
+
+
+// -------------------------- Function to draw the histograms -------------------------- //
+void StackedHistTopology::Draw2D(TCanvas *c1, bool coarse=true, TString option="")
+{
+  if (!is2Dhists){
+    std::cout << "[StackedHistTopology] ERROR: cannot call Draw2D for 1D hists. Call DrawStack instead. Exiting..." << std::endl;
+    throw;
+  }
+
+  // First: style the histograms
+  StyleHists2D();
+
+  // Next: make TLegend
+  // Only do this for histograms that have entries
+  TLegend *leg = new TLegend(0.1,0.88,0.65,0.99);
+  // leg->SetTextFont(132);
+  leg->SetLineColor(kWhite);
+  leg->SetTextAlign(12);
+  leg->SetNColumns(6);
+
+  TPaveText *pt = new TPaveText(0.65,0.88,0.9,0.99,"NDC NB");
+  pt->SetLineColor(kWhite);
+  pt->SetFillColor(kWhite);
+  pt->SetTextAlign(12);
+
+  double underflow_total_x = 0.;
+  double overflow_total_x = 0.;
+  double underflow_total_y = 0.;
+  double overflow_total_y = 0.;
+
+  bool drawn_first = false;
+
+  if (coarse) {
+
+  StackedHistTopology::GenerateCoarseHistos();
+
+  for (std::pair<std::string, TH2F *> ch : coarse_histos_2D) {
+      if (ch.second->GetEntries() == 0) continue;
+
+      c1->cd();
+      c1->SetTopMargin(0.13);
+      if (!drawn_first){
+        ch.second->Draw("scat"+option);
+        drawn_first = true;
+      }
+      else{
+        ch.second->Draw("scat same"+option);
+      }
+
+    leg->AddEntry(ch.second, ch.first.c_str(), "f");
+    //std::cout << "Integral for topology " << ch.first.c_str() << ": " << ch.second->Integral() << std::endl;
+
+    underflow_total_x += ch.second->Integral(0,0,0,ch.second->GetYaxis()->GetNbins()+1);
+    overflow_total_x += ch.second->Integral(ch.second->GetXaxis()->GetNbins()+1,ch.second->GetXaxis()->GetNbins()+1,0,ch.second->GetYaxis()->GetNbins()+1);
+    underflow_total_y += ch.second->Integral(0,ch.second->GetXaxis()->GetNbins()+1,0,0);
+    overflow_total_y += ch.second->Integral(0,ch.second->GetXaxis()->GetNbins()+1,ch.second->GetYaxis()->GetNbins()+1,ch.second->GetYaxis()->GetNbins()+1);
+    }
+  }
+  else { // fine
+    for (int i_hist = 0; i_hist < nHists; i_hist++) {
+      if (hists2D[i_hist]->GetEntries() == 0)
+        continue;
+
+        c1->cd();
+        c1->SetTopMargin(0.13);
+        if (!drawn_first){
+          hists2D[i_hist]->Draw("scat"+option);
+          drawn_first = true;
+        }
+        else{
+          hists2D[i_hist]->Draw("scat same"+option);
+        }
+
+      NuIntTopology topology_for_legend =
+          StackedHistTopology::GetTopologyFromHistN((unsigned int)i_hist);
+      leg->AddEntry(hists2D[i_hist],
+                    topologyenum2str(topology_for_legend).c_str(), "f");
+      //std::cout << "Integral for topology " << topologyenum2str(topology_for_legend).c_str() << ": " << hists[i_hist]->Integral() << std::endl;
+
+      underflow_total_x += hists2D[i_hist]->Integral(0,0,0,hists2D[i_hist]->GetYaxis()->GetNbins()+1);
+      overflow_total_x += hists2D[i_hist]->Integral(hists2D[i_hist]->GetXaxis()->GetNbins()+1,hists2D[i_hist]->GetXaxis()->GetNbins()+1,0,hists2D[i_hist]->GetYaxis()->GetNbins()+1);
+      underflow_total_y += hists2D[i_hist]->Integral(0,hists2D[i_hist]->GetXaxis()->GetNbins()+1,0,0);
+      overflow_total_y += hists2D[i_hist]->Integral(0,hists2D[i_hist]->GetXaxis()->GetNbins()+1,hists2D[i_hist]->GetYaxis()->GetNbins()+1,hists2D[i_hist]->GetYaxis()->GetNbins()+1);
+    }
+  } // end if coarse/fine
+
+  pt->AddText(TString::Format("U/f x (Inv): %.2f (%.2f)",underflow_total_x,invalid_total_x).Data());
+  pt->AddText(TString::Format("O/f x: %.2f",overflow_total_x).Data());
+  pt->AddText(TString::Format("U/f y (Inv): %.2f (%.2f)",underflow_total_y,invalid_total_y).Data());
+  pt->AddText(TString::Format("O/f y: %.2f",overflow_total_y).Data());
+
+  c1->cd();
+  leg->Draw();
+  pt->Draw();
+}
+
 // -------------------------- Function to style the histograms -------------------------- //
 // Private: only called by DrawStack function in this file
-void StackedHistTopology::StyleHists()
+void StackedHistTopology::StyleHistsStack()
 {
   // Set fill color for all histograms
   hists[0] ->SetFillColor(kOrange); // CC0pi0p
@@ -302,6 +475,63 @@ void StackedHistTopology::StyleHists()
   hists[22]->SetFillColor(kMagenta-7); // Pion Parallel
   hists[23]->SetFillColor(kMagenta-9); // Muon Parallel
   hists[24]->SetFillColor(kBlack); // Unknown
+}
+
+// -------------------------- Function to style the histograms -------------------------- //
+// Private: only called by DrawStack function in this file
+void StackedHistTopology::StyleHists2D()
+{
+  // Set fill color for all histograms
+  hists2D[0] ->SetMarkerColor(kOrange); // CC0pi0p
+  hists2D[1] ->SetMarkerColor(kOrange-3); // CC0pi1p
+  hists2D[2] ->SetMarkerColor(kOrange+2); // CC0piNp
+  hists2D[3] ->SetMarkerColor(kRed); // CC1piplus0p
+  hists2D[4] ->SetMarkerColor(kRed+2); // CC1piplus1p
+  hists2D[5] ->SetMarkerColor(kPink-7); // CC1piplusNp
+  hists2D[6] ->SetMarkerColor(kPink+10); // CC1piminus0p
+  hists2D[7] ->SetMarkerColor(kMagenta+1); // CC1piminus1p
+  hists2D[8] ->SetMarkerColor(kViolet+1); // CC1piminusNp
+  hists2D[9] ->SetMarkerColor(kBlue+2); // CC1pizero0p
+  hists2D[10]->SetMarkerColor(kBlue); // CC1pizero1p
+  hists2D[11]->SetMarkerColor(kAzure+1); // CC1pizeroNp
+  hists2D[12]->SetMarkerColor(kCyan+2); // CCmultipi0p
+  hists2D[13]->SetMarkerColor(kCyan); // CCmultipi1p
+  hists2D[14]->SetMarkerColor(kGreen+1); // CCmultipiNp
+  hists2D[15]->SetMarkerColor(kGreen+3); // CCother
+  hists2D[16]->SetMarkerColor(kYellow+1); // CCnue
+  hists2D[17]->SetMarkerColor(kBlue-10); // NC
+  hists2D[18]->SetMarkerColor(kBlue-5); // outFV
+  hists2D[19]->SetMarkerColor(kGray); // Cosmic
+  hists2D[20]->SetMarkerColor(kGray+2); // Mixed
+  hists2D[21]->SetMarkerColor(kBlack); // Unknown
+  // Set fill color for all histograms
+  hists2D[0] ->SetFillColor(kOrange); // CC0pi0p
+  hists2D[1] ->SetFillColor(kOrange-3); // CC0pi1p
+  hists2D[2] ->SetFillColor(kOrange+2); // CC0piNp
+  hists2D[3] ->SetFillColor(kRed); // CC1piplus0p
+  hists2D[4] ->SetFillColor(kRed+2); // CC1piplus1p
+  hists2D[5] ->SetFillColor(kPink-7); // CC1piplusNp
+  hists2D[6] ->SetFillColor(kPink+10); // CC1piminus0p
+  hists2D[7] ->SetFillColor(kMagenta+1); // CC1piminus1p
+  hists2D[8] ->SetFillColor(kViolet+1); // CC1piminusNp
+  hists2D[9] ->SetFillColor(kBlue+2); // CC1pizero0p
+  hists2D[10]->SetFillColor(kBlue); // CC1pizero1p
+  hists2D[11]->SetFillColor(kAzure+1); // CC1pizeroNp
+  hists2D[12]->SetFillColor(kCyan+2); // CCmultipi0p
+  hists2D[13]->SetFillColor(kCyan); // CCmultipi1p
+  hists2D[14]->SetFillColor(kGreen+1); // CCmultipiNp
+  hists2D[15]->SetFillColor(kGreen+3); // CCother
+  hists2D[16]->SetFillColor(kYellow+1); // CCnue
+  hists2D[17]->SetFillColor(kBlue-10); // NC
+  hists2D[18]->SetFillColor(kBlue-5); // outFV
+  hists2D[19]->SetFillColor(kGray); // Cosmic
+  hists2D[20]->SetFillColor(kGray+2); // Mixed
+  hists2D[21]->SetFillColor(kBlack); // Unknown
+  // Set marker size for all histograms
+  for (size_t i=0; i<nHists; i++){
+    hists2D[i]->SetMarkerStyle(20);
+    hists2D[i]->SetMarkerSize(.5);
+  }
 }
 
 
@@ -337,20 +567,33 @@ NuIntTopology StackedHistTopology::GetTopologyFromHistN(unsigned int hist_n)
 }
 
 // ---------------------- Function to get histogram integrals ---------------------- //
-void StackedHistTopology::PrintHistIntegrals(bool coarse)
+void StackedHistTopology::PrintHistIntegrals(double mc_scaling=0, bool coarse=true, int nsel_onbeam=0, int nsel_offbeam=0, double offbeam_scaling=1.0)
 {
   // Calculate and print out relative integrals (percentage of events that are each topology)
    if (coarse) {
      StackedHistTopology::GenerateCoarseHistos();
 
-    double total_integral = 0.;
+   double total_integral = 0.;
    for (std::pair<std::string, TH1F *> ch : coarse_histos) {
      total_integral += ch.second->Integral();
    }
+   double total_integral_mconly = total_integral;
 
+   // If data histograms are given, deal with them here
+   if (nsel_offbeam>0 && mc_scaling>0){
+     total_integral += (double)nsel_offbeam*offbeam_scaling/mc_scaling;
+   } // end if (data histograms)
+
+   if (nsel_offbeam>0) std::cout << std::endl << "Purity: MC+EXT (MC only)" << std::endl;
    for (std::pair<std::string, TH1F *> ch : coarse_histos) {
-     std::cout << "Integral for topology " << ch.first.c_str() << ": " << ch.second->Integral()/total_integral << std::endl;
+     std::cout << "Integral for topology " << ch.first.c_str() << ": " << ch.second->Integral()/total_integral;
+     if (nsel_offbeam>0) std::cout << " (" << ch.second->Integral()/total_integral_mconly << ")";
+     std::cout << std::endl;
    }
+
+   if (nsel_offbeam>0) std::cout << "Integral for EXT data: " << (double)nsel_offbeam*(offbeam_scaling)/(total_integral*mc_scaling) << std::endl;
+
+   if (nsel_onbeam>0) std::cout << std::endl << "Integral for BNB data: " << nsel_onbeam << " (" << (double)nsel_onbeam/(total_integral*mc_scaling) << " x MC+EXT)" << std::endl << std::endl;
  }
  else{
    // Compute total integral

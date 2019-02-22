@@ -19,6 +19,7 @@ std::vector<CC1piPlotVars> GetCutVars(treevars *vars) {
    // ,Var_TPCObj_LeadingMIP_PandoraClassedAsTrack(vars)
    ,Var_TPCObj_PFP_track_passesMIPcut(vars)
    ,Var_MIP_containment(vars)
+   // ,Var_TPCObj_PFP_track_passesPioncut(vars)
    // ,Var_TPCObj_SecondMIP_isContained(vars)
    // ,Var_TPCObj_FirstMIP_isContained(vars)
    // ,Var_TPCObj_AllDaughters_isContained(vars)
@@ -52,13 +53,14 @@ std::vector<CC1piPlotVars> GetMIPCutVars(treevars *vars) {
 // Now define the vectors that go into the pion cut. In CC1pi_Pioncut.cxx we define EvalPionCut - that function will loop over all of these variables and evaluate whether a track passes a cut in them. Only if a track passes all cuts will it be defined as a pion.
 
 // What variables do we want to cut on?
-std::vector<CC1piPlotVars> GetPionCutVars(treevars *vars) {
-   std::vector<CC1piPlotVars> cut_vars = {
-   Var_TPCObj_PFP_ndaughters_SecondMIP(vars)
-   ,Var_TPCObj_PFP_isDaughter(vars)
-   };
-   return cut_vars;
-};
+// std::vector<CC1piPlotVars> GetPionCutVars(treevars *vars) {
+//    std::vector<CC1piPlotVars> cut_vars = {
+//    Var_TPCObj_PFP_track_passesMIPcut(vars)
+//    ,Var_TPCObj_PFP_isDaughter(vars)
+//    ,
+//    };
+//    return cut_vars;
+// };
 
 
 #endif

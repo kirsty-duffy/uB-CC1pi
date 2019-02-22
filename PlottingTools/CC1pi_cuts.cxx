@@ -70,6 +70,8 @@ bool IsEventSelected_SingleCut(double cutval, treevars *vars, int i_cut){
 
       else if (TracksNeeded_i == "exactlytwo" && n_tracks == 2) isSelected = true;
 
+      else if (TracksNeeded_i == "exactlyone" && n_tracks == 1) isSelected = true;
+
       else if (TracksNeeded_i == "all") {
          if (OnlyDaughters_i && n_tracks == std::count(TPCObj_PFP_isDaughter.begin(),TPCObj_PFP_isDaughter.end(),true)) isSelected = true;
          else if(!OnlyDaughters_i && n_tracks == tracks_in_event-1) isSelected = true; // Again, 1 less because of the neutrino

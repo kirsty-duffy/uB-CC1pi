@@ -7,10 +7,10 @@
 #include "TVector3.h"
 #include "TTree.h"
 #include "TMVA/Reader.h"
+#include "mupiBDT.h"
 
 // This code defines the variables we read in from the tree and new derived variables from there.
 // The implementation (i.e. the code that actually calculates the new derived variables) is in treevars_header.h
-
 
 struct treevars{
    // These are the variables that are filled directly from the tree
@@ -96,6 +96,16 @@ struct treevars{
    std::vector<std::vector<std::vector<double>>> *TPCObj_PFP_track_SpacepointsXYZ=nullptr;
    std::vector<std::vector<double>> *TPCObj_PFP_track_SpacepointsQPlane2=nullptr;
 
+   std::vector<std::vector<double>> *TPCObj_PFP_track_unusedhits_charge_plane0 = nullptr;
+   std::vector<std::vector<int>> *TPCObj_PFP_track_unusedhits_endwiredist_plane0 = nullptr;
+   std::vector<std::vector<double>> *TPCObj_PFP_track_unusedhits_endtimedist_plane0 = nullptr;
+   std::vector<std::vector<double>> *TPCObj_PFP_track_unusedhits_charge_plane1 = nullptr;
+   std::vector<std::vector<int>> *TPCObj_PFP_track_unusedhits_endwiredist_plane1 = nullptr;
+   std::vector<std::vector<double>> *TPCObj_PFP_track_unusedhits_endtimedist_plane1 = nullptr;
+   std::vector<std::vector<double>> *TPCObj_PFP_track_unusedhits_charge_plane2 = nullptr;
+   std::vector<std::vector<int>> *TPCObj_PFP_track_unusedhits_endwiredist_plane2 = nullptr;
+   std::vector<std::vector<double>> *TPCObj_PFP_track_unusedhits_endtimedist_plane2 = nullptr;
+
    unsigned int run_num;
    unsigned int subrun_num;
    unsigned int event_num;
@@ -111,6 +121,7 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_Lmipoverp;
    std::vector<double> *TPCObj_PFP_lnLmipoverp;
    std::vector<double> *TPCObj_PFP_lnLmipovermu;
+   std::vector<double> *TPCObj_PFP_lnLmipoverpi;
    std::vector<double> *TPCObj_PFP_Lmumipovermumipp;
    std::vector<double> *TPCObj_PFP_track_Chi2Proton_plane2;
    std::vector<double> *TPCObj_PFP_BrokenTrackAngle;
@@ -140,6 +151,19 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_MCP_motherIDeq0;
    std::vector<double> *TPCObj_PFP_MCP_PDG_mTruePDG;
    std::vector<double> *TPCObj_PFP_track_BDTscore;
+
+   std::vector<double> *TPCObj_PFP_track_mupiBDTscore;
+   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_leadingMIP;
+   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_secondMIP;
+   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_highestOverlowestMIP;
+   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_highestMinuslowestMIP;
+   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_cont;
+   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_exit;
+   std::vector<double> *TPCObj_PFP_track_length_over_startend;
+   std::vector<double> *TPCObj_PFP_track_length_over_longestMIP;
+   std::vector<double> *TPCObj_PFP_track_n_unused_hits_nearend;
+   std::vector<double> *TPCObj_PFP_track_unmatched_charge_nearend_plane2;
+
    std::vector<double> *TPCObj_NDaughterPFPs;
    std::vector<double> *TPCObj_PFP_MCP_trueOrigPDG;
    std::vector<double> *TPCObj_PFP_track_theta_lowdEdx;
@@ -176,6 +200,7 @@ struct treevars{
    std::vector<double> *MIP_containment;
    std::vector<double> *TPCObj_BDTscore_MIPdiff;
    std::vector<double> *TPCObj_BDTscore_MIPdiv;
+   std::vector<double> *TPCObj_MIPstartend_mindist;
 
    std::vector<double> *TPCObj_PFP_track_trueTheta;
    std::vector<double> *TPCObj_PFP_track_truePhi;
@@ -193,6 +218,8 @@ struct treevars{
    float float_VtxTrackDist;
    float float_nhits;
    float float_lnLmipoverp;
+
+   mupiBDT mupiBDT;
 
 };
 

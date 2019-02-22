@@ -10,7 +10,7 @@
 #include "TGraph.h"
 
 
-void PlotLocalLinearityDetails(std::vector<std::vector<double>> spacepoints_vec, std::vector<double> proj1d_vec, std::vector<double> cusum_vec, std::vector<double> ttest_vec, std::vector<int> kinkidxs_vec, int pfp_idx, std::vector<double> startpoint_vec, std::vector<std::vector<double>> truekink_vec=std::vector<std::vector<double>>(), double mincosth=-999, int evtnum=-999){
+void PlotLocalLinearityDetails(std::vector<std::vector<double>> spacepoints_vec, std::vector<double> proj1d_vec, std::vector<double> cusum_vec, std::vector<double> ttest_vec, std::vector<int> kinkidxs_vec, int pfp_idx, std::vector<double> startpoint_vec, std::vector<std::vector<double>> truekink_vec=std::vector<std::vector<double>>(), std::vector<std::vector<double>> mcp_x_vec=std::vector<std::vector<double>>(), std::vector<std::vector<double>> mcp_y_vec=std::vector<std::vector<double>>(), std::vector<std::vector<double>> mcp_z_vec=std::vector<std::vector<double>>(), double mincosth=-999, int evtnum=-999){
 
   // Make TGraphs to fill
   TGraph *spacepoints_yz = new TGraph();
@@ -46,6 +46,13 @@ void PlotLocalLinearityDetails(std::vector<std::vector<double>> spacepoints_vec,
   TGraph *truekink_xz = new TGraph();
   truekink_xz->SetMarkerColor(kBlue);
   truekink_xz->SetMarkerStyle(29);
+
+  TGraph *mcp_yz = new TGraph();
+  mcp_yz->SetMarkerColor(kGray+1);
+  mcp_yz->SetMarkerStyle(6);
+  TGraph *mcp_xz = new TGraph();
+  mcp_xz->SetMarkerColor(kGray+1);
+  mcp_xz->SetMarkerStyle(6);
 
   TGraph *dirs = new TGraph();
 
@@ -113,6 +120,14 @@ void PlotLocalLinearityDetails(std::vector<std::vector<double>> spacepoints_vec,
     truekink_xz->SetPoint(i_true,z,x);
   }
 
+  // Fill plots for true MCP positions
+  for (int i_mcp=0; i_mcp<mcp_x_vec.size(); i_mcp++){
+    for (int i_mpt=0; i_mpt<mcp_x_vec.at(i_mcp).size(); i_mpt++){
+      mcp_yz->SetPoint(i_mcp+i_mpt,mcp_z_vec.at(i_mcp).at(i_mpt),mcp_y_vec.at(i_mcp).at(i_mpt));
+      mcp_xz->SetPoint(i_mcp+i_mpt,mcp_z_vec.at(i_mcp).at(i_mpt),mcp_x_vec.at(i_mcp).at(i_mpt));
+    }
+  }
+
 
 
 
@@ -125,6 +140,7 @@ void PlotLocalLinearityDetails(std::vector<std::vector<double>> spacepoints_vec,
     spacepoints_yz->Draw("Ap");
     spacepoints_yz->GetYaxis()->SetTitle("Y (cm)");
     spacepoints_yz->GetXaxis()->SetTitle("Z (cm)");
+    if (mcp_yz->GetN()>0) mcp_yz->Draw("same p");
     if (truekink_yz->GetN()>0) truekink_yz->Draw("same p");
     spacepoints_yz->Draw("same p"); // draw again to make sure spacepoints are on the top
     startpoint_yz->Draw("same p");
@@ -133,6 +149,7 @@ void PlotLocalLinearityDetails(std::vector<std::vector<double>> spacepoints_vec,
     spacepoints_xz->GetYaxis()->SetTitle("X (cm)");
     spacepoints_xz->GetXaxis()->SetTitle("Z (cm)");
     spacepoints_xz->Draw("Ap");
+    if (mcp_xz->GetN()>0) mcp_xz->Draw("same p");
     if (truekink_yz->GetN()>0) truekink_xz->Draw("same p");
     spacepoints_xz->Draw("same p"); // draw again to make sure spacepoints are on the top
     startpoint_xz->Draw("same p");
@@ -170,7 +187,7 @@ void PlotLocalLinearityDetails(std::vector<std::vector<double>> spacepoints_vec,
   pt->SetTextFont(132);
   pt->AddText(TString::Format("PFP %d",pfp_idx).Data());
   pt->AddText(TString::Format("%d reconstructed kinks found",(int)kinkidxs_vec.size()).Data());
-  // pt->AddText(TString::Format("Smallest true cos(theta): %.2f",mincosth).Data());
+  pt->AddText(TString::Format("True cos(theta): %.2f",mincosth).Data());
   pt->Draw();
 
   TLegend *l = new TLegend(0.05,0.05,0.95,0.39);
@@ -357,7 +374,7 @@ void PlotLocalLinearityDetails_byangle(std::vector<std::vector<double>> spacepoi
 
   c1->Print(TString::Format("evt_%d_pfp_%d_byangle.pdf",evtnum,pfp_idx).Data());
 
-  delete c1;  
+  delete c1;
   // return true;
 
 } // end function: PlotLocalLinearityDetails

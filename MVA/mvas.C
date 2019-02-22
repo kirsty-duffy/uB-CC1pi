@@ -12,7 +12,7 @@ enum HistType { MVAType = 0, ProbaType = 1, RarityType = 2, CompareType = 3 };
 
 // input: - Input file (result from TMVA)
 //        - use of TMVA plotting TStyle
-void mvas( TString fin = "TMVA.root", HistType htype = MVAType, Bool_t useTMVAStyle = kTRUE )
+void mvas( TString fin = "TMVA.root", HistType htype = MVAType, Bool_t useTMVAStyle = kTRUE, TString topLeveldir="" )
 {
    // set style and remove existing canvas'
    TMVAGlob::Initialize( useTMVAStyle );
@@ -21,12 +21,12 @@ void mvas( TString fin = "TMVA.root", HistType htype = MVAType, Bool_t useTMVASt
    const Bool_t Save_Images = kTRUE;
 
    // checks if file with name "fin" is already open, and if not opens one
-   TFile* file = TMVAGlob::OpenFile( fin );  
+   TFile* file = TMVAGlob::OpenFile( fin );
 
    // define Canvas layout here!
    Int_t xPad = 1; // no of plots in x
    Int_t yPad = 1; // no of plots in y
-   Int_t noPad = xPad * yPad ; 
+   Int_t noPad = xPad * yPad ;
    const Int_t width = 600;   // size of canvas
 
    // this defines how many canvases we need
@@ -37,7 +37,11 @@ void mvas( TString fin = "TMVA.root", HistType htype = MVAType, Bool_t useTMVASt
 
    // search for the right histograms in full list of keys
    TIter next(file->GetListOfKeys());
-   TKey *key(0);   
+   if (topLeveldir!=""){
+      gDirectory->cd(topLeveldir);
+      next = TIter(gDirectory->GetListOfKeys());
+   }
+   TKey *key(0);
    while ((key = (TKey*)next())) {
 
       if (!TString(key->GetName()).BeginsWith("Method_")) continue;
@@ -66,13 +70,13 @@ void mvas( TString fin = "TMVA.root", HistType htype = MVAType, Bool_t useTMVASt
          TH1* bgd = dynamic_cast<TH1*>(titDir->Get( hname + "_B" ));
 
          if (sig==0 || bgd==0) {
-            if     (htype == MVAType)     
+            if     (htype == MVAType)
                cout << ":\t mva distribution not available (this is normal for Cut classifier)" << endl;
-            else if(htype == ProbaType)   
+            else if(htype == ProbaType)
                cout << ":\t probability distribution not available" << endl;
-            else if(htype == RarityType)  
+            else if(htype == RarityType)
                cout << ":\t rarity distribution not available" << endl;
-            else if(htype == CompareType) 
+            else if(htype == CompareType)
                cout << ":\t overtraining check not available" << endl;
             else cout << endl;
             continue;
@@ -81,66 +85,66 @@ void mvas( TString fin = "TMVA.root", HistType htype = MVAType, Bool_t useTMVASt
          cout << " containing " << hname << "_S/_B" << endl;
          // chop off useless stuff
          sig->SetTitle( Form("TMVA response for classifier: %s", methodTitle.Data()) );
-         if      (htype == ProbaType) 
+         if      (htype == ProbaType)
             sig->SetTitle( Form("TMVA probability for classifier: %s", methodTitle.Data()) );
-         else if (htype == RarityType) 
+         else if (htype == RarityType)
             sig->SetTitle( Form("TMVA Rarity for classifier: %s", methodTitle.Data()) );
-         else if (htype == CompareType) 
+         else if (htype == CompareType)
             sig->SetTitle( Form("TMVA overtraining check for classifier: %s", methodTitle.Data()) );
-         
+
          // create new canvas
-         TString ctitle = ((htype == MVAType) ? 
-                           Form("TMVA response %s",methodTitle.Data()) : 
-                           (htype == ProbaType) ? 
+         TString ctitle = ((htype == MVAType) ?
+                           Form("TMVA response %s",methodTitle.Data()) :
+                           (htype == ProbaType) ?
                            Form("TMVA probability %s",methodTitle.Data()) :
-                           (htype == CompareType) ? 
+                           (htype == CompareType) ?
                            Form("TMVA comparison %s",methodTitle.Data()) :
                            Form("TMVA Rarity %s",methodTitle.Data()));
-         
-         c = new TCanvas( Form("canvas%d", countCanvas+1), ctitle, 
-                          countCanvas*50+200, countCanvas*20, width, (Int_t)width*0.78 ); 
-    
+
+         c = new TCanvas( Form("canvas%d", countCanvas+1), ctitle,
+                          countCanvas*50+200, countCanvas*20, width, (Int_t)width*0.78 );
+
          // set the histogram style
          TMVAGlob::SetSignalAndBackgroundStyle( sig, bgd );
-         
+
          // normalise both signal and background
          TMVAGlob::NormalizeHists( sig, bgd );
-         
+
          // frame limits (choose judicuous x range)
          Float_t nrms = 10;
          cout << "--- Mean and RMS (S): " << sig->GetMean() << ", " << sig->GetRMS() << endl;
          cout << "--- Mean and RMS (B): " << bgd->GetMean() << ", " << bgd->GetRMS() << endl;
-         Float_t xmin = TMath::Max( TMath::Min(sig->GetMean() - nrms*sig->GetRMS(), 
+         Float_t xmin = TMath::Max( TMath::Min(sig->GetMean() - nrms*sig->GetRMS(),
                                                bgd->GetMean() - nrms*bgd->GetRMS() ),
                                     sig->GetXaxis()->GetXmin() );
-         Float_t xmax = TMath::Min( TMath::Max(sig->GetMean() + nrms*sig->GetRMS(), 
+         Float_t xmax = TMath::Min( TMath::Max(sig->GetMean() + nrms*sig->GetRMS(),
                                                bgd->GetMean() + nrms*bgd->GetRMS() ),
                                     sig->GetXaxis()->GetXmax() );
          Float_t ymin = 0;
          Float_t maxMult = (htype == CompareType) ? 1.3 : 1.2;
          Float_t ymax = TMath::Max( sig->GetMaximum(), bgd->GetMaximum() )*maxMult;
-   
+
          // build a frame
          Int_t nb = 500;
          TString hFrameName(TString("frame") + methodTitle);
          TObject *o = gROOT->FindObject(hFrameName);
          if(o) delete o;
-         TH2F* frame = new TH2F( hFrameName, sig->GetTitle(), 
+         TH2F* frame = new TH2F( hFrameName, sig->GetTitle(),
                                  nb, xmin, xmax, nb, ymin, ymax );
          frame->GetXaxis()->SetTitle( methodTitle + ((htype == MVAType || htype == CompareType) ? " response" : "") );
          if      (htype == ProbaType  ) frame->GetXaxis()->SetTitle( "Signal probability" );
          else if (htype == RarityType ) frame->GetXaxis()->SetTitle( "Signal rarity" );
          frame->GetYaxis()->SetTitle("(1/N) dN^{ }/^{ }dx");
          TMVAGlob::SetFrameStyle( frame );
-   
+
          // eventually: draw the frame
-         frame->Draw();  
-    
+         frame->Draw();
+
          c->GetPad(0)->SetLeftMargin( 0.105 );
          frame->GetYaxis()->SetTitleOffset( 1.2 );
 
-         // Draw legend               
-         TLegend *legend= new TLegend( c->GetLeftMargin(), 1 - c->GetTopMargin() - 0.12, 
+         // Draw legend
+         TLegend *legend= new TLegend( c->GetLeftMargin(), 1 - c->GetTopMargin() - 0.12,
                                        c->GetLeftMargin() + (htype == CompareType ? 0.40 : 0.3), 1 - c->GetTopMargin() );
          legend->SetFillStyle( 1 );
          legend->AddEntry(sig,TString("Signal")     + ((htype == CompareType) ? " (test sample)" : ""), "F");
@@ -152,7 +156,7 @@ void mvas( TString fin = "TMVA.root", HistType htype = MVAType, Bool_t useTMVASt
          // overlay signal and background histograms
          sig->Draw("samehist");
          bgd->Draw("samehist");
-   
+
          if (htype == CompareType) {
             // if overtraining check, load additional histograms
             TH1* sigOv = 0;
@@ -161,7 +165,7 @@ void mvas( TString fin = "TMVA.root", HistType htype = MVAType, Bool_t useTMVASt
             TString ovname = hname += "_Train";
             sigOv = dynamic_cast<TH1*>(titDir->Get( ovname + "_S" ));
             bgdOv = dynamic_cast<TH1*>(titDir->Get( ovname + "_B" ));
-      
+
             if (sigOv == 0 || bgdOv == 0) {
                cout << "+++ Problem in \"mvas.C\": overtraining check histograms do not exist" << endl;
             }
@@ -187,7 +191,7 @@ void mvas( TString fin = "TMVA.root", HistType htype = MVAType, Bool_t useTMVASt
             sigOv->SetLineWidth( 1 );
             sigOv->SetLineColor( col );
             sigOv->Draw("e1same");
-      
+
             col = bgd->GetLineColor();
             bgdOv->SetMarkerColor( col );
             bgdOv->SetMarkerSize( 0.7 );
@@ -196,9 +200,9 @@ void mvas( TString fin = "TMVA.root", HistType htype = MVAType, Bool_t useTMVASt
             bgdOv->SetLineColor( col );
             bgdOv->Draw("e1same");
 
-            ymax = TMath::Max( ymax, TMath::Max( sigOv->GetMaximum(), bgdOv->GetMaximum() )*maxMult );
+            ymax = TMath::Max( ymax, (Float_t)TMath::Max( (Float_t)sigOv->GetMaximum(), (Float_t)bgdOv->GetMaximum() )*maxMult );
             frame->GetYaxis()->SetLimits( 0, ymax );
-      
+
             // for better visibility, plot thinner lines
             sig->SetLineWidth( 1 );
             bgd->SetLineWidth( 1 );
@@ -211,7 +215,7 @@ void mvas( TString fin = "TMVA.root", HistType htype = MVAType, Bool_t useTMVASt
 
             TString probatext = Form( "Kolmogorov-Smirnov test: signal (background) probability = %5.3g (%5.3g)", kolS, kolB );
             TText* tt = new TText( 0.12, 0.74, probatext );
-            tt->SetNDC(); tt->SetTextSize( 0.032 ); tt->AppendPad(); 
+            tt->SetNDC(); tt->SetTextSize( 0.032 ); tt->AppendPad();
          }
 
          // redraw axes
@@ -221,15 +225,15 @@ void mvas( TString fin = "TMVA.root", HistType htype = MVAType, Bool_t useTMVASt
          Int_t    nbin = sig->GetNbinsX();
          Double_t dxu  = sig->GetBinWidth(0);
          Double_t dxo  = sig->GetBinWidth(nbin+1);
-         TString uoflow = Form( "U/O-flow (S,B): (%.1f, %.1f)%% / (%.1f, %.1f)%%", 
+         TString uoflow = Form( "U/O-flow (S,B): (%.1f, %.1f)%% / (%.1f, %.1f)%%",
                                 sig->GetBinContent(0)*dxu*100, bgd->GetBinContent(0)*dxu*100,
                                 sig->GetBinContent(nbin+1)*dxo*100, bgd->GetBinContent(nbin+1)*dxo*100 );
          TText* t = new TText( 0.975, 0.115, uoflow );
          t->SetNDC();
          t->SetTextSize( 0.030 );
          t->SetTextAngle( 90 );
-         t->AppendPad();    
-   
+         t->AppendPad();
+
          // update canvas
          c->Update();
 
@@ -237,15 +241,16 @@ void mvas( TString fin = "TMVA.root", HistType htype = MVAType, Bool_t useTMVASt
 
          TMVAGlob::plot_logo(1.058);
          if (Save_Images) {
-            if      (htype == MVAType)     TMVAGlob::imgconv( c, Form("plots/mva_%s",     methodTitle.Data()) );
-            else if (htype == ProbaType)   TMVAGlob::imgconv( c, Form("plots/proba_%s",   methodTitle.Data()) ); 
-            else if (htype == CompareType) TMVAGlob::imgconv( c, Form("plots/overtrain_%s", methodTitle.Data()) ); 
-            else                           TMVAGlob::imgconv( c, Form("plots/rarity_%s",  methodTitle.Data()) ); 
+            TString plotdir="plots";
+            if (topLeveldir!="") plotdir=topLeveldir+"/"+plotdir;
+            if      (htype == MVAType)     TMVAGlob::imgconv( c, Form("%s/mva_%s",     plotdir.Data(), methodTitle.Data()) );
+            else if (htype == ProbaType)   TMVAGlob::imgconv( c, Form("%s/proba_%s",   plotdir.Data(), methodTitle.Data()) );
+            else if (htype == CompareType) TMVAGlob::imgconv( c, Form("%s/overtrain_%s", plotdir.Data(), methodTitle.Data()) );
+            else                           TMVAGlob::imgconv( c, Form("%s/rarity_%s",  plotdir.Data(), methodTitle.Data()) );
          }
          countCanvas++;
-         
+
       }
       cout << "";
    }
 }
-

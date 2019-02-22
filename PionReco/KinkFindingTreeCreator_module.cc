@@ -89,6 +89,9 @@ private:
   std::vector<std::vector<double>> MCP_Px_eachpoint;
   std::vector<std::vector<double>> MCP_Py_eachpoint;
   std::vector<std::vector<double>> MCP_Pz_eachpoint;
+  std::vector<std::vector<double>> MCP_x_eachpoint;
+  std::vector<std::vector<double>> MCP_y_eachpoint;
+  std::vector<std::vector<double>> MCP_z_eachpoint;
   std::vector<std::vector<double>> MCP_StartXYZ;
   std::vector<std::vector<double>> MCP_EndXYZ;
 
@@ -143,6 +146,9 @@ KinkFindingTreeCreator::KinkFindingTreeCreator(fhicl::ParameterSet const & p)
   _outtree->Branch("MCP_Px_eachpoint",&MCP_Px_eachpoint);
   _outtree->Branch("MCP_Py_eachpoint",&MCP_Py_eachpoint);
   _outtree->Branch("MCP_Pz_eachpoint",&MCP_Pz_eachpoint);
+  _outtree->Branch("MCP_x_eachpoint",&MCP_x_eachpoint);
+  _outtree->Branch("MCP_y_eachpoint",&MCP_y_eachpoint);
+  _outtree->Branch("MCP_z_eachpoint",&MCP_z_eachpoint);
   _outtree->Branch("MCP_StartXYZ",&MCP_StartXYZ);
   _outtree->Branch("MCP_EndXYZ",&MCP_EndXYZ);
 
@@ -265,6 +271,9 @@ void KinkFindingTreeCreator::analyze(art::Event const & evt)
   MCP_Px_eachpoint.clear();
   MCP_Py_eachpoint.clear();
   MCP_Pz_eachpoint.clear();
+  MCP_x_eachpoint.clear();
+  MCP_y_eachpoint.clear();
+  MCP_z_eachpoint.clear();
   MCP_StartXYZ.clear();
   MCP_EndXYZ.clear();
 
@@ -299,14 +308,21 @@ void KinkFindingTreeCreator::analyze(art::Event const & evt)
     MCP_trueStartP.push_back(mcp->P());
 
     std::vector<double> px, py, pz;
+    std::vector<double> x, y, z;
     for (size_t i_traj=0; i_traj<mcp->NumberTrajectoryPoints(); i_traj++){
       px.push_back(mcp->Px(i_traj));
       py.push_back(mcp->Py(i_traj));
       pz.push_back(mcp->Pz(i_traj));
+      x.push_back(mcp->Position(i_traj).X());
+      y.push_back(mcp->Position(i_traj).Y());
+      z.push_back(mcp->Position(i_traj).Z());
     }
     MCP_Px_eachpoint.push_back(px);
     MCP_Py_eachpoint.push_back(py);
     MCP_Pz_eachpoint.push_back(pz);
+    MCP_x_eachpoint.push_back(x);
+    MCP_y_eachpoint.push_back(y);
+    MCP_z_eachpoint.push_back(z);
 
     std::vector<int> daughters;
     for (int i_d=0; i_d<mcp->NumberDaughters(); i_d++){
