@@ -10,6 +10,9 @@
 
 // Definition of MIP cut
 double doEvalMIPCut(std::vector<CC1piPlotVars> MIPCutVars, treevars *vars, int i_tr){
+
+   double passed = 1;
+
    // Loop over MIP cuts and apply each one to the track
    for (size_t i_mipcut=0; i_mipcut < MIPCutVars.size(); i_mipcut++){
 
@@ -28,15 +31,16 @@ double doEvalMIPCut(std::vector<CC1piPlotVars> MIPCutVars, treevars *vars, int i
       }
       else if (MIPlow && (value > cutval)){
          // std::cout << "value > cutval so fails" << std::endl;
-         return 0;
+         passed = 0;
       }
       else if (!MIPlow && (value < cutval)){
          // std::cout << "value < cutval so fails" << std::endl;
-         return 0;
+         passed = 0;
       }
    }
+
    // If it makes it all the way to the end of the loop, it must have passed every cut. Return 1.
-   return 1;
+   return passed;
 };
 
 // -------------------------------------------------- //
