@@ -35,6 +35,11 @@ double EvalPionCut(treevars *vars, int i_tr){
      return 0;
    }
 
+   // Must be pion candidate
+   if (vars->TPCObj_PiCandtrackIndex != i_tr){
+      return 0;
+   }
+
    // Mu-pi BDT cut
    if (vars->TPCObj_PFP_track_isContained->at(i_tr)){
       // Contained BDT cut

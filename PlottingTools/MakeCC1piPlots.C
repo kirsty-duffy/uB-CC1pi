@@ -84,9 +84,9 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       // ,Var_TPCObj_PFP_track_mupiBDTscore_all(vars)
       // // ,Var_TPCObj_PFP_track_mupiBDTscore_longestMIP(vars)
       // // ,Var_TPCObj_PFP_track_mupiBDTscore_secondMIP(vars)
-      // ,Var_TPCObj_PFP_track_mupiBDTscore_highestOverlowestMIP(vars)
-      // ,Var_TPCObj_PFP_track_mupiBDTscore_highestMinuslowestMIP(vars)
-      // ,Var_TPCObj_PFP_track_passesPioncut(vars)
+      Var_TPCObj_PFP_track_mupiBDTscore_PiCandOverMuCand(vars)
+      ,Var_TPCObj_PFP_track_mupiBDTscore_PiCandMinusMuCand(vars)
+      ,Var_TPCObj_PFP_track_passesPioncut(vars)
       // ,Var_TPCObj_PFP_track_length_over_startend(vars)
       // ,Var_TPCObj_PFP_track_length_over_longestMIP(vars)
       // ,Var_TPCObj_PFP_ndaughters(vars)
@@ -97,6 +97,10 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       // ,Var_TPCObj_PFP_track_n_unused_hits_nearend(vars)
       // ,Var_TPCObj_PFP_track_unmatched_charge_nearend_plane2(vars)
       // ,Var_TPCObj_PFP_track_unmatched_charge_nearend_plane2_nozero(vars)
+      ,Var_TPCObj_PFP_track_mupiBDTscore_containedonly_pioncand(vars)
+      ,Var_TPCObj_PFP_track_mupiBDTscore_exitingonly_pioncand(vars)
+      ,Var_TPCObj_PFP_track_mupiBDTscore_containedonly_muoncand(vars)
+      ,Var_TPCObj_PFP_track_mupiBDTscore_exitingonly_muoncand(vars)
    };
    return varstoplot;
 }
@@ -125,6 +129,11 @@ std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> GetVarstoplot2D(treevars *va
       // ,{Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean_NotPioncont(vars),Var_TPCObj_PFP_track_length(vars)}
       // ,{Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_NotPioncont(vars),Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum_NotPioncont(vars)}
       //,{Var_TPCObj_PFP_track_length(vars),Var_TPCObj_PFP_track_nhits(vars)}
+      {Var_TPCObj_PFP_track_mupiBDTscore_PiCand(vars),Var_TPCObj_PFP_track_mupiBDTscore_MuCand(vars)}
+      ,{Var_TPCObj_PFP_track_mupiBDTscore_PiCand_contonly(vars),Var_TPCObj_PFP_track_mupiBDTscore_MuCand_contonly(vars)}
+      ,{Var_TPCObj_PFP_track_mupiBDTscore_PiCand_contonly(vars),Var_TPCObj_PFP_track_mupiBDTscore_MuCand_exitonly(vars)}
+      ,{Var_TPCObj_PFP_track_mupiBDTscore_PiCand_exitonly(vars),Var_TPCObj_PFP_track_mupiBDTscore_MuCand_contonly(vars)}
+      ,{Var_TPCObj_PFP_track_mupiBDTscore_PiCand_exitonly(vars),Var_TPCObj_PFP_track_mupiBDTscore_MuCand_exitonly(vars)}
    };
    return varstoplot2D;
 }
@@ -278,27 +287,17 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    // Custom 2D histograms: leading vs second MIP true PDG
    std::vector<PDGCode> MIPpdgs = {kMuMinus, kMuPlus, kPiMinus, kPiPlus, kProton};
    int nMIPpdgs = MIPpdgs.size()+1;
-   TH2D *selMIPs2D = new TH2D("selMIPs2D","Selected MIP-like tracks;Leading MIP; Second MIP",nMIPpdgs,0,nMIPpdgs,nMIPpdgs,0,nMIPpdgs);
+   TH2D *selMIPs2D = new TH2D("selMIPs2D","Selected MIP-like tracks;Muon Candidate; Pion Candidate",nMIPpdgs+1,0,nMIPpdgs+1,nMIPpdgs+1,0,nMIPpdgs+1);
    for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
       if (i_bin==nMIPpdgs){
          selMIPs2D->GetXaxis()->SetBinLabel(i_bin,"Other");
          selMIPs2D->GetYaxis()->SetBinLabel(i_bin,"Other");
+         selMIPs2D->GetXaxis()->SetBinLabel(i_bin+1,"Row Sums");
+         selMIPs2D->GetYaxis()->SetBinLabel(i_bin+1,"Col Sums");
          continue;
       }
       selMIPs2D->GetXaxis()->SetBinLabel(i_bin,PDGenum2str(MIPpdgs.at(i_bin-1)).c_str());
       selMIPs2D->GetYaxis()->SetBinLabel(i_bin,PDGenum2str(MIPpdgs.at(i_bin-1)).c_str());
-   }
-
-   // Custom 2D histograms: muon candidate vs pion candidate true PDG
-   TH2D *selMIPsPID2D = new TH2D("selMIPsPID2D","Selected MIP-like tracks;Muon Candidate; Pion Candidate",nMIPpdgs,0,nMIPpdgs,nMIPpdgs,0,nMIPpdgs);
-   for (size_t i_bin=1; i_bin<nMIPpdgs+1; i_bin++){
-      if (i_bin==nMIPpdgs){
-         selMIPsPID2D->GetXaxis()->SetBinLabel(i_bin,"Other");
-         selMIPsPID2D->GetYaxis()->SetBinLabel(i_bin,"Other");
-         continue;
-      }
-      selMIPsPID2D->GetXaxis()->SetBinLabel(i_bin,PDGenum2str(MIPpdgs.at(i_bin-1)).c_str());
-      selMIPsPID2D->GetYaxis()->SetBinLabel(i_bin,PDGenum2str(MIPpdgs.at(i_bin-1)).c_str());
    }
 
    // Custom 2D histograms: leading vs second MIP true PDG for signal events only
@@ -505,21 +504,10 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
          PDGCode LeadingMIPpdg = PDGCode(mc_vars.TPCObj_PFP_truePDG->at(mc_vars.TPCObj_LeadingMIPtrackIndex));
          PDGCode SecondMIPpdg = PDGCode(mc_vars.TPCObj_PFP_truePDG->at(mc_vars.TPCObj_SecondMIPtrackIndex));
 
-         int LeadingMIPbin = nMIPpdgs;
-         int SecondMIPbin = nMIPpdgs;
-         for (int i_bin=0; i_bin<MIPpdgs.size(); i_bin++){
-            if (MIPpdgs.at(i_bin) == LeadingMIPpdg) LeadingMIPbin = i_bin+1;
-            if (MIPpdgs.at(i_bin) == SecondMIPpdg) SecondMIPbin = i_bin+1;
-         }
-         selMIPs2D->Fill((double)LeadingMIPbin-0.5,(double)SecondMIPbin-0.5);
-         if ((NuIntTopology)mc_vars.Truth_topology == kCC1piplus0p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplus1p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplusNp)
-            selMIPs2D_signal->Fill((double)LeadingMIPbin-0.5,(double)SecondMIPbin-0.5);
-
-
-         //PDGCode MuonCandpdg = PDGCode(mc_vars.muoncandidatePDG);
-         //PDGCode PionCandpdg = PDGCode(mc_vars.pioncandidatePDG);
          PDGCode MuonCandpdg = PDGCode(mc_vars.BDT_muoncandidatePDG);
          PDGCode PionCandpdg = PDGCode(mc_vars.BDT_pioncandidatePDG);
+
+         // std::cout << "MuonCand: " << PDGenum2str(MuonCandpdg) << ", PionCand: " << PDGenum2str(PionCandpdg) << std::endl;
 
          int MuonCandbin = nMIPpdgs;
          int PionCandbin = nMIPpdgs;
@@ -527,7 +515,11 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
             if (MIPpdgs.at(i_bin) == MuonCandpdg) MuonCandbin = i_bin+1;
             if (MIPpdgs.at(i_bin) == PionCandpdg) PionCandbin = i_bin+1;
          }
-         selMIPsPID2D->Fill((double)MuonCandbin-0.5,(double)PionCandbin-0.5);
+         selMIPs2D->Fill((double)MuonCandbin-0.5,(double)PionCandbin-0.5);
+
+         if ((NuIntTopology)mc_vars.Truth_topology == kCC1piplus0p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplus1p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplusNp)
+            selMIPs2D_signal->Fill((double)MuonCandbin-0.5,(double)PionCandbin-0.5);
+
 
 
 
@@ -579,6 +571,8 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
             // Quality cuts
             // if (mc_vars.TPCObj_PFP_track_dEdx_truncmean_start->at(i_tr)<1.0) continue;
             // if (mc_vars.TPCObj_PFP_VtxTrackDist->at(i_tr)>5.0) continue;
+
+            // if (mc_vars.BDT_pioncandidatePDG==211) continue;
 
             if (!(FillPlotForTrack(&(Varstoplot.at(i_h)), &mc_vars, i_tr))) continue;
 
@@ -825,9 +819,15 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
       c1->Print(std::string(std::string("CC1pi_top_beforecuts")+printname).c_str());
       c1->Clear();
 
+      std::cout << "After cuts " << varstoplot_dummy.at(i_h).histname << ": " << std::endl;
+      mc_hists_cc1pi_pdg_aftercuts[i_h]->PrintHistIntegrals();
+
       mc_hists_cc1pi_pdg_aftercuts[i_h]->DrawStack(POTscaling,c1,"",onb_hists_cc1pi_pdg_aftercuts[i_h],offb_hists_cc1pi_pdg_aftercuts[i_h],offbeamscaling,onminusoffbeam);
       c1->Print(std::string(std::string("CC1pi_pdg_aftercuts")+printname).c_str());
       c1->Clear();
+
+      std::cout << "With POT scaling " << varstoplot_dummy.at(i_h).histname << ": " << std::endl;
+      mc_hists_cc1pi_pdg_aftercuts[i_h]->PrintHistIntegrals();
 
       mc_hists_cc1pi_top_aftercuts[i_h]->DrawStack(POTscaling,c1,true,onb_hists_cc1pi_top_aftercuts[i_h],offb_hists_cc1pi_top_aftercuts[i_h],offbeamscaling,onminusoffbeam);
       c1->Print(std::string(std::string("CC1pi_top_aftercuts")+printname).c_str());
@@ -872,33 +872,38 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
       delete c1;
    }
 
-   // Make custom plot: leading vs second MIP
    TCanvas *c1 = new TCanvas();
-   selMIPs2D->Scale(1.0/selMIPs2D->Integral());
-   selMIPs2D->Draw("colz text");
-   c1->Print("CC1pi_selMIPs2D.png");
 
-   selMIPs2D_signal->Scale(1.0/selMIPs2D_signal->Integral());
+   // Make custom plot: leading vs second MIP
+   // selMIPs2D->Scale(1.0/selMIPs2D->Integral());
+   //selMIPs2D_signal->Scale(1.0/selMIPs2D_signal->Integral());
+
    for (size_t x_bin=1; x_bin<nMIPpdgs+1; x_bin++){
       float total = 0;
+      float total_signal=0;
       for (size_t y_bin=1; y_bin<nMIPpdgs+1; y_bin++){
-         total+=selMIPs2D_signal->GetBinContent(x_bin,y_bin);
+         total+=selMIPs2D->GetBinContent(x_bin,y_bin);
+         total_signal+=selMIPs2D_signal->GetBinContent(x_bin,y_bin);
       }
-      selMIPs2D_signal->SetBinContent(x_bin,nMIPpdgs+1,total);
+      selMIPs2D->SetBinContent(x_bin,nMIPpdgs+1,total);
+      selMIPs2D_signal->SetBinContent(x_bin,nMIPpdgs+1,total_signal);
    }
    for (size_t y_bin=1; y_bin<nMIPpdgs+1; y_bin++){
       float total = 0;
+      float total_signal = 0;
       for (size_t x_bin=1; x_bin<nMIPpdgs+1; x_bin++){
-         total+=selMIPs2D_signal->GetBinContent(x_bin,y_bin);
+         total+=selMIPs2D->GetBinContent(x_bin,y_bin);
+         total_signal+=selMIPs2D_signal->GetBinContent(x_bin,y_bin);
       }
-      selMIPs2D_signal->SetBinContent(nMIPpdgs+1,y_bin,total);
+      selMIPs2D->SetBinContent(nMIPpdgs+1,y_bin,total);
+      selMIPs2D_signal->SetBinContent(nMIPpdgs+1,y_bin,total_signal);
    }
+
+   selMIPs2D->Draw("colz text");
+   c1->Print("CC1pi_selMIPs2D.png");
+
    selMIPs2D_signal->Draw("colz text");
    c1->Print("CC1pi_selMIPs2D_signal.png");
-
-   selMIPsPID2D->Scale(1.0/selMIPsPID2D->Integral());
-   selMIPsPID2D->Draw("colz text");
-   c1->Print("CC1pi_selMIPsPID2D.png");
 
    SelectedEvents->DrawStack(1.,c1);
    c1->Print("CC1pi_SelectedEvents.png");

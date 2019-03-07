@@ -110,6 +110,11 @@ bool IsEventSelected(treevars *vars){
       }
    }
 
+   // Hack: if pion candidate is exiting, add another cut on muon candidate
+   if (vars->TPCObj_PiCandtrackIndex>=0 && vars->TPCObj_PFP_track_isContained->at(vars->TPCObj_PiCandtrackIndex)==0 && vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_MuCandtrackIndex)>=0){
+     isSelected = false;
+   }
+
    return isSelected;
 }
 

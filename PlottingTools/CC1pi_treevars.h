@@ -153,10 +153,14 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_track_BDTscore;
 
    std::vector<double> *TPCObj_PFP_track_mupiBDTscore;
-   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_leadingMIP;
-   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_secondMIP;
-   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_highestOverlowestMIP;
-   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_highestMinuslowestMIP;
+   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_PiCand;
+   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_MuCand;
+   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_PiCand_contonly;
+   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_MuCand_contonly;
+   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_PiCand_exitonly;
+   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_MuCand_exitonly;
+   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_PiCandOverMuCand;
+   std::vector<double> *TPCObj_PFP_track_mupiBDTscore_PiCandMinusMuCand;
    std::vector<double> *TPCObj_PFP_track_mupiBDTscore_cont;
    std::vector<double> *TPCObj_PFP_track_mupiBDTscore_exit;
    std::vector<double> *TPCObj_PFP_track_length_over_startend;
@@ -213,6 +217,8 @@ struct treevars{
 
    int TPCObj_LeadingMIPtrackIndex;
    int TPCObj_SecondMIPtrackIndex;
+   int TPCObj_PiCandtrackIndex;
+   int TPCObj_MuCandtrackIndex;
 
    float float_dEdx_truncmean_start;
    float float_VtxTrackDist;

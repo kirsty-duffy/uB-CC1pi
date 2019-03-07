@@ -23,6 +23,7 @@ class StackedHistPDGCode{
   void DrawOverlay(double norm, TCanvas *c1, TString option);
   void DrawOverlayMuPi(double norm, TCanvas *c1, TString option);
   void Draw2D(TCanvas *c1, TString option);
+  void PrintHistIntegrals();
 
  protected:
   int nHists;
@@ -84,10 +85,10 @@ void StackedHistPDGCode::InstantiateHistOrder(){
     hist_order.push_back(kNuEBar);
     hist_order.push_back(kNuTau);
     hist_order.push_back(kNuTauBar);
-    hist_order.push_back(kMuMinus);
-    hist_order.push_back(kMuPlus);
     hist_order.push_back(kPiPlus);
     hist_order.push_back(kPiMinus);
+    hist_order.push_back(kMuMinus);
+    hist_order.push_back(kMuPlus);
     hist_order.push_back(kPiZero);
     hist_order.push_back(kElectron);
     hist_order.push_back(kPositron);
@@ -160,7 +161,13 @@ void StackedHistPDGCode::DrawStack(double mc_scaling, TCanvas *c1, TString optio
   double underflow_total = 0.;
   double overflow_total = 0.;
 
-  if (mc_scaling==0) mc_scaling = 1.0;
+  if (mc_scaling==0){ //mc_scaling = 1.0;
+    double total = 0.0;
+    for (int i_hist=0; i_hist < nHists; i_hist++){
+      total += hists[i_hist]->GetEntries();
+    }
+    mc_scaling = 1.0/total;
+  }
 
   for (int i_hist=0; i_hist < nHists; i_hist++){
     if (hists[i_hist]->GetEntries() == 0) continue;
@@ -174,6 +181,7 @@ void StackedHistPDGCode::DrawStack(double mc_scaling, TCanvas *c1, TString optio
     overflow_total += hists[i_hist]->GetBinContent(hists[i_hist]->GetXaxis()->GetNbins()+1);
 
   }
+
 
   pt->AddText(TString::Format("Underflow (Invalid): %.2f (%.2f)",underflow_total,invalid_total_x).Data());
   pt->AddText(TString::Format("Overflow: %.2f",overflow_total).Data());
@@ -496,10 +504,10 @@ void StackedHistPDGCode::StyleHistsStack()
   hists[3] ->SetFillColor(kRed); // kNuEBar
   hists[4] ->SetFillColor(kRed+2); // kNuTau
   hists[5] ->SetFillColor(kPink-7); // kNuTauBar
-  hists[6] ->SetFillColor(kPink+10); // kMuMinus
-  hists[8] ->SetFillColor(kViolet+1); // kPiMinus
-  hists[7] ->SetFillColor(kMagenta+1); // kMuPlus
-  hists[9] ->SetFillColor(kBlue+2); // kPiPlus
+  hists[6] ->SetFillColor(kViolet+1); // kPiPlus
+  hists[7] ->SetFillColor(kBlue+2); // kPiMinus
+  hists[8] ->SetFillColor(kPink+10); // kMuMinus
+  hists[9] ->SetFillColor(kMagenta+1); // kMuPlus
   hists[10]->SetFillColor(kBlue); // kPiZero
   hists[11]->SetFillColor(kAzure+1); // kElectron
   hists[12]->SetFillColor(kCyan+2); // kPositron
@@ -626,6 +634,29 @@ unsigned int StackedHistPDGCode::GetHistN(PDGCode particle_pdg)
 PDGCode StackedHistPDGCode::GetPDGFromHistN(unsigned int hist_n)
 {
   return hist_order.at(hist_n);
+}
+
+// ---------------------- Function to get histogram integrals ---------------------- //
+void StackedHistPDGCode::PrintHistIntegrals()
+{
+ // Compute total integral
+ double total_integral = 0;
+ for (int i_hist=0; i_hist < nHists; i_hist++){
+    if (hists[i_hist]->GetEntries() == 0) continue;
+
+    double integral = hists[i_hist]->Integral();
+    total_integral += integral;
+ }
+ for (int i_hist=0; i_hist < nHists; i_hist++){
+    if (hists[i_hist]->GetEntries() == 0) continue;
+
+    PDGCode pdg = StackedHistPDGCode::GetPDGFromHistN((unsigned int)i_hist);
+
+    double integral = hists[i_hist]->Integral();
+
+    std::cout << "Integral for particle " << PDGenum2str(pdg) << ": " << integral << " (" << integral/total_integral << " of total " << total_integral << " MC events)" << std::endl;
+
+ }
 }
 
 

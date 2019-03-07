@@ -264,6 +264,8 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
 
    vars->TPCObj_LeadingMIPtrackIndex = -9999;
    vars->TPCObj_SecondMIPtrackIndex = -9999;
+   vars->TPCObj_PiCandtrackIndex = -9999;
+   vars->TPCObj_MuCandtrackIndex = -9999;
 
    if (vecsize>0) vars->TPCObj_AngleBetweenMIPs = new std::vector<double>(1,-9999);
    else vars->TPCObj_AngleBetweenMIPs = new std::vector<double>(0,-9999);
@@ -290,17 +292,23 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
    vars->TPCObj_PFP_track_mupiBDTscore_cont = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_track_mupiBDTscore_exit = new std::vector<double>(vecsize,-9999);
    if (vecsize>0){
-      vars->TPCObj_PFP_track_mupiBDTscore_leadingMIP = new std::vector<double>(1,-9999); vars->TPCObj_PFP_track_mupiBDTscore_secondMIP = new std::vector<double>(1,-9999);
-      vars->TPCObj_PFP_track_mupiBDTscore_highestOverlowestMIP = new std::vector<double>(1,-9999);
-      vars->TPCObj_PFP_track_mupiBDTscore_highestMinuslowestMIP = new std::vector<double>(1,-9999);
+      vars->TPCObj_PFP_track_mupiBDTscore_PiCand = new std::vector<double>(1,-9999); vars->TPCObj_PFP_track_mupiBDTscore_MuCand = new std::vector<double>(1,-9999);
+      vars->TPCObj_PFP_track_mupiBDTscore_PiCand_contonly = new std::vector<double>(1,-9999); vars->TPCObj_PFP_track_mupiBDTscore_MuCand_contonly = new std::vector<double>(1,-9999);
+      vars->TPCObj_PFP_track_mupiBDTscore_PiCand_exitonly = new std::vector<double>(1,-9999); vars->TPCObj_PFP_track_mupiBDTscore_MuCand_exitonly = new std::vector<double>(1,-9999);
+      vars->TPCObj_PFP_track_mupiBDTscore_PiCandOverMuCand = new std::vector<double>(1,-9999);
+      vars->TPCObj_PFP_track_mupiBDTscore_PiCandMinusMuCand = new std::vector<double>(1,-9999);
       vars->TPCObj_BDTscore_MIPdiff = new std::vector<double>(1,-9999);
       vars->TPCObj_BDTscore_MIPdiv = new std::vector<double>(1,-9999);
    }
    else {
-      vars->TPCObj_PFP_track_mupiBDTscore_leadingMIP = new std::vector<double>(0);
-      vars->TPCObj_PFP_track_mupiBDTscore_secondMIP = new std::vector<double>(0);
-      vars->TPCObj_PFP_track_mupiBDTscore_highestOverlowestMIP = new std::vector<double>(0);
-      vars->TPCObj_PFP_track_mupiBDTscore_highestMinuslowestMIP = new std::vector<double>(0);
+      vars->TPCObj_PFP_track_mupiBDTscore_PiCand = new std::vector<double>(0);
+      vars->TPCObj_PFP_track_mupiBDTscore_MuCand = new std::vector<double>(0);
+      vars->TPCObj_PFP_track_mupiBDTscore_PiCand_contonly = new std::vector<double>(0);
+      vars->TPCObj_PFP_track_mupiBDTscore_MuCand_contonly = new std::vector<double>(0);
+      vars->TPCObj_PFP_track_mupiBDTscore_PiCand_exitonly = new std::vector<double>(0);
+      vars->TPCObj_PFP_track_mupiBDTscore_MuCand_exitonly = new std::vector<double>(0);
+      vars->TPCObj_PFP_track_mupiBDTscore_PiCandOverMuCand = new std::vector<double>(0);
+      vars->TPCObj_PFP_track_mupiBDTscore_PiCandMinusMuCand = new std::vector<double>(0);
       vars->TPCObj_BDTscore_MIPdiff = new std::vector<double>(0);
       vars->TPCObj_BDTscore_MIPdiv = new std::vector<double>(0);
    }
@@ -878,26 +886,6 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
       double BDT_MIPdiff = std::abs(LeadingMIP_BDTscore - SecondMIP_BDTscore);
       vars->TPCObj_BDTscore_MIPdiff->at(0) = BDT_MIPdiff;
       vars->TPCObj_BDTscore_MIPdiv->at(0) = LeadingMIP_BDTscore/SecondMIP_BDTscore;
-
-      // Store mu-pi BDT score for leading and second MIP
-      vars->TPCObj_PFP_track_mupiBDTscore_leadingMIP->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_LeadingMIPtrackIndex);
-
-      vars->TPCObj_PFP_track_mupiBDTscore_secondMIP->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_SecondMIPtrackIndex);
-
-      double highscore=0;
-      double lowscore=0;
-      if (vars->TPCObj_PFP_track_mupiBDTscore_leadingMIP->at(0)>vars->TPCObj_PFP_track_mupiBDTscore_secondMIP->at(0)){
-         highscore = vars->TPCObj_PFP_track_mupiBDTscore_leadingMIP->at(0);
-         lowscore = vars->TPCObj_PFP_track_mupiBDTscore_secondMIP->at(0);
-      }
-      else{
-         highscore = vars->TPCObj_PFP_track_mupiBDTscore_secondMIP->at(0);
-         lowscore = vars->TPCObj_PFP_track_mupiBDTscore_leadingMIP->at(0);
-      }
-
-      vars->TPCObj_PFP_track_mupiBDTscore_highestOverlowestMIP->at(0) = TMath::Abs(highscore/lowscore);
-
-      vars->TPCObj_PFP_track_mupiBDTscore_highestMinuslowestMIP->at(0) = highscore-lowscore;
    }
 
 
@@ -921,26 +909,56 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
       // At least one track must be contained. If only one track is contained, it's the pion. If both are contained, the shorter track is the pion.
       if(vars->TPCObj_PFP_track_isContained->at(vars->TPCObj_SecondMIPtrackIndex)) {
          vars->MIP_containment->at(0) = 1;
-         vars->muoncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_LeadingMIPtrackIndex);
-         vars->pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_SecondMIPtrackIndex);
+         // vars->muoncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_LeadingMIPtrackIndex);
+         // vars->pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_SecondMIPtrackIndex);
       }
       else if (vars->TPCObj_PFP_track_isContained->at(vars->TPCObj_LeadingMIPtrackIndex)){
          vars->MIP_containment->at(0) = 1;
-         vars->muoncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_SecondMIPtrackIndex);
-         vars->pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_LeadingMIPtrackIndex);
+         // vars->muoncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_SecondMIPtrackIndex);
+         // vars->pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_LeadingMIPtrackIndex);
       }
       else {
          vars->MIP_containment->at(0) = 0;
       }
 
       // Test mu-pi BDT PID idea
-      if(vars->TPCObj_PFP_track_passesPioncut->at(vars->TPCObj_SecondMIPtrackIndex)) {
-         vars->BDT_muoncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_LeadingMIPtrackIndex);
-         vars->BDT_pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_SecondMIPtrackIndex);
+      int picandindex=-9999, mucandindex=-9999;
+      //if(vars->TPCObj_PFP_track_passesPioncut->at(vars->TPCObj_SecondMIPtrackIndex)) {
+      if (vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_SecondMIPtrackIndex)>vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_LeadingMIPtrackIndex)){
+         picandindex = vars->TPCObj_SecondMIPtrackIndex;
+         mucandindex = vars->TPCObj_LeadingMIPtrackIndex;
       }
       else {
-         vars->BDT_muoncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_SecondMIPtrackIndex);
-         vars->BDT_pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(vars->TPCObj_LeadingMIPtrackIndex);
+         mucandindex = vars->TPCObj_SecondMIPtrackIndex;
+         picandindex = vars->TPCObj_LeadingMIPtrackIndex;
+      }
+
+      vars->TPCObj_PiCandtrackIndex = picandindex;
+      vars->TPCObj_MuCandtrackIndex = mucandindex;
+
+      vars->BDT_muoncandidatePDG = vars->TPCObj_PFP_truePDG->at(mucandindex);
+      vars->BDT_pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(picandindex);
+
+      vars->TPCObj_PFP_track_mupiBDTscore_PiCandOverMuCand->at(0) = TMath::Abs(vars->TPCObj_PFP_track_mupiBDTscore->at(picandindex)/vars->TPCObj_PFP_track_mupiBDTscore->at(mucandindex));
+
+      vars->TPCObj_PFP_track_mupiBDTscore_PiCandMinusMuCand->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(picandindex)-vars->TPCObj_PFP_track_mupiBDTscore->at(mucandindex);
+
+      // Store mu-pi BDT score for leading and second MIP
+      vars->TPCObj_PFP_track_mupiBDTscore_PiCand->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(picandindex);
+      vars->TPCObj_PFP_track_mupiBDTscore_MuCand->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(mucandindex);
+
+      if (vars->TPCObj_PFP_track_isContained->at(picandindex)){
+         vars->TPCObj_PFP_track_mupiBDTscore_PiCand_contonly->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(picandindex);
+      }
+      else{
+         vars->TPCObj_PFP_track_mupiBDTscore_PiCand_exitonly->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(picandindex);
+      }
+
+      if (vars->TPCObj_PFP_track_isContained->at(mucandindex)){
+         vars->TPCObj_PFP_track_mupiBDTscore_MuCand_contonly->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(mucandindex);
+      }
+      else{
+         vars->TPCObj_PFP_track_mupiBDTscore_MuCand_exitonly->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(mucandindex);
       }
    }
 
