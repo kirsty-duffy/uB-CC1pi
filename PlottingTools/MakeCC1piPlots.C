@@ -75,6 +75,7 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       ,Var_TPCObj_PFP_track_BDTscore(vars)
       ,Var_TPCObj_PFP_VtxTrackDist(vars)
       ,Var_MIP_containment(vars)
+      ,Var_TPCObj_PFP_VtxTrackEnd_TrackStartDist(vars)
 
    };
    return varstoplot;
@@ -597,7 +598,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
          onb_hists_cc1pi_pdg_aftercuts[i_h] = new TH1F(TString::Format("hCC1pi_onbeam_PDG_aftercuts_%s",histname_i.c_str()).Data(),histtitle_i.c_str(),bins_i.at(0),bins_i.at(1),bins_i.at(2));
          onb_hists_cc1pi_top_aftercuts[i_h] = new TH1F(TString::Format("hCC1pi_onbeam_Top_aftercuts_%s",histname_i.c_str()).Data(),histtitle_i.c_str(),bins_i.at(0),bins_i.at(1),bins_i.at(2));
      }
-      
+
 
       // Make 2Dhistograms to fill
       for (size_t i_h=0; i_h<nplots2D; i_h++){
@@ -623,7 +624,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
         Calcvars(&onbeam_vars, &fReader_onbeam);
         std::vector<CC1piPlotVars> Varstoplot = GetVarstoplot(&onbeam_vars);
 	std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> Varstoplot2D = GetVarstoplot2D(&onbeam_vars);
-	      
+
 
         bool isSelected = IsEventSelected(&onbeam_vars);
 

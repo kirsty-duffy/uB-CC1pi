@@ -199,6 +199,7 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
    vars->TPCObj_PFP_track_Chi2Proton_plane2 = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_BrokenTrackAngle = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_VtxTrackDist = new std::vector<double>(vecsize);
+   vars->TPCObj_PFP_VtxTrackEnd_TrackStartDist = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_isContained_double = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_isDaughter_double = new std::vector<double>(vecsize);
    vars->TPCObj_PFP_PandoraClassedAsTrack_double = new std::vector<double>(vecsize,-9999);
@@ -366,6 +367,7 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
          vars->TPCObj_PFP_Lmumipovermumipp->at(i_track) = -9999;
          vars->TPCObj_PFP_track_Chi2Proton_plane2->at(i_track) = -9999;
          vars->TPCObj_PFP_VtxTrackDist->at(i_track) = -9999;
+         vars->TPCObj_PFP_VtxTrackEnd_TrackStartDist->at(i_track) = -9999;
          vars->TPCObj_PFP_BrokenTrackAngle->at(i_track) = -9999;
          vars->TPCObj_PFP_isContained_double->at(i_track) = -9999;
          vars->TPCObj_PFP_isDaughter_double->at(i_track) = -9999;
@@ -421,7 +423,22 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
             vars->TPCObj_PFP_Lmumipovermumipp->at(i_track) = (vars->TPCObj_PFP_LH_mu->at(i_track)+vars->TPCObj_PFP_LH_mip->at(i_track))/(vars->TPCObj_PFP_LH_mu->at(i_track)+vars->TPCObj_PFP_LH_mip->at(i_track)+vars->TPCObj_PFP_LH_p->at(i_track));
          }
       }
+
       vars->TPCObj_PFP_VtxTrackDist->at(i_track) = std::hypot(std::hypot(vars->TPCObj_reco_vtx->at(0) - vars->TPCObj_PFP_track_start->at(i_track).at(0), vars->TPCObj_reco_vtx->at(1) - vars->TPCObj_PFP_track_start->at(i_track).at(1)), vars->TPCObj_reco_vtx->at(2) - vars->TPCObj_PFP_track_start->at(i_track).at(2));
+
+      double mindist = vars->TPCObj_PFP_VtxTrackDist->at(i_track);
+
+      // loop over other tracks in the event and find the minimum distance between the start of this track and either the vertex or the end of another track (what we're doing here is trying to find and reject isolated tracks)
+      TVector3 trkstart(vars->TPCObj_PFP_track_start->at(i_track).at(0),vars->TPCObj_PFP_track_start->at(i_track).at(1),vars->TPCObj_PFP_track_start->at(i_track).at(2));
+      for (int i_trk_tmp=0; i_trk_tmp<vecsize; i_trk_tmp++){
+         if (i_trk_tmp==i_track) continue;
+         TVector3 trkend(vars->TPCObj_PFP_track_start->at(i_trk_tmp).at(0),vars->TPCObj_PFP_track_start->at(i_trk_tmp).at(1),vars->TPCObj_PFP_track_start->at(i_trk_tmp).at(2));
+         double d_tmp = (trkstart-trkend).Mag();
+         if (d_tmp<mindist) mindist = d_tmp;
+      }
+      vars->TPCObj_PFP_VtxTrackEnd_TrackStartDist->at(i_track) = mindist;
+
+
       vars->TPCObj_PFP_isContained_double->at(i_track) = (double)(vars->TPCObj_PFP_track_isContained->at(i_track));
       vars->TPCObj_PFP_isDaughter_double->at(i_track) = (double)(vars->TPCObj_PFP_isDaughter->at(i_track));
       vars->TPCObj_PFP_PandoraClassedAsTrack_double->at(i_track) = (double)(vars->TPCObj_PFP_PandoraClassedAsTrack->at(i_track));
@@ -895,6 +912,7 @@ void Clearvars(treevars *vars){
    delete vars->TPCObj_PFP_Lmumipovermumipp;
    delete vars->TPCObj_PFP_BrokenTrackAngle;
    delete vars->TPCObj_PFP_VtxTrackDist;
+   delete vars->TPCObj_PFP_VtxTrackEnd_TrackStartDist;
    delete vars->TPCObj_PFP_isContained_double;
    delete vars->TPCObj_PFP_track_dEdx_truncmean_start;
    delete vars->TPCObj_DaughterTracks_Order_dEdxtr;

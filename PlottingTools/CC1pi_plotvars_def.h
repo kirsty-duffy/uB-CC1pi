@@ -180,6 +180,22 @@ CC1piPlotVars Var_TPCObj_PFP_VtxTrackDist(treevars *vars){
 }
 
 // TPCObj_PFP_VtxTrackDist
+CC1piPlotVars Var_TPCObj_PFP_VtxTrackEnd_TrackStartDist(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_VtxTrackEnd_TrackStartDist;
+  tmp.KeepBelowCut = true;
+  // tmp.isMIPcut = true;
+//  tmp.OnlyDaughters = true;
+  tmp.TracksNeeded = "all";
+  tmp.CutValue = 5.;
+  tmp.bins = {35,5,50};
+  tmp.histtitle = ";Minimum track start distance from reconstructed vertex or end of another track [cm];";
+  tmp.histname = "VtxTrackEnd_TrackStartDist";
+  // tmp.PlotOnlyDaughters = true;
+  return tmp;
+}
+
+// TPCObj_PFP_VtxTrackDist
 CC1piPlotVars Var_TPCObj_PFP_VtxTrackDist_IsMIP(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_VtxTrackDist;

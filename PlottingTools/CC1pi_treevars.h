@@ -115,6 +115,7 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_track_Chi2Proton_plane2;
    std::vector<double> *TPCObj_PFP_BrokenTrackAngle;
    std::vector<double> *TPCObj_PFP_VtxTrackDist;
+   std::vector<double> *TPCObj_PFP_VtxTrackEnd_TrackStartDist;
    std::vector<double> *TPCObj_PFP_isContained_double;
    std::vector<double> *TPCObj_PFP_ndaughters;
    std::vector<double> *TPCObj_PFP_track_dEdx_truncmean_start;
