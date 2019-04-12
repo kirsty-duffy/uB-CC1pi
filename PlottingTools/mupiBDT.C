@@ -52,6 +52,14 @@ void mupiBDT::initialise_BDT_contained(){
    fReader_contained->AddSpectator("lnLmipoverpi", &lnLmipoverpi);
 
    fReader_contained->BookMVA(BookMVAType_contained.c_str(), BookMVALoc_contained.c_str());
+
+   TFile *fin = new TFile(MVAOutputRootFile.c_str(),"open");
+   TH1D *MVA_S_cont = (TH1D*)fin->Get(std::string(MVAOutputRootFile_conthistname+"S").c_str());
+   TH1D *MVA_B_cont = (TH1D*)fin->Get(std::string(MVAOutputRootFile_conthistname+"B").c_str());
+   MVA_sig_purity_cont = (TH1D*)MVA_S_cont->Clone("MVA_sig_purity_cont");
+   MVA_B_cont->Add(MVA_S_cont);
+   MVA_sig_purity_cont->Divide(MVA_B_cont);
+   // fin->Close();
 }
 
 void mupiBDT::initialise_BDT_exiting(){
@@ -72,6 +80,14 @@ void mupiBDT::initialise_BDT_exiting(){
    fReader_exiting->AddSpectator("unmatched_charge_nearend_plane2", &unmatched_charge_nearend_plane2);
 
    fReader_exiting->BookMVA(BookMVAType_exiting.c_str(), BookMVALoc_exiting.c_str());
+
+   TFile *fin = new TFile(MVAOutputRootFile.c_str(),"open");
+   TH1D *MVA_S_exiting = (TH1D*)fin->Get(std::string(MVAOutputRootFile_exitinghistname+"S").c_str());
+   TH1D *MVA_B_exiting = (TH1D*)fin->Get(std::string(MVAOutputRootFile_exitinghistname+"B").c_str());
+   MVA_sig_purity_exiting = (TH1D*)MVA_S_exiting->Clone("MVA_sig_purity_exiting");
+   MVA_B_exiting->Add(MVA_S_exiting);
+   MVA_sig_purity_exiting->Divide(MVA_B_exiting);
+   // fin->Close();
 }
 
 

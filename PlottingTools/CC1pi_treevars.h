@@ -4,6 +4,8 @@
 #include "../Algorithms/TopologyEnums.h"
 
 #include "TMath.h"
+#include "TFile.h"
+#include "TH1D.h"
 #include "TVector3.h"
 #include "TTree.h"
 #include "TMVA/Reader.h"
@@ -153,6 +155,7 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_track_BDTscore;
 
    std::vector<double> *TPCObj_PFP_track_mupiBDTscore;
+   std::vector<double> *TPCObj_PFP_track_mupiBDTsigpur;
    std::vector<double> *TPCObj_PFP_track_mupiBDTscore_PiCand;
    std::vector<double> *TPCObj_PFP_track_mupiBDTscore_MuCand;
    std::vector<double> *TPCObj_PFP_track_mupiBDTscore_PiCand_contonly;

@@ -288,6 +288,7 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
    vars->TPCObj_PFP_track_unmatched_charge_nearend_plane2 = new std::vector<double>(vecsize,-9999);
 
    vars->TPCObj_PFP_track_BDTscore = new std::vector<double>(vecsize,-9999);
+   vars->TPCObj_PFP_track_mupiBDTsigpur = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_track_mupiBDTscore = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_track_mupiBDTscore_cont = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_track_mupiBDTscore_exit = new std::vector<double>(vecsize,-9999);
@@ -843,15 +844,16 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
             // Work out whether track is contained or exiting and apply the correct BDT
             if (vars->TPCObj_PFP_track_isContained->at(i_track)){
                vars->TPCObj_PFP_track_mupiBDTscore->at(i_track) = vars->mupiBDT.fReader_contained->EvaluateMVA("BDTG");
+               int bin = vars->mupiBDT.MVA_sig_purity_cont->FindBin(vars->TPCObj_PFP_track_mupiBDTscore->at(i_track));
+               vars->TPCObj_PFP_track_mupiBDTsigpur->at(i_track) = vars->mupiBDT.MVA_sig_purity_cont->GetBinContent(bin);
             }
             else{
                vars->TPCObj_PFP_track_mupiBDTscore->at(i_track) = vars->mupiBDT.fReader_exiting->EvaluateMVA("BDTG");
+               int bin = vars->mupiBDT.MVA_sig_purity_exiting->FindBin(vars->TPCObj_PFP_track_mupiBDTscore->at(i_track));
+               vars->TPCObj_PFP_track_mupiBDTsigpur->at(i_track) = vars->mupiBDT.MVA_sig_purity_exiting->GetBinContent(bin);
             }
 
          }
-
-         // Evaluate pion cut (i.e. whether we want to class this track as a pion). Cut algorithm defined in CC1pi_cuts.cxx
-         vars->TPCObj_PFP_track_passesPioncut->at(i_track) = EvalPionCut(vars,i_track);
       } // end loop over tracks in TPCObj (i_track)
    }
 
@@ -923,8 +925,49 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
 
       // Test mu-pi BDT PID idea
       int picandindex=-9999, mucandindex=-9999;
-      //if(vars->TPCObj_PFP_track_passesPioncut->at(vars->TPCObj_SecondMIPtrackIndex)) {
-      if (vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_SecondMIPtrackIndex)>vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_LeadingMIPtrackIndex)){
+
+      // If only one track is contained, that one is the pion candidate
+      // if (vars->TPCObj_PFP_track_isContained->at(vars->TPCObj_LeadingMIPtrackIndex)==0 && vars->TPCObj_PFP_track_isContained->at(vars->TPCObj_SecondMIPtrackIndex)==1){
+      //    picandindex = vars->TPCObj_SecondMIPtrackIndex;
+      //    mucandindex = vars->TPCObj_LeadingMIPtrackIndex;
+      // }
+      // else if (vars->TPCObj_PFP_track_isContained->at(vars->TPCObj_LeadingMIPtrackIndex)==1 && vars->TPCObj_PFP_track_isContained->at(vars->TPCObj_SecondMIPtrackIndex)==0){
+      //    picandindex = vars->TPCObj_LeadingMIPtrackIndex;
+      //    mucandindex = vars->TPCObj_SecondMIPtrackIndex;
+      // }
+      // // Otherwise (both contained or both exiting, pion candidate is the shorter MIP only if it also has a higher mu-pi BDT score)
+      // else if (vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_SecondMIPtrackIndex)>vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_LeadingMIPtrackIndex)){
+      //    picandindex = vars->TPCObj_SecondMIPtrackIndex;
+      //    mucandindex = vars->TPCObj_LeadingMIPtrackIndex;
+      // }
+
+      // for (int i_track=0; i_track < vecsize; i_track++){
+      //    if (vars->TPCObj_PFP_track_mupiBDTscore->at(i_track)==-9999) continue;
+      //
+      //    if (vars->TPCObj_PFP_track_isContained->at(i_track)){
+      //       // If contained and mu-pi BDT score > 0.2, is pion candidate
+      //       if (vars->TPCObj_PFP_track_mupiBDTscore->at(i_track) > 0.2){
+      //          picandindex = i_track;
+      //       }
+      //       // If contained and mu-pi BDT score !> 0.2, is muon candidate
+      //       else{
+      //          mucandindex = i_track;
+      //       }
+      //    }
+      //    else{
+      //       // If exiting and mu-pi BDT score > 0.8, is pion candidate
+      //       if (vars->TPCObj_PFP_track_mupiBDTscore->at(i_track) > 0.8){
+      //          picandindex = i_track;
+      //       }
+      //       // If exiting and mu-pi BDT score <-0.5, is muon candidate
+      //       if (vars->TPCObj_PFP_track_mupiBDTscore->at(i_track) < -0.5){
+      //          mucandindex = i_track;
+      //       }
+      //    }
+      // }
+
+      // Pion candidate is the one with the highest mupiBDT signal purity
+      if (vars->TPCObj_PFP_track_mupiBDTsigpur->at(vars->TPCObj_SecondMIPtrackIndex)>vars->TPCObj_PFP_track_mupiBDTsigpur->at(vars->TPCObj_LeadingMIPtrackIndex)){
          picandindex = vars->TPCObj_SecondMIPtrackIndex;
          mucandindex = vars->TPCObj_LeadingMIPtrackIndex;
       }
@@ -933,34 +976,70 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
          picandindex = vars->TPCObj_LeadingMIPtrackIndex;
       }
 
+      // If both contained, pion candidate is the one with the highest mu-pi BDT score
+      // if (vars->MIP_containment->at(0)==0) return;
+      // if (vars->TPCObj_PFP_track_isContained->at(vars->TPCObj_LeadingMIPtrackIndex) && vars->TPCObj_PFP_track_isContained->at(vars->TPCObj_SecondMIPtrackIndex)){
+      //    if (vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_SecondMIPtrackIndex)>vars->TPCObj_PFP_track_mupiBDTscore->at(vars->TPCObj_LeadingMIPtrackIndex)){
+      //       picandindex = vars->TPCObj_SecondMIPtrackIndex;
+      //       mucandindex = vars->TPCObj_LeadingMIPtrackIndex;
+      //    }
+      //    else {
+      //       mucandindex = vars->TPCObj_SecondMIPtrackIndex;
+      //       picandindex = vars->TPCObj_LeadingMIPtrackIndex;
+      //    }
+      // }
+      // // If only one contained, that one is the pion candidate
+      // else if (vars->TPCObj_PFP_track_isContained->at(vars->TPCObj_LeadingMIPtrackIndex)){
+      //    picandindex = vars->TPCObj_LeadingMIPtrackIndex;
+      //    mucandindex = vars->TPCObj_SecondMIPtrackIndex;
+      // }
+      // else if (vars->TPCObj_PFP_track_isContained->at(vars->TPCObj_SecondMIPtrackIndex)){
+      //    picandindex = vars->TPCObj_SecondMIPtrackIndex;
+      //    mucandindex = vars->TPCObj_LeadingMIPtrackIndex;
+      // }
+
+      // mucandindex = vars->TPCObj_LeadingMIPtrackIndex;
+      // picandindex = vars->TPCObj_SecondMIPtrackIndex;
+
       vars->TPCObj_PiCandtrackIndex = picandindex;
       vars->TPCObj_MuCandtrackIndex = mucandindex;
 
-      vars->BDT_muoncandidatePDG = vars->TPCObj_PFP_truePDG->at(mucandindex);
-      vars->BDT_pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(picandindex);
-
-      vars->TPCObj_PFP_track_mupiBDTscore_PiCandOverMuCand->at(0) = TMath::Abs(vars->TPCObj_PFP_track_mupiBDTscore->at(picandindex)/vars->TPCObj_PFP_track_mupiBDTscore->at(mucandindex));
-
-      vars->TPCObj_PFP_track_mupiBDTscore_PiCandMinusMuCand->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(picandindex)-vars->TPCObj_PFP_track_mupiBDTscore->at(mucandindex);
-
-      // Store mu-pi BDT score for leading and second MIP
-      vars->TPCObj_PFP_track_mupiBDTscore_PiCand->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(picandindex);
-      vars->TPCObj_PFP_track_mupiBDTscore_MuCand->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(mucandindex);
-
-      if (vars->TPCObj_PFP_track_isContained->at(picandindex)){
-         vars->TPCObj_PFP_track_mupiBDTscore_PiCand_contonly->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(picandindex);
+      if (mucandindex>=0){
+         vars->BDT_muoncandidatePDG = vars->TPCObj_PFP_truePDG->at(mucandindex);
       }
-      else{
-         vars->TPCObj_PFP_track_mupiBDTscore_PiCand_exitonly->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(picandindex);
+      if (picandindex>=0){
+         vars->BDT_pioncandidatePDG = vars->TPCObj_PFP_truePDG->at(picandindex);
       }
 
-      if (vars->TPCObj_PFP_track_isContained->at(mucandindex)){
-         vars->TPCObj_PFP_track_mupiBDTscore_MuCand_contonly->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(mucandindex);
+      if (mucandindex>=0 && picandindex>=0){
+         vars->TPCObj_PFP_track_mupiBDTscore_PiCandOverMuCand->at(0) = /*TMath::Abs(*/vars->TPCObj_PFP_track_mupiBDTscore->at(picandindex)/vars->TPCObj_PFP_track_mupiBDTscore->at(mucandindex)/*)*/;
+         vars->TPCObj_PFP_track_mupiBDTscore_PiCandMinusMuCand->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(picandindex)-vars->TPCObj_PFP_track_mupiBDTscore->at(mucandindex);
+
+         // Store mu-pi BDT score for pion and muon candidates
+         vars->TPCObj_PFP_track_mupiBDTscore_PiCand->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(picandindex);
+         vars->TPCObj_PFP_track_mupiBDTscore_MuCand->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(mucandindex);
+
+         if (vars->TPCObj_PFP_track_isContained->at(picandindex)){
+            vars->TPCObj_PFP_track_mupiBDTscore_PiCand_contonly->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(picandindex);
+         }
+         else{
+            vars->TPCObj_PFP_track_mupiBDTscore_PiCand_exitonly->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(picandindex);
+         }
+
+         if (vars->TPCObj_PFP_track_isContained->at(mucandindex)){
+            vars->TPCObj_PFP_track_mupiBDTscore_MuCand_contonly->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(mucandindex);
+         }
+         else{
+            vars->TPCObj_PFP_track_mupiBDTscore_MuCand_exitonly->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(mucandindex);
+         }
       }
-      else{
-         vars->TPCObj_PFP_track_mupiBDTscore_MuCand_exitonly->at(0) = vars->TPCObj_PFP_track_mupiBDTscore->at(mucandindex);
-      }
+
    }
+
+   // Evaluate pion cut (i.e. whether we want to class this track as a pion). Cut algorithm defined in CC1pi_cuts.cxx
+  for (int i_track=0; i_track < vecsize; i_track++){
+    vars->TPCObj_PFP_track_passesPioncut->at(i_track) = EvalPionCut(vars,i_track);
+  }
 
 }
 

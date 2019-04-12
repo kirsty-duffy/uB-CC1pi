@@ -35,6 +35,11 @@ double EvalPionCut(treevars *vars, int i_tr){
      return 0;
    }
 
+   // A muon candidate must have been selected
+   if (vars->TPCObj_MuCandtrackIndex < 0){
+      return 0;
+   }
+
    // Must be pion candidate
    if (vars->TPCObj_PiCandtrackIndex != i_tr){
       return 0;
@@ -44,16 +49,16 @@ double EvalPionCut(treevars *vars, int i_tr){
    if (vars->TPCObj_PFP_track_isContained->at(i_tr)){
       // Contained BDT cut
 
-      double mupibdt = vars->TPCObj_PFP_track_mupiBDTscore_cont->at(i_tr);
-
-      // std::cout << "mupibdt = " << mupibdt << std::endl;
-
-      if (mupibdt == -9999 || mupibdt == -999){
-        return -9999;
-      }
-      else if (mupibdt <= 0.2){
-         return 0;
-      }
+      // double mupibdt = vars->TPCObj_PFP_track_mupiBDTscore_cont->at(i_tr);
+      //
+      // // std::cout << "mupibdt = " << mupibdt << std::endl;
+      //
+      // if (mupibdt == -9999 || mupibdt == -999){
+      //   return -9999;
+      // }
+      // else if (mupibdt <= 0.2){
+      //    return 0;
+      // }
    }
    else{
       // Exiting BDT cut

@@ -1667,6 +1667,38 @@ CC1piPlotVars Var_TPCObj_MIPstartend_mindist(treevars *vars){
   return tmp;
 }
 
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTsigpur(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTsigpur;
+  tmp.bins = {27,-0.04,1.04};
+  tmp.histtitle = ";Mu/pi BDT signal purity (selected daughter MIPs only, combined contained and exiting);";
+  tmp.histname = "mupiBDT_sigpur_daughtermips";
+  tmp.PlotOnlyDaughterMIPs = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTsigpur_PiCand(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTsigpur;
+  tmp.bins = {27,-0.04,1.04};
+  tmp.histtitle = ";Mu/pi BDT signal purity (selected pion candidates only, combined contained and exiting);";
+  tmp.histname = "mupiBDT_sigpur_picand";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyPionCandidate = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTsigpur_MuCand(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTsigpur;
+  tmp.bins = {27,-0.04,1.04};
+  tmp.histtitle = ";Mu/pi BDT signal purity (selected muon candidates only, combined contained and exiting);";
+  tmp.histname = "mupiBDT_sigpur_mucand";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyMuonCandidate = true;
+  return tmp;
+}
+
 CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore;
@@ -1719,6 +1751,65 @@ CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_exitingonly(treevars *vars){
   return tmp;
 }
 
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_containedonly_longestMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore;
+  tmp.bins = {30,-1.1,1.1};
+  tmp.histtitle = ";Contained Mu/pi BDT score (longest daughter MIP, contained only);";
+  tmp.histname = "mupiBDT_daughtermips_contonly_longestMIP";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyLeadingDaughterMIP = true;
+  tmp.PlotOnlyContained = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_exitingonly_longestMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore;
+  tmp.bins = {30,-1.1,1.1};
+  tmp.histtitle = ";Exiting Mu/pi BDT score (longest daughter MIP, exiting only);";
+  tmp.histname = "mupiBDT_daughtermips_exitonly_longestMIP";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyLeadingDaughterMIP = true;
+  tmp.PlotOnlyExiting = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_containedonly_shortestMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore;
+  tmp.bins = {30,-1.1,1.1};
+  tmp.histtitle = ";Contained Mu/pi BDT score (shortest daughter MIP, contained only);";
+  tmp.histname = "mupiBDT_daughtermips_contonly_shortestMIP";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlySecondDaughterMIP = true;
+  tmp.PlotOnlyContained = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_exitingonly_shortestMIP(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore;
+  tmp.bins = {30,-1.1,1.1};
+  tmp.histtitle = ";Exiting Mu/pi BDT score (shortest daughter MIP, exiting only);";
+  tmp.histname = "mupiBDT_daughtermips_exitonly_shortestMIP";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlySecondDaughterMIP = true;
+  tmp.PlotOnlyExiting = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_pioncand(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore;
+  tmp.bins = {30,-1.1,1.1};
+  tmp.histtitle = ";Contained Mu/pi BDT score (selected pi+ candidates only);";
+  tmp.histname = "mupiBDT_pioncand";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyPionCandidate = true;
+  return tmp;
+}
+
 CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_containedonly_pioncand(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore;
@@ -1743,6 +1834,17 @@ CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_exitingonly_pioncand(treevars *v
   return tmp;
 }
 
+CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_muoncand(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore;
+  tmp.bins = {30,-1.1,1.1};
+  tmp.histtitle = ";Contained Mu/pi BDT score (selected muon candidates only);";
+  tmp.histname = "mupiBDT_muoncand";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyMuonCandidate = true;
+  return tmp;
+}
+
 CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_containedonly_muoncand(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore;
@@ -1750,7 +1852,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_containedonly_muoncand(treevars 
   tmp.histtitle = ";Contained Mu/pi BDT score (selected contained muon candidates only);";
   tmp.histname = "mupiBDT_muoncand_contonly";
   tmp.PlotOnlyDaughterMIPs = true;
-  tmp.PlotNotPionCandidate = true;
+  tmp.PlotOnlyMuonCandidate = true;
   tmp.PlotOnlyContained = true;
   return tmp;
 }
@@ -1762,7 +1864,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_exitingonly_muoncand(treevars *v
   tmp.histtitle = ";Exiting Mu/pi BDT score (selected exiting muon candidates only);";
   tmp.histname = "mupiBDT_muoncand_exitonly";
   tmp.PlotOnlyDaughterMIPs = true;
-  tmp.PlotNotPionCandidate = true;
+  tmp.PlotOnlyMuonCandidate = true;
   tmp.PlotOnlyExiting = true;
   return tmp;
 }
@@ -1833,7 +1935,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_MuCand_exitonly(treevars *vars){
 CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_PiCandOverMuCand(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore_PiCandOverMuCand;
-  tmp.bins = {15,0,2};
+  tmp.bins = {50,-10,10};
   tmp.histtitle = ";Mu/pi BDT score: pion candidate score/muon candidate score;";
   tmp.histname = "mupiBDT_PiCandOverMuCand";
   return tmp;
@@ -1842,7 +1944,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_PiCandOverMuCand(treevars *vars)
 CC1piPlotVars Var_TPCObj_PFP_track_mupiBDTscore_PiCandMinusMuCand(treevars *vars){
   CC1piPlotVars tmp;
   tmp.Var = vars->TPCObj_PFP_track_mupiBDTscore_PiCandMinusMuCand;
-  tmp.bins = {15,0,2};
+  tmp.bins = {21,-2.1,2.1};
   tmp.histtitle = ";Mu/pi BDT score: pion candidate score - muon candidate score;";
   tmp.histname = "mupiBDT_PiCandMinusMuCand";
   return tmp;

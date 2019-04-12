@@ -19,10 +19,18 @@ struct mupiBDT{
 
    std::string BookMVAType_contained = "BDTG";
    std::string BookMVALoc_contained = "/uboone/app/users/kduffy/CC1pi/CC1pi_uboonecode/srcs/uboonecode/uboone/CC1pi/ignore/2019-01-28/dataset_cont/weights/TMVAClassification_cont_BDTG.weights.xml";
+   // std::string BookMVALoc_contained = "/uboone/app/users/kduffy/CC1pi/CC1pi_uboonecode/srcs/uboonecode/uboone/CC1pi/ignore/2019-04-04/dataset_cont_nolength/weights/TMVAClassification_cont_BDTG.weights.xml";
    TMVA::Reader *fReader_contained;
    std::string BookMVAType_exiting = "BDTG";
    std::string BookMVALoc_exiting = "/uboone/app/users/kduffy/CC1pi/CC1pi_uboonecode/srcs/uboonecode/uboone/CC1pi/ignore/2019-01-28/dataset_exiting/weights/TMVAClassification_exiting_BDTG.weights.xml";
+   // std::string BookMVALoc_exiting = "/uboone/app/users/kduffy/CC1pi/CC1pi_uboonecode/srcs/uboonecode/uboone/CC1pi/ignore/2019-04-04/dataset_exiting_nolength/weights/TMVAClassification_exiting_BDTG.weights.xml";
    TMVA::Reader *fReader_exiting;
+
+   std::string MVAOutputRootFile = "/uboone/app/users/kduffy/CC1pi/CC1pi_uboonecode/srcs/uboonecode/uboone/CC1pi/ignore/2019-01-28/TMVA_mupi_output.root";
+   std::string MVAOutputRootFile_conthistname = "dataset_cont/Method_BDTG/BDTG/MVA_BDTG_";
+   std::string MVAOutputRootFile_exitinghistname = "dataset_exiting/Method_BDTG/BDTG/MVA_BDTG_";
+   TH1D *MVA_sig_purity_cont;
+   TH1D *MVA_sig_purity_exiting;
 
    bool CheckMVAvars();
    void initialise_BDT_contained();

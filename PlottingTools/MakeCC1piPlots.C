@@ -79,12 +79,16 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       // Var_TPCObj_PFP_track_mupiBDTscore(vars)
       // // ,Var_TPCObj_PFP_track_ContmupiBDTscore(vars)
       // // ,Var_TPCObj_PFP_track_ExitmupiBDTscore(vars)
-      // ,Var_TPCObj_PFP_track_mupiBDTscore_containedonly(vars)
-      // ,Var_TPCObj_PFP_track_mupiBDTscore_exitingonly(vars)
+      Var_TPCObj_PFP_track_mupiBDTscore_containedonly(vars)
+      ,Var_TPCObj_PFP_track_mupiBDTscore_exitingonly(vars)
+      ,Var_TPCObj_PFP_track_mupiBDTscore_containedonly_longestMIP(vars)
+      ,Var_TPCObj_PFP_track_mupiBDTscore_exitingonly_longestMIP(vars)
+      ,Var_TPCObj_PFP_track_mupiBDTscore_containedonly_shortestMIP(vars)
+      ,Var_TPCObj_PFP_track_mupiBDTscore_exitingonly_shortestMIP(vars)
       // ,Var_TPCObj_PFP_track_mupiBDTscore_all(vars)
       // // ,Var_TPCObj_PFP_track_mupiBDTscore_longestMIP(vars)
       // // ,Var_TPCObj_PFP_track_mupiBDTscore_secondMIP(vars)
-      Var_TPCObj_PFP_track_mupiBDTscore_PiCandOverMuCand(vars)
+      ,Var_TPCObj_PFP_track_mupiBDTscore_PiCandOverMuCand(vars)
       ,Var_TPCObj_PFP_track_mupiBDTscore_PiCandMinusMuCand(vars)
       ,Var_TPCObj_PFP_track_passesPioncut(vars)
       // ,Var_TPCObj_PFP_track_length_over_startend(vars)
@@ -97,10 +101,15 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       // ,Var_TPCObj_PFP_track_n_unused_hits_nearend(vars)
       // ,Var_TPCObj_PFP_track_unmatched_charge_nearend_plane2(vars)
       // ,Var_TPCObj_PFP_track_unmatched_charge_nearend_plane2_nozero(vars)
+      ,Var_TPCObj_PFP_track_mupiBDTscore_pioncand(vars)
       ,Var_TPCObj_PFP_track_mupiBDTscore_containedonly_pioncand(vars)
       ,Var_TPCObj_PFP_track_mupiBDTscore_exitingonly_pioncand(vars)
+      ,Var_TPCObj_PFP_track_mupiBDTscore_muoncand(vars)
       ,Var_TPCObj_PFP_track_mupiBDTscore_containedonly_muoncand(vars)
       ,Var_TPCObj_PFP_track_mupiBDTscore_exitingonly_muoncand(vars)
+      ,Var_TPCObj_PFP_track_mupiBDTsigpur(vars)
+      ,Var_TPCObj_PFP_track_mupiBDTsigpur_PiCand(vars)
+      ,Var_TPCObj_PFP_track_mupiBDTsigpur_MuCand(vars)
    };
    return varstoplot;
 }
@@ -129,11 +138,28 @@ std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> GetVarstoplot2D(treevars *va
       // ,{Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_truncated_mean_NotPioncont(vars),Var_TPCObj_PFP_track_length(vars)}
       // ,{Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_mean_NotPioncont(vars),Var_TPCObj_PFP_track_SimpleCluster_hitLinearity_minimum_NotPioncont(vars)}
       //,{Var_TPCObj_PFP_track_length(vars),Var_TPCObj_PFP_track_nhits(vars)}
-      {Var_TPCObj_PFP_track_mupiBDTscore_PiCand(vars),Var_TPCObj_PFP_track_mupiBDTscore_MuCand(vars)}
-      ,{Var_TPCObj_PFP_track_mupiBDTscore_PiCand_contonly(vars),Var_TPCObj_PFP_track_mupiBDTscore_MuCand_contonly(vars)}
+      // {Var_TPCObj_PFP_track_mupiBDTscore_PiCand(vars),Var_TPCObj_PFP_track_mupiBDTscore_MuCand(vars)}
+      {Var_TPCObj_PFP_track_mupiBDTscore_PiCand_contonly(vars),Var_TPCObj_PFP_track_mupiBDTscore_MuCand_contonly(vars)}
       ,{Var_TPCObj_PFP_track_mupiBDTscore_PiCand_contonly(vars),Var_TPCObj_PFP_track_mupiBDTscore_MuCand_exitonly(vars)}
       ,{Var_TPCObj_PFP_track_mupiBDTscore_PiCand_exitonly(vars),Var_TPCObj_PFP_track_mupiBDTscore_MuCand_contonly(vars)}
       ,{Var_TPCObj_PFP_track_mupiBDTscore_PiCand_exitonly(vars),Var_TPCObj_PFP_track_mupiBDTscore_MuCand_exitonly(vars)}
+      //
+      ,{Var_TPCObj_PFP_track_mupiBDTscore_containedonly(vars),Var_TPCObj_PFP_track_length_over_startend(vars)}
+      ,{Var_TPCObj_PFP_track_mupiBDTscore_containedonly(vars),Var_TPCObj_PFP_track_length_over_longestMIP(vars)}
+      ,{Var_TPCObj_PFP_track_mupiBDTscore_containedonly(vars),Var_TPCObj_PFP_ndaughters(vars)}
+      ,{Var_TPCObj_PFP_track_mupiBDTscore_containedonly(vars),Var_TPCObj_PFP_lnLmipovermu(vars)}
+      ,{Var_TPCObj_PFP_track_mupiBDTscore_containedonly(vars),Var_TPCObj_PFP_track_perc_used_hits(vars)}
+      ,{Var_TPCObj_PFP_track_mupiBDTscore_containedonly(vars),Var_TPCObj_PFP_track_MCSpi_meanScatter(vars)}
+      ,{Var_TPCObj_PFP_track_mupiBDTscore_containedonly(vars),Var_TPCObj_PFP_track_MCSpi_maxScatter(vars)}
+      ,{Var_TPCObj_PFP_track_mupiBDTscore_containedonly(vars),Var_TPCObj_PFP_track_n_unused_hits_nearend(vars)}
+      ,{Var_TPCObj_PFP_track_mupiBDTscore_containedonly(vars),Var_TPCObj_PFP_track_unmatched_charge_nearend_plane2(vars)}
+      //
+      ,{Var_TPCObj_PFP_track_mupiBDTscore_exitingonly(vars),Var_TPCObj_PFP_track_length_over_startend(vars)}
+      ,{Var_TPCObj_PFP_track_mupiBDTscore_exitingonly(vars),Var_TPCObj_PFP_track_length_over_longestMIP(vars)}
+      ,{Var_TPCObj_PFP_track_mupiBDTscore_exitingonly(vars),Var_TPCObj_PFP_track_perc_used_hits(vars)}
+      ,{Var_TPCObj_PFP_track_mupiBDTscore_exitingonly(vars),Var_TPCObj_PFP_track_MCSpi_meanScatter(vars)}
+      ,{Var_TPCObj_PFP_track_mupiBDTscore_exitingonly(vars),Var_TPCObj_PFP_track_MCSpi_maxScatter(vars)}
+      //
    };
    return varstoplot2D;
 }
@@ -476,6 +502,10 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
          }
       }
 
+      // Hack: only fill plots if both contained
+      // if (!isSelected) continue;
+      // if (!(mc_vars.TPCObj_PFP_track_isContained->at(mc_vars.TPCObj_LeadingMIPtrackIndex)==1 && mc_vars.TPCObj_PFP_track_isContained->at(mc_vars.TPCObj_SecondMIPtrackIndex)==0)) continue;
+
 
       // For all events, make hit dQds and local linearity plots for true pi+ and mu tracks
       for (int i_tr=0; i_tr<mc_vars.TPCObj_PFP_isDaughter->size(); i_tr++){
@@ -495,6 +525,24 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
            delete c1;
          }
       }
+
+      //Record info for event displays
+      // for(int PFP = 0; PFP < mc_vars.TPCObj_PFP_truePDG->size(); PFP++) {
+      //    if(  mc_vars.TPCObj_PFP_track_isContained->at(PFP)==0 && mc_vars.TPCObj_PFP_track_mupiBDTscore->at(PFP)>0.8) {
+      //       std::cout << "Found exiting pion " << mc_vars.TPCObj_PiCandtrackIndex << std::endl;
+      //       evdinfo << "Run/Subrun/Event: " << mc_vars.run_num << " " << mc_vars.subrun_num << " " << mc_vars.event_num << std::endl;
+      //       evdinfo << "True topology: " << topologyenum2str(mc_vars.Truth_topology) << std::endl;
+      //       evdinfo << "Reco nu vertex position (x,y,z): " << mc_vars.TPCObj_reco_vtx->at(0) << " " << mc_vars.TPCObj_reco_vtx->at(1) << " " << mc_vars.TPCObj_reco_vtx->at(2) << std::endl;
+      //       evdinfo << "PDG: " << mc_vars.TPCObj_PFP_truePDG->at(PFP) << " – ";
+      //       evdinfo << "Start (z,x): " << mc_vars.TPCObj_PFP_track_start->at(PFP).at(2) << " " << mc_vars.TPCObj_PFP_track_start->at(PFP).at(0) << " – ";
+      //       evdinfo << "End (z,x): " << mc_vars.TPCObj_PFP_track_end->at(PFP).at(2) << " " << mc_vars.TPCObj_PFP_track_end->at(PFP).at(0);
+      //       if (mc_vars.TPCObj_PFP_track_passesMIPcut->at(PFP)) evdinfo << " - mu-pi BDT score " << mc_vars.TPCObj_PFP_track_mupiBDTscore->at(PFP);
+      //       if (mc_vars.TPCObj_PFP_track_isContained->at(PFP)) evdinfo << " - Contained";
+      //       else evdinfo << " - Exiting";
+      //       evdinfo << std::endl;
+      //       evdinfo << std::endl;
+      //    }
+      // }
 
       if(isSelected){
          // std::cout << i << " " << mc_vars.TPCObj_LeadingMIPtrackIndex << " " << mc_vars.TPCObj_SecondMIPtrackIndex << std::endl;
@@ -535,19 +583,23 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
          }
 
 
-         //Record info for event displays
-         if(SecondMIPpdg==kProton) {
-            evdinfo << "Run/Subrun/Event: " << mc_vars.run_num << " " << mc_vars.subrun_num << " " << mc_vars.event_num << std::endl;
-            evdinfo << "True topology: " << topologyenum2str(mc_vars.Truth_topology) << std::endl;
-            evdinfo << "Reco nu vertex position (x,y,z): " << mc_vars.TPCObj_reco_vtx->at(0) << " " << mc_vars.TPCObj_reco_vtx->at(1) << " " << mc_vars.TPCObj_reco_vtx->at(2) << std::endl;
-            for(int PFP = 0; PFP < mc_vars.TPCObj_PFP_truePDG->size(); PFP++) {
-               evdinfo << "PDG: " << mc_vars.TPCObj_PFP_truePDG->at(PFP) << " – ";
-               evdinfo << "Start (z,x): " << mc_vars.TPCObj_PFP_track_start->at(PFP).at(2) << " " << mc_vars.TPCObj_PFP_track_start->at(PFP).at(0) << " – ";
-               evdinfo << "End (z,x): " << mc_vars.TPCObj_PFP_track_end->at(PFP).at(2) << " " << mc_vars.TPCObj_PFP_track_end->at(PFP).at(0);
-               evdinfo << std::endl;
-            }
-            evdinfo << std::endl;
-         }
+
+         // //Record info for event displays
+         // if(mc_vars.TPCObj_PFP_track_isContained->at(mc_vars.TPCObj_PiCandtrackIndex)==0/*i<1000*/) {
+         //    evdinfo << "Run/Subrun/Event: " << mc_vars.run_num << " " << mc_vars.subrun_num << " " << mc_vars.event_num << std::endl;
+         //    evdinfo << "True topology: " << topologyenum2str(mc_vars.Truth_topology) << std::endl;
+         //    evdinfo << "Reco nu vertex position (x,y,z): " << mc_vars.TPCObj_reco_vtx->at(0) << " " << mc_vars.TPCObj_reco_vtx->at(1) << " " << mc_vars.TPCObj_reco_vtx->at(2) << std::endl;
+         //    for(int PFP = 0; PFP < mc_vars.TPCObj_PFP_truePDG->size(); PFP++) {
+         //       evdinfo << "PDG: " << mc_vars.TPCObj_PFP_truePDG->at(PFP) << " – ";
+         //       evdinfo << "Start (z,x): " << mc_vars.TPCObj_PFP_track_start->at(PFP).at(2) << " " << mc_vars.TPCObj_PFP_track_start->at(PFP).at(0) << " – ";
+         //       evdinfo << "End (z,x): " << mc_vars.TPCObj_PFP_track_end->at(PFP).at(2) << " " << mc_vars.TPCObj_PFP_track_end->at(PFP).at(0);
+         //       if (mc_vars.TPCObj_PFP_track_passesMIPcut->at(PFP)) evdinfo << " - mu-pi BDT score " << mc_vars.TPCObj_PFP_track_mupiBDTscore->at(PFP);
+         //       if (mc_vars.TPCObj_PFP_track_isContained->at(PFP)) evdinfo << " - Contained";
+         //       else evdinfo << " - Exiting";
+         //       evdinfo << std::endl;
+         //    }
+         //    evdinfo << std::endl;
+         // }
 
       } // end if (isSelected)
 
@@ -875,8 +927,8 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    TCanvas *c1 = new TCanvas();
 
    // Make custom plot: leading vs second MIP
-   // selMIPs2D->Scale(1.0/selMIPs2D->Integral());
-   //selMIPs2D_signal->Scale(1.0/selMIPs2D_signal->Integral());
+   selMIPs2D->Scale(1.0/selMIPs2D->Integral());
+   selMIPs2D_signal->Scale(1.0/selMIPs2D_signal->Integral());
 
    for (size_t x_bin=1; x_bin<nMIPpdgs+1; x_bin++){
       float total = 0;
