@@ -224,6 +224,10 @@ else { // fine
     topPad->Draw();
     bottomPad->Draw();
 
+    double maxrange = std::max(stack->GetMaximum(),datatodraw->GetMaximum());
+    stack->SetMaximum(maxrange);
+    datatodraw->SetMaximum(maxrange);
+
     topPad->cd();
     stack->Draw("hist");
     stack->GetXaxis()->SetTitleSize(0);
@@ -235,6 +239,8 @@ else { // fine
     bottomPad->cd();
     TH1* MCtotal = (TH1*)stack->GetStack()->Last()->Clone("MCtotal");
     TH1* dataratio = (TH1*)datatodraw->Clone("dataratio");
+    dataratio->SetMinimum(0);
+    dataratio->SetMaximum(2);
     dataratio->Divide(MCtotal);
     dataratio->GetXaxis()->SetTitle(stack->GetXaxis()->GetTitle());
     dataratio->GetYaxis()->SetTitle("Data/MC ratio");
