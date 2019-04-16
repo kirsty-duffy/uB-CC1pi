@@ -416,12 +416,23 @@ CC1piPlotVars Var_TPCObj_PFP_track_passesMIPcut(treevars *vars){
   tmp.KeepBelowCut = false;
   tmp.OnlyDaughters = true;
   tmp.TracksNeeded = "exactlytwo";
+//  tmp.TracksNeeded = "NA";
   tmp.CutValue = 0.5;
   tmp.bins = {2,0,2};
   tmp.histtitle = ";IsMIP;";
   tmp.histname = "isMIP";
   tmp.PlotOnlyDaughterMIPs = false;
   tmp.PlotOnlyContained = false;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_NMIPs(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_NMIPs;
+  tmp.bins = {10,0,10};
+  tmp.PlotOnlyDaughters = true;
+  tmp.histtitle = ";Number of tracks classified as MIPs;";
+  tmp.histname = "NMIPs";
   return tmp;
 }
 
@@ -1669,6 +1680,35 @@ CC1piPlotVars Var_TPCObj_PFP_track_MuonMomCombined_LeadingMIP(treevars *vars){
   tmp.PlotOnlyLeadingDaughterMIP = true;
   return tmp;
 }
+
+CC1piPlotVars Var_TPCObj_AngleBetweenMIPs_broken(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_AngleBetweenMIPs_broken;
+  tmp.KeepBelowCut = true;
+  tmp.TracksNeeded = "NA";
+  tmp.CutValue = 2.6;
+  tmp.bins = {15,0,3.14};
+  tmp.histtitle = ";Angle between truly broken MIP candidates [rad];";
+  tmp.histname = "AngleBetweenMIPs_broken";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyContained = false;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_AngleBetweenMIPs_notbroken(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_AngleBetweenMIPs_notbroken;
+  tmp.KeepBelowCut = true;
+  tmp.TracksNeeded = "NA";
+  tmp.CutValue = 2.6;
+  tmp.bins = {15,0,3.14};
+  tmp.histtitle = ";Angle between truly non-broken MIP candidates [rad];";
+  tmp.histname = "AngleBetweenMIPs_notbroken";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyContained = false;
+  return tmp;
+}
+
 
 // Decide whether to fill a plot for a given track. This is useful for e.g. plots with PlotOnlyDaughterMIPs=true
 bool FillPlotForTrack(CC1piPlotVars *plotvar, treevars *vars, int i_tr){

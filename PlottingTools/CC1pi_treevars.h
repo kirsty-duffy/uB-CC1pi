@@ -141,6 +141,7 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_MCP_PDG_mTruePDG;
    std::vector<double> *TPCObj_PFP_track_BDTscore;
    std::vector<double> *TPCObj_NDaughterPFPs;
+   std::vector<double> *TPCObj_NMIPs;
    std::vector<double> *TPCObj_PFP_MCP_trueOrigPDG;
    std::vector<double> *TPCObj_PFP_track_theta_lowdEdx;
    std::vector<double> *TPCObj_PFP_track_theta_highdEdx;
@@ -167,6 +168,8 @@ struct treevars{
    // Not really a vector, only going to have one entry
    // But easier to store this way so it's compatible with the plotting code
    std::vector<double> *TPCObj_AngleBetweenMIPs;
+   std::vector<double> *TPCObj_AngleBetweenMIPs_broken;
+   std::vector<double> *TPCObj_AngleBetweenMIPs_notbroken;
    std::vector<double> *TPCObj_dEdx_truncmean_MIPdiff;
    std::vector<double> *TPCObj_dEdx_truncmean_MIPdiff_mupi;
    std::vector<double> *TPCObj_dEdx_truncmean_MIPdiff_muproton;
