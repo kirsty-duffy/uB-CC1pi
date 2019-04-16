@@ -267,6 +267,10 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
 
    if (vecsize>0) vars->TPCObj_AngleBetweenMIPs = new std::vector<double>(1,-9999);
    else vars->TPCObj_AngleBetweenMIPs = new std::vector<double>(0,-9999);
+   if (vecsize>0) vars->TPCObj_AngleBetweenMIPs_broken = new std::vector<double>(1,-9999);
+   else vars->TPCObj_AngleBetweenMIPs_broken = new std::vector<double>(0,-9999);
+   if (vecsize>0) vars->TPCObj_AngleBetweenMIPs_notbroken = new std::vector<double>(1,-9999);
+   else vars->TPCObj_AngleBetweenMIPs_notbroken = new std::vector<double>(0,-9999);
 
    if (vecsize>0) vars->TPCObj_dEdx_truncmean_MIPdiff = new std::vector<double>(1,-9999);
    else vars->TPCObj_dEdx_truncmean_MIPdiff = new std::vector<double>(0,-9999);
@@ -305,7 +309,11 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
       vars->TPCObj_BDTscore_MIPdiv = new std::vector<double>(0);
    }
 
-   vars->TPCObj_NDaughterPFPs = new std::vector<double>(1,-9999);
+   if (vecsize>0) vars->TPCObj_NDaughterPFPs = new std::vector<double>(1,-9999);
+   else vars->TPCObj_NDaughterPFPs = new std::vector<double>(0,-9999);
+
+   if (vecsize>0) vars->TPCObj_NMIPs = new std::vector<double>(1,-9999);
+   else vars->TPCObj_NMIPs = new std::vector<double>(0,-9999);
 
    vars->TPCObj_PFP_track_trueTheta = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_track_truePhi = new std::vector<double>(vecsize,-9999);
@@ -340,7 +348,7 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
    std::vector<std::pair<double, int>> *pair_dEdx_truncmean_index = new std::vector<std::pair<double, int>>(vecsize);
    std::vector<std::pair<double, int>> *pair_trklen_index = new std::vector<std::pair<double, int>>(vecsize);
 
-   vars->TPCObj_NDaughterPFPs->at(0) = std::count(vars->TPCObj_PFP_isDaughter->begin(),vars->TPCObj_PFP_isDaughter->end(),1);
+   if(vecsize>0) vars->TPCObj_NDaughterPFPs->at(0) = std::count(vars->TPCObj_PFP_isDaughter->begin(),vars->TPCObj_PFP_isDaughter->end(),1);
 
    // Now calculate the values for all variables
    for (int i_track=0; i_track < vecsize; i_track++){
@@ -690,6 +698,10 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
       // Evaluate MIP cut (i.e. whether we want to class this track as a MIP). Cut algorithm defined in CC1pi_cuts.cxx and the variables that go into the decision are defined in CC1pi_cuts.h
       vars->TPCObj_PFP_track_passesMIPcut->at(i_track) = (double)EvalMIPCut(vars,i_track,MIPCutVars);
 
+      vars->TPCObj_NMIPs->at(0) = std::count(vars->TPCObj_PFP_track_passesMIPcut->begin(), vars->TPCObj_PFP_track_passesMIPcut->end(), 1);
+
+      // Evaluate pion cut (i.e. whether we want to class this track as a pion). Cut algorithm defined in CC1pi_cuts.cxx and the variables that go into the decision are defined in CC1pi_cuts.h
+      vars->TPCObj_PFP_track_passesPioncut->at(i_track) = EvalPionCut(vars,i_track);
 
 
       // Look at spacepoints for local linearity: order vectors containing spacepoints and hit integral (charge) for plane 2 hits in a sensible way (i.e. along the track)
@@ -812,6 +824,14 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
       double dist2=(start2-end1).Mag();
 
       vars->TPCObj_MIPstartend_mindist->at(0) = std::min(dist1,dist2);
+      if(vars->TPCObj_PFP_MCPid->at(vars->TPCObj_LeadingMIPtrackIndex) == vars->TPCObj_PFP_MCPid->at(vars->TPCObj_SecondMIPtrackIndex)) {
+         vars->TPCObj_AngleBetweenMIPs_broken->at(0) = vars->TPCObj_AngleBetweenMIPs->at(0);
+         vars->TPCObj_AngleBetweenMIPs_notbroken->at(0) = -9999;
+      }
+      else {
+         vars->TPCObj_AngleBetweenMIPs_broken->at(0) = -9999;
+         vars->TPCObj_AngleBetweenMIPs_notbroken->at(0) = vars->TPCObj_AngleBetweenMIPs->at(0);
+      }
    }
 
    // Calculate mu-pi BDT score

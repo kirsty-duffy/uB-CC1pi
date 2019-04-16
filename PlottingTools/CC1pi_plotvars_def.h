@@ -418,6 +418,7 @@ CC1piPlotVars Var_TPCObj_PFP_track_passesMIPcut(treevars *vars){
   tmp.KeepBelowCut = false;
   tmp.OnlyDaughters = true;
   tmp.TracksNeeded = "exactlytwo";
+//  tmp.TracksNeeded = "NA";
   tmp.CutValue = 0.5;
   tmp.bins = {2,0,2};
   tmp.histtitle = ";IsMIP;";
@@ -437,6 +438,16 @@ CC1piPlotVars Var_TPCObj_PFP_track_passesPioncut(treevars *vars){
   tmp.TracksNeeded = "exactlyone";
   tmp.histtitle = ";Is Pion Candidate?;";
   tmp.histname = "IsPionCand";
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_NMIPs(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_NMIPs;
+  tmp.bins = {10,0,10};
+  tmp.PlotOnlyDaughters = true;
+  tmp.histtitle = ";Number of tracks classified as MIPs;";
+  tmp.histname = "NMIPs";
   return tmp;
 }
 
@@ -1853,6 +1864,34 @@ CC1piPlotVars Var_TPCObj_PFP_track_unmatched_charge_nearend_plane2_nozero(treeva
   tmp.histtitle = ";Unmatched plane 2 charge near end (selected MIPs only);";
   tmp.histname = "unmatched_charge_plane2_notzero";
   tmp.PlotOnlyDaughterMIPs = true;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_AngleBetweenMIPs_broken(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_AngleBetweenMIPs_broken;
+  tmp.KeepBelowCut = true;
+  tmp.TracksNeeded = "NA";
+  tmp.CutValue = 2.6;
+  tmp.bins = {15,0,3.14};
+  tmp.histtitle = ";Angle between truly broken MIP candidates [rad];";
+  tmp.histname = "AngleBetweenMIPs_broken";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyContained = false;
+  return tmp;
+}
+
+CC1piPlotVars Var_TPCObj_AngleBetweenMIPs_notbroken(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->TPCObj_AngleBetweenMIPs_notbroken;
+  tmp.KeepBelowCut = true;
+  tmp.TracksNeeded = "NA";
+  tmp.CutValue = 2.6;
+  tmp.bins = {15,0,3.14};
+  tmp.histtitle = ";Angle between truly non-broken MIP candidates [rad];";
+  tmp.histname = "AngleBetweenMIPs_notbroken";
+  tmp.PlotOnlyDaughterMIPs = true;
+  tmp.PlotOnlyContained = false;
   return tmp;
 }
 
