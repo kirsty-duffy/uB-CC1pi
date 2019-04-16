@@ -75,6 +75,10 @@ std::vector<CC1piPlotVars> GetVarstoplot(treevars *vars){
       ,Var_TPCObj_PFP_track_BDTscore(vars)
       ,Var_TPCObj_PFP_VtxTrackDist(vars)
       ,Var_MIP_containment(vars)
+      ,Var_TPCObj_AngleBetweenMIPs_broken(vars)
+      ,Var_TPCObj_AngleBetweenMIPs_notbroken(vars)
+      ,Var_TPCObj_NDaughterPFPs(vars)
+      ,Var_TPCObj_NMIPs(vars)
 
    };
    return varstoplot;
@@ -106,7 +110,22 @@ std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> GetVarstoplot2D(treevars *va
    return varstoplot2D;
 }
 
+bool CheckEvent(const char* filename, const char* search) {
+   string line;
+   ifstream Myfile;
+   Myfile.open(filename);
 
+   while(!Myfile.eof()) {
+      getline(Myfile, line);
+      if (line.find(search, 0) != string::npos) {
+         Myfile.close();
+         return true;
+      }
+   }
+
+   Myfile.close();
+   return false;
+}
 
 // ---------------------------------------------------- //
 //  Now the function starts
@@ -145,7 +164,14 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
 
    TFile *f_bnbcos = new TFile(mcfile.c_str(), "read");
    TTree *t_bnbcos = (TTree*)f_bnbcos->Get("cc1piselec/outtree");
-
+/*
+   TFile f_empty("empty.root", "RECREATE");
+   TDirectoryFile f_directory("cc1piselec","cc1piselec");
+   TTree *t_empty = t_bnbcos->CloneTree(0);
+   f_directory.Add(t_empty);
+   f_empty.Write();
+   f_empty.Close();
+*/
     if (!t_bnbcos){
       std::cout << "Error: did not find tree cc1piselec/outtree in file" << std::endl;
       return;
@@ -201,13 +227,18 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    ofstream evdinfo;
    evdinfo.open("evdinfo.txt");
 
+   ofstream pass;
+   pass.open("pass.txt");
+
+   ofstream fail;
+   fail.open("fail.txt");
+
    // Sanity check: the plot vectors should be the same size
    t_bnbcos->GetEntry(0);
    Calcvars(&mc_vars, &fReader);
    std::vector<CC1piPlotVars> varstoplot_dummy = GetVarstoplot(&mc_vars);
    std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> varstoplot2D_dummy = GetVarstoplot2D(&mc_vars);
    std::vector<CC1piPlotVars> cutvars_dummy = GetCutVars(&mc_vars);
-
    // ----------------- MC
 
    // Make histograms to fill
@@ -371,9 +402,12 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
       std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> Varstoplot2D = GetVarstoplot2D(&mc_vars);
 
       AllEvents->Fill((NuIntTopology)mc_vars.Truth_topology,0.5);
-      NDaughters->Fill((NuIntTopology)mc_vars.Truth_topology,mc_vars.TPCObj_NDaughterPFPs->at(0));
+      if (mc_vars.TPCObj_NDaughterPFPs->size() > 0) NDaughters->Fill((NuIntTopology)mc_vars.Truth_topology,mc_vars.TPCObj_NDaughterPFPs->at(0));
 
       bool isSelected = IsEventSelected(&mc_vars);
+
+      //std::string eventstring = std::to_string(mc_vars.run_num)+" "+std::to_string(mc_vars.subrun_num)+" "+std::to_string(mc_vars.event_num)+" ";
+      //if(isSelected==true && !CheckEvent("passCV_passDIC.txt",eventstring.c_str())) isSelected = false;
 
       // Fill efficiency plots
       if ((NuIntTopology)mc_vars.Truth_topology == kCC1piplus0p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplus1p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplusNp){
@@ -467,33 +501,33 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
 
          SelectedEvents->Fill((NuIntTopology)mc_vars.Truth_topology,0.5);
 
-         PDGCode LeadingMIPpdg = PDGCode(mc_vars.TPCObj_PFP_truePDG->at(mc_vars.TPCObj_LeadingMIPtrackIndex));
-         PDGCode SecondMIPpdg = PDGCode(mc_vars.TPCObj_PFP_truePDG->at(mc_vars.TPCObj_SecondMIPtrackIndex));
+         if(mc_vars.TPCObj_LeadingMIPtrackIndex != -9999 && mc_vars.TPCObj_SecondMIPtrackIndex != -9999) {
+            PDGCode LeadingMIPpdg = PDGCode(mc_vars.TPCObj_PFP_truePDG->at(mc_vars.TPCObj_LeadingMIPtrackIndex));
+            PDGCode SecondMIPpdg = PDGCode(mc_vars.TPCObj_PFP_truePDG->at(mc_vars.TPCObj_SecondMIPtrackIndex));
 
-         int LeadingMIPbin = nMIPpdgs;
-         int SecondMIPbin = nMIPpdgs;
-         for (int i_bin=0; i_bin<MIPpdgs.size(); i_bin++){
-            if (MIPpdgs.at(i_bin) == LeadingMIPpdg) LeadingMIPbin = i_bin+1;
-            if (MIPpdgs.at(i_bin) == SecondMIPpdg) SecondMIPbin = i_bin+1;
+            int LeadingMIPbin = nMIPpdgs;
+            int SecondMIPbin = nMIPpdgs;
+            for (int i_bin=0; i_bin<MIPpdgs.size(); i_bin++){
+               if (MIPpdgs.at(i_bin) == LeadingMIPpdg) LeadingMIPbin = i_bin+1;
+               if (MIPpdgs.at(i_bin) == SecondMIPpdg) SecondMIPbin = i_bin+1;
+            }
+            selMIPs2D->Fill((double)LeadingMIPbin-0.5,(double)SecondMIPbin-0.5);
+            if ((NuIntTopology)mc_vars.Truth_topology == kCC1piplus0p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplus1p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplusNp)
+               selMIPs2D_signal->Fill((double)LeadingMIPbin-0.5,(double)SecondMIPbin-0.5);
+
+            //PDGCode MuonCandpdg = PDGCode(mc_vars.muoncandidatePDG);
+            //PDGCode PionCandpdg = PDGCode(mc_vars.pioncandidatePDG);
+            PDGCode MuonCandpdg = PDGCode(mc_vars.BDT_muoncandidatePDG);
+            PDGCode PionCandpdg = PDGCode(mc_vars.BDT_pioncandidatePDG);
+
+            int MuonCandbin = nMIPpdgs;
+            int PionCandbin = nMIPpdgs;
+            for (int i_bin=0; i_bin<MIPpdgs.size(); i_bin++){
+               if (MIPpdgs.at(i_bin) == MuonCandpdg) MuonCandbin = i_bin+1;
+               if (MIPpdgs.at(i_bin) == PionCandpdg) PionCandbin = i_bin+1;
+            }
+            selMIPsPID2D->Fill((double)MuonCandbin-0.5,(double)PionCandbin-0.5);
          }
-         selMIPs2D->Fill((double)LeadingMIPbin-0.5,(double)SecondMIPbin-0.5);
-         if ((NuIntTopology)mc_vars.Truth_topology == kCC1piplus0p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplus1p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplusNp)
-            selMIPs2D_signal->Fill((double)LeadingMIPbin-0.5,(double)SecondMIPbin-0.5);
-
-
-         //PDGCode MuonCandpdg = PDGCode(mc_vars.muoncandidatePDG);
-         //PDGCode PionCandpdg = PDGCode(mc_vars.pioncandidatePDG);
-         PDGCode MuonCandpdg = PDGCode(mc_vars.BDT_muoncandidatePDG);
-         PDGCode PionCandpdg = PDGCode(mc_vars.BDT_pioncandidatePDG);
-
-         int MuonCandbin = nMIPpdgs;
-         int PionCandbin = nMIPpdgs;
-         for (int i_bin=0; i_bin<MIPpdgs.size(); i_bin++){
-            if (MIPpdgs.at(i_bin) == MuonCandpdg) MuonCandbin = i_bin+1;
-            if (MIPpdgs.at(i_bin) == PionCandpdg) PionCandbin = i_bin+1;
-         }
-         selMIPsPID2D->Fill((double)MuonCandbin-0.5,(double)PionCandbin-0.5);
-
 
 
          // For selected events, make proton plots
@@ -522,12 +556,26 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
             evdinfo << std::endl;
          }
 */
+         // Record passing event numbers
+         pass << mc_vars.run_num << " " << mc_vars.subrun_num << " " << mc_vars.event_num << " " << std::endl;
+
       } // end if (isSelected)
+
+      else { // if (!isSelected)
+         // Record failing event numbers
+         fail << mc_vars.run_num << " " << mc_vars.subrun_num << " " << mc_vars.event_num << " " << std::endl;
+      }
+
 
       // Fill 1D plots
       // Loop over Varstoplot
       for (size_t i_h = 0; i_h < nplots; i_h++){
-        std::vector<double> vartoplot = *(Varstoplot.at(i_h).Var);
+
+         //std::string eventstring = std::to_string(mc_vars.run_num)+" "+std::to_string(mc_vars.subrun_num)+" "+std::to_string(mc_vars.event_num)+" ";
+         //if(!CheckEvent("passCV_passDIC.txt",eventstring.c_str())) continue;
+
+         std::vector<double> vartoplot = *(Varstoplot.at(i_h).Var);
+
          // Loop over tracks
          for (size_t i_tr = 0; i_tr < vartoplot.size(); i_tr++){
 
@@ -574,6 +622,8 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    } // end loop over entries in tree
 
    evdinfo.close();
+   pass.close();
+   fail.close();
 
    // ----------------- Data: on-beam
 
@@ -893,7 +943,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    double CC1pi_all = AllEvents->GetCC1piIntegral();
    std::cout << std::endl << "Total number of selected events: " << SelectedEvents->GetTotalIntegral() << " MC, " << nsel_onbeam << " beam-on data, " << nsel_offbeam << " ext data" << std::endl;
    std::cout << "CC1pi+ selection efficiency: " << CC1pi_selected << "/" << CC1pi_all << " = " << CC1pi_selected/CC1pi_all << std::endl;
-   std::cout << "Background rejection: 1 - " << SelectedEvents->GetTotalIntegral() - CC1pi_selected << "/" << AllEvents->GetTotalIntegral() << " = " << 1-(SelectedEvents->GetTotalIntegral() - CC1pi_selected)/(1.0*AllEvents->GetTotalIntegral()) << std::endl;
+   std::cout << "Background rejection: 1 - " << SelectedEvents->GetTotalIntegral() - CC1pi_selected << "/" << AllEvents->GetTotalIntegral() - CC1pi_all << " = " << 1-(SelectedEvents->GetTotalIntegral() - CC1pi_selected)/(1.0*AllEvents->GetTotalIntegral() - CC1pi_all) << std::endl;
    getSimPot(mcfile);
 
    f_MVA.Write();
