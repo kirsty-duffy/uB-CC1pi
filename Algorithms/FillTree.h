@@ -13,6 +13,7 @@
 // uboone includes
 #include "uboone/AnalysisTree/MCTruth/AssociationsTruth_tool.h"
 #include "uboone/AnalysisTree/MCTruth/IMCTruthMatching.h"
+#include "uboone/EventWeight/MCEventWeight.h"
 
 // root includes
 #include "TFile.h"

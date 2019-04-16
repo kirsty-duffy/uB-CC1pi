@@ -44,8 +44,8 @@ void InputTags::PrintConfig(){
      << "\t <<<< fResidualsMeanCutUp = " << fResidualsMeanCutUp << std::endl
      << "\t <<<< fResidualsMeanCutDown = " << fResidualsMeanCutDown << std::endl
      << "\t <<<< fPercUsedHitsCut = " << fPercUsedHitsCut << std::endl
-     << "\t <<<< fGenieEventweightPM1Producer = " << fGenieEventweightPM1Producer << std::endl;
-     << "\t <<<< fGenieEventweightMultisimProducer = " << fGenieEventweightMultisimProducer << std::endl;
-     << "\t <<<< fFluxEventweightMultisimProducer = " << fFluxEventweightMultisimProducer << std::endl;
+     << "\t <<<< fGenieEventweightPM1Producer = " << fGenieEventweightPM1Producer << std::endl
+     << "\t <<<< fGenieEventweightMultisimProducer = " << fGenieEventweightMultisimProducer << std::endl
+     << "\t <<<< fFluxEventweightMultisimProducer = " << fFluxEventweightMultisimProducer << std::endl
      << std::endl;
 }

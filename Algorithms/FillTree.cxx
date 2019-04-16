@@ -1004,7 +1004,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
       // GENIE reweighing (systematics - pm1sigma)
       art::Handle<std::vector<evwgh::MCEventWeight>> genieeventweight_pm1_h;
-      e.getByLabel(CC1piInputTags->fGenieEventweightPM1Producer, genieeventweight_pm1_h);
+      evt.getByLabel(CC1piInputTags->fGenieEventweightPM1Producer, genieeventweight_pm1_h);
       if(!genieeventweight_pm1_h.isValid()){
          std::cout << "[CC1pi::FillTree] MCEventWeight for GENIE reweight pm1sigma, product " << CC1piInputTags->fGenieEventweightPM1Producer << " not found..." << std::endl;
          //throw std::exception();
@@ -1031,7 +1031,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
       // GENIE reweighing (systematics - multisim)
       art::Handle<std::vector<evwgh::MCEventWeight>> genieeventweight_multisim_h;
-      e.getByLabel(CC1piInputTags->fGenieEventweightMultisimProducer, genieeventweight_multisim_h);
+      evt.getByLabel(CC1piInputTags->fGenieEventweightMultisimProducer, genieeventweight_multisim_h);
       if(!genieeventweight_multisim_h.isValid()){
          std::cout << "[CC1pi::FillTree] MCEventWeight for GENIE reweight multisim, product " << CC1piInputTags->fGenieEventweightMultisimProducer << " not found..." << std::endl;
          //throw std::exception();
@@ -1058,7 +1058,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
       // Flux reweighing (systematics - multisim)
       art::Handle<std::vector<evwgh::MCEventWeight>> fluxeventweight_multisim_h;
-      e.getByLabel(CC1piInputTags->fFluxEventweightMultisimProducer, fluxeventweight_multisim_h);
+      evt.getByLabel(CC1piInputTags->fFluxEventweightMultisimProducer, fluxeventweight_multisim_h);
       if(!fluxeventweight_multisim_h.isValid()){
          std::cout << "[CC1pi::FillTree] MCEventWeight for FLUX reweight multisim, product " << CC1piInputTags->fFluxEventweightMultisimProducer << " not found..." << std::endl;
          //throw std::exception();
