@@ -161,6 +161,22 @@ void cc1pianavars::Clear(){
    nuint_W = -9999;
    nuint_Qsq = -9999;
 
+   // Event Weight variables
+   evtwgt_genie_pm1_nfunc = -9999;
+   evtwgt_genie_pm1_funcname.clear();
+   evtwgt_genie_pm1_nweight.clear();
+   evtwgt_genie_pm1_weight.clear();
+
+   evtwgt_genie_multisim_nfunc = -9999;
+   evtwgt_genie_multisim_funcname.clear();
+   evtwgt_genie_multisim_nweight.clear();
+   evtwgt_genie_multisim_weight.clear();
+
+   evtwgt_flux_multisim_nfunc = -9999;
+   evtwgt_flux_multisim_funcname.clear();
+   evtwgt_flux_multisim_nweight.clear();
+   evtwgt_flux_multisim_weight.clear();
+
 }
 
 void cc1pianavars::SetReco2Vars(art::Event &evt){
@@ -947,6 +963,93 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          }
       } // end loop over MCParticles
    } // end if (!isData)
+
+
+   if (!isData) {
+
+      // GENIE reweighing (systematics - pm1sigma)
+      art::Handle<std::vector<evwgh::MCEventWeight>> genieeventweight_pm1_h;
+      e.getByLabel(CC1piInputTags->fGenieEventweightPM1Producer, genieeventweight_pm1_h);
+      if(!genieeventweight_pm1_h.isValid()){
+         std::cout << "[CC1pi::FillTree] MCEventWeight for GENIE reweight pm1sigma, product " << CC1piInputTags->fGenieEventweightPM1Producer << " not found..." << std::endl;
+         //throw std::exception();
+      }
+      else {
+         std::vector<art::Ptr<evwgh::MCEventWeight>> genieeventweight_pm1_v;
+         art::fill_ptr_vector(genieeventweight_pm1_v, genieeventweight_pm1_h);
+         if (genieeventweight_pm1_v.size() > 0) {
+            art::Ptr<evwgh::MCEventWeight> evt_wgt = genieeventweight_pm1_v.at(0); // Just for the first nu interaction
+            std::map<std::string, std::vector<double>> evtwgt_map = evt_wgt->fWeight;
+            int countFunc = 0;
+            // loop over the map and save the name of the function and the vector of weights for each function
+            for(auto it : evtwgt_map) {
+               std::string func_name = it.first;
+               std::vector<double> weight_v = it.second; 
+               evtwgt_genie_pm1_funcname.push_back(func_name);
+               evtwgt_genie_pm1_weight.push_back(weight_v);
+               evtwgt_genie_pm1_nweight.push_back(weight_v.size());
+               countFunc++;
+            }
+            evtwgt_genie_pm1_nfunc = countFunc;
+         }
+      }
+
+      // GENIE reweighing (systematics - multisim)
+      art::Handle<std::vector<evwgh::MCEventWeight>> genieeventweight_multisim_h;
+      e.getByLabel(CC1piInputTags->fGenieEventweightMultisimProducer, genieeventweight_multisim_h);
+      if(!genieeventweight_multisim_h.isValid()){
+         std::cout << "[CC1pi::FillTree] MCEventWeight for GENIE reweight multisim, product " << CC1piInputTags->fGenieEventweightMultisimProducer << " not found..." << std::endl;
+         //throw std::exception();
+      }
+      else {
+         std::vector<art::Ptr<evwgh::MCEventWeight>> genieeventweight_multisim_v;
+         art::fill_ptr_vector(genieeventweight_multisim_v, genieeventweight_multisim_h);
+         if (genieeventweight_multisim_v.size() > 0) {
+            art::Ptr<evwgh::MCEventWeight> evt_wgt = genieeventweight_multisim_v.at(0); // Just for the first nu interaction
+            std::map<std::string, std::vector<double>> evtwgt_map = evt_wgt->fWeight;
+            int countFunc = 0;
+            // loop over the map and save the name of the function and the vector of weights for each function
+            for(auto it : evtwgt_map) {
+               std::string func_name = it.first;
+               std::vector<double> weight_v = it.second; 
+               evtwgt_genie_multisim_funcname.push_back(func_name);
+               evtwgt_genie_multisim_weight.push_back(weight_v);
+               evtwgt_genie_multisim_nweight.push_back(weight_v.size());
+               countFunc++;
+            }
+            evtwgt_genie_multisim_nfunc = countFunc;
+         }
+      }
+
+      // Flux reweighing (systematics - multisim)
+      art::Handle<std::vector<evwgh::MCEventWeight>> fluxeventweight_multisim_h;
+      e.getByLabel(CC1piInputTags->fFluxEventweightMultisimProducer, fluxeventweight_multisim_h);
+      if(!fluxeventweight_multisim_h.isValid()){
+         std::cout << "[CC1pi::FillTree] MCEventWeight for FLUX reweight multisim, product " << CC1piInputTags->fFluxEventweightMultisimProducer << " not found..." << std::endl;
+         //throw std::exception();
+      }
+      else {
+         std::vector<art::Ptr<evwgh::MCEventWeight>> fluxeventweight_multisim_v;
+         art::fill_ptr_vector(fluxeventweight_multisim_v, fluxeventweight_multisim_h);
+         if (fluxeventweight_multisim_v.size() > 0) {
+            art::Ptr<evwgh::MCEventWeight> evt_wgt = fluxeventweight_multisim_v.at(0); // Just for the first nu interaction
+            std::map<std::string, std::vector<double>> evtwgt_map = evt_wgt->fWeight;
+            int countFunc = 0;
+            // loop over the map and save the name of the function and the vector of weights for each function
+            for(auto it : evtwgt_map) {
+               std::string func_name = it.first;
+               std::vector<double> weight_v = it.second; 
+               evtwgt_flux_multisim_funcname.push_back(func_name);
+               evtwgt_flux_multisim_weight.push_back(weight_v);
+               evtwgt_flux_multisim_nweight.push_back(weight_v.size());
+               countFunc++;
+            }
+            evtwgt_flux_multisim_nfunc = countFunc;
+         }
+      }
+
+   } // end if (!isData)
+
 }
 
 

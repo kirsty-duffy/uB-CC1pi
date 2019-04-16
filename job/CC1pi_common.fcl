@@ -54,6 +54,9 @@ physics.producers.cc1piselec:
   ResidualsMeanCutUp:    0.7
   PercUsedHitsCut:       0.7
   BraggAlgoConfig:       @local::braggalgo_mcc8_dedxcalib
+  GenieEventweightPM1Producer:       "genieeventweightpm1::CC1pi"
+  GenieEventweightMultisimProducer:  "genieeventweightmultisim::CC1pi"
+  FluxEventweightMultisimProducer:   "fluxeventweightmultisim::CC1pi"
 }
 
 physics.producers.StoppingParticleTagger: @local::cc1pi_micheltagger

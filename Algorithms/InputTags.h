@@ -23,6 +23,9 @@ struct InputTags{
    double fResidualsMeanCutDown;
    double fResidualsMeanCutUp;
    double fPercUsedHitsCut;
+   art::InputTag fGenieEventweightPM1Producer;
+   art::InputTag fGenieEventweightMultisimProducer;
+   art::InputTag fFluxEventweightMultisimProducer;
 
    // Constructor (pass the fhicl parameters here)
    InputTags(fhicl::ParameterSet const &p);
