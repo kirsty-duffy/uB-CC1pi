@@ -1235,6 +1235,19 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("nuint_W", &(vars->nuint_W));
    t -> Branch("nuint_Qsq", &(vars->nuint_Qsq));
 
+   t -> Branch("evtwgt_genie_pm1_nfunc", &(vars->evtwgt_genie_pm1_nfunc));
+   t -> Branch("evtwgt_genie_pm1_funcname", &(vars->evtwgt_genie_pm1_funcname));
+   t -> Branch("evtwgt_genie_pm1_nweight", &(vars->evtwgt_genie_pm1_nweight));
+   t -> Branch("evtwgt_genie_pm1_weight", &(vars->evtwgt_genie_pm1_weight));
+   t -> Branch("evtwgt_genie_multisim_nfunc", &(vars->evtwgt_genie_multisim_nfunc));
+   t -> Branch("evtwgt_genie_multisim_funcname", &(vars->evtwgt_genie_multisim_funcname));
+   t -> Branch("evtwgt_genie_multisim_nweight", &(vars->evtwgt_genie_multisim_nweight));
+   t -> Branch("evtwgt_genie_multisim_weight", &(vars->evtwgt_genie_multisim_weight));
+   t -> Branch("evtwgt_flux_multisim_nfunc", &(vars->evtwgt_flux_multisim_nfunc));
+   t -> Branch("evtwgt_flux_multisim_funcname", &(vars->evtwgt_flux_multisim_funcname));
+   t -> Branch("evtwgt_flux_multisim_nweight", &(vars->evtwgt_flux_multisim_nweight));
+   t -> Branch("evtwgt_flux_multisim_weight", &(vars->evtwgt_flux_multisim_weight));
+
 }
 
 #endif
