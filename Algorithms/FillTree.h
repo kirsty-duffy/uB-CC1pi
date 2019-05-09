@@ -219,19 +219,19 @@ struct cc1pianavars{
 
    // Event Weight variables
    int evtwgt_genie_pm1_nfunc; // Number of functions used for GENIE reweighting (pm1sigma)
-   vector<std::string> evtwgt_genie_pm1_funcname; // Names of the functions used for GENIE reweighting (pm1sigma)
-   vector<int> evtwgt_genie_pm1_nweight; // Number of weights per function name used for GENIE reweighting (pm1sigma)
-   vector<vector<double>> evtwgt_genie_pm1_weight; // Weights per function name used for GENIE reweighting (pm1sigma)
+   std::vector<std::string> evtwgt_genie_pm1_funcname; // Names of the functions used for GENIE reweighting (pm1sigma)
+   std::vector<int> evtwgt_genie_pm1_nweight; // Number of weights per function name used for GENIE reweighting (pm1sigma)
+   std::vector<std::vector<double>> evtwgt_genie_pm1_weight; // Weights per function name used for GENIE reweighting (pm1sigma)
 
    int evtwgt_genie_multisim_nfunc; ///< Number of functions used for GENIE reweighting (multisim)
-   vector<std::string> evtwgt_genie_multisim_funcname; ///< Names of the functions used for GENIE reweighting (multisim)
-   vector<int> evtwgt_genie_multisim_nweight; ///< Number of weights per function name used for GENIE reweighting (multisim)
-   vector<vector<double>> evtwgt_genie_multisim_weight; ///< Weights per function name used for GENIE reweighting (multisim)
+   std::vector<std::string> evtwgt_genie_multisim_funcname; ///< Names of the functions used for GENIE reweighting (multisim)
+   std::vector<int> evtwgt_genie_multisim_nweight; ///< Number of weights per function name used for GENIE reweighting (multisim)
+   std::vector<std::vector<double>> evtwgt_genie_multisim_weight; ///< Weights per function name used for GENIE reweighting (multisim)
 
    int evtwgt_flux_multisim_nfunc; ///< Number of functions used for FLUX reweighting (multisim)
-   vector<std::string> evtwgt_flux_multisim_funcname; ///< Names of the functions used for FLUX reweighting (multisim)
-   vector<int> evtwgt_flux_multisim_nweight; ///< Number of weights per function name used for FLUX reweighting (multisim)
-   vector<vector<double>> evtwgt_flux_multisim_weight; ///< Weights per function name used for FLUX reweighting (multisim)
+   std::vector<std::string> evtwgt_flux_multisim_funcname; ///< Names of the functions used for FLUX reweighting (multisim)
+   std::vector<int> evtwgt_flux_multisim_nweight; ///< Number of weights per function name used for FLUX reweighting (multisim)
+   std::vector<std::vector<double>> evtwgt_flux_multisim_weight; ///< Weights per function name used for FLUX reweighting (multisim)
 
   fhicl::ParameterSet pset;
 

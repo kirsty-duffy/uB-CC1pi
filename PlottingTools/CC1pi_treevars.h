@@ -110,6 +110,19 @@ struct treevars{
    unsigned int subrun_num;
    unsigned int event_num;
 
+   int evtwgt_genie_pm1_nfunc;
+   std::vector<std::string> *evtwgt_genie_pm1_funcname = nullptr;
+   std::vector<int> *evtwgt_genie_pm1_nweight = nullptr;
+   std::vector<std::vector<double>> *evtwgt_genie_pm1_weight = nullptr;
+   int evtwgt_genie_multisim_nfunc;
+   std::vector<std::string> *evtwgt_genie_multisim_funcname = nullptr;
+   std::vector<int> *evtwgt_genie_multisim_nweight = nullptr;
+   std::vector<std::vector<double>> *evtwgt_genie_multisim_weight = nullptr;
+   int evtwgt_flux_multisim_nfunc;
+   std::vector<std::string> *evtwgt_flux_multisim_funcname = nullptr;
+   std::vector<int> *evtwgt_flux_multisim_nweight = nullptr;
+   std::vector<std::vector<double>> *evtwgt_flux_multisim_weight = nullptr;
+
 
    // These are derived quantities - derived from the values above in Calcvars
    std::vector<double> *TPCObj_PFP_isDaughter_double;

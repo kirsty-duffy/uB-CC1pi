@@ -355,6 +355,12 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    ContainmentLength2D->GetYaxis()->SetBinLabel(1,"#pi^{+}");
    ContainmentLength2D->GetYaxis()->SetBinLabel(2,"#mu^{-}");
 
+   // genie multisim syst - total xsec
+   std::vector<double> evtwgt_genie_multisim_SelectedBackground(mc_vars.evtwgt_genie_multisim_nweight->at(0),0);
+   std::vector<double> evtwgt_genie_multisim_SelectedSignal(mc_vars.evtwgt_genie_multisim_nweight->at(0),0);
+   std::vector<double> evtwgt_genie_multisim_AllSignal(mc_vars.evtwgt_genie_multisim_nweight->at(0),0);
+
+
    std::cout << std::endl << "--- Considering the following 1D variables --- " << std::endl;
    for (size_t i_var=0; i_var < nplots; i_var++){
          std::cout << varstoplot_dummy.at(i_var).histtitle.substr(1,varstoplot_dummy.at(i_var).histtitle.size()-2) << std::endl;
@@ -665,6 +671,20 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
       // Fill custom 2D plot
       ContainmentLength2D->Fill(mc_vars.TPCObj_mupiContained->at(0),mc_vars.TPCObj_muonLonger->at(0));
 
+
+      // genie multisim syst - total xsec
+      for(int univ = 0; univ < mc_vars.evtwgt_genie_multisim_nweight->at(0); univ++) {
+         if ((NuIntTopology)mc_vars.Truth_topology == kCC1piplus0p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplus1p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplusNp) {
+
+            evtwgt_genie_multisim_AllSignal[univ]+=mc_vars.evtwgt_genie_multisim_weight->at(0).at(univ);
+
+            if(isSelected) evtwgt_genie_multisim_SelectedSignal[univ]+=mc_vars.evtwgt_genie_multisim_weight->at(0).at(univ);
+
+         }
+
+         else if(isSelected) evtwgt_genie_multisim_SelectedBackground[univ]+=mc_vars.evtwgt_genie_multisim_weight->at(0).at(univ);
+      }
+
    } // end loop over entries in tree
 
    evdinfo.close();
@@ -717,7 +737,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
         t_onbeam->GetEntry(i);
         Calcvars(&onbeam_vars, &fReader_onbeam);
         std::vector<CC1piPlotVars> Varstoplot = GetVarstoplot(&onbeam_vars);
-	std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> Varstoplot2D = GetVarstoplot2D(&onbeam_vars);
+        std::vector<std::pair<CC1piPlotVars,CC1piPlotVars>> Varstoplot2D = GetVarstoplot2D(&onbeam_vars);
 
 
         bool isSelected = IsEventSelected(&onbeam_vars);
@@ -858,6 +878,45 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
      }
    }
 
+
+   // genie multisim syst - total xsec
+
+   double POT = 1.8161e+20;
+   double flux = 1.16859e+11/1.592e+20;
+   double targets = 2.61231e+31;
+
+   TH1D *CV_total_xsec = new TH1D("CV_total_xsec","",1,0,1);
+   double CV_xsec = (SelectedEvents->GetCC1piIntegral())/( (SelectedEvents->GetCC1piIntegral()/AllEvents->GetCC1piIntegral()) * POT * flux * targets);
+   CV_total_xsec->Fill(0.5, CV_xsec*1e+39);
+   double CV_error = 0;
+
+   TH2D *genie_multsim_total = new TH2D("genie_multisim_total","Total Cross Section;;#sigma [10^{-39} cm^{2}]",1,0,1,50,0,2);
+   for(int univ=0; univ < 100; univ++) {
+      double N = SelectedEvents->GetTotalIntegral();
+      double B = evtwgt_genie_multisim_SelectedBackground[univ];
+      double eff = evtwgt_genie_multisim_SelectedSignal[univ]/evtwgt_genie_multisim_AllSignal[univ];
+      double xsec = (N - B)/(eff * POT * flux * targets);
+      genie_multsim_total->Fill(0.5, xsec*1e+39);
+
+      CV_error+=(CV_xsec-xsec)*(CV_xsec-xsec);
+
+   }
+
+   CV_error=std::sqrt(CV_error/100.0);
+   CV_total_xsec->SetBinError(1,CV_error*1e+39);
+   std::cout << "CV total cross section: " << CV_xsec << std::endl;
+   std::cout << "GENIE multisim systematic: " << CV_error << " (" << CV_error/CV_xsec * 100 << "%)" << std::endl;
+
+   TCanvas *c2 = new TCanvas("c2","c2");
+   genie_multsim_total->GetXaxis()->SetTickLength(0);
+   genie_multsim_total->GetXaxis()->SetLabelOffset(999);
+   genie_multsim_total->SetContour(50);
+   genie_multsim_total->Draw("COLZ");
+   CV_total_xsec->SetLineColor(kRed+2);
+   CV_total_xsec->SetLineWidth(2);
+   CV_total_xsec->Draw("SAME");
+   c2->Print("genie_multsim_total.png");
+   delete c2;
 
 
    // -------------------- Now make all the plots
