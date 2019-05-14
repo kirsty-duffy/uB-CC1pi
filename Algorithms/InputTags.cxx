@@ -19,6 +19,7 @@ InputTags::InputTags(fhicl::ParameterSet const &p){
    fResidualsMeanCutDown = p.get<double>("ResidualsMeanCutDown",-999.);
    fResidualsMeanCutUp   = p.get<double>("ResidualsMeanCutUp",-999.);
    fPercUsedHitsCut      = p.get<double>("PercUsedHitsCut",-999.);
+   fBNBEventweightProducer = p.get<std::string>("BNBEventweightProducer","");
    fGenieEventweightPM1Producer = p.get<std::string>("GenieEventweightPM1Producer","");
    fGenieEventweightMultisimProducer = p.get<std::string>("GenieEventweightMultisimProducer","");
    fFluxEventweightMultisimProducer = p.get<std::string>("FluxEventweightMultisimProducer","");
@@ -44,6 +45,7 @@ void InputTags::PrintConfig(){
      << "\t <<<< fResidualsMeanCutUp = " << fResidualsMeanCutUp << std::endl
      << "\t <<<< fResidualsMeanCutDown = " << fResidualsMeanCutDown << std::endl
      << "\t <<<< fPercUsedHitsCut = " << fPercUsedHitsCut << std::endl
+     << "\t <<<< fBNBEventweightProducer = " << fBNBEventweightProducer << std::endl
      << "\t <<<< fGenieEventweightPM1Producer = " << fGenieEventweightPM1Producer << std::endl
      << "\t <<<< fGenieEventweightMultisimProducer = " << fGenieEventweightMultisimProducer << std::endl
      << "\t <<<< fFluxEventweightMultisimProducer = " << fFluxEventweightMultisimProducer << std::endl

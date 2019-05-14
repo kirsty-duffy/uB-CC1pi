@@ -172,6 +172,8 @@ void cc1pianavars::Clear(){
    nuint_Qsq = -9999;
 
    // Event Weight variables
+   evtwgt_bnb = -9999;
+
    evtwgt_genie_pm1_nfunc = -9999;
    evtwgt_genie_pm1_funcname.clear();
    evtwgt_genie_pm1_nweight.clear();
@@ -1002,6 +1004,26 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
 
    if (!isData) {
 
+      // BNB Correction Weights
+      evtwgt_bnb = 1.;
+      art::Handle<std::vector<evwgh::MCEventWeight>> bnbeventweight_h;
+      evt.getByLabel(CC1piInputTags->fBNBEventweightProducer, bnbeventweight_h);
+      if(!bnbeventweight_h.isValid()){
+         std::cout << "[CC1pi::FillTree] MCEventWeight product " << CC1piInputTags->fBNBEventweightProducer << " not found..." << std::endl;
+         //throw std::exception();
+      }
+      std::vector<art::Ptr<evwgh::MCEventWeight>> bnbeventweight_v;
+      art::fill_ptr_vector(bnbeventweight_v, bnbeventweight_h);
+      if (bnbeventweight_v.size() > 0) {
+         art::Ptr<evwgh::MCEventWeight> evt_wgt = bnbeventweight_v.at(0);
+         for (auto entry : evt_wgt->fWeight) {
+            if (entry.first.find("bnbcorrection") != std::string::npos) {
+               evtwgt_bnb *= entry.second.at(0);
+               std::cout << "[CC1pi::FillTree] BNB Correction Weight: " << evtwgt_bnb << std::endl;
+            }
+         }
+      }
+
       // GENIE reweighing (systematics - pm1sigma)
       art::Handle<std::vector<evwgh::MCEventWeight>> genieeventweight_pm1_h;
       evt.getByLabel(CC1piInputTags->fGenieEventweightPM1Producer, genieeventweight_pm1_h);
@@ -1235,6 +1257,7 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("nuint_W", &(vars->nuint_W));
    t -> Branch("nuint_Qsq", &(vars->nuint_Qsq));
 
+   t -> Branch("evtwgt_bnb", &(vars->evtwgt_bnb));
    t -> Branch("evtwgt_genie_pm1_nfunc", &(vars->evtwgt_genie_pm1_nfunc));
    t -> Branch("evtwgt_genie_pm1_funcname", &(vars->evtwgt_genie_pm1_funcname));
    t -> Branch("evtwgt_genie_pm1_nweight", &(vars->evtwgt_genie_pm1_nweight));

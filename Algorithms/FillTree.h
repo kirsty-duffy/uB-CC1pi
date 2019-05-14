@@ -218,6 +218,8 @@ struct cc1pianavars{
   double nuint_Qsq;
 
    // Event Weight variables
+   double evtwgt_bnb;
+
    int evtwgt_genie_pm1_nfunc; // Number of functions used for GENIE reweighting (pm1sigma)
    std::vector<std::string> evtwgt_genie_pm1_funcname; // Names of the functions used for GENIE reweighting (pm1sigma)
    std::vector<int> evtwgt_genie_pm1_nweight; // Number of weights per function name used for GENIE reweighting (pm1sigma)

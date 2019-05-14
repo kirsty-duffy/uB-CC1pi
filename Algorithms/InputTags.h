@@ -24,6 +24,7 @@ struct InputTags{
    double fResidualsMeanCutDown;
    double fResidualsMeanCutUp;
    double fPercUsedHitsCut;
+   art::InputTag fBNBEventweightProducer;
    art::InputTag fGenieEventweightPM1Producer;
    art::InputTag fGenieEventweightMultisimProducer;
    art::InputTag fFluxEventweightMultisimProducer;

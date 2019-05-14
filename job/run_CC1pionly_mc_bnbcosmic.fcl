@@ -57,6 +57,7 @@ physics.producers.cc1piselec.ClusterProducer:                   "pandoraNu::UBXS
 physics.producers.cc1piselec.HitProducer:                       "pandoraCosmicHitRemoval::UBXSec"
 physics.producers.cc1piselec.SpacePointProducer:                "pandoraNu::UBXSec"
 physics.producers.cc1piselec.TPCObjectProducer:                 "TPCObjectMaker::UBXSec"
+physics.producers.cc1piselec.BNBEventweightProducer:            "eventweight"
 physics.producers.cc1piselec.GenieEventweightPM1Producer:       "genieeventweightpm1::UBXSec"
 physics.producers.cc1piselec.GenieEventweightMultisimProducer:  "genieeventweightmultisim::UBXSec"
 physics.producers.cc1piselec.FluxEventweightMultisimProducer:   "fluxeventweightmultisim::UBXSec"
