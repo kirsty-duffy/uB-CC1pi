@@ -199,6 +199,8 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("subrun_num",&(varstoset->subrun_num));
    intree->SetBranchStatus("event_num",1);
    intree->SetBranchAddress("event_num",&(varstoset->event_num));
+//   intree->SetBranchStatus("evtwgt_bnb",1);
+//   intree->SetBranchAddress("evtwgt_bnb",&(varstoset->evtwgt_bnb));
    intree->SetBranchStatus("evtwgt_genie_pm1_nfunc",1);
    intree->SetBranchAddress("evtwgt_genie_pm1_nfunc",&(varstoset->evtwgt_genie_pm1_nfunc));
    intree->SetBranchStatus("evtwgt_genie_pm1_funcname",1);

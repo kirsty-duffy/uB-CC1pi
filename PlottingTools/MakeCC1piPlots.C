@@ -360,6 +360,11 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    std::vector<double> evtwgt_genie_multisim_SelectedSignal(mc_vars.evtwgt_genie_multisim_nweight->at(0),0);
    std::vector<double> evtwgt_genie_multisim_AllSignal(mc_vars.evtwgt_genie_multisim_nweight->at(0),0);
 
+   // flux multisim syst - total xsec
+   std::vector<double> evtwgt_flux_multisim_SelectedBackground(mc_vars.evtwgt_flux_multisim_nweight->at(1),1);
+   std::vector<double> evtwgt_flux_multisim_SelectedSignal(mc_vars.evtwgt_flux_multisim_nweight->at(1),1);
+   std::vector<double> evtwgt_flux_multisim_AllSignal(mc_vars.evtwgt_flux_multisim_nweight->at(1),1);
+
 
    std::cout << std::endl << "--- Considering the following 1D variables --- " << std::endl;
    for (size_t i_var=0; i_var < nplots; i_var++){
@@ -427,6 +432,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
 
    // Loop through MC tree and fill plots
    for (int i = 0; i < t_bnbcos->GetEntries(); i++){
+//   for (int i = 0; i <= 1; i++) {
      if (i%1000==0) std::cout << "MC: " << i << "/" << t_bnbcos->GetEntries() << std::endl;
 
       t_bnbcos->GetEntry(i);
@@ -685,6 +691,36 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
          else if(isSelected) evtwgt_genie_multisim_SelectedBackground[univ]+=mc_vars.evtwgt_genie_multisim_weight->at(0).at(univ);
       }
 
+      // flux multisim syst - total xsec
+
+      for(int univ = 0; univ < mc_vars.evtwgt_flux_multisim_nweight->at(1); univ++) {
+
+         double weight = 1;
+
+         for(int func = 0; func < mc_vars.evtwgt_flux_multisim_nfunc; func++) {
+
+            if(mc_vars.evtwgt_flux_multisim_funcname->at(func) == "bnbcorrection_FluxHist") weight*=mc_vars.evtwgt_flux_multisim_weight->at(func).at(0);
+
+            else {
+               //if(mc_vars.evtwgt_flux_multisim_weight->at(func).at(univ) < 0 || mc_vars.evtwgt_flux_multisim_weight->at(func).at(univ) > 100)
+               //   std::cout << "Bad Weight for func " << mc_vars.evtwgt_flux_multisim_funcname->at(func) << " univ " << univ << ": " << mc_vars.evtwgt_flux_multisim_weight->at(func).at(univ) << std::endl;
+
+               weight*=mc_vars.evtwgt_flux_multisim_weight->at(func).at(univ);
+            }
+
+         }
+
+         if ((NuIntTopology)mc_vars.Truth_topology == kCC1piplus0p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplus1p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplusNp) {
+
+            evtwgt_flux_multisim_AllSignal[univ]+=weight;
+
+            if(isSelected) evtwgt_flux_multisim_SelectedSignal[univ]+=weight;
+
+         }
+
+         else if(isSelected) evtwgt_flux_multisim_SelectedBackground[univ]+=weight;
+      }
+
    } // end loop over entries in tree
 
    evdinfo.close();
@@ -878,6 +914,9 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
      }
    }
 
+   
+   // -------------------- Now make all the plots
+
 
    // genie multisim syst - total xsec
 
@@ -916,10 +955,49 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    CV_total_xsec->SetLineWidth(2);
    CV_total_xsec->Draw("SAME");
    c2->Print("genie_multsim_total.png");
+
+
+   // flux multisim syst - total xsec
+
+   CV_error = 0;
+   TFile *f_flux = new TFile("../ignore/MCC8_FluxHistograms_Uncertainties.root", "read");
+
+   TH2D *flux_multsim_total = new TH2D("flux_multisim_total","Total Cross Section;;#sigma [10^{-39} cm^{2}]",1,0,1,50,0,2);
+   for(int univ=0; univ < 1000; univ++) {
+      double N = SelectedEvents->GetTotalIntegral();
+      double B = evtwgt_flux_multisim_SelectedBackground[univ];
+      double eff = evtwgt_flux_multisim_SelectedSignal[univ]/evtwgt_flux_multisim_AllSignal[univ];
+
+      TH1D *t_flux = (TH1D*)f_flux->Get(std::string(std::string("numu/total/Active_TPC_Volume/numu_total_Uni_")+std::to_string(univ)+std::string("_AV_TPC")).c_str());
+      int upperbin = t_flux->GetXaxis()->FindBin(3);
+      flux = t_flux->Integral(1,upperbin);
+      flux*=POT;
+      flux/=2.43e11 * 256.35 * 233.;
+      
+      //std::cout << "Flux for univ " << univ << ": " << flux << std::endl;
+
+      double xsec = (N - B)/(eff * flux * targets);
+      flux_multsim_total->Fill(0.5, xsec*1e+39);
+
+      //std::cout << "xsec: " << xsec << std::endl;
+
+      CV_error+=(CV_xsec-xsec)*(CV_xsec-xsec);
+
+   }
+
+   CV_error=std::sqrt(CV_error/1000.0);
+   CV_total_xsec->SetBinError(1,CV_error*1e+39);
+   std::cout << "CV total cross section: " << CV_xsec << std::endl;
+   std::cout << "flux multisim systematic: " << CV_error << " (" << CV_error/CV_xsec * 100 << "%)" << std::endl;
+
+   flux_multsim_total->GetXaxis()->SetTickLength(0);
+   flux_multsim_total->GetXaxis()->SetLabelOffset(999);
+   flux_multsim_total->SetContour(50);
+   flux_multsim_total->Draw("COLZ");
+   CV_total_xsec->Draw("SAME");
+   c2->Print("flux_multsim_total.png");
    delete c2;
 
-
-   // -------------------- Now make all the plots
 
    // Make 1D plots
    for (size_t i_h=0; i_h < nplots; i_h++){
