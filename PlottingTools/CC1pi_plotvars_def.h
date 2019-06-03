@@ -1709,6 +1709,18 @@ CC1piPlotVars Var_TPCObj_AngleBetweenMIPs_notbroken(treevars *vars){
   return tmp;
 }
 
+//Dummy var for testing CC inclusive selection
+CC1piPlotVars Var_Marco_selected(treevars *vars){
+  CC1piPlotVars tmp;
+  tmp.Var = vars->Marco_selected_vect;
+  tmp.KeepBelowCut = false;
+  tmp.TracksNeeded = "NA";
+  tmp.CutValue = -1;
+  tmp.bins = {2,0,2};
+  tmp.histtitle = ";Selected by CC Inclusive selection?;";
+  tmp.histname = "Marco_selected";
+  return tmp;
+}
 
 // Decide whether to fill a plot for a given track. This is useful for e.g. plots with PlotOnlyDaughterMIPs=true
 bool FillPlotForTrack(CC1piPlotVars *plotvar, treevars *vars, int i_tr){

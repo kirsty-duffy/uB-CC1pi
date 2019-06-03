@@ -16,9 +16,10 @@ std::vector<CC1piPlotVars> GetCutVars(treevars *vars) {
    std::vector<CC1piPlotVars> cut_vars = {
    //Var_TPCObj_AngleBetweenMIPs(vars)
    // ,Var_TPCObj_LeadingMIP_PandoraClassedAsTrack(vars)
-   Var_TPCObj_PFP_track_passesMIPcut(vars)
-   ,Var_MIP_containment(vars)
-   ,Var_TPCObj_AngleBetweenMIPs_high(vars)
+//   Var_TPCObj_PFP_track_passesMIPcut(vars)
+//   ,Var_MIP_containment(vars)
+//   ,Var_TPCObj_AngleBetweenMIPs_high(vars)
+   Var_Marco_selected(vars)
    // ,Var_TPCObj_SecondMIP_isContained(vars)
    // ,Var_TPCObj_FirstMIP_isContained(vars)
    // ,Var_TPCObj_AllDaughters_isContained(vars)
@@ -41,9 +42,9 @@ std::vector<CC1piPlotVars> GetMIPCutVars(treevars *vars) {
    //Var_TPCObj_PFP_track_dEdx_truncmean_start_lowcut(vars)
    //,Var_TPCObj_PFP_track_dedx_grminhits(vars)
    //,Var_TPCObj_PFP_lnLmipoverp(vars)
-   Var_TPCObj_PFP_VtxTrackDist(vars)
-   ,Var_TPCObj_PFP_track_BDTscore(vars)
-   ,Var_TPCObj_PFP_track_theta_parallel(vars)
+//   Var_TPCObj_PFP_VtxTrackDist(vars)
+//   ,Var_TPCObj_PFP_track_BDTscore(vars)
+//   ,Var_TPCObj_PFP_track_theta_parallel(vars)
    };
    return cut_vars;
 };

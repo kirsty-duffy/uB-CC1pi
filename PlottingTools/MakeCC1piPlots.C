@@ -938,7 +938,10 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    delete c1;
 
    // Print out integrals
+   std::cout << "SelectedEvents->PrintHistIntegrals()" << std::endl;
    SelectedEvents->PrintHistIntegrals();
+   std::cout << "AllEvents->PrintHistIntegrals()" << std::endl;
+   AllEvents->PrintHistIntegrals();
    double CC1pi_selected = SelectedEvents->GetCC1piIntegral();
    double CC1pi_all = AllEvents->GetCC1piIntegral();
    std::cout << std::endl << "Total number of selected events: " << SelectedEvents->GetTotalIntegral() << " MC, " << nsel_onbeam << " beam-on data, " << nsel_offbeam << " ext data" << std::endl;

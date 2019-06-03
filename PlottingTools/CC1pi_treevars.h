@@ -184,6 +184,8 @@ struct treevars{
    std::vector<double> *TPCObj_PFP_track_truePhi;
    std::vector<double> *TPCObj_PFP_track_trueStartP;
 
+   std::vector<double> *Marco_selected_vect;
+
    int muoncandidatePDG;
    int pioncandidatePDG;
    int BDT_muoncandidatePDG;

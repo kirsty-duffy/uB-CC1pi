@@ -296,6 +296,8 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
    vars->TPCObj_PFP_track_MuonMomMCS = new std::vector<double>(vecsize,-9999);
    vars->TPCObj_PFP_track_MuonMomCombined = new std::vector<double>(vecsize,-9999);
 
+   vars->Marco_selected_vect = new std::vector<double>(1,vars->Marco_selected);
+
    // Just use collection plane for now
    int i_pl = 2;
 

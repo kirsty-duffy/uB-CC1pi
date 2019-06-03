@@ -355,7 +355,7 @@ void StackedHistTopology::PrintHistIntegrals(bool coarse)
    }
 
    for (std::pair<std::string, TH1F *> ch : coarse_histos) {
-     std::cout << "Integral for topology " << ch.first.c_str() << ": " << ch.second->Integral()/total_integral << std::endl;
+     std::cout << "Integral for topology " << ch.first.c_str() << ": " << ch.second->Integral()/total_integral << " (" << ch.second->Integral() << "/" << total_integral << ")" << std::endl;
    }
  }
  else{
