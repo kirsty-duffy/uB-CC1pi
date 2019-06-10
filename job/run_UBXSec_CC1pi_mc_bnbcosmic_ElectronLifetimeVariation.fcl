@@ -1,0 +1,38 @@
+#include "run_UBXSec_CC1pi_mc_bnbcosmic.fcl"
+
+services.DetectorPropertiesService.Electronlifetime: 10.0e3 # in microseconds
+
+physics.producers.UBXSecpandoraNucali.CaloDoLifeTimeCorrection: true
+
+physics.producermods: [
+      "pandoraCosmicTPCObj",
+      "RecoTrueMatcherCosmic",
+      "pandoraCosmicTrackPFPart",
+      "pandoraCosmicFlashTag",
+      "pandoraCosmicACPTTagger",
+      "pandoraCosmicStoppingMu",
+      "pandoraCosmicHitRemoval",
+      "pandoraNu",
+      "pandoraNucalo",
+      "pandoraNupid",
+      "pandoraNuMCSMu",
+      "pandoraNuMCSPi",
+      "RecoTrueMatcher",
+      "TPCObjectMaker",
+      "pandoraNuGeoCosmicTag",
+      "NeutrinoMCFlash",
+      "NeutrinoFlashMatch",
+      "CandidateConsistency",
+      #"genieeventweightpm1",
+      #"genieeventweightmultisim",
+      #"fluxeventweightmultisim",
+      "UBXSec",
+      "UBXSecpandoraNucali",
+      "dedxcalibration",
+      "pid",
+      "CC1piMCSMu",
+      "CC1piMCSP",
+      "CC1piMCSPi",
+      "cc1piselec"
+   ]
+
