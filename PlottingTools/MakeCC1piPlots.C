@@ -360,11 +360,20 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    std::vector<double> evtwgt_genie_multisim_SelectedSignal(mc_vars.evtwgt_genie_multisim_nweight->at(0),0);
    std::vector<double> evtwgt_genie_multisim_AllSignal(mc_vars.evtwgt_genie_multisim_nweight->at(0),0);
 
+   // genie unisims systs UP - total xsec
+   std::vector<double> evtwgt_genie_unisim_up_SelectedBackground(mc_vars.evtwgt_genie_pm1_nfunc,0);
+   std::vector<double> evtwgt_genie_unisim_up_SelectedSignal(mc_vars.evtwgt_genie_pm1_nfunc,0);
+   std::vector<double> evtwgt_genie_unisim_up_AllSignal(mc_vars.evtwgt_genie_pm1_nfunc,0);
+
+   // genie unisims systs DOWN - total xsec
+   std::vector<double> evtwgt_genie_unisim_down_SelectedBackground(mc_vars.evtwgt_genie_pm1_nfunc,0);
+   std::vector<double> evtwgt_genie_unisim_down_SelectedSignal(mc_vars.evtwgt_genie_pm1_nfunc,0);
+   std::vector<double> evtwgt_genie_unisim_down_AllSignal(mc_vars.evtwgt_genie_pm1_nfunc,0);
+
    // flux multisim syst - total xsec
    std::vector<double> evtwgt_flux_multisim_SelectedBackground(mc_vars.evtwgt_flux_multisim_nweight->at(1),1);
    std::vector<double> evtwgt_flux_multisim_SelectedSignal(mc_vars.evtwgt_flux_multisim_nweight->at(1),1);
    std::vector<double> evtwgt_flux_multisim_AllSignal(mc_vars.evtwgt_flux_multisim_nweight->at(1),1);
-
 
    std::cout << std::endl << "--- Considering the following 1D variables --- " << std::endl;
    for (size_t i_var=0; i_var < nplots; i_var++){
@@ -691,6 +700,32 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
          else if(isSelected) evtwgt_genie_multisim_SelectedBackground[univ]+=mc_vars.evtwgt_genie_multisim_weight->at(0).at(univ);
       }
 
+      // genie unisims systs - total xsec
+      for(int param = 0; param < 39; param++) {
+         if ((NuIntTopology)mc_vars.Truth_topology == kCC1piplus0p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplus1p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplusNp) {
+
+            evtwgt_genie_unisim_up_AllSignal[param]+=mc_vars.evtwgt_genie_pm1_weight->at(param).at(0);
+            evtwgt_genie_unisim_down_AllSignal[param]+=mc_vars.evtwgt_genie_pm1_weight->at(param).at(1);
+//            evtwgt_genie_unisim_up_AllSignal[param]+=mc_vars.evtwgt_genie_pm1_weight->at(0).at(param);
+//            evtwgt_genie_unisim_down_AllSignal[param]+=mc_vars.evtwgt_genie_pm1_weight->at(1).at(param);
+
+            if(isSelected) {
+               evtwgt_genie_unisim_up_SelectedSignal[param]+=mc_vars.evtwgt_genie_pm1_weight->at(param).at(0);
+               evtwgt_genie_unisim_down_SelectedSignal[param]+=mc_vars.evtwgt_genie_pm1_weight->at(param).at(1);
+//               evtwgt_genie_unisim_up_SelectedSignal[param]+=mc_vars.evtwgt_genie_pm1_weight->at(0).at(param);
+//               evtwgt_genie_unisim_down_SelectedSignal[param]+=mc_vars.evtwgt_genie_pm1_weight->at(1).at(param);
+            }
+
+         }
+
+         else if(isSelected) {
+            evtwgt_genie_unisim_up_SelectedBackground[param]+=mc_vars.evtwgt_genie_pm1_weight->at(param).at(0);
+            evtwgt_genie_unisim_down_SelectedBackground[param]+=mc_vars.evtwgt_genie_pm1_weight->at(param).at(1);
+//            evtwgt_genie_unisim_up_SelectedBackground[param]+=mc_vars.evtwgt_genie_pm1_weight->at(0).at(param);
+//            evtwgt_genie_unisim_down_SelectedBackground[param]+=mc_vars.evtwgt_genie_pm1_weight->at(1).at(param);
+         }
+      }
+
       // flux multisim syst - total xsec
 
       for(int univ = 0; univ < mc_vars.evtwgt_flux_multisim_nweight->at(1); univ++) {
@@ -920,7 +955,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
 
    // genie multisim syst - total xsec
 
-   double POT = 1.8161e+20;
+   double POT = 1.29459e+20;
    double flux = 1.16859e+11/1.592e+20;
    double targets = 2.61231e+31;
 
@@ -955,6 +990,33 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    CV_total_xsec->SetLineWidth(2);
    CV_total_xsec->Draw("SAME");
    c2->Print("genie_multsim_total.png");
+
+
+   // genie unisim systs - total xsec
+
+   std::cout << "CV B: " << SelectedEvents->GetTotalIntegral() - SelectedEvents->GetCC1piIntegral() << std::endl;
+   std::cout << "CV eff: " << SelectedEvents->GetCC1piIntegral()/AllEvents->GetCC1piIntegral() << std::endl;
+
+   for (int param=0; param < 39; param++) {
+      double N = SelectedEvents->GetTotalIntegral();
+
+      double B_up = evtwgt_genie_unisim_up_SelectedBackground[param];
+      double eff_up = evtwgt_genie_unisim_up_SelectedSignal[param]/evtwgt_genie_unisim_up_AllSignal[param];
+      double xsec_up = (N - B_up)/(eff_up * POT * flux * targets);
+      double syst_up = (xsec_up - CV_xsec)/CV_xsec;
+
+      std::cout << mc_vars.evtwgt_genie_pm1_funcname->at(param) << " up: " << syst_up << std::endl;
+      std::cout << "B_up: " << B_up << std::endl;
+      std::cout << "eff_up: " << eff_up << std::endl;
+
+      double B_down = evtwgt_genie_unisim_down_SelectedBackground[param];
+      double eff_down = evtwgt_genie_unisim_down_SelectedSignal[param]/evtwgt_genie_unisim_down_AllSignal[param];
+      double xsec_down = (N - B_down)/(eff_down * POT * flux * targets);
+      double syst_down = (xsec_down - CV_xsec)/CV_xsec;
+      std::cout << mc_vars.evtwgt_genie_pm1_funcname->at(param) << " down: " << syst_down << std::endl;
+      std::cout << "B_down: " << B_down << std::endl;
+      std::cout << "eff_down: " << eff_down << std::endl;
+   }
 
 
    // flux multisim syst - total xsec
