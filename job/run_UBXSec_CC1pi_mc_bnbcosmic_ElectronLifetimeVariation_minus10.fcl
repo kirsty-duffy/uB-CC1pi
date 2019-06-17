@@ -1,0 +1,3 @@
+#include "run_UBXSec_CC1pi_mc_bnbcosmic_ElectronLifetimeVariation.fcl"
+
+services.DetectorPropertiesService.Electronlifetime: 9.0e3 # in microseconds
