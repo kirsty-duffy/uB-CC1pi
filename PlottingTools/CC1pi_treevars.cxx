@@ -340,7 +340,6 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
                // "mother" of previous MCP is now the one we are studying
                bool mother_found = false;
                for (size_t i_MCP2=0; i_MCP2 < vars->MCP_ID->size(); i_MCP2++){
-                 mother_found = false;
                  if (motherID == vars->MCP_ID->at(i_MCP2)){
                   currentidx = i_MCP2;
                   mother_found = true;
