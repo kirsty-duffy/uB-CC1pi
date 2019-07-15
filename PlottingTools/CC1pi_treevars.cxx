@@ -336,14 +336,18 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
             // Loop through MCPs to find "original" MCP (i.e. the first one after the neutrino)
             int currentidx = i_MCP;
             while (motherID!=0){
-            // std::cout << vars->MCP_PDG->at(currentidx) << "(" << currentidx << ") from  " << "(" << motherID << ")" << std::endl;
-              // "mother" of previous MCP is now the one we are studying
-              for (size_t i_MCP2=0; i_MCP2 < vars->MCP_ID->size(); i_MCP2++){
-                if (motherID == vars->MCP_ID->at(i_MCP2)){
+               // std::cout << vars->MCP_PDG->at(currentidx) << "(" << currentidx << ") from  " << "(" << motherID << ")" << std::endl;
+               // "mother" of previous MCP is now the one we are studying
+               bool mother_found = false;
+               for (size_t i_MCP2=0; i_MCP2 < vars->MCP_ID->size(); i_MCP2++){
+                 mother_found = false;
+                 if (motherID == vars->MCP_ID->at(i_MCP2)){
                   currentidx = i_MCP2;
+                  mother_found = true;
                 }
               }
               motherID = vars->MCP_MotherID->at(currentidx);
+              if (!mother_found) motherID = 0;
             }
             vars->TPCObj_PFP_MCP_trueOrigPDG->at(i_track)=vars->MCP_PDG->at(currentidx);
 
