@@ -58,6 +58,7 @@ physics.producers.cc1piselec:
   BNBEventweightProducer:            "eventweight"
   GenieEventweightPM1Producer:       "genieeventweightpm1::CC1pi"
   GenieEventweightMultisimProducer:  "genieeventweightmultisim::CC1pi"
+  GenieModelsEventWeightMultisimProducer: "geniemodelseventweightmultisim::CC1pi"
   FluxEventweightMultisimProducer:   "fluxeventweightmultisim::CC1pi"
 }
 

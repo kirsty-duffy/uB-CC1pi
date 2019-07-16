@@ -230,6 +230,11 @@ struct cc1pianavars{
    std::vector<int> evtwgt_genie_multisim_nweight; ///< Number of weights per function name used for GENIE reweighting (multisim)
    std::vector<std::vector<double>> evtwgt_genie_multisim_weight; ///< Weights per function name used for GENIE reweighting (multisim)
 
+   int evtwgt_genie_models_multisim_nfunc; ///< Number of functions used for GENIE models reweighting (multisim)
+   std::vector<std::string> evtwgt_genie_models_multisim_funcname; ///< Names of the functions used for GENIE models reweighting (multisim)
+   std::vector<int> evtwgt_genie_models_multisim_nweight; ///< Number of weights per function name used for GENIE models reweighting (multisim)
+   std::vector<std::vector<double>> evtwgt_genie_models_multisim_weight; ///< Weights per function name used for GENIE models reweighting (multisim)
+
    int evtwgt_flux_multisim_nfunc; ///< Number of functions used for FLUX reweighting (multisim)
    std::vector<std::string> evtwgt_flux_multisim_funcname; ///< Names of the functions used for FLUX reweighting (multisim)
    std::vector<int> evtwgt_flux_multisim_nweight; ///< Number of weights per function name used for FLUX reweighting (multisim)

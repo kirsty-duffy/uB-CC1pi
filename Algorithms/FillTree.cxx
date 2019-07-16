@@ -184,6 +184,11 @@ void cc1pianavars::Clear(){
    evtwgt_genie_multisim_nweight.clear();
    evtwgt_genie_multisim_weight.clear();
 
+   evtwgt_genie_models_multisim_nfunc = -9999;
+   evtwgt_genie_models_multisim_funcname.clear();
+   evtwgt_genie_models_multisim_nweight.clear();
+   evtwgt_genie_models_multisim_weight.clear();
+
    evtwgt_flux_multisim_nfunc = -9999;
    evtwgt_flux_multisim_funcname.clear();
    evtwgt_flux_multisim_nweight.clear();
@@ -1078,6 +1083,33 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
          }
       }
 
+      // GENIE QE/MEC model rewighting (systematics – multisim)
+      art::Handle<std::vector<evwgh::MCEventWeight>> geniemodelseventweight_h;
+      evt.getByLabel(CC1piInputTags->fGenieModelsEventweightMultisimProducer, geniemodelseventweight_h);
+      if(!geniemodelseventweight_h.isValid()){
+         std::cout << "[UBXSec] MCEventWeight for GENIE Models reweight multisim, product " << CC1piInputTags->fGenieModelsEventweightMultisimProducer << " not found..." << std::endl;
+         //throw std::exception();
+      } else {
+         std::vector<art::Ptr<evwgh::MCEventWeight>> geniemodelseventweight_v;
+         art::fill_ptr_vector(geniemodelseventweight_v, geniemodelseventweight_h);
+         if (geniemodelseventweight_v.size() > 0) {
+            art::Ptr<evwgh::MCEventWeight> evt_wgt = geniemodelseventweight_v.at(0); // Just for the first nu interaction
+            std::map<std::string, std::vector<double>> evtwgt_map = evt_wgt->fWeight;
+            int countFunc = 0;
+            // loop over the map and save the name of the function and the vector of weights for each function
+            for(auto it : evtwgt_map) {
+               std::string func_name = it.first;
+               std::vector<double> weight_v = it.second; 
+               //std::vector<float> weight_v_float (weight_v.begin(), weight_v.end());
+               evtwgt_genie_models_multisim_funcname.push_back(func_name);
+               evtwgt_genie_models_multisim_weight.push_back(weight_v);
+               evtwgt_genie_models_multisim_nweight.push_back(weight_v.size());
+               countFunc++;
+            }
+            evtwgt_genie_models_multisim_nfunc = countFunc;
+         }
+      }
+
       // Flux reweighing (systematics - multisim)
       art::Handle<std::vector<evwgh::MCEventWeight>> fluxeventweight_multisim_h;
       evt.getByLabel(CC1piInputTags->fFluxEventweightMultisimProducer, fluxeventweight_multisim_h);
@@ -1266,6 +1298,10 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("evtwgt_genie_multisim_funcname", &(vars->evtwgt_genie_multisim_funcname));
    t -> Branch("evtwgt_genie_multisim_nweight", &(vars->evtwgt_genie_multisim_nweight));
    t -> Branch("evtwgt_genie_multisim_weight", &(vars->evtwgt_genie_multisim_weight));
+   t -> Branch("evtwgt_genie_models_multisim_nfunc", &(vars->evtwgt_genie_models_multisim_nfunc));
+   t -> Branch("evtwgt_genie_models_multisim_funcname", &(vars->evtwgt_genie_models_multisim_funcname));
+   t -> Branch("evtwgt_genie_models_multisim_nweight", &(vars->evtwgt_genie_models_multisim_nweight));
+   t -> Branch("evtwgt_genie_models_multisim_weight", &(vars->evtwgt_genie_models_multisim_weight));
    t -> Branch("evtwgt_flux_multisim_nfunc", &(vars->evtwgt_flux_multisim_nfunc));
    t -> Branch("evtwgt_flux_multisim_funcname", &(vars->evtwgt_flux_multisim_funcname));
    t -> Branch("evtwgt_flux_multisim_nweight", &(vars->evtwgt_flux_multisim_nweight));
