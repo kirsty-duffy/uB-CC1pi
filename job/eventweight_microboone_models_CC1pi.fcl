@@ -1,0 +1,63 @@
+BEGIN_PROLOG
+
+models_microboone_eventweight: {
+  module_type: "EventWeight"
+ 
+  # Throw exception if weight outside limits
+  min_weight: 0
+  max_weight: 100
+ 
+  genie_module_label: generator  
+ 
+  bnbcorrection: {
+    type: FluxHist
+    cv_hist_file: "uboonebeam/bnb_gsimple/bnb_gsimple_fluxes_02.28.2014_470_rwhist/gsimple_uboone_flux.root"
+    rw_hist_file: "uboonebeam/bnb_gsimple/bnb_gsimple_fluxes_02.28.2014_470_rwhist/redecay_uboone_flux.root"
+    random_seed: 1
+    mode: reweight
+    number_of_multisims: 1
+  }
+
+  ##########################################################
+  ## Model ratios
+  ##
+  ## Maintainer: A. Mastbaum (mastbaum@uchicago.edu)
+  ##
+  ##########################################################
+
+  model_q0q3_ccmec: {
+    type: HistogramWeight
+    random_seed: 54
+    mode: multisim
+    number_of_multisims: 1000
+    rw_hist_file: "systematics/q0q3_rw/q0q3_rw_valencia.root"
+    rw_hist_object: "q0q3_ccmec_valencia_default"
+    sigma: 1
+    norm_scale: 0.6
+    event_filter: "ccmec"
+  }
+
+  model_q0q3_ccqe: {
+    type: HistogramWeight
+    random_seed: 54
+    mode: multisim
+    number_of_multisims: 1000
+    rw_hist_file: "systematics/q0q3_rw/q0q3_rw_valencia.root"
+    rw_hist_object: "q0q3_ccqe_valencia_default"
+    sigma: 1
+    norm_scale: 1.1
+    event_filter: "ccqe"
+  }
+}
+
+##########################################################
+## Enabled weighting functions
+##########################################################
+
+models_microboone_eventweight.weight_functions: [
+  #bnbcorrection,
+  model_q0q3_ccmec, model_q0q3_ccqe
+]
+ 
+END_PROLOG
+

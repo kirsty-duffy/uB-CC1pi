@@ -1,3 +1,5 @@
+#include "eventweight_microboone_reinteractions_CC1pi.fcl"
+#include "eventweight_microboone_models_CC1pi.fcl"
 #include "config_particle_identification.fcl"
 #include "calibration_microboone.fcl"
 #include "caldata_microboone.fcl"

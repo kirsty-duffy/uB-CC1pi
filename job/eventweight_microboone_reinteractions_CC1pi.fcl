@@ -1,0 +1,79 @@
+BEGIN_PROLOG
+reinteractions_microboone_eventweight: {
+  module_type: "EventWeight"
+
+  # Throw exception if weight outside limits
+  min_weight: 0
+  max_weight: 100
+
+  genie_module_label: generator
+
+  bnbcorrection: {
+    type: FluxHist
+    cv_hist_file: "uboonebeam/bnb_gsimple/bnb_gsimple_fluxes_02.28.2014_470_rwhist/gsimple_uboone_flux.root"
+    rw_hist_file: "uboonebeam/bnb_gsimple/bnb_gsimple_fluxes_02.28.2014_470_rwhist/redecay_uboone_flux.root"
+    random_seed: 1
+    mode: reweight
+    number_of_multisims: 1
+  }
+
+  ##########################################################
+  ## Hadron reinteraction uncertainties
+  ##
+  ## References:
+  ##
+  ##   * A. Furmanski, Reinteraction Systematics, DocDB 17455
+  ##
+  ## Maintainer: Andy Mastbaum (mastbaum@uchicago.edu)
+  ##
+  ##########################################################
+
+  #weight_functions_reinteractions: [ reinteractions_proton, reinteractions_piplus, reinteractions_piminus ]
+  weight_functions_reinteractions: [ reinteractions_all ]
+
+  reinteractions_proton: {
+    type: Reinteraction
+    random_seed: 57
+    parameter_list: ["p"]
+    parameter_sigma: [ 1 ]
+    mode: multisim
+    number_of_multisims: 100
+  }
+
+  reinteractions_piplus: {
+    type: Reinteraction
+    random_seed: 58
+    parameter_list: ["pip"]
+    parameter_sigma: [ 1 ]
+    mode: multisim
+    number_of_multisims: 100
+  }
+
+  reinteractions_piminus: {
+    type: Reinteraction
+    random_seed: 59
+    parameter_list: ["pim"]
+    parameter_sigma: [ 1 ]
+    mode: multisim
+    number_of_multisims: 100
+  }
+
+  reinteractions_all: {
+    type: Reinteraction
+    random_seed: 60
+    parameter_list: ["p", "pip", "pim"]
+    parameter_sigma: [ 1, 1, 1 ]
+    mode: multisim
+    number_of_multisims: 100
+  }
+}
+
+##########################################################
+## Enabled weighting functions
+##########################################################
+reinteractions_microboone_eventweight.weight_functions: [
+  #bnbcorrection,
+  @sequence::reinteractions_microboone_eventweight.weight_functions_reinteractions
+]
+
+END_PROLOG

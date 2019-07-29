@@ -240,6 +240,11 @@ struct cc1pianavars{
    std::vector<int> evtwgt_flux_multisim_nweight; ///< Number of weights per function name used for FLUX reweighting (multisim)
    std::vector<std::vector<double>> evtwgt_flux_multisim_weight; ///< Weights per function name used for FLUX reweighting (multisim)
 
+   int evtwgt_reinteractions_multisim_nfunc; ///< Number of functions used for reinteractions reweighting (multisim)
+   std::vector<std::string> evtwgt_reinteractions_multisim_funcname; ///< Names of the functions used for reinteractions reweighting (multisim)
+   std::vector<int> evtwgt_reinteractions_multisim_nweight; ///< Number of weights per function name used for reinteractions reweighting (multisim)
+   std::vector<std::vector<double>> evtwgt_reinteractions_multisim_weight; ///< Weights per function name used for reinteractions reweighting (multisim)
+
   fhicl::ParameterSet pset;
 
   InputTags *CC1piInputTags;

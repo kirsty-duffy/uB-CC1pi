@@ -47,6 +47,8 @@ physics.producers.pandoraNupid.CalorimetryModuleLabel: "pandoraNucalo::CC1pi"
 physics.producers.pandoraNupid.TrackModuleLabel: "pandoraNu::CC1pi"
 physics.producers.genieeventweightmultisim.genie_all.parameter_list: ["QEMA", "NCELaxial", "NCELeta", "CCResAxial", "CCResVector", "NCResAxial", "NCResVector", "CohMA", "CohR0", "NonResRvp1pi", "NonResRvbarp1pi", "NonResRvp2pi", "NonResRvbarp2pi", "ResDecayGamma", "ResDecayTheta", "NC", "DISAth", "DISBth", "DISCv1u", "DISCv2u", "AGKYxF", "AGKYpT", "FormZone", "FermiGasModelKf", "IntraNukeNmfp", "IntraNukeNcex", "IntraNukeNel", "IntraNukeNinel", "IntraNukeNabs", "IntraNukeNpi", "IntraNukePImfp", "IntraNukePIcex", "IntraNukePIel", "IntraNukePIinel", "IntraNukePIabs", "IntraNukePIpi"]
 physics.producers.genieeventweightmultisim.genie_all.parameter_sigma: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ]
+physics.producers.geniemodelseventweightmultisim: @local::models_microboone_eventweight
+physics.producers.reinteractioneventweightmultisim: @local::reinteractions_microboone_eventweight
 
 #physics.producermods: [
 ubxsec_producermods: [
@@ -70,7 +72,9 @@ ubxsec_producermods: [
    "CandidateConsistency",
    "genieeventweightpm1",
    "genieeventweightmultisim",
+   "geniemodelseventweightmultisim",
    "fluxeventweightmultisim",
+   "reinteractioneventweightmultisim",
    "UBXSec"
 #   "tpcneutrinoidfilternumuccinc",
 ]

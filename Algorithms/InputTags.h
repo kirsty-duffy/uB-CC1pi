@@ -29,6 +29,7 @@ struct InputTags{
    art::InputTag fGenieEventweightMultisimProducer;
    art::InputTag fGenieModelsEventweightMultisimProducer;
    art::InputTag fFluxEventweightMultisimProducer;
+   art::InputTag fReinteractionsEventweightMultisimProducer;
 
    // Constructor (pass the fhicl parameters here)
    InputTags(fhicl::ParameterSet const &p);

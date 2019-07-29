@@ -24,6 +24,7 @@ InputTags::InputTags(fhicl::ParameterSet const &p){
    fGenieEventweightMultisimProducer = p.get<std::string>("GenieEventweightMultisimProducer","");
    fGenieModelsEventweightMultisimProducer = p.get<std::string>("GenieModelsEventweightMultisimProducer","");
    fFluxEventweightMultisimProducer = p.get<std::string>("FluxEventweightMultisimProducer","");
+   fReinteractionsEventweightMultisimProducer = p.get<std::string>("ReinteractionsEventweightMultisimProducer","");
 }
 
 void InputTags::PrintConfig(){
@@ -51,5 +52,6 @@ void InputTags::PrintConfig(){
      << "\t <<<< fGenieEventweightMultisimProducer = " << fGenieEventweightMultisimProducer << std::endl
      << "\t <<<< fGenieModelsEventweightMultisimProducer = " << fGenieModelsEventweightMultisimProducer << std::endl
      << "\t <<<< fFluxEventweightMultisimProducer = " << fFluxEventweightMultisimProducer << std::endl
+     << "\t <<<< fReinteractionsEventweightMultisimProducer = " << fReinteractionsEventweightMultisimProducer << std::endl
      << std::endl;
 }

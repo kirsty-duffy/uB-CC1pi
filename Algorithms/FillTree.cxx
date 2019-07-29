@@ -194,6 +194,11 @@ void cc1pianavars::Clear(){
    evtwgt_flux_multisim_nweight.clear();
    evtwgt_flux_multisim_weight.clear();
 
+   evtwgt_reinteractions_multisim_nfunc = -9999;
+   evtwgt_reinteractions_multisim_funcname.clear();
+   evtwgt_reinteractions_multisim_nweight.clear();
+   evtwgt_reinteractions_multisim_weight.clear();
+
 }
 
 void cc1pianavars::SetReco2Vars(art::Event &evt){
@@ -628,17 +633,17 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
             // Get energy estimation by range (code for momentum by range copied from analysistree, then convert momentum to energy)
             // Calculations only exist in TrackMomentumCalculator for muons and protons
             // TrackMomentumCalculator returns GeV, multiply by 1000 to get MeV
-            trkf::TrackMomentumCalculator trkm;
-            double track_rangeP_mu = trkm.GetTrackMomentum(track->Length(),kMuMinus)*1000.;
-            double track_rangeP_p = trkm.GetTrackMomentum(track->Length(),kProton)*1000.;
+            //trkf::TrackMomentumCalculator trkm;
+            //double track_rangeP_mu = trkm.GetTrackMomentum(track->Length(),kMuMinus)*1000.;
+            //double track_rangeP_p = trkm.GetTrackMomentum(track->Length(),kProton)*1000.;
 
             // Now convert P->E
             // From TrackMomentumCalculator::GetTrackMomentum: P = TMath::Sqrt((KE*KE)+(2*M*KE))
             // P = TMath::Sqrt((E*E)-(M*M)) and E = KE+M
             // => KE = TMath::Sqrt((P*P)+(M*M))-M
             // TrackMometumCalculator uses Muon_M = 105.7 MeV, Proton_M = 938.272 MeV so use these values here
-            track_rangeE_mu = TMath::Sqrt((track_rangeP_mu*track_rangeP_mu)+(105.7*105.7)) - 105.7;
-            track_rangeE_p = TMath::Sqrt((track_rangeP_p*track_rangeP_p)+(938.272*938.272)) - 938.272;
+            //track_rangeE_mu = TMath::Sqrt((track_rangeP_mu*track_rangeP_mu)+(105.7*105.7)) - 105.7;
+            //track_rangeE_p = TMath::Sqrt((track_rangeP_p*track_rangeP_p)+(938.272*938.272)) - 938.272;
 
 
             // Shower Rejection
@@ -1087,7 +1092,7 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
       art::Handle<std::vector<evwgh::MCEventWeight>> geniemodelseventweight_h;
       evt.getByLabel(CC1piInputTags->fGenieModelsEventweightMultisimProducer, geniemodelseventweight_h);
       if(!geniemodelseventweight_h.isValid()){
-         std::cout << "[UBXSec] MCEventWeight for GENIE Models reweight multisim, product " << CC1piInputTags->fGenieModelsEventweightMultisimProducer << " not found..." << std::endl;
+         std::cout << "[CC1pi::FillTree] MCEventWeight for GENIE Models reweight multisim, product " << CC1piInputTags->fGenieModelsEventweightMultisimProducer << " not found..." << std::endl;
          //throw std::exception();
       } else {
          std::vector<art::Ptr<evwgh::MCEventWeight>> geniemodelseventweight_v;
@@ -1134,6 +1139,33 @@ void cc1pianavars::SetReco2Vars(art::Event &evt){
                countFunc++;
             }
             evtwgt_flux_multisim_nfunc = countFunc;
+         }
+      }
+
+      // reinteractions reweighing (systematics - multisim)
+      art::Handle<std::vector<evwgh::MCEventWeight>> reinteractionseventweight_multisim_h;
+      evt.getByLabel(CC1piInputTags->fReinteractionsEventweightMultisimProducer, reinteractionseventweight_multisim_h);
+      if(!reinteractionseventweight_multisim_h.isValid()){
+         std::cout << "[CC1pi::FillTree] MCEventWeight for reinteractions reweight multisim, product " << CC1piInputTags->fReinteractionsEventweightMultisimProducer << " not found..." << std::endl;
+         //throw std::exception();
+      }
+      else {
+         std::vector<art::Ptr<evwgh::MCEventWeight>> reinteractionseventweight_multisim_v;
+         art::fill_ptr_vector(reinteractionseventweight_multisim_v, reinteractionseventweight_multisim_h);
+         if (reinteractionseventweight_multisim_v.size() > 0) {
+            art::Ptr<evwgh::MCEventWeight> evt_wgt = reinteractionseventweight_multisim_v.at(0); // Just for the first nu interaction
+            std::map<std::string, std::vector<double>> evtwgt_map = evt_wgt->fWeight;
+            int countFunc = 0;
+            // loop over the map and save the name of the function and the vector of weights for each function
+            for(auto it : evtwgt_map) {
+               std::string func_name = it.first;
+               std::vector<double> weight_v = it.second; 
+               evtwgt_reinteractions_multisim_funcname.push_back(func_name);
+               evtwgt_reinteractions_multisim_weight.push_back(weight_v);
+               evtwgt_reinteractions_multisim_nweight.push_back(weight_v.size());
+               countFunc++;
+            }
+            evtwgt_reinteractions_multisim_nfunc = countFunc;
          }
       }
 
@@ -1306,6 +1338,10 @@ void MakeAnaBranches(TTree *t, cc1pianavars *vars){
    t -> Branch("evtwgt_flux_multisim_funcname", &(vars->evtwgt_flux_multisim_funcname));
    t -> Branch("evtwgt_flux_multisim_nweight", &(vars->evtwgt_flux_multisim_nweight));
    t -> Branch("evtwgt_flux_multisim_weight", &(vars->evtwgt_flux_multisim_weight));
+   t -> Branch("evtwgt_reinteractions_multisim_nfunc", &(vars->evtwgt_reinteractions_multisim_nfunc));
+   t -> Branch("evtwgt_reinteractions_multisim_funcname", &(vars->evtwgt_reinteractions_multisim_funcname));
+   t -> Branch("evtwgt_reinteractions_multisim_nweight", &(vars->evtwgt_reinteractions_multisim_nweight));
+   t -> Branch("evtwgt_reinteractions_multisim_weight", &(vars->evtwgt_reinteractions_multisim_weight));
 
 }
 
