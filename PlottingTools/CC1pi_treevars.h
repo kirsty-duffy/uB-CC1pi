@@ -118,10 +118,18 @@ struct treevars{
    std::vector<std::string> *evtwgt_genie_multisim_funcname = nullptr;
    std::vector<int> *evtwgt_genie_multisim_nweight = nullptr;
    std::vector<std::vector<double>> *evtwgt_genie_multisim_weight = nullptr;
+   int evtwgt_genie_models_multisim_nfunc;
+   std::vector<std::string> *evtwgt_genie_models_multisim_funcname = nullptr;
+   std::vector<int> *evtwgt_genie_models_multisim_nweight = nullptr;
+   std::vector<std::vector<double>> *evtwgt_genie_models_multisim_weight = nullptr;
    int evtwgt_flux_multisim_nfunc;
    std::vector<std::string> *evtwgt_flux_multisim_funcname = nullptr;
    std::vector<int> *evtwgt_flux_multisim_nweight = nullptr;
    std::vector<std::vector<double>> *evtwgt_flux_multisim_weight = nullptr;
+   int evtwgt_reinteractions_multisim_nfunc;
+   std::vector<std::string> *evtwgt_reinteractions_multisim_funcname = nullptr;
+   std::vector<int> *evtwgt_reinteractions_multisim_nweight = nullptr;
+   std::vector<std::vector<double>> *evtwgt_reinteractions_multisim_weight = nullptr;
 
 
    // These are derived quantities - derived from the values above in Calcvars

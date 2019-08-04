@@ -370,10 +370,20 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    std::vector<double> evtwgt_genie_unisim_down_SelectedSignal(mc_vars.evtwgt_genie_pm1_nfunc,0);
    std::vector<double> evtwgt_genie_unisim_down_AllSignal(mc_vars.evtwgt_genie_pm1_nfunc,0);
 
+   //genie model multisim syst – total xsec
+   std::vector<double> evtwgt_genie_models_multisim_SelectedBackground(mc_vars.evtwgt_genie_models_multisim_nweight->at(0),0);
+   std::vector<double> evtwgt_genie_models_multisim_SelectedSignal(mc_vars.evtwgt_genie_models_multisim_nweight->at(0),0);
+   std::vector<double> evtwgt_genie_models_multisim_AllSignal(mc_vars.evtwgt_genie_models_multisim_nweight->at(0),0);
+
    // flux multisim syst - total xsec
    std::vector<double> evtwgt_flux_multisim_SelectedBackground(mc_vars.evtwgt_flux_multisim_nweight->at(1),1);
    std::vector<double> evtwgt_flux_multisim_SelectedSignal(mc_vars.evtwgt_flux_multisim_nweight->at(1),1);
    std::vector<double> evtwgt_flux_multisim_AllSignal(mc_vars.evtwgt_flux_multisim_nweight->at(1),1);
+
+   // reinteractions multisim syst - total xsec
+   std::vector<double> evtwgt_reinteractions_multisim_SelectedBackground(mc_vars.evtwgt_reinteractions_multisim_nweight->at(0),0);
+   std::vector<double> evtwgt_reinteractions_multisim_SelectedSignal(mc_vars.evtwgt_reinteractions_multisim_nweight->at(0),0);
+   std::vector<double> evtwgt_reinteractions_multisim_AllSignal(mc_vars.evtwgt_reinteractions_multisim_nweight->at(0),0);
 
    std::cout << std::endl << "--- Considering the following 1D variables --- " << std::endl;
    for (size_t i_var=0; i_var < nplots; i_var++){
@@ -726,6 +736,27 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
          }
       }
 
+      // genie model multisim syst - total xsec
+
+      for(int univ = 0; univ < mc_vars.evtwgt_genie_models_multisim_nweight->at(0); univ++) {
+
+         double weight = 1;
+
+         for(int func = 0; func < mc_vars.evtwgt_genie_models_multisim_nfunc; func++) {
+               weight*=mc_vars.evtwgt_genie_models_multisim_weight->at(func).at(univ);
+         }
+
+         if ((NuIntTopology)mc_vars.Truth_topology == kCC1piplus0p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplus1p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplusNp) {
+
+            evtwgt_genie_models_multisim_AllSignal[univ]+=weight;
+
+            if(isSelected) evtwgt_genie_models_multisim_SelectedSignal[univ]+=weight;
+
+         }
+
+         else if(isSelected) evtwgt_genie_models_multisim_SelectedBackground[univ]+=weight;
+      }
+
       // flux multisim syst - total xsec
 
       for(int univ = 0; univ < mc_vars.evtwgt_flux_multisim_nweight->at(1); univ++) {
@@ -754,6 +785,20 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
          }
 
          else if(isSelected) evtwgt_flux_multisim_SelectedBackground[univ]+=weight;
+      }
+
+      // reinteractions multisim syst - total xsec
+
+      for(int univ = 0; univ < mc_vars.evtwgt_reinteractions_multisim_nweight->at(0); univ++) {
+         if ((NuIntTopology)mc_vars.Truth_topology == kCC1piplus0p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplus1p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplusNp) {
+
+            evtwgt_reinteractions_multisim_AllSignal[univ]+=mc_vars.evtwgt_reinteractions_multisim_weight->at(0).at(univ);
+
+            if(isSelected) evtwgt_reinteractions_multisim_SelectedSignal[univ]+=mc_vars.evtwgt_reinteractions_multisim_weight->at(0).at(univ);
+
+         }
+
+         else if(isSelected) evtwgt_reinteractions_multisim_SelectedBackground[univ]+=mc_vars.evtwgt_reinteractions_multisim_weight->at(0).at(univ);
       }
 
    } // end loop over entries in tree
@@ -955,7 +1000,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
 
    // genie multisim syst - total xsec
 
-   double POT = 1.29459e+20;
+   double POT = 2.00955e+20;
    double flux = 1.16859e+11/1.592e+20;
    double targets = 2.61231e+31;
 
@@ -1018,6 +1063,63 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
       std::cout << "eff_down: " << eff_down << std::endl;
    }
 
+   // genie model multisim syst - total xsec
+
+   CV_error = 0;
+
+   TH2D *genie_models_multsim_total = new TH2D("genie_models_multisim_total","Total Cross Section;;#sigma [10^{-39} cm^{2}]",1,0,1,50,0,2);
+   for(int univ=0; univ < 1000; univ++) {
+      double N = SelectedEvents->GetTotalIntegral();
+      double B = evtwgt_genie_models_multisim_SelectedBackground[univ];
+      double eff = evtwgt_genie_models_multisim_SelectedSignal[univ]/evtwgt_genie_models_multisim_AllSignal[univ];
+      double xsec = (N - B)/(eff * POT * flux * targets);
+      genie_models_multsim_total->Fill(0.5, xsec*1e+39);
+
+      CV_error+=(CV_xsec-xsec)*(CV_xsec-xsec);
+
+   }
+
+   CV_error=std::sqrt(CV_error/1000.0);
+   CV_total_xsec->SetBinError(1,CV_error*1e+39);
+   std::cout << "GENIE model multisim systematic: " << CV_error << " (" << CV_error/CV_xsec * 100 << "%)" << std::endl;
+
+   genie_models_multsim_total->GetXaxis()->SetTickLength(0);
+   genie_models_multsim_total->GetXaxis()->SetLabelOffset(999);
+   genie_models_multsim_total->SetContour(50);
+   genie_models_multsim_total->Draw("COLZ");
+   CV_total_xsec->SetLineColor(kRed+2);
+   CV_total_xsec->SetLineWidth(2);
+   CV_total_xsec->Draw("SAME");
+   c2->Print("genie_models_multsim_total.png");
+
+   // reinteractions multisim syst - total xsec
+
+   CV_error = 0;
+
+   TH2D *reinteractions_multsim_total = new TH2D("reinteractions_multisim_total","Total Cross Section;;#sigma [10^{-39} cm^{2}]",1,0,1,50,0,2);
+   for(int univ=0; univ < 100; univ++) {
+      double N = SelectedEvents->GetTotalIntegral();
+      double B = evtwgt_reinteractions_multisim_SelectedBackground[univ];
+      double eff = evtwgt_reinteractions_multisim_SelectedSignal[univ]/evtwgt_reinteractions_multisim_AllSignal[univ];
+      double xsec = (N - B)/(eff * POT * flux * targets);
+      reinteractions_multsim_total->Fill(0.5, xsec*1e+39);
+
+      CV_error+=(CV_xsec-xsec)*(CV_xsec-xsec);
+
+   }
+
+   CV_error=std::sqrt(CV_error/100.0);
+   CV_total_xsec->SetBinError(1,CV_error*1e+39);
+   std::cout << "reinteractions multisim systematic: " << CV_error << " (" << CV_error/CV_xsec * 100 << "%)" << std::endl;
+
+   reinteractions_multsim_total->GetXaxis()->SetTickLength(0);
+   reinteractions_multsim_total->GetXaxis()->SetLabelOffset(999);
+   reinteractions_multsim_total->SetContour(50);
+   reinteractions_multsim_total->Draw("COLZ");
+   CV_total_xsec->SetLineColor(kRed+2);
+   CV_total_xsec->SetLineWidth(2);
+   CV_total_xsec->Draw("SAME");
+   c2->Print("reinteractions_multsim_total.png");
 
    // flux multisim syst - total xsec
 
@@ -1049,7 +1151,6 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
 
    CV_error=std::sqrt(CV_error/1000.0);
    CV_total_xsec->SetBinError(1,CV_error*1e+39);
-   std::cout << "CV total cross section: " << CV_xsec << std::endl;
    std::cout << "flux multisim systematic: " << CV_error << " (" << CV_error/CV_xsec * 100 << "%)" << std::endl;
 
    flux_multsim_total->GetXaxis()->SetTickLength(0);

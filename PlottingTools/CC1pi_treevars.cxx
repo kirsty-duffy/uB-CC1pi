@@ -217,6 +217,14 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("evtwgt_genie_multisim_nweight",&(varstoset->evtwgt_genie_multisim_nweight));
    intree->SetBranchStatus("evtwgt_genie_multisim_weight",1);
    intree->SetBranchAddress("evtwgt_genie_multisim_weight",&(varstoset->evtwgt_genie_multisim_weight));
+   intree->SetBranchStatus("evtwgt_genie_models_multisim_nfunc",1);
+   intree->SetBranchAddress("evtwgt_genie_models_multisim_nfunc",&(varstoset->evtwgt_genie_models_multisim_nfunc));
+   intree->SetBranchStatus("evtwgt_genie_models_multisim_funcname",1);
+   intree->SetBranchAddress("evtwgt_genie_models_multisim_funcname",&(varstoset->evtwgt_genie_models_multisim_funcname));
+   intree->SetBranchStatus("evtwgt_genie_models_multisim_nweight",1);
+   intree->SetBranchAddress("evtwgt_genie_models_multisim_nweight",&(varstoset->evtwgt_genie_models_multisim_nweight));
+   intree->SetBranchStatus("evtwgt_genie_models_multisim_weight",1);
+   intree->SetBranchAddress("evtwgt_genie_models_multisim_weight",&(varstoset->evtwgt_genie_models_multisim_weight));
    intree->SetBranchStatus("evtwgt_flux_multisim_nfunc",1);
    intree->SetBranchAddress("evtwgt_flux_multisim_nfunc",&(varstoset->evtwgt_flux_multisim_nfunc));
    intree->SetBranchStatus("evtwgt_flux_multisim_funcname",1);
@@ -225,6 +233,14 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("evtwgt_flux_multisim_nweight",&(varstoset->evtwgt_flux_multisim_nweight));
    intree->SetBranchStatus("evtwgt_flux_multisim_weight",1);
    intree->SetBranchAddress("evtwgt_flux_multisim_weight",&(varstoset->evtwgt_flux_multisim_weight));
+   intree->SetBranchStatus("evtwgt_reinteractions_multisim_nfunc",1);
+   intree->SetBranchAddress("evtwgt_reinteractions_multisim_nfunc",&(varstoset->evtwgt_reinteractions_multisim_nfunc));
+   intree->SetBranchStatus("evtwgt_reinteractions_multisim_funcname",1);
+   intree->SetBranchAddress("evtwgt_reinteractions_multisim_funcname",&(varstoset->evtwgt_reinteractions_multisim_funcname));
+   intree->SetBranchStatus("evtwgt_reinteractions_multisim_nweight",1);
+   intree->SetBranchAddress("evtwgt_reinteractions_multisim_nweight",&(varstoset->evtwgt_reinteractions_multisim_nweight));
+   intree->SetBranchStatus("evtwgt_reinteractions_multisim_weight",1);
+   intree->SetBranchAddress("evtwgt_reinteractions_multisim_weight",&(varstoset->evtwgt_reinteractions_multisim_weight));
 
    // Also initialise BDT classes
    varstoset->mupiBDT.initialise_BDT_contained();
