@@ -201,6 +201,7 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("event_num",&(varstoset->event_num));
 //   intree->SetBranchStatus("evtwgt_bnb",1);
 //   intree->SetBranchAddress("evtwgt_bnb",&(varstoset->evtwgt_bnb));
+/*
    intree->SetBranchStatus("evtwgt_genie_pm1_nfunc",1);
    intree->SetBranchAddress("evtwgt_genie_pm1_nfunc",&(varstoset->evtwgt_genie_pm1_nfunc));
    intree->SetBranchStatus("evtwgt_genie_pm1_funcname",1);
@@ -241,7 +242,7 @@ void settreevars(TTree *intree, treevars *varstoset){
    intree->SetBranchAddress("evtwgt_reinteractions_multisim_nweight",&(varstoset->evtwgt_reinteractions_multisim_nweight));
    intree->SetBranchStatus("evtwgt_reinteractions_multisim_weight",1);
    intree->SetBranchAddress("evtwgt_reinteractions_multisim_weight",&(varstoset->evtwgt_reinteractions_multisim_weight));
-
+*/
    // Also initialise BDT classes
    varstoset->mupiBDT.initialise_BDT_contained();
    varstoset->mupiBDT.initialise_BDT_exiting();
@@ -420,14 +421,17 @@ void Calcvars(treevars *vars, TMVA::Reader *fReader, std::vector<CC1piPlotVars> 
             // Loop through MCPs to find "original" MCP (i.e. the first one after the neutrino)
             int currentidx = i_MCP;
             while (motherID!=0){
-            // std::cout << vars->MCP_PDG->at(currentidx) << "(" << currentidx << ") from  " << "(" << motherID << ")" << std::endl;
-              // "mother" of previous MCP is now the one we are studying
-              for (size_t i_MCP2=0; i_MCP2 < vars->MCP_ID->size(); i_MCP2++){
-                if (motherID == vars->MCP_ID->at(i_MCP2)){
-                  currentidx = i_MCP2;
-                }
-              }
-              motherID = vars->MCP_MotherID->at(currentidx);
+               // std::cout << vars->MCP_PDG->at(currentidx) << "(" << currentidx << ") from  " << "(" << motherID << ")" << std::endl;
+               // "mother" of previous MCP is now the one we are studying
+               bool mother_found = false;
+               for (size_t i_MCP2=0; i_MCP2 < vars->MCP_ID->size(); i_MCP2++){
+                  if (motherID == vars->MCP_ID->at(i_MCP2)){
+                     currentidx = i_MCP2;
+                     mother_found = true;
+                  }
+               }
+               motherID = vars->MCP_MotherID->at(currentidx);
+               if (!mother_found) motherID = 0;
             }
             vars->TPCObj_PFP_MCP_trueOrigPDG->at(i_track)=vars->MCP_PDG->at(currentidx);
 
