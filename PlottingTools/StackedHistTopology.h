@@ -18,7 +18,7 @@ class StackedHistTopology{
   void Fill(NuIntTopology topology, double value);
   void Fill(NuIntTopology topology, double value, double weight);
   void Fill2D(NuIntTopology topology, double value_x, double value_y);
-  void DrawStack(double mc_scaling, TCanvas *c1, bool coarse=true, TH1F *onbeam_h=nullptr, TH1F *offbeam_h=nullptr, double offbeam_scaling=1.0, bool onminusoffbeam=false);
+  void DrawStack(double mc_scaling, TCanvas *c1, bool coarse=true, TH1F *onbeam_h=nullptr, TH1F *offbeam_h=nullptr, double offbeam_scaling=1.0, bool onminusoffbeam=false, TH1F *dirt_h=nullptr, double dirt_scaling=1.0);
   void PrintHistIntegrals(double mc_scaling, bool coarse=true, int nsel_onbeam=0, int nsel_offbeam=0, double offbeam_scaling=1.0);
   double GetCC1piIntegral();
   double GetTotalIntegral();
@@ -205,7 +205,7 @@ void StackedHistTopology::GenerateCoarseHistos()
 };
 
 // -------------------------- Function to draw the histograms -------------------------- //
-void StackedHistTopology::DrawStack(double mc_scaling, TCanvas *c1, bool coarse=true, TH1F *onbeam_h=nullptr, TH1F *offbeam_h=nullptr, double offbeam_scaling=1.0, bool onminusoffbeam=false)
+void StackedHistTopology::DrawStack(double mc_scaling, TCanvas *c1, bool coarse=true, TH1F *onbeam_h=nullptr, TH1F *offbeam_h=nullptr, double offbeam_scaling=1.0, bool onminusoffbeam=false, TH1F *dirt_h=nullptr, double dirt_scaling=1.0)
 {
 
   // Next: add histogramst to the stack and make TLegend
@@ -232,33 +232,46 @@ void StackedHistTopology::DrawStack(double mc_scaling, TCanvas *c1, bool coarse=
 
   if (coarse) {
 
-  StackedHistTopology::GenerateCoarseHistos();
+     StackedHistTopology::GenerateCoarseHistos();
 
-  for (std::pair<std::string, TH1F *> ch : coarse_histos) {
-    stack->Add(ch.second);
-    leg->AddEntry(ch.second, ch.first.c_str(), "f");
-    //std::cout << "Integral for topology " << ch.first.c_str() << ": " << ch.second->Integral() << std::endl;
+     for (std::pair<std::string, TH1F *> ch : coarse_histos) {
+        stack->Add(ch.second);
+        leg->AddEntry(ch.second, ch.first.c_str(), "f");
+        //std::cout << "Integral for topology " << ch.first.c_str() << ": " << ch.second->Integral() << std::endl;
 
-    underflow_total += ch.second->GetBinContent(0);
-    overflow_total += ch.second->GetBinContent(ch.second->GetXaxis()->GetNbins()+1);
+        underflow_total += ch.second->GetBinContent(0);
+        overflow_total += ch.second->GetBinContent(ch.second->GetXaxis()->GetNbins()+1);
+     }
   }
-}
-else { // fine
-  for (int i_hist = 0; i_hist < nHists; i_hist++) {
-    if (hists[i_hist]->GetEntries() == 0)
-      continue;
+  else { // fine
+     for (int i_hist = 0; i_hist < nHists; i_hist++) {
+        if (hists[i_hist]->GetEntries() == 0)
+           continue;
 
-    stack->Add(hists[i_hist]);
-    NuIntTopology topology_for_legend =
-        StackedHistTopology::GetTopologyFromHistN((unsigned int)i_hist);
-    leg->AddEntry(hists[i_hist],
-                  topologyenum2str(topology_for_legend).c_str(), "f");
-    //std::cout << "Integral for topology " << topologyenum2str(topology_for_legend).c_str() << ": " << hists[i_hist]->Integral() << std::endl;
+        stack->Add(hists[i_hist]);
+        NuIntTopology topology_for_legend =
+           StackedHistTopology::GetTopologyFromHistN((unsigned int)i_hist);
+        leg->AddEntry(hists[i_hist],
+              topologyenum2str(topology_for_legend).c_str(), "f");
+        //std::cout << "Integral for topology " << topologyenum2str(topology_for_legend).c_str() << ": " << hists[i_hist]->Integral() << std::endl;
 
-    underflow_total += hists[i_hist]->GetBinContent(0);
-    overflow_total += hists[i_hist]->GetBinContent(hists[i_hist]->GetXaxis()->GetNbins()+1);
+        underflow_total += hists[i_hist]->GetBinContent(0);
+        overflow_total += hists[i_hist]->GetBinContent(hists[i_hist]->GetXaxis()->GetNbins()+1);
+     }
+  } // end if coarse/fine
+
+  if (dirt_h) {
+
+     dirt_h->Scale(dirt_scaling);
+     dirt_h->SetFillColor(28);
+     dirt_h->SetLineColor(28);
+     stack->Add(dirt_h);
+     leg->AddEntry(dirt_h,"dirt","f");
+
+     underflow_total += dirt_h->GetBinContent(0);
+     overflow_total += dirt_h->GetBinContent(dirt_h->GetXaxis()->GetNbins()+1);
+
   }
-} // end if coarse/fine
 
   pt->AddText(TString::Format("Underflow (Invalid): %.2f (%.2f)",underflow_total,invalid_total_x).Data());
   pt->AddText(TString::Format("Overflow: %.2f",overflow_total).Data());
@@ -481,13 +494,41 @@ void StackedHistTopology::StyleHistsStack()
   hists[22]->SetFillColor(kMagenta-7); // Pion Parallel
   hists[23]->SetFillColor(kMagenta-9); // Muon Parallel
   hists[24]->SetFillColor(kBlack); // Unknown
+
+  // Set line color for all histograms
+  hists[0] ->SetLineColor(kOrange); // CC0pi0p
+  hists[1] ->SetLineColor(kOrange-3); // CC0pi1p
+  hists[2] ->SetLineColor(kOrange+2); // CC0piNp
+  hists[3] ->SetLineColor(kRed); // CC1piplus0p
+  hists[4] ->SetLineColor(kRed+2); // CC1piplus1p
+  hists[5] ->SetLineColor(kPink-7); // CC1piplusNp
+  hists[6] ->SetLineColor(kPink+10); // CC1piminus0p
+  hists[7] ->SetLineColor(kMagenta+1); // CC1piminus1p
+  hists[8] ->SetLineColor(kViolet+1); // CC1piminusNp
+  hists[9] ->SetLineColor(kBlue+2); // CC1pizero0p
+  hists[10]->SetLineColor(kBlue); // CC1pizero1p
+  hists[11]->SetLineColor(kAzure+1); // CC1pizeroNp
+  hists[12]->SetLineColor(kCyan+2); // CCmultipi0p
+  hists[13]->SetLineColor(kCyan); // CCmultipi1p
+  hists[14]->SetLineColor(kGreen+1); // CCmultipiNp
+  hists[15]->SetLineColor(kGreen+3); // CCother
+  hists[16]->SetLineColor(kYellow+1); // CCnue
+  hists[17]->SetLineColor(kBlue-10); // NC
+  hists[18]->SetLineColor(kBlue-5); // outFV
+  hists[19]->SetLineColor(kGray); // Cosmic
+  hists[20]->SetLineColor(kGray+2); // Mixed
+  hists[21]->SetLineColor(kMagenta-4); // Broken
+  hists[22]->SetLineColor(kMagenta-7); // Pion Parallel
+  hists[23]->SetLineColor(kMagenta-9); // Muon Parallel
+  hists[24]->SetLineColor(kBlack); // Unknown
+
 }
 
 // -------------------------- Function to style the histograms -------------------------- //
 // Private: only called by DrawStack function in this file
 void StackedHistTopology::StyleHists2D()
 {
-  // Set fill color for all histograms
+  // Set marker color for all histograms
   hists2D[0] ->SetMarkerColor(kOrange); // CC0pi0p
   hists2D[1] ->SetMarkerColor(kOrange-3); // CC0pi1p
   hists2D[2] ->SetMarkerColor(kOrange+2); // CC0piNp
@@ -510,6 +551,7 @@ void StackedHistTopology::StyleHists2D()
   hists2D[19]->SetMarkerColor(kGray); // Cosmic
   hists2D[20]->SetMarkerColor(kGray+2); // Mixed
   hists2D[21]->SetMarkerColor(kBlack); // Unknown
+
   // Set fill color for all histograms
   hists2D[0] ->SetFillColor(kOrange); // CC0pi0p
   hists2D[1] ->SetFillColor(kOrange-3); // CC0pi1p

@@ -19,7 +19,7 @@ class StackedHistPDGCode{
   void Fill(PDGCode particle_pdg, double value);
   void Fill(PDGCode particle_pdg, double value, double weight);
   void Fill2D(PDGCode particle_pdg, double value_x, double value_y);
-  void DrawStack(double mc_scaling, TCanvas *c1, TString option="", TH1F *onbeam_h=nullptr, TH1F *offbeam_h=nullptr, double offbeam_scaling=1.0, bool onminusoffbeam=false);
+  void DrawStack(double mc_scaling, TCanvas *c1, TString option="", TH1F *onbeam_h=nullptr, TH1F *offbeam_h=nullptr, double offbeam_scaling=1.0, bool onminusoffbeam=false, TH1F *dirt_h=nullptr, double dirtscaling=1.0);
   void DrawOverlay(double norm, TCanvas *c1, TString option);
   void DrawOverlayMuPi(double norm, TCanvas *c1, TString option);
   void Draw2D(TCanvas *c1, TString option);
@@ -134,7 +134,7 @@ void StackedHistPDGCode::Fill2D(PDGCode particle_pdg, double value_x, double val
 }
 
 // -------------------------- Function to draw the histograms -------------------------- //
-void StackedHistPDGCode::DrawStack(double mc_scaling, TCanvas *c1, TString option="", TH1F *onbeam_h=nullptr, TH1F *offbeam_h=nullptr, double offbeam_scaling=1.0, bool onminusoffbeam=false)
+void StackedHistPDGCode::DrawStack(double mc_scaling, TCanvas *c1, TString option="", TH1F *onbeam_h=nullptr, TH1F *offbeam_h=nullptr, double offbeam_scaling=1.0, bool onminusoffbeam=false, TH1F *dirt_h=nullptr, double dirt_scaling=1.0)
 {
   if (is2Dhists){
     std::cout << "[StackedHistPDGCode] ERROR: cannot call DrawStack for 2D hists. Call Draw2D instead. Exiting..." << std::endl;
@@ -172,6 +172,19 @@ void StackedHistPDGCode::DrawStack(double mc_scaling, TCanvas *c1, TString optio
 
     underflow_total += hists[i_hist]->GetBinContent(0);
     overflow_total += hists[i_hist]->GetBinContent(hists[i_hist]->GetXaxis()->GetNbins()+1);
+
+  }
+
+  if (dirt_h) {
+
+     dirt_h->Scale(dirt_scaling);
+     dirt_h->SetFillColor(28);
+     dirt_h->SetLineColor(28);
+     stack->Add(dirt_h);
+     leg->AddEntry(dirt_h,"dirt","f");
+
+     underflow_total += dirt_h->GetBinContent(0);
+     overflow_total += dirt_h->GetBinContent(dirt_h->GetXaxis()->GetNbins()+1);
 
   }
 
@@ -511,6 +524,30 @@ void StackedHistPDGCode::StyleHistsStack()
   hists[18]->SetFillColor(kGreen+3); // kKaonPlus
   hists[19]->SetFillColor(kGreen+2); // kKaonMinus
   hists[20]->SetFillColor(kBlack); // kPDGUnknown
+
+  // Set line color for all histograms
+  hists[0] ->SetLineColor(kOrange); // kNuMu
+  hists[1] ->SetLineColor(kOrange-3); // kNuMuBar
+  hists[2] ->SetLineColor(kOrange+2); // kNuE
+  hists[3] ->SetLineColor(kRed); // kNuEBar
+  hists[4] ->SetLineColor(kRed+2); // kNuTau
+  hists[5] ->SetLineColor(kPink-7); // kNuTauBar
+  hists[6] ->SetLineColor(kPink+10); // kMuMinus
+  hists[8] ->SetLineColor(kViolet+1); // kPiMinus
+  hists[7] ->SetLineColor(kMagenta+1); // kMuPlus
+  hists[9] ->SetLineColor(kBlue+2); // kPiPlus
+  hists[10]->SetLineColor(kBlue); // kPiZero
+  hists[11]->SetLineColor(kAzure+1); // kElectron
+  hists[12]->SetLineColor(kCyan+2); // kPositron
+  hists[13]->SetLineColor(kCyan); // kTauMinus
+  hists[14]->SetLineColor(kGreen+1); // kTauPlus
+  hists[15]->SetLineColor(kOrange-2); // kPhoton
+  hists[16]->SetLineColor(kGray); // kProton
+  hists[17]->SetLineColor(kGray+2); // kNeutron
+  hists[18]->SetLineColor(kGreen+3); // kKaonPlus
+  hists[19]->SetLineColor(kGreen+2); // kKaonMinus
+  hists[20]->SetLineColor(kBlack); // kPDGUnknown
+
 }
 
 // -------------------------- Function to style the histograms -------------------------- //

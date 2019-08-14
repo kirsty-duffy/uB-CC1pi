@@ -154,7 +154,7 @@ bool CheckEvent(const char* filename, const char* search) {
 //  Now the function starts
 // ---------------------------------------------------- //
 
-void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeamdatafile="", std::string offbeamdatafile="", double offbeamscaling=0., bool onminusoffbeam=false, bool MakeKinkFindingPlots=false, bool MakeProtonPlots=false){
+void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeamdatafile="", std::string offbeamdatafile="", double offbeamscaling=0., bool onminusoffbeam=false, std::string dirtfile="", double dirtscaling =0., bool MakeKinkFindingPlots=false, bool MakeProtonPlots=false){
 
   std::cout << "Using scaling: " << std::endl
 	    << " -- MC: " << POTscaling << std::endl
@@ -245,6 +245,23 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
      fReader_offbeam.AddVariable("nhits", &(offbeam_vars.float_nhits));
      fReader_offbeam.AddVariable("lnLmipoverp", &(offbeam_vars.float_lnLmipoverp));
      fReader_offbeam.BookMVA(BookMVAType.c_str(), BookMVALoc.c_str());
+   }
+
+   TFile *f_dirt=nullptr;
+   TTree *t_dirt=nullptr;
+   treevars dirt_vars;
+   TMVA::Reader fReader_dirt("");
+   if (dirtfile!=""){
+     std::cout << "Making data-MC comparisons" << std::endl;
+     f_dirt = new TFile(dirtfile.c_str(), "read");
+     t_dirt = (TTree*)f_dirt->Get("cc1piselec/outtree");
+     settreevars(t_dirt,&dirt_vars);
+
+     fReader_dirt.AddVariable("dEdx_truncmean_start", &(dirt_vars.float_dEdx_truncmean_start));
+//     fReader_dirt.AddVariable("VtxTrackDist", &(dirt_vars.float_VtxTrackDist));
+     fReader_dirt.AddVariable("nhits", &(dirt_vars.float_nhits));
+     fReader_dirt.AddVariable("lnLmipoverp", &(dirt_vars.float_lnLmipoverp));
+     fReader_dirt.BookMVA(BookMVAType.c_str(), BookMVALoc.c_str());
    }
 
    ofstream evdinfo;
@@ -354,7 +371,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    ContainmentLength2D->GetXaxis()->SetBinLabel(4,"both");
    ContainmentLength2D->GetYaxis()->SetBinLabel(1,"#pi^{+}");
    ContainmentLength2D->GetYaxis()->SetBinLabel(2,"#mu^{-}");
-
+/*
    // genie multisim syst - total xsec
    std::vector<double> evtwgt_genie_multisim_SelectedBackground(mc_vars.evtwgt_genie_multisim_nweight->at(0),0);
    std::vector<double> evtwgt_genie_multisim_SelectedSignal(mc_vars.evtwgt_genie_multisim_nweight->at(0),0);
@@ -384,7 +401,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    std::vector<double> evtwgt_reinteractions_multisim_SelectedBackground(mc_vars.evtwgt_reinteractions_multisim_nweight->at(0),0);
    std::vector<double> evtwgt_reinteractions_multisim_SelectedSignal(mc_vars.evtwgt_reinteractions_multisim_nweight->at(0),0);
    std::vector<double> evtwgt_reinteractions_multisim_AllSignal(mc_vars.evtwgt_reinteractions_multisim_nweight->at(0),0);
-
+*/
    std::cout << std::endl << "--- Considering the following 1D variables --- " << std::endl;
    for (size_t i_var=0; i_var < nplots; i_var++){
          std::cout << varstoplot_dummy.at(i_var).histtitle.substr(1,varstoplot_dummy.at(i_var).histtitle.size()-2) << std::endl;
@@ -696,7 +713,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
       // Fill custom 2D plot
       ContainmentLength2D->Fill(mc_vars.TPCObj_mupiContained->at(0),mc_vars.TPCObj_muonLonger->at(0));
 
-
+/*
       // genie multisim syst - total xsec
       for(int univ = 0; univ < mc_vars.evtwgt_genie_multisim_nweight->at(0); univ++) {
          if ((NuIntTopology)mc_vars.Truth_topology == kCC1piplus0p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplus1p || (NuIntTopology)mc_vars.Truth_topology == kCC1piplusNp) {
@@ -800,7 +817,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
 
          else if(isSelected) evtwgt_reinteractions_multisim_SelectedBackground[univ]+=mc_vars.evtwgt_reinteractions_multisim_weight->at(0).at(univ);
       }
-
+*/
    } // end loop over entries in tree
 
    evdinfo.close();
@@ -984,7 +1001,7 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
 
     } // end loop over entries in tree
 
-   } // end if onbeam data tree exists
+   } // end if offbeam data tree exists
    else{ // this is important for plotting (to make sure DrawStack doesn't segfault when the histograms are given to it)
       for (size_t i_h=0; i_h<nplots; i_h++){
          offb_hists_cc1pi_pdg_beforecuts[i_h] = nullptr;
@@ -994,10 +1011,70 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
      }
    }
 
-   
+  int nsel_dirt=0;
+  // Make histograms to fill
+  TH1F *dirt_hists_cc1pi_pdg_beforecuts[nplots];
+  TH1F *dirt_hists_cc1pi_top_beforecuts[nplots];
+  TH1F *dirt_hists_cc1pi_pdg_aftercuts[nplots];
+  TH1F *dirt_hists_cc1pi_top_aftercuts[nplots];
+  if (t_dirt){
+     for (size_t i_h=0; i_h<nplots; i_h++){
+      std::string histtitle_i = varstoplot_dummy.at(i_h).histtitle;
+      std::string histname_i = varstoplot_dummy.at(i_h).histname;
+      std::vector<double> bins_i = varstoplot_dummy.at(i_h).bins;
+
+        dirt_hists_cc1pi_pdg_beforecuts[i_h] = new TH1F(TString::Format("hCC1pi_dirt_PDG_beforecuts_%s",histname_i.c_str()).Data(),histtitle_i.c_str(),bins_i.at(0),bins_i.at(1),bins_i.at(2));
+        dirt_hists_cc1pi_top_beforecuts[i_h] = new TH1F(TString::Format("hCC1pi_dirt_Top_beforecuts_%s",histname_i.c_str()).Data(),histtitle_i.c_str(),bins_i.at(0),bins_i.at(1),bins_i.at(2));
+
+        dirt_hists_cc1pi_pdg_aftercuts[i_h] = new TH1F(TString::Format("hCC1pi_dirt_PDG_aftercuts_%s",histname_i.c_str()).Data(),histtitle_i.c_str(),bins_i.at(0),bins_i.at(1),bins_i.at(2));
+        dirt_hists_cc1pi_top_aftercuts[i_h] = new TH1F(TString::Format("hCC1pi_dirt_Top_aftercuts_%s",histname_i.c_str()).Data(),histtitle_i.c_str(),bins_i.at(0),bins_i.at(1),bins_i.at(2));
+    }
+
+    // Loop through dirt tree and fill plots
+    for (int i = 0; i < t_dirt->GetEntries(); i++){
+      if (i%1000==0) std::cout << "Dirt: " << i << "/" << t_dirt->GetEntries() << std::endl;
+      t_dirt->GetEntry(i);
+      Calcvars(&dirt_vars, &fReader_dirt);
+      std::vector<CC1piPlotVars> Varstoplot = GetVarstoplot(&dirt_vars);
+
+      bool isSelected = IsEventSelected(&dirt_vars);
+
+      if (isSelected) nsel_dirt++;
+      // Fill 1D plots
+      // Loop over Varstoplot
+      for (size_t i_h = 0; i_h < nplots; i_h++){
+         std::vector<double> vartoplot = *(Varstoplot.at(i_h).Var);
+          // Loop over tracks
+          for (size_t i_tr = 0; i_tr < vartoplot.size(); i_tr++){
+             // if (!(onbeam_vars.TPCObj_PFP_isDaughter->at(i_tr) && bool(onbeam_vars.TPCObj_PFP_track_passesMIPcut->at(i_tr)))) continue;
+
+             if (!(FillPlotForTrack(&(Varstoplot.at(i_h)), &dirt_vars, i_tr))) continue;
+
+             dirt_hists_cc1pi_pdg_beforecuts[i_h]->Fill(vartoplot.at(i_tr));
+             dirt_hists_cc1pi_top_beforecuts[i_h]->Fill(vartoplot.at(i_tr),1.0/vartoplot.size());
+
+             if(isSelected) {
+                dirt_hists_cc1pi_pdg_aftercuts[i_h]->Fill(vartoplot.at(i_tr));
+                dirt_hists_cc1pi_top_aftercuts[i_h]->Fill(vartoplot.at(i_tr),1.0/vartoplot.size());
+             } // end if(isSelected)
+          } // end loop over tracks
+      } // end loop over 1D Varstoplot
+
+    } // end loop over entries in tree
+
+   } // end if dirt tree exists
+   else{ // this is important for plotting (to make sure DrawStack doesn't segfault when the histograms are given to it)
+      for (size_t i_h=0; i_h<nplots; i_h++){
+         dirt_hists_cc1pi_pdg_beforecuts[i_h] = nullptr;
+         dirt_hists_cc1pi_top_beforecuts[i_h] = nullptr;
+         dirt_hists_cc1pi_pdg_aftercuts[i_h] = nullptr;
+         dirt_hists_cc1pi_top_aftercuts[i_h] = nullptr;
+     }
+   }
+  
    // -------------------- Now make all the plots
 
-
+/*
    // genie multisim syst - total xsec
 
    double POT = 2.00955e+20;
@@ -1160,26 +1237,26 @@ void MakeCC1piPlots(std::string mcfile, double POTscaling=0., std::string onbeam
    CV_total_xsec->Draw("SAME");
    c2->Print("flux_multsim_total.png");
    delete c2;
-
+*/
 
    // Make 1D plots
    for (size_t i_h=0; i_h < nplots; i_h++){
       TCanvas *c1 = new TCanvas("c1","c1");
       std::string printname = std::string(varstoplot_dummy.at(i_h).histname+".png");
 
-      mc_hists_cc1pi_pdg_beforecuts[i_h]->DrawStack(POTscaling,c1,"",onb_hists_cc1pi_pdg_beforecuts[i_h],offb_hists_cc1pi_pdg_beforecuts[i_h],offbeamscaling,onminusoffbeam);
+      mc_hists_cc1pi_pdg_beforecuts[i_h]->DrawStack(POTscaling,c1,"",onb_hists_cc1pi_pdg_beforecuts[i_h],offb_hists_cc1pi_pdg_beforecuts[i_h],offbeamscaling,onminusoffbeam,dirt_hists_cc1pi_pdg_beforecuts[i_h],dirtscaling);
       c1->Print(std::string(std::string("CC1pi_pdg_beforecuts")+printname).c_str());
       c1->Clear();
 
-      mc_hists_cc1pi_top_beforecuts[i_h]->DrawStack(POTscaling,c1,true,onb_hists_cc1pi_top_beforecuts[i_h],offb_hists_cc1pi_top_beforecuts[i_h],offbeamscaling,onminusoffbeam);
+      mc_hists_cc1pi_top_beforecuts[i_h]->DrawStack(POTscaling,c1,true,onb_hists_cc1pi_top_beforecuts[i_h],offb_hists_cc1pi_top_beforecuts[i_h],offbeamscaling,onminusoffbeam,dirt_hists_cc1pi_top_beforecuts[i_h],dirtscaling);
       c1->Print(std::string(std::string("CC1pi_top_beforecuts")+printname).c_str());
       c1->Clear();
 
-      mc_hists_cc1pi_pdg_aftercuts[i_h]->DrawStack(POTscaling,c1,"",onb_hists_cc1pi_pdg_aftercuts[i_h],offb_hists_cc1pi_pdg_aftercuts[i_h],offbeamscaling,onminusoffbeam);
+      mc_hists_cc1pi_pdg_aftercuts[i_h]->DrawStack(POTscaling,c1,"",onb_hists_cc1pi_pdg_aftercuts[i_h],offb_hists_cc1pi_pdg_aftercuts[i_h],offbeamscaling,onminusoffbeam,dirt_hists_cc1pi_pdg_aftercuts[i_h],dirtscaling);
       c1->Print(std::string(std::string("CC1pi_pdg_aftercuts")+printname).c_str());
       c1->Clear();
 
-      mc_hists_cc1pi_top_aftercuts[i_h]->DrawStack(POTscaling,c1,true,onb_hists_cc1pi_top_aftercuts[i_h],offb_hists_cc1pi_top_aftercuts[i_h],offbeamscaling,onminusoffbeam);
+      mc_hists_cc1pi_top_aftercuts[i_h]->DrawStack(POTscaling,c1,true,onb_hists_cc1pi_top_aftercuts[i_h],offb_hists_cc1pi_top_aftercuts[i_h],offbeamscaling,onminusoffbeam,dirt_hists_cc1pi_top_aftercuts[i_h],dirtscaling);
       c1->Print(std::string(std::string("CC1pi_top_aftercuts")+printname).c_str());
 
       delete c1;
